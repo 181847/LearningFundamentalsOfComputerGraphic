@@ -8,6 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{1040B2C0-7328-42EF-BF70-47E21F51EB5F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ForCommonClasses", "ForCommonClasses\ForCommonClasses.vcxproj", "{3E1F02DF-BC93-4C96-9612-863C734A89BC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0ECCF441-CB05-494B-B6E4-4E19E447CC47} = {0ECCF441-CB05-494B-B6E4-4E19E447CC47}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
