@@ -4,6 +4,7 @@ namespace CommonClass
 {
 
 vector2::vector2()
+	:m_x(0.0f), m_y(0.0f)
 {
 }
 
