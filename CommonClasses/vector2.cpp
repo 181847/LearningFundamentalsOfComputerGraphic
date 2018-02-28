@@ -1,4 +1,5 @@
 #include "vector2.h"
+#include <math.h>
 
 namespace CommonClass
 {
@@ -18,6 +19,18 @@ vector2::~vector2()
 {
 }
 
+bool vector2::operator==(const vector2 & cmp) const
+{
+	return fabs(m_x - cmp.m_x) < COMPARE_EPSILON
+		&& fabs(m_y - cmp.m_y) < COMPARE_EPSILON;
+}
+
+bool vector2::operator!=(const vector2 & cmp) const
+{
+	// just revert the result of operator ==
+	return ! ( (*this) == cmp );
+}
+
 vector2 operator+(const vector2 & a, const vector2 & b)
 {
 	return vector2(a.m_x + b.m_x, a.m_y + b.m_y);
@@ -28,14 +41,14 @@ vector2 operator-(const vector2 & a, const vector2 & b)
 	return vector2(a.m_x - b.m_x, a.m_y - b.m_y);
 }
 
-vector2 operator*(const vector2 & a, const vector2 & b)
+Types::F32 operator*(const vector2 & a, const vector2 & b)
 {
-	return vector2(a.m_x * b.m_x, a.m_y * b.m_y);
+	return (a.m_x * b.m_x + a.m_y * b.m_y);
 }
 
-vector2 dotProd(const vector2 & a, const vector2 & b)
+Types::F32 dotProd(const vector2 & a, const vector2 & b)
 {
-	return vector2(a.m_x * b.m_x, a.m_y * b.m_y);
+	return (a.m_x * b.m_x + a.m_y * b.m_y);
 }
 
 }// namespace CommonClass
