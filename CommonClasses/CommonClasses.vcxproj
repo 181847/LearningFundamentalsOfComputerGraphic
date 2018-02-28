@@ -134,6 +134,7 @@
     <Text Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="vector2.h" />
   </ItemGroup>
   <ItemGroup>
