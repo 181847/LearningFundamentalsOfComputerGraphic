@@ -18,21 +18,28 @@ public:
 		Types::F32 m_arr[2];
 	};
 
-private:
-	const Types::F32 COMPARE_EPSILON = 1e-8f;
+	/*!
+		\brief decide the precision of the almost equal floats
+	*/
+	static const Types::I32 COMPARE_ULP = 8;
 
 public:
 	vector2();
 	vector2(const Types::F32 & x, const Types::F32 & y);
 	~vector2();
-
-	bool operator == (const vector2 & cmp) const;
-	bool operator != (const vector2 & cmp) const;
 };
 
 vector2    operator + (const vector2 & a, const vector2 & b);
 vector2    operator - (const vector2 & a, const vector2 & b);
 Types::F32 operator * (const vector2 & a, const vector2 & b);
 Types::F32 dotProd    (const vector2 & a, const vector2 & b);	// same as operator *
+
+/*!
+	\brief two vector are almost equal
+	\param a compared vector
+	\param b compared vector
+	\param ulp the precision of compare, lower and more accurate
+*/
+bool AlmostEqual(const vector2 & a, const vector2 & b, int ulp = vector2::COMPARE_ULP);
 
 }// namespace CommonClass
