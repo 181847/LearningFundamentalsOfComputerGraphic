@@ -188,31 +188,36 @@ void AddTestUnit()
 
 			// cmp1 + cmp2 rgb only
 			cmp1.AddRGB(cmp2);
-			errorLogger.LogIfNotEq( cmp1,
+			errorLogger.LogIfNotEq( 
+				cmp1,
 				CommonClass::RGBA8(clampChannel(comu1 + comu5), clampChannel(comu2 + comu6), clampChannel(comu3 + comu7), comu4));
 			recoverCMP1();
 
 			// cmp1 - cmp2 rgb only
+			cmp1.SubRGB(cmp2),
 			errorLogger.LogIfNotEq(
-				cmp1.SubRGB(cmp2),
+				cmp1,
 				CommonClass::RGBA8(revertChannel(comu1 - comu5), revertChannel(comu2 - comu6), revertChannel(comu3 - comu7), comu4));
 			recoverCMP1();
 			
 			// cmp1 * cmp2 rgb only
+			cmp1.MulRGB(cmp2),
 			errorLogger.LogIfNotEq(
-				cmp1.MulRGB(cmp2),
+				cmp1,
 				CommonClass::RGBA8(clampChannel((comu1 * comu5) >> 8), clampChannel((comu2 - comu6) >> 8), clampChannel((comu3 - comu7) >> 8), comu4));	// '>> 8' because we scale 8bit channel value back to [0, 255]
 			recoverCMP1();
 
 			// cmp1 * scalar rgb only
+			cmp1.MulRGB(comf1),
 			errorLogger.LogIfNotEq(
-				cmp1.MulRGB(comf1),
+				cmp1,
 				CommonClass::RGBA8(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), comu4));
 			recoverCMP1();
 
 			// cmp1 / scalar rgb only
+			cmp1.DivRGB(comf2),
 			errorLogger.LogIfNotEq(
-				cmp1.DivRGB(comf2),
+				cmp1,
 				CommonClass::RGBA8(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2), comu4));
 			recoverCMP1();
 
@@ -220,38 +225,36 @@ void AddTestUnit()
 			cmp1.AddAlpha(comu8);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				clampChannel(comu4 + comu8)
-			);
+				clampChannel(comu4 + comu8));
 			recoverCMP1();
 
 			// alpha sub
 			cmp1.SubAlpha(comu8);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				revertChannel(comu4 - comu8)
-			);
+				revertChannel(comu4 - comu8));
 			recoverCMP1();
 
 			// alpha mul
 			cmp1.MulAlpha(comu8);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				clampChannel((comu1 * comu8) >> 8)
-			);
+				clampChannel((comu1 * comu8) >> 8));
+			recoverCMP1();
 
 			// alpha mul float
 			cmp1.MulAlpha(comf1);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				clampChannel((comu1 * comf1))
-			);
+				clampChannel((comu1 * comf1)));
+			recoverCMP1();
 
 			// alpha div float
 			cmp1.DivAlpha(comf2);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				clampChannel((comu1 / comf2))
-			);
+				clampChannel((comu1 / comf2)));
+			recoverCMP1();
 
 
 		}
