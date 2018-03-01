@@ -20,9 +20,15 @@
     <ClInclude Include="CommonTypes.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="vector3.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="vector3.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
