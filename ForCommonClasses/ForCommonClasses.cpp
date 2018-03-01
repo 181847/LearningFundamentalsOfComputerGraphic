@@ -1,6 +1,8 @@
 // For Unit Test
 #include <MyTools\UnitTestModules.h>
 #include <iostream>
+#include <MyTools\RandomToolNeedLib\MTRandom.h>
+#pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
 
 // include test target code
 #include "../CommonClasses/vector2.h"
@@ -30,67 +32,67 @@ void AddTestUnit()
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region test vector2 == and !=
-	TEST_UNIT_START("test vector2 == and !=")
-		CommonClass::vector2 cmp1(1.2f, 2.4f);
-		CommonClass::vector2 cmp2(1.2f + 1e-9f, 2.4f);
-
-		// the cmp2.m_x is a little bit bigger than cmp1.m_x,
-		// the operator should ignore the difference,
-		// and judge them as the equal vector.
-		errorLogger.LogIfNotEq(cmp1, cmp2);
-	TEST_UNIT_END;
-#pragma endregion
-
 #pragma region test vector2 +/ -/ *
 	TEST_UNIT_START("test vector2 +/ -/ *")
-		const Types::F32 comf1(1.2f), comf2(2.4f), comf3(3.5f), comf4(5.878f);
-		CommonClass::vector2 cmp1(comf1, comf2);
-		CommonClass::vector2 cmp2(comf3, comf4);
 
-		errorLogger.LogIfNotEq(
-			cmp1 + cmp2, 
-			CommonClass::vector2(comf1 + comf3, comf2 + comf4));
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 600;
+		
+		for (int i = 0; i < 200; ++i)
+		{
+			const Types::F32	comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)), 
+								comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+								comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+								comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+			CommonClass::vector2 cmp1(comf1, comf2);
+			CommonClass::vector2 cmp2(comf3, comf4);
 
-		errorLogger.LogIfNotEq(
-			cmp1 - cmp2, 
-			CommonClass::vector2(comf1 - comf3, comf2 - comf4));
+			errorLogger.LogIfNotEq(
+				cmp1 + cmp2,
+				CommonClass::vector2(comf1 + comf3, comf2 + comf4));
 
-		errorLogger.LogIfNotEq(
-			cmp1 * cmp2,
-			(comf1 * comf3 + comf2 * comf4) );
+			errorLogger.LogIfNotEq(
+				cmp1 - cmp2,
+				CommonClass::vector2(comf1 - comf3, comf2 - comf4));
+
+			errorLogger.LogIfNotEq(
+				cmp1 * cmp2,
+				(comf1 * comf3 + comf2 * comf4));
+		}
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region test vector3 == and !=
-	TEST_UNIT_START("test vector3 == and !=")
-		CommonClass::vector3 cmp1(1.2f, 2.4f, 45.121f);
-		CommonClass::vector3 cmp2(1.2f + 1e-9f, 2.4f, 45.121f + 1e-10f);
+#pragma region test vector3 +/ -/ *
+	TEST_UNIT_START("test vector3 +/ -/ *")
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 600;
+		
+		for (int i = 0; i < 200; ++i)
+		{
+			const Types::F32	comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)), 
+								comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+								comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+								comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+								comf5(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+								comf6(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+			CommonClass::vector2 cmp1(comf1, comf2);
+			CommonClass::vector2 cmp2(comf3, comf4);
 
-		// the cmp2.m_x is a little bit bigger than cmp1.m_x,
-		// the operator should ignore the difference,
-		// and judge them as the equal vector.
-		errorLogger.LogIfNotEq(cmp1, cmp2);
-	TEST_UNIT_END;
-#pragma endregion
+			// cmp1 + cmp2
+			errorLogger.LogIfNotEq(
+				cmp1 + cmp2,
+				CommonClass::vector2(comf1 + comf3, comf2 + comf4));
 
-#pragma region test vector2 +/ -/ *
-	TEST_UNIT_START("test vector2 +/ -/ *")
-		const Types::F32 comf1(1.2f), comf2(2.4f), comf3(3.5f), comf4(5.878f), comf5(745.15), comf6(-45.4454);
-		CommonClass::vector3 cmp1(comf1, comf2, comf3);
-		CommonClass::vector3 cmp2(comf4, comf5, comf6);
+			// cmp1 - cmp2
+			errorLogger.LogIfNotEq(
+				cmp1 - cmp2,
+				CommonClass::vector2(comf1 - comf3, comf2 - comf4));
 
-		errorLogger.LogIfNotEq(
-			cmp1 + cmp2,
-			CommonClass::vector3(comf1 + comf3, comf2 + comf4, comf));
-
-		errorLogger.LogIfNotEq(
-			cmp1 - cmp2,
-			CommonClass::vector2(comf1 - comf3, comf2 - comf4));
-
-		errorLogger.LogIfNotEq(
-			cmp1 * cmp2,
-			(comf1 * comf3 + comf2 * comf4));
+			errorLogger.LogIfNotEq(
+				cmp1 * cmp2,
+				(comf1 * comf3 + comf2 * comf4));
+		}
+		return false;
 	TEST_UNIT_END;
 #pragma endregion
 
