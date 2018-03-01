@@ -6,6 +6,7 @@
 
 // include test target code
 #include "../CommonClasses/vector2.h"
+#include "../CommonClasses/vector3.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -47,23 +48,31 @@ void AddTestUnit()
 			CommonClass::vector2 cmp1(comf1, comf2);
 			CommonClass::vector2 cmp2(comf3, comf4);
 
+			// cmp1 + cmp2
 			errorLogger.LogIfNotEq(
 				cmp1 + cmp2,
 				CommonClass::vector2(comf1 + comf3, comf2 + comf4));
 
+			// cmp1 - cmp2
 			errorLogger.LogIfNotEq(
 				cmp1 - cmp2,
 				CommonClass::vector2(comf1 - comf3, comf2 - comf4));
 
+			// cmp1 * cmp2
 			errorLogger.LogIfNotEq(
 				cmp1 * cmp2,
+				(comf1 * comf3 + comf2 * comf4));
+
+			// cmp1 * cmp2
+			errorLogger.LogIfNotEq(
+				CommonClass::dotProd(cmp1, cmp2),
 				(comf1 * comf3 + comf2 * comf4));
 		}
 	TEST_UNIT_END;
 #pragma endregion
 
 #pragma region test vector3 +/ -/ *
-	TEST_UNIT_START("test vector3 +/ -/ *")
+	TEST_UNIT_START("test vector3 +/ -/ */ X")
 		RandomTool::MTRandom mtr;
 		const unsigned int MAX_RAND_INT = 600;
 		
@@ -75,24 +84,37 @@ void AddTestUnit()
 								comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
 								comf5(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
 								comf6(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
-			CommonClass::vector2 cmp1(comf1, comf2);
-			CommonClass::vector2 cmp2(comf3, comf4);
+			CommonClass::vector3 cmp1(comf1, comf2, comf3);
+			CommonClass::vector3 cmp2(comf4, comf5, comf6);
 
 			// cmp1 + cmp2
 			errorLogger.LogIfNotEq(
 				cmp1 + cmp2,
-				CommonClass::vector2(comf1 + comf3, comf2 + comf4));
+				CommonClass::vector3(comf1 + comf4, comf2 + comf5, comf3 + comf6));
 
 			// cmp1 - cmp2
 			errorLogger.LogIfNotEq(
 				cmp1 - cmp2,
-				CommonClass::vector2(comf1 - comf3, comf2 - comf4));
-
+				CommonClass::vector3(comf1 - comf4, comf2 - comf5, comf3 - comf6));
+			
+			// cmp1 * cmp2
 			errorLogger.LogIfNotEq(
 				cmp1 * cmp2,
-				(comf1 * comf3 + comf2 * comf4));
+				(comf1 * comf4 + comf2 * comf5 + comf3 * comf6));
+
+			// cmp1 * cmp2
+			errorLogger.LogIfNotEq(
+				CommonClass::dotProd(cmp1, cmp2),
+				(comf1 * comf4 + comf2 * comf5 + comf3 * comf6));
+
+			// cmp1 X cmp2
+			errorLogger.LogIfNotEq(
+				CommonClass::crossProd(cmp1, cmp2),
+				CommonClass::vector3(
+					comf2 * comf6 - comf5 * comf3,
+					comf4 * comf3 - comf1 * comf6,
+					comf1 * comf5 - comf4 * comf2));
 		}
-		return false;
 	TEST_UNIT_END;
 #pragma endregion
 
