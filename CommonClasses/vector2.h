@@ -4,7 +4,9 @@
 namespace CommonClass
 {
 
-// vector2 have two float component.
+/*! 
+	\brief a vector in 2D space
+*/
 class vector2
 {
 
@@ -31,7 +33,13 @@ public:
 
 vector2    operator + (const vector2 & a, const vector2 & b);
 vector2    operator - (const vector2 & a, const vector2 & b);
+bool       operator ==(const vector2 & a, const vector2 & b);
+bool       operator !=(const vector2 & a, const vector2 & b);
 Types::F32 operator * (const vector2 & a, const vector2 & b);
+
+/*!
+	\brief compute the dot product of two vector
+*/
 Types::F32 dotProd    (const vector2 & a, const vector2 & b);	// same as operator *
 
 /*!

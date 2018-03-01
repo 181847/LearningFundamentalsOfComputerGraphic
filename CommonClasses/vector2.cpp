@@ -33,6 +33,18 @@ vector2 operator-(const vector2 & a, const vector2 & b)
 	return vector2(a.m_x - b.m_x, a.m_y - b.m_y);
 }
 
+bool operator==(const vector2 & a, const vector2 & b)
+{
+	return a.m_x == b.m_x 
+		&& a.m_y == b.m_y;
+}
+
+bool operator!=(const vector2 & a, const vector2 & b)
+{
+	return a.m_x != b.m_x
+		|| a.m_y != b.m_y;
+}
+
 Types::F32 operator*(const vector2 & a, const vector2 & b)
 {
 	return (a.m_x * b.m_x + a.m_y * b.m_y);
