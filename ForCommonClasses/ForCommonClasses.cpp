@@ -8,6 +8,7 @@
 #include "../CommonClasses/vector2.h"
 #include "../CommonClasses/vector3.h"
 #include "../CommonClasses/RGBA.h"
+#include "../CommonClasses/Image.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -252,6 +253,49 @@ void AddTestUnit()
 
 
 		}
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region test Image
+	TEST_UNIT_START("test Image")
+		const Types::U32 width(512), height(512);
+		CommonClass::Image testImage(width, height);
+
+		CommonClass::RGBA pixelSetter;
+		pixelSetter.SetChannel<CommonClass::RGBA::BLUE>(0.5f);
+
+		for (int x = 0; x < width; ++x)
+		{
+			for (int y = 0; y < height; ++y)
+			{
+				pixelSetter.SetChannel<CommonClass::RGBA::RED>  (         x / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::GREEN>(         y / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::ALPHA>( ( x + y ) / 1024.0f);
+
+				testImage.SetPixel(x, y, pixelSetter);
+			}
+		}
+
+		testImage.SaveTo("OutputTestImage\\ThisImageIsForTest.png");
+
+		std::cout << "Please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForTest.png\"\n"
+				  << "check it with the file in the same folder \"CheckWithMe.png\""
+				  << "if the image is right, input a single number\n"
+				  << "else just hit ENTER, which means there's error:";
+
+		char ch = std::getchar();
+
+		// if the character is not number, then the image is wrong.
+		if (ch < '0' || ch > '9')
+		{
+			errorLogger.addErrorCount(true);
+		}
+		else
+		{
+			// consume the extra 'ENTER'.
+			std::getchar();
+		}
+
 	TEST_UNIT_END;
 #pragma endregion
 
