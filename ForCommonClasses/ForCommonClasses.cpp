@@ -119,10 +119,10 @@ void AddTestUnit()
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region test RGBA +/ -/ */ *(scalar)/ /(scalar)
+#pragma region test RGBA +/ -/ rgbMulti/ *(scalar)/ /(scalar)
 	TEST_UNIT_START("test RGBA +/ -/ */ *(scalar)/ /(scalar)")
 		RandomTool::MTRandom mtr;
-		const unsigned int MAX_RAND_INT = 255;
+		const unsigned int MAX_RAND_INT = 64;
 
 		/*!
 			\brief clamp the channel to [0.0f, 1.0f]
@@ -160,8 +160,8 @@ void AddTestUnit()
 			/*!
 				scale the RGB with float.
 			*/
-			const Types::F32	comf1(mtr.Random()),
-								comf2(mtr.Random());
+			const Types::F32	comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
+								comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
 
 			CommonClass::RGBA cmp1(comu1, comu2, comu3, comu4);
 			CommonClass::RGBA cmp2(comu5, comu6, comu7, comu8);
@@ -177,13 +177,13 @@ void AddTestUnit()
 			// default constructor can ignore alpha channel, the alpha of the pixel will be set to max(opaque).
 			errorLogger.LogIfNotEq(
 				CommonClass::RGBA(comu1, comu2, comu3),
-				CommonClass::RGBA(comu1, comu2, comu3, RGBA::ALPHA_CHANNEL_OPAQUE));
+				CommonClass::RGBA(comu1, comu2, comu3, CommonClass::RGBA::ALPHA_CHANNEL_OPAQUE));
 
 			// assign rgb only
 			cmp1.AssignRGB(cmp2);
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA(comu5, comu6, comu7, comu8));
+				CommonClass::RGBA(comu5, comu6, comu7, comu4));
 			recoverCMP1();
 
 			// cmp1 + cmp2 rgb only
@@ -204,7 +204,7 @@ void AddTestUnit()
 			cmp1.MulRGB(cmp2),
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA(clampChannel(comu1 * comu5), clampChannel(comu2 - comu6), clampChannel(comu3 - comu7), comu4));
+				CommonClass::RGBA(clampChannel(comu1 * comu5), clampChannel(comu2 * comu6), clampChannel(comu3 * comu7), comu4));
 			recoverCMP1();
 
 			// cmp1 * scalar rgb only
@@ -215,10 +215,11 @@ void AddTestUnit()
 			recoverCMP1();
 
 			// cmp1 / scalar rgb only
+			Types::F32 reciprocalComf2 = 1.0f / comf2;
 			cmp1.DivRGB(comf2),
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2), comu4));
+				CommonClass::RGBA(clampChannel(comu1 * reciprocalComf2), clampChannel(comu2 * reciprocalComf2), clampChannel(comu3 * reciprocalComf2), comu4));
 			recoverCMP1();
 
 			// alpha add
@@ -235,25 +236,18 @@ void AddTestUnit()
 				clampChannel(comu4 - comu8));
 			recoverCMP1();
 
-			// alpha mul
-			cmp1.MulAlpha(comu8);
-			errorLogger.LogIfNotEq(
-				cmp1.m_a,
-				comu1 * comu8);
-			recoverCMP1();
-
 			// alpha mul float
 			cmp1.MulAlpha(comf1);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				clampChannel((comu1 * comf1)));
+				clampChannel((comu4 * comf1)));
 			recoverCMP1();
 
 			// alpha div float
 			cmp1.DivAlpha(comf2);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				clampChannel((comu1 / comf2)));
+				clampChannel((comu4 / comf2)));
 			recoverCMP1();
 
 
