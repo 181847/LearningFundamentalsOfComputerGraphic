@@ -7,6 +7,7 @@
 // include test target code
 #include "../CommonClasses/vector2.h"
 #include "../CommonClasses/vector3.h"
+#include "../CommonClasses/RGBA.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -118,19 +119,23 @@ void AddTestUnit()
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region test RGBA8 +/ -/ */ *(scalar)/ /(scalar)
-	TEST_UNIT_START("test RGBA8 +/ -/ */ *(scalar)/ /(scalar)")
+#pragma region test RGBA +/ -/ */ *(scalar)/ /(scalar)
+	TEST_UNIT_START("test RGBA +/ -/ */ *(scalar)/ /(scalar)")
 		RandomTool::MTRandom mtr;
 		const unsigned int MAX_RAND_INT = 255;
 
 		/*!
-			\brief clamp the channel of pixel <= 255
+			\brief clamp the channel to [0.0f, 1.0f]
 		*/
-		auto clampChannel = [](Types::U32 ch)-> Types::U8
+		auto clampChannel = [](Types::F32 ch)-> Types::F32
 		{
-			if (ch >= 0xff)
+			if (ch <= 0.0f)
 			{
-				return 0xff;
+				return 0.0f;
+			}
+			else if (ch >= 1.0f)
+			{
+				return 1.0f;
 			}
 			else
 			{
@@ -138,36 +143,19 @@ void AddTestUnit()
 			}
 		};
 
-		/*! only for test
-			\brief revert the channel bigger than 255 wrap to 0
-			only for the RGB substraction when the second operator is bigger,
-			make the result up to the max of U32.
-		*/
-		auto revertChannel = [](Types::U32 ch)->Types::U8
-		{
-			if (ch > 0xff)
-			{
-				return 0;
-			}
-			else
-			{
-				return ch;
-			}
-		};
-		
 		for (int i = 0; i < 200; ++i)
 		{
 			/*!
 				make up the RGBA channel
 			*/
-			const Types::U32	comu1(mtr.Random(MAX_RAND_INT)),
-								comu2(mtr.Random(MAX_RAND_INT)),
-								comu3(mtr.Random(MAX_RAND_INT)),
-								comu4(mtr.Random(MAX_RAND_INT)),
-								comu5(mtr.Random(MAX_RAND_INT)),
-								comu6(mtr.Random(MAX_RAND_INT)),
-								comu7(mtr.Random(MAX_RAND_INT)),
-								comu8(mtr.Random(MAX_RAND_INT));
+			const Types::F32	comu1(mtr.Random()),
+								comu2(mtr.Random()),
+								comu3(mtr.Random()),
+								comu4(mtr.Random()),
+								comu5(mtr.Random()),
+								comu6(mtr.Random()),
+								comu7(mtr.Random()),
+								comu8(mtr.Random());
 
 			/*!
 				scale the RGB with float.
@@ -175,50 +163,63 @@ void AddTestUnit()
 			const Types::F32	comf1(mtr.Random()),
 								comf2(mtr.Random());
 
-			CommonClass::RGBA8 cmp1(comu1, comu2, comu3, comu4);
-			CommonClass::RGBA8 cmp2(comu5, comu6, comu7, comu8);
+			CommonClass::RGBA cmp1(comu1, comu2, comu3, comu4);
+			CommonClass::RGBA cmp2(comu5, comu6, comu7, comu8);
 
 			/*!
 				\brief recover the cmp1's value
 			*/
 			auto recoverCMP1 = [&cmp1, comu1, comu2, comu3, comu4]()
 			{
-				cmp1 = CommonClass::RGBA8(comu1, comu2, comu3, comu4);
+				cmp1 = CommonClass::RGBA(comu1, comu2, comu3, comu4);
 			};
+
+			// default constructor can ignore alpha channel, the alpha of the pixel will be set to max(opaque).
+			errorLogger.LogIfNotEq(
+				CommonClass::RGBA(comu1, comu2, comu3),
+				CommonClass::RGBA(comu1, comu2, comu3, RGBA::ALPHA_CHANNEL_OPAQUE);
+			);
+
+			// assign rgb only
+			cmp1.AssignRGB(cmp2);
+			errorLogger.LogIfNotEq(
+				cmp1,
+				CommonClass::RGBA(comu5, comu6, comu7, comu8));
+			recoverCMP1();
 
 			// cmp1 + cmp2 rgb only
 			cmp1.AddRGB(cmp2);
 			errorLogger.LogIfNotEq( 
 				cmp1,
-				CommonClass::RGBA8(clampChannel(comu1 + comu5), clampChannel(comu2 + comu6), clampChannel(comu3 + comu7), comu4));
+				CommonClass::RGBA(clampChannel(comu1 + comu5), clampChannel(comu2 + comu6), clampChannel(comu3 + comu7), comu4));
 			recoverCMP1();
 
 			// cmp1 - cmp2 rgb only
 			cmp1.SubRGB(cmp2),
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA8(revertChannel(comu1 - comu5), revertChannel(comu2 - comu6), revertChannel(comu3 - comu7), comu4));
+				CommonClass::RGBA(clampChannel(comu1 - comu5), clampChannel(comu2 - comu6), clampChannel(comu3 - comu7), comu4));
 			recoverCMP1();
 			
 			// cmp1 * cmp2 rgb only
 			cmp1.MulRGB(cmp2),
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA8(clampChannel((comu1 * comu5) >> 8), clampChannel((comu2 - comu6) >> 8), clampChannel((comu3 - comu7) >> 8), comu4));	// '>> 8' because we scale 8bit channel value back to [0, 255]
+				CommonClass::RGBA(clampChannel((comu1 * comu5) >> 8), clampChannel((comu2 - comu6) >> 8), clampChannel((comu3 - comu7) >> 8), comu4));	// '>> 8' because we scale 8bit channel value back to [0, 255]
 			recoverCMP1();
 
 			// cmp1 * scalar rgb only
 			cmp1.MulRGB(comf1),
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA8(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), comu4));
+				CommonClass::RGBA(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), comu4));
 			recoverCMP1();
 
 			// cmp1 / scalar rgb only
 			cmp1.DivRGB(comf2),
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA8(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2), comu4));
+				CommonClass::RGBA(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2), comu4));
 			recoverCMP1();
 
 			// alpha add
