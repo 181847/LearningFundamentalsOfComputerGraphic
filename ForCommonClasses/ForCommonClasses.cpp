@@ -177,8 +177,7 @@ void AddTestUnit()
 			// default constructor can ignore alpha channel, the alpha of the pixel will be set to max(opaque).
 			errorLogger.LogIfNotEq(
 				CommonClass::RGBA(comu1, comu2, comu3),
-				CommonClass::RGBA(comu1, comu2, comu3, RGBA::ALPHA_CHANNEL_OPAQUE);
-			);
+				CommonClass::RGBA(comu1, comu2, comu3, RGBA::ALPHA_CHANNEL_OPAQUE));
 
 			// assign rgb only
 			cmp1.AssignRGB(cmp2);
@@ -205,7 +204,7 @@ void AddTestUnit()
 			cmp1.MulRGB(cmp2),
 			errorLogger.LogIfNotEq(
 				cmp1,
-				CommonClass::RGBA(clampChannel((comu1 * comu5) >> 8), clampChannel((comu2 - comu6) >> 8), clampChannel((comu3 - comu7) >> 8), comu4));	// '>> 8' because we scale 8bit channel value back to [0, 255]
+				CommonClass::RGBA(clampChannel(comu1 * comu5), clampChannel(comu2 - comu6), clampChannel(comu3 - comu7), comu4));
 			recoverCMP1();
 
 			// cmp1 * scalar rgb only
@@ -233,14 +232,14 @@ void AddTestUnit()
 			cmp1.SubAlpha(comu8);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				revertChannel(comu4 - comu8));
+				clampChannel(comu4 - comu8));
 			recoverCMP1();
 
 			// alpha mul
 			cmp1.MulAlpha(comu8);
 			errorLogger.LogIfNotEq(
 				cmp1.m_a,
-				clampChannel((comu1 * comu8) >> 8));
+				comu1 * comu8);
 			recoverCMP1();
 
 			// alpha mul float
