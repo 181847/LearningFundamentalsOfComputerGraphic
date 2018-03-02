@@ -17,6 +17,17 @@ public:
 	};
 
 	/*!
+		\brief enumerate the channels
+	*/
+	enum
+	{
+		RED = 0,
+		GREEN,
+		BLUE,
+		ALPHA
+	};
+
+	/*!
 		\brief some useful constant value
 	*/
 	const static Types::F32 MIN_CHANNEL_VALUE;
@@ -34,6 +45,13 @@ public:
 	RGBA();
 	RGBA(const Types::F32 & r, const Types::F32 & g, const Types::F32 & b, const Types::F32 & a = ALPHA_CHANNEL_OPAQUE);
 	~RGBA();
+
+	/*!
+		\brief set one channel value
+		\param value new value of one channel
+	*/
+	template<Types::U8 ch>
+	void SetChannel(const Types::F32 & value);
 
 	/*!
 		\brief let the rgb channel equal to the source
@@ -114,5 +132,30 @@ bool operator != (const RGBA & a, const RGBA & b);
 	\param ulp the precision of compare, lower and more accurate.
 */
 bool AlmostEqual(const RGBA & a, const RGBA & b, int ulp = RGBA::COMPARE_ULP);
+
+template<Types::U8 ch>
+inline void RGBA::SetChannel(const Types::F32 & value)
+{
+	const Types::F32 clamppedValue = ClampChannel(value);
+
+	switch (ch)
+	{
+	case RGBA::RED:
+		m_r = clamppedValue;
+		break;
+
+	case RGBA::GREEN:
+		m_g = clamppedValue;
+		break;
+
+	case RGBA::BLUE:
+		m_b = clamppedValue;
+		break;
+
+	case RGBA::ALPHA:
+		m_a = clamppedValue;
+		break;
+	}
+}
 
 }// namespace CommonClass
