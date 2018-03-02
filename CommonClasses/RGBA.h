@@ -24,6 +24,11 @@ public:
 	const static Types::F32 HALF_CHANNEL_VALUE;
 	const static Types::F32 ALPHA_CHANNEL_OPAQUE;
 	const static Types::F32 ALPHA_CHANNEL_TRANSPARENT;
+	
+	/*!
+		\brief decide the precision of the almost equal floats£¬less it is, more acurate the equal comparing will be.
+	*/
+	static const Types::I32 COMPARE_ULP = 8;
 
 public:
 	RGBA();
@@ -91,6 +96,23 @@ public:
 		\brief divided by the alpha, clamp it between [0.0f, 1.0f]
 	*/
 	void DivAlpha(const Types::F32 & scale);
+
+	/*!
+		\brief clamp the value to [0.0f, 1.0f].
+		\param value the value will be clampped.
+	*/
+	static Types::F32 ClampChannel(const Types::F32 & value);
 };
+
+bool operator == (const RGBA & a, const RGBA & b); 
+bool operator != (const RGBA & a, const RGBA & b);
+
+/*!
+	\brief two RGBA are almost equal
+	\param a compared pixel
+	\param b compared pixel
+	\param ulp the precision of compare, lower and more accurate.
+*/
+bool AlmostEqual(const RGBA & a, const RGBA & b, int ulp = RGBA::COMPARE_ULP);
 
 }// namespace CommonClass

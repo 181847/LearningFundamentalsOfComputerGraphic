@@ -23,12 +23,18 @@
     <ClInclude Include="vector3.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="RGBA.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="vector3.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="RGBA.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
