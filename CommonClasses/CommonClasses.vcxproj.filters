@@ -29,6 +29,9 @@
     <ClInclude Include="Image.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="Film.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -41,6 +44,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Image.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Film.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
