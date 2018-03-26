@@ -10,8 +10,31 @@
 #include "../CommonClasses/vector3.h"
 #include "../CommonClasses/RGBA.h"
 #include "../CommonClasses/Image.h"
+#include "../CommonClasses/OrthographicCamera.h"
 #pragma comment(lib, "CommonClasses.lib")
 
+RandomTool::MTRandom globalMtr;
+const unsigned int G_MAX_INT = 1000;
+
+/*!
+	\brief get random vector3.
+	if you want to set the seed, try globalMtr.SetRandomSeed(...);
+*/
+CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
+{
+	CommonClass::vector3 randVec;
+	do
+	{
+		randVec = CommonClass::vector3((globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
+			(globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
+			(globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1));
+
+		// if allowZeroVector is false, loop until a none zero vector
+	} while (! allowZeroVector && randVec.m_x == 0.0f && randVec.m_y== 0.0f && randVec.m_z == 0.0f);
+	
+
+	return randVec;
+}
 
 DECLARE_TEST_UNITS;
 
@@ -319,24 +342,82 @@ void AddTestUnit()
 		using namespace CommonClass;
 		using namespace MathTool;
 		
-		const unsigned int MAX_RAND_INT = 100;
-		RandomTool::MTRandom mtr;
+		globalMtr.SetRandomSeed(5);
+
+		
+
+		for (int i = 0; i < 20; ++i)
+		{
+			vector3 v1(GetRandomVector3(false));
+
+			v1 = Normalize(v1);
+
+			errorLogger.LogIfFalse(almost_equal(Length(v1), 1.0f, 8));
+
+			v1.m_x *= 2.0f;
+			v1.m_y *= 2.0f;
+			v1.m_z *= 3.0f;
+
+			// ensurance, make vector's length not equal to unit.
+			errorLogger.LogIfTrue(almost_equal(Length(v1), 1.0f, 8));
+		}
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region check cameras basis is constructed correctly
+	TEST_UNIT_START("check camera's basis is constructed correctly")
+		using namespace CommonClass;
+		using namespace MathTool;
+		
+		globalMtr.SetRandomSeed(5);
 
 		/*!
-			\brief get length of the vector.
+			\brief help to check the vector's length is almost 1 unit.
 		*/
-		auto LenOf = [](const vector3 & a)->Types::F32 {
-			return std::sqrtf(a.m_x * a.m_x + a.m_y * a.m_y + a.m_z * a.m_z);
+		auto lengthAlmostEqual_1_Unit = [](const vector3& a)->bool
+		{
+			return almost_equal(Length(a), 1.0f, 8);
+		};
+
+		/*!
+			\brief using cross product check two vectors is almost perpendicular to each other.
+			Warning: the result of cross product by have a huge differ from 0.0f,
+					so the almost_equal will not work properly,
+					here we just specify a range (-1e-7f, 1e-7f).
+		*/
+		auto almostPerpendicular = [](const vector3& a, const vector3& b)->bool
+		{
+			Types::F32 dpValue = dotProd(a, b);
+			std::printf("## check perpendicular vector3 %f.\n", dpValue);
+
+			return (-1e-7f) < dpValue && dpValue < (1e-7f);
 		};
 
 		for (int i = 0; i < 20; ++i)
 		{
-			vector3 v1(	mtr.Random() * (mtr.Random(MAX_RAND_INT) + 1), 
-						mtr.Random() * (mtr.Random(MAX_RAND_INT) + 1),
-						mtr.Random() * (mtr.Random(MAX_RAND_INT) + 1));
+			vector3 origin = GetRandomVector3(true);
+			vector3 target = GetRandomVector3(false);
+			vector3 dummyLookUp = Normalize(GetRandomVector3(false));
 
-			errorLogger.LogIfFalse(almost_equal(LenOf(Normalize(v1)), 1.0f, 8));
+			// if the position and target is overlaped, skip this turn.
+			if (origin == target)
+			{
+				continue;
+			}
+
+			OrthographicCamera orthoCamera(origin, target, dummyLookUp);
+			
+			// check basis is all unit vector
+			errorLogger.LogIfFalse(lengthAlmostEqual_1_Unit(orthoCamera.m_w));
+			errorLogger.LogIfFalse(lengthAlmostEqual_1_Unit(orthoCamera.m_u));
+			errorLogger.LogIfFalse(lengthAlmostEqual_1_Unit(orthoCamera.m_v));
+
+			// check three basises is perpendicular to each other
+			errorLogger.LogIfFalse(almostPerpendicular(orthoCamera.m_w, orthoCamera.m_u));
+			errorLogger.LogIfFalse(almostPerpendicular(orthoCamera.m_w, orthoCamera.m_v));
+			errorLogger.LogIfFalse(almostPerpendicular(orthoCamera.m_u, orthoCamera.m_v));
 		}
+		
 	TEST_UNIT_END;
 #pragma endregion
 
