@@ -53,6 +53,11 @@ vector3    crossProd  (const vector3 & a, const vector3 & b);
 vector3	   Normalize(const vector3 & a);
 
 /*!
+	\brief get length of the vector.
+*/
+Types::F32 Length(const vector3 & a);
+
+/*!
 	\brief two vector are almost equal
 	\param a compared vector
 	\param b compared vector

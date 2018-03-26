@@ -75,6 +75,11 @@ vector3 Normalize(const vector3 & a)
 	return vector3(a.m_x * reciprocalLen, a.m_y * reciprocalLen, a.m_z * reciprocalLen);
 }
 
+Types::F32 Length(const vector3 & a)
+{
+	return std::sqrtf(a.m_x * a.m_x + a.m_y * a.m_y + a.m_z * a.m_z);
+};
+
 bool AlmostEqual(const vector3 & a, const vector3 & b, int ulp)
 {
 	return MathTool::almost_equal(a.m_x, b.m_x, ulp)
