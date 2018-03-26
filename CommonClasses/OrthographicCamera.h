@@ -40,7 +40,7 @@ public:
 		\brief init camera's position and pose
 		\param origin camera location
 		\param lookAt target position ( NOT VECTOR )
-		\param lookUp Up vector to construct the basis.
+		\param lookUp Up vector to construct the basis, don't have to be unit vector.
 	*/
 	OrthographicCamera(const CommonClass::vector3& origin, const CommonClass::vector3& lookAt, const CommonClass::vector3& lookUp);
 

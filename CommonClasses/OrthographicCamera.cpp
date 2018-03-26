@@ -6,8 +6,8 @@ OrthographicCamera::OrthographicCamera(const CommonClass::vector3 & origin, cons
 	:m_origin(origin)
 {
 	m_w = Normalize(m_origin - lookAt);
-	m_v = crossProd(lookUp, m_w);
-	m_u = crossProd(m_w, m_v);
+	m_v = Normalize(crossProd(lookUp, m_w));
+	m_u = Normalize(crossProd(m_w, m_v));
 }
 
 
