@@ -32,6 +32,9 @@
     <ClInclude Include="Film.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="OrthographicCamera.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -47,6 +50,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Film.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="OrthographicCamera.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
