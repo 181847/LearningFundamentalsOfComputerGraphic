@@ -2,6 +2,7 @@
 #include <MyTools\UnitTestModules.h>
 #include <iostream>
 #include <MyTools\RandomToolNeedLib\MTRandom.h>
+#include <MyTools\MathTool.h>
 #pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
 
 // include test target code
@@ -23,7 +24,6 @@ void AddTestUnit()
 {
 #pragma region Try the testUnit
 	TEST_UNIT_START("a test always success")
-		return true;
 	TEST_UNIT_END;
 #pragma endregion
 
@@ -296,6 +296,47 @@ void AddTestUnit()
 			std::getchar();
 		}
 
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region vector3 copy constructor
+	TEST_UNIT_START("vector3 copy constructor")
+		using namespace CommonClass;
+		vector3 m3(1.0f, 2.0f, 3.0f);
+		vector3 m_toBeError(1.1f, 2.2f, 3.3f);
+		vector3 m_copy(m3);
+
+		// construct success
+		errorLogger.LogIfFalse(AlmostEqual(m3, m_copy));
+
+		// ensure function AlmostEqual is right
+		errorLogger.LogIfTrue(AlmostEqual(m3, m_toBeError));
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region vector3 normalize
+	TEST_UNIT_START("vector3 normalize")
+		using namespace CommonClass;
+		using namespace MathTool;
+		
+		const unsigned int MAX_RAND_INT = 100;
+		RandomTool::MTRandom mtr;
+
+		/*!
+			\brief get length of the vector.
+		*/
+		auto LenOf = [](const vector3 & a)->Types::F32 {
+			return std::sqrtf(a.m_x * a.m_x + a.m_y * a.m_y + a.m_z * a.m_z);
+		};
+
+		for (int i = 0; i < 20; ++i)
+		{
+			vector3 v1(	mtr.Random() * (mtr.Random(MAX_RAND_INT) + 1), 
+						mtr.Random() * (mtr.Random(MAX_RAND_INT) + 1),
+						mtr.Random() * (mtr.Random(MAX_RAND_INT) + 1));
+
+			errorLogger.LogIfFalse(almost_equal(LenOf(Normalize(v1)), 1.0f, 8));
+		}
 	TEST_UNIT_END;
 #pragma endregion
 
