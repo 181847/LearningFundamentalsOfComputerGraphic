@@ -48,6 +48,11 @@ Types::F32 dotProd    (const vector3 & a, const vector3 & b);	// same as operato
 vector3    crossProd  (const vector3 & a, const vector3 & b);
 
 /*!
+	\brief normalize the vector3
+*/
+vector3	   Normalize(const vector3 & a);
+
+/*!
 	\brief two vector are almost equal
 	\param a compared vector
 	\param b compared vector

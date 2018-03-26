@@ -64,6 +64,17 @@ vector3 crossProd(const vector3 & a, const vector3 & b)
 		a.m_x * b.m_y - b.m_x * a.m_y);
 }
 
+vector3 Normalize(const vector3 & a)
+{
+	const Types::F32 squreLen = a.m_x * a.m_x + a.m_y * a.m_y + a.m_z * a.m_z;
+	if (squreLen == 0.0f)
+	{
+		throw std::exception("cannot normalize a zero vector.");
+	}
+	const Types::F32 reciprocalLen = 1 / (std::sqrtf(squreLen));
+	return vector3(a.m_x * reciprocalLen, a.m_y * reciprocalLen, a.m_z * reciprocalLen);
+}
+
 bool AlmostEqual(const vector3 & a, const vector3 & b, int ulp)
 {
 	return MathTool::almost_equal(a.m_x, b.m_x, ulp)
