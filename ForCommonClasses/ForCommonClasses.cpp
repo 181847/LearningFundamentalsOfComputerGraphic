@@ -281,15 +281,15 @@ void AddTestUnit()
 
 #pragma region test Image
 	TEST_UNIT_START("test Image")
-		const Types::U32 width(512), height(512);
-		CommonClass::Image testImage(width, height);
+		const Types::U32 WIDTH(512), HEIGHT(512);
+		CommonClass::Image testImage(WIDTH, HEIGHT);
 
 		CommonClass::RGBA pixelSetter;
 		pixelSetter.SetChannel<CommonClass::RGBA::BLUE>(0.5f);
 
-		for (int x = 0; x < width; ++x)
+		for (int x = 0; x < WIDTH; ++x)
 		{
-			for (int y = 0; y < height; ++y)
+			for (int y = 0; y < HEIGHT; ++y)
 			{
 				pixelSetter.SetChannel<CommonClass::RGBA::RED>  (         x / 512.0f);
 				pixelSetter.SetChannel<CommonClass::RGBA::GREEN>(         y / 512.0f);
@@ -364,6 +364,51 @@ void AddTestUnit()
 	TEST_UNIT_END;
 #pragma endregion
 
+#pragma region film capture light test
+	TEST_UNIT_START("film capture light test")
+		using namespace CommonClass;
+		const Types::U32 WIDTH(512), HEIGHT(512);
+		
+		Film tfilm(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f);
+
+		RGBA pixelSetter;
+		pixelSetter.SetChannel<RGBA::BLUE>(0.5f);
+
+		for (int x = 0; x < WIDTH; ++x)
+		{
+			for (int y = 0; y < HEIGHT; ++y)
+			{
+				pixelSetter.SetChannel<CommonClass::RGBA::RED>(x / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::GREEN>(y / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::ALPHA>((x + y) / 1024.0f);
+
+				tfilm.SetPixel(x, y, pixelSetter);
+			}
+		}
+
+		tfilm.SaveTo("OutputTestImage\\ThisImageIsForFilm.png");
+
+		std::cout << "Film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForFilm.png\"\n"
+			<< "check it with the file in the same folder \"CheckWithMe.png\""
+			<< "if the image is same, input a single number\n"
+			<< "else just hit ENTER, which means there's error:";
+
+		char ch = std::getchar();
+
+		// if the character is not number, then the image is wrong.
+		if (ch < '0' || ch > '9')
+		{
+			errorLogger.addErrorCount(true);
+		}
+		else
+		{
+			// consume the extra 'ENTER'.
+			std::getchar();
+		}
+		
+	TEST_UNIT_END;
+#pragma endregion
+
 #pragma region check cameras basis is constructed correctly
 	TEST_UNIT_START("check camera's basis is constructed correctly")
 		using namespace CommonClass;
@@ -388,7 +433,7 @@ void AddTestUnit()
 		auto almostPerpendicular = [](const vector3& a, const vector3& b)->bool
 		{
 			Types::F32 dpValue = dotProd(a, b);
-			std::printf("## check perpendicular vector3 %f.\n", dpValue);
+			//std::printf("## check perpendicular vector3 %f.\n", dpValue);
 
 			return (-1e-7f) < dpValue && dpValue < (1e-7f);
 		};
@@ -416,6 +461,81 @@ void AddTestUnit()
 			errorLogger.LogIfFalse(almostPerpendicular(orthoCamera.m_w, orthoCamera.m_u));
 			errorLogger.LogIfFalse(almostPerpendicular(orthoCamera.m_w, orthoCamera.m_v));
 			errorLogger.LogIfFalse(almostPerpendicular(orthoCamera.m_u, orthoCamera.m_v));
+		}
+		
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region test capmera capture light
+	TEST_UNIT_START("test capmera capture light")
+		using namespace CommonClass;
+		using namespace MathTool;
+		
+		globalMtr.SetRandomSeed(5);
+
+		/*!
+			\brief help to check the vector's length is almost 1 unit.
+		*/
+		auto lengthAlmostEqual_1_Unit = [](const vector3& a)->bool
+		{
+			return almost_equal(Length(a), 1.0f, 8);
+		};
+
+		/*!
+			\brief using cross product check two vectors is almost perpendicular to each other.
+			Warning: the result of cross product by have a huge differ from 0.0f,
+					so the almost_equal will not work properly,
+					here we just specify a range (-1e-7f, 1e-7f).
+		*/
+		auto almostPerpendicular = [](const vector3& a, const vector3& b)->bool
+		{
+			Types::F32 dpValue = dotProd(a, b);
+			//std::printf("## check perpendicular vector3 %f.\n", dpValue);
+
+			return (-1e-7f) < dpValue && dpValue < (1e-7f);
+		};
+
+		vector3 origin(0.0f, 0.0f, 0.0f);
+		vector3 target(1.0f, 0.0f, 0.0f);
+		vector3 dummyLookUp(0.0f, 1.0f, 0.0f);
+
+		const Types::U32 WIDTH(512), HEIGHT(512);
+		OrthographicCamera orthoCamera(origin, target, dummyLookUp);
+		orthoCamera.SetFilm(std::make_unique<Film>(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f));
+
+		RGBA pixelSetter;
+		pixelSetter.SetChannel<RGBA::BLUE>(0.5f);
+
+		for (int x = 0; x < WIDTH; ++x)
+		{
+			for (int y = 0; y < HEIGHT; ++y)
+			{
+				pixelSetter.SetChannel<CommonClass::RGBA::RED>(x / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::GREEN>(y / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::ALPHA>((x + y) / 1024.0f);
+
+				orthoCamera.IncomeLight(x, y, pixelSetter);
+			}
+		}
+
+		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCamera.png");
+
+		std::cout << "OrthoCamera film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
+			<< "check it with the file in the same folder \"CheckWithMe.png\""
+			<< "if the image is same, input a single number\n"
+			<< "else just hit ENTER, which means there's error:";
+
+		char ch = std::getchar();
+
+		// if the character is not number, then the image is wrong.
+		if (ch < '0' || ch > '9')
+		{
+			errorLogger.addErrorCount(true);
+		}
+		else
+		{
+			// consume the extra 'ENTER'.
+			std::getchar();
 		}
 		
 	TEST_UNIT_END;
