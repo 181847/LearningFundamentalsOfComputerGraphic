@@ -14,8 +14,8 @@ Film::~Film()
 
 void Film::GetPixelUV(const Types::U32 x, const Types::U32 y, Types::F32 & outU, Types::F32 & outV)
 {
-	outU = m_left + (m_right - m_left) * (x / m_width);
-	outV = m_bottom + (m_top - m_bottom) * (y / m_height);
+	outU = m_left + (m_right - m_left) * (1.0f * x / m_width);
+	outV = m_bottom + (m_top - m_bottom) * (1.0f * y / m_height);
 }
 
 } // namespace CommonClass
