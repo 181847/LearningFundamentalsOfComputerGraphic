@@ -35,6 +35,9 @@
     <ClInclude Include="OrthographicCamera.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -53,6 +56,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="OrthographicCamera.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Ray.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
