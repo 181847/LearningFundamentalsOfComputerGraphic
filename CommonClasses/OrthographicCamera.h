@@ -1,6 +1,7 @@
 #pragma once
 #include "Film.h"
 #include "vector3.h"
+#include "Ray.h"
 #include <memory>
 
 namespace CommonClass
@@ -52,7 +53,7 @@ public:
 		\param x horizontal index from left to right
 		\param y vertical index from bottom to top
 	*/
-	//Ray GetRay(const Types::U32 x, const Types::U32 y);
+	Ray GetRay(const Types::U32 x, const Types::U32 y);
 
 	/*!
 		\brief set color of the film
