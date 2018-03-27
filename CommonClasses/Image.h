@@ -28,16 +28,17 @@ private:
 	};
 
 protected:
+	/*£¡
+		\brief 1D array (access data through 2D method) store pixels
+	*/
+	std::vector<Pixel> m_canvas;
+
+public:
 	/*!
 		\brief the width and height of the image
 		they should only be set once in the constructor of the Image.
 	*/
 	const Types::U32 m_width, m_height;
-	
-	/*£¡
-		\brief 1D array (access data through 2D method) store pixels
-	*/
-	std::vector<Pixel> m_canvas;
 
 public:
 	/*!
