@@ -21,6 +21,11 @@ public:
 		\param left/right/top/bottom film borders from origin
 	*/
 	Film(const Types::U32 pixelWidth, const Types::U32 pixelHeight, const Types::F32 left, const Types::F32 right, const Types::F32 top, const Types::F32 bottom);
+
+	// prevent copy construct and equal assignment.
+	Film(const Film&) = delete;
+	Film& operator=(const Film&) = delete;
+
 	~Film();
 
 	/*!
