@@ -1,4 +1,5 @@
 #include "Image.h"
+#include <assert.h>
 #include <svpng\svpng.inc>
 
 namespace CommonClass
@@ -38,6 +39,9 @@ void Image::SaveTo(const std::string & filePath) const
 
 void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
 {
+	assert((0 <= x && x < m_width) && (0 <= y && y < m_height)
+			&& "pixel index out of range.");
+
 	Pixel& modifiedPixel = m_canvas[y * m_width + x];
 	modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_r * 255);
 	modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_g * 255);
