@@ -11,10 +11,57 @@
 #include "../CommonClasses/RGBA.h"
 #include "../CommonClasses/Image.h"
 #include "../CommonClasses/OrthographicCamera.h"
+#include "../CommonClasses/Ray.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 RandomTool::MTRandom globalMtr;
 const unsigned int G_MAX_INT = 1000;
+
+/*!
+	\brief some common configurations for the test.
+*/
+namespace UserConfig
+{
+	/*!
+		\brief whether let user check some output image file is right,
+		if false every check about the Image will be default to be correct.
+	*/
+	const bool LET_USER_CHECK_IMG = false;
+
+	/*!
+		\brief common image resolution on width
+	*/
+	const Types::U32 COMMON_PIXEL_WIDTH     = 512;
+	
+	/*!
+		\brief common image resolution on height
+	*/
+	const Types::U32 COMMON_PIXEL_HEIGHT    = 512;
+	
+	/*!
+		\brief common render option, left bound location
+	*/
+	const Types::F32 COMMON_RENDER_LEFT     = -1.0f;
+
+	
+	/*!
+		\brief common render option, right bound location
+	*/
+	const Types::F32 COMMON_RENDER_RIGHT    = +1.0f;
+
+	
+	/*!
+		\brief common render option, bottom bound location
+	*/
+	const Types::F32 COMMON_RENDER_BOTTOM   = -1.0f;
+
+	
+	/*!
+		\brief common render option, right bound location
+	*/
+	const Types::F32 COMMON_RENDER_TOP      = +1.0f;
+
+}
 
 /*!
 	\brief get random vector3.
@@ -98,6 +145,7 @@ void AddTestUnit()
 
 #pragma region test vector3 +/ -/ *
 	TEST_UNIT_START("test vector3 +/ -/ */ X")
+		using namespace CommonClass;
 		RandomTool::MTRandom mtr;
 		const unsigned int MAX_RAND_INT = 600;
 		
@@ -139,6 +187,26 @@ void AddTestUnit()
 					comf2 * comf6 - comf5 * comf3,
 					comf4 * comf3 - comf1 * comf6,
 					comf1 * comf5 - comf4 * comf2));
+
+			// vector3 * float
+			Types::F32 randomFloat = mtr.Random();
+			errorLogger.LogIfNotEq(
+				cmp1 * randomFloat,
+				vector3(
+					comf1 * randomFloat,
+					comf2 * randomFloat,
+					comf3 * randomFloat)); 
+			errorLogger.LogIfNotEq(
+				randomFloat * cmp2,
+				vector3(
+					comf4 * randomFloat,
+					comf5 * randomFloat,
+					comf6 * randomFloat));
+
+			// - vector3
+			errorLogger.LogIfNotEq(
+				-cmp1, 
+				vector3(-comf1, -comf2, -comf3));
 		}
 	TEST_UNIT_END;
 #pragma endregion
@@ -301,22 +369,26 @@ void AddTestUnit()
 
 		testImage.SaveTo("OutputTestImage\\ThisImageIsForTest.png");
 
-		std::cout << "Please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForTest.png\"\n"
-				  << "check it with the file in the same folder \"CheckWithMe.png\""
-				  << "if the image is right, input a single number\n"
-				  << "else just hit ENTER, which means there's error:";
-
-		char ch = std::getchar();
-
-		// if the character is not number, then the image is wrong.
-		if (ch < '0' || ch > '9')
+		if (UserConfig::LET_USER_CHECK_IMG)
 		{
-			errorLogger.addErrorCount(true);
-		}
-		else
-		{
-			// consume the extra 'ENTER'.
-			std::getchar();
+
+			std::cout << "Please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForTest.png\"\n"
+				<< "check it with the file in the same folder \"CheckWithMe.png\""
+				<< "if the image is right, input a single number\n"
+				<< "else just hit ENTER, which means there's error:";
+
+			char ch = std::getchar();
+
+			// if the character is not number, then the image is wrong.
+			if (ch < '0' || ch > '9')
+			{
+				errorLogger.addErrorCount(true);
+			}
+			else
+			{
+				// consume the extra 'ENTER'.
+				std::getchar();
+			}
 		}
 
 	TEST_UNIT_END;
@@ -386,24 +458,28 @@ void AddTestUnit()
 			}
 		}
 
+
 		tfilm.SaveTo("OutputTestImage\\ThisImageIsForFilm.png");
 
-		std::cout << "Film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForFilm.png\"\n"
-			<< "check it with the file in the same folder \"CheckWithMe.png\""
-			<< "if the image is same, input a single number\n"
-			<< "else just hit ENTER, which means there's error:";
-
-		char ch = std::getchar();
-
-		// if the character is not number, then the image is wrong.
-		if (ch < '0' || ch > '9')
+		if (UserConfig::LET_USER_CHECK_IMG)
 		{
-			errorLogger.addErrorCount(true);
-		}
-		else
-		{
-			// consume the extra 'ENTER'.
-			std::getchar();
+			std::cout << "Film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForFilm.png\"\n"
+				<< "check it with the file in the same folder \"CheckWithMe.png\""
+				<< "if the image is same, input a single number\n"
+				<< "else just hit ENTER, which means there's error:";
+
+			char ch = std::getchar();
+
+			// if the character is not number, then the image is wrong.
+			if (ch < '0' || ch > '9')
+			{
+				errorLogger.addErrorCount(true);
+			}
+			else
+			{
+				// consume the extra 'ENTER'.
+				std::getchar();
+			}
 		}
 		
 	TEST_UNIT_END;
@@ -520,27 +596,72 @@ void AddTestUnit()
 
 		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCamera.png");
 
-		std::cout << "OrthoCamera film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
-			<< "check it with the file in the same folder \"CheckWithMe.png\""
-			<< "if the image is same, input a single number\n"
-			<< "else just hit ENTER, which means there's error:";
 
-		char ch = std::getchar();
 
-		// if the character is not number, then the image is wrong.
-		if (ch < '0' || ch > '9')
+		if (UserConfig::LET_USER_CHECK_IMG)
 		{
-			errorLogger.addErrorCount(true);
-		}
-		else
-		{
-			// consume the extra 'ENTER'.
-			std::getchar();
+			std::cout << "OrthoCamera film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
+				<< "check it with the file in the same folder \"CheckWithMe.png\""
+				<< "if the image is same, input a single number\n"
+				<< "else just hit ENTER, which means there's error:";
+
+			char ch = std::getchar();
+
+			// if the character is not number, then the image is wrong.
+			if (ch < '0' || ch > '9')
+			{
+				errorLogger.addErrorCount(true);
+			}
+			else
+			{
+				// consume the extra 'ENTER'.
+				std::getchar();
+			}
 		}
 		
 	TEST_UNIT_END;
 #pragma endregion
 
+#pragma region test ray construct
+	TEST_UNIT_START("test ray construct")
+		using namespace CommonClass;
+		
+		for (int i = 0; i < 20; ++i)
+		{
+			Ray tray(GetRandomVector3(), GetRandomVector3(false));
+
+			errorLogger.LogIfFalse(MathTool::almost_equal(Length(tray.m_direction), 1.0f, 8));
+		}
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region get ray from orthographic camera
+	TEST_UNIT_START("get ray from orthographic camera")
+		using namespace CommonClass;
+		using namespace MathTool;
+
+		vector3 camOrigin = GetRandomVector3();
+		vector3 camLookAt = GetRandomVector3();
+		vector3 camLookUp = Normalize(GetRandomVector3(false));
+		OrthographicCamera orthoCamera(camOrigin, camLookAt, camLookUp);
+		orthoCamera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			UserConfig::COMMON_RENDER_LEFT, UserConfig::COMMON_RENDER_RIGHT, UserConfig::COMMON_RENDER_BOTTOM, UserConfig::COMMON_RENDER_TOP));
+
+		for (int i = 0; i < orthoCamera.m_film->m_width; ++i)
+		{
+			for (int j = 0; j < orthoCamera.m_film->m_height; ++j)
+			{
+				Ray ray = orthoCamera.GetRay(i, j);
+				
+				errorLogger.LogIfFalse(AlmostPerpendicular(ray.m_origin - orthoCamera.m_origin, ray.m_direction, -1e-4f, +1e-5f));
+				errorLogger.LogIfFalse(AlmostEqual(ray.m_direction, -orthoCamera.m_w));
+			}
+		}
+
+
+	TEST_UNIT_END;
+#pragma endregion
 }// AddTestUnit()
 
 }// namespace TestUnit
