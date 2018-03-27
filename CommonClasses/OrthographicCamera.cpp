@@ -11,6 +11,21 @@ OrthographicCamera::OrthographicCamera(const CommonClass::vector3 & origin, cons
 }
 
 
+void OrthographicCamera::IncomeLight(const Types::U32 x, const Types::U32 y, const CommonClass::RGBA & color)
+{
+	if (m_film.get() == nullptr)
+	{
+		throw std::exception("camera capture light failed: film is not setted");
+	}
+
+	m_film->SetPixel(x, y, color);
+}
+
+void OrthographicCamera::SetFilm(std::unique_ptr<Film> newFilm)
+{
+	m_film = std::move(newFilm);
+}
+
 OrthographicCamera::~OrthographicCamera()
 {
 }

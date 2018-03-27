@@ -43,9 +43,29 @@ public:
 		\param lookUp Up vector to construct the basis, don't have to be unit vector.
 	*/
 	OrthographicCamera(const CommonClass::vector3& origin, const CommonClass::vector3& lookAt, const CommonClass::vector3& lookUp);
-
+	OrthographicCamera(const OrthographicCamera&) = delete;
+	OrthographicCamera& operator=(const OrthographicCamera&) = delete;
 	~OrthographicCamera();
 
+	/*!
+		\brief get ray of the tracing route.
+		\param x horizontal index from left to right
+		\param y vertical index from bottom to top
+	*/
+	//Ray GetRay(const Types::U32 x, const Types::U32 y);
+
+	/*!
+		\brief set color of the film
+		\param x horizontal index from left to right
+		\param y vertical index from bottom to top
+		\param color set color into the film.
+	*/
+	void IncomeLight(const Types::U32 x, const Types::U32 y, const CommonClass::RGBA& color);
+
+	/*!
+		\brief set a new film on the camera
+	*/
+	void SetFilm(std::unique_ptr<Film> newFilm);
 	
 };
 
