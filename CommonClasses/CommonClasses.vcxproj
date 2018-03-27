@@ -145,21 +145,29 @@
     <Text Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Box.h" />
     <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="Film.h" />
+    <ClInclude Include="HitRecord.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="OrthographicCamera.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RGBA.h" />
+    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="Surface.h" />
     <ClInclude Include="vector2.h" />
     <ClInclude Include="vector3.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="Film.cpp" />
+    <ClCompile Include="HitRecord.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="OrthographicCamera.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RGBA.cpp" />
+    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="Surface.cpp" />
     <ClCompile Include="vector2.cpp" />
     <ClCompile Include="vector3.cpp" />
   </ItemGroup>

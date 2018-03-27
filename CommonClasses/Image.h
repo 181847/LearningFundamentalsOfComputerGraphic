@@ -73,6 +73,14 @@ public:
 	*/
 	RGBA GetPixel(const Types::U32 x, const Types::U32 y) const;
 
+protected:
+	/*!
+		\brief convert 2D indices into 1D index to search pixels in the m_canvas.
+		\param x horizontal value from left to right
+		\param y vertical value from bottom to top
+	*/
+	const Types::U32 To1DArrIndex(const Types::U32 x, const Types::U32 y) const;
+
 
 
 };

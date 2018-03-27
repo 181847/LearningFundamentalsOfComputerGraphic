@@ -37,12 +37,18 @@ void Image::SaveTo(const std::string & filePath) const
 	fclose(outputFile);
 }
 
-void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
+const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) const
 {
 	assert((0 <= x && x < m_width) && (0 <= y && y < m_height)
-			&& "pixel index out of range.");
+		&& "pixel index out of range.");
 
-	Pixel& modifiedPixel = m_canvas[y * m_width + x];
+	return x * m_height + (m_height - 1 - y);
+}
+
+void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
+{
+
+	Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
 	modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_r * 255);
 	modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_g * 255);
 	modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_b * 255);
@@ -51,7 +57,7 @@ void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
 
 RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 {
-	const Pixel& returnedPixel = m_canvas[y * m_width + x];
+	const Pixel& returnedPixel = m_canvas[To1DArrIndex(x, y)];
 
 	const Types::F32 reciprocal8BitsOne = 1.0f / 255;
 	

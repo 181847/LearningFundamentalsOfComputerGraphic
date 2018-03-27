@@ -3,6 +3,7 @@
 #include <iostream>
 #include <MyTools\RandomToolNeedLib\MTRandom.h>
 #include <MyTools\MathTool.h>
+#include <limits>
 #pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
 
 // include test target code
@@ -12,6 +13,7 @@
 #include "../CommonClasses/Image.h"
 #include "../CommonClasses/OrthographicCamera.h"
 #include "../CommonClasses/Ray.h"
+#include "../CommonClasses/Sphere.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 RandomTool::MTRandom globalMtr;
@@ -648,17 +650,64 @@ void AddTestUnit()
 			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
 			UserConfig::COMMON_RENDER_LEFT, UserConfig::COMMON_RENDER_RIGHT, UserConfig::COMMON_RENDER_BOTTOM, UserConfig::COMMON_RENDER_TOP));
 
-		for (int i = 0; i < orthoCamera.m_film->m_width; ++i)
+		for (unsigned int i = 0; i < orthoCamera.m_film->m_width; ++i)
 		{
-			for (int j = 0; j < orthoCamera.m_film->m_height; ++j)
+
+			for (unsigned int j = 0; j < orthoCamera.m_film->m_height; ++j)
 			{
 				Ray ray = orthoCamera.GetRay(i, j);
 				
-				errorLogger.LogIfFalse(AlmostPerpendicular(ray.m_origin - orthoCamera.m_origin, ray.m_direction, -1e-4f, +1e-5f));
+				errorLogger.LogIfFalse(AlmostPerpendicular(ray.m_origin - orthoCamera.m_origin, ray.m_direction, -1e-4f, +1e-4f));
 				errorLogger.LogIfFalse(AlmostEqual(ray.m_direction, -orthoCamera.m_w));
 			}
 		}
 
+
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region check sphere ray collision
+	TEST_UNIT_START("check sphere ray collision")
+		using namespace CommonClass;
+
+
+		Sphere tsph(vector3(1.0f, 0.0f, 0.0f), 1.0f);
+		RGBA whitePixel(1.0f, 1.0f, 1.0f);
+		RGBA blackPixel(0.0f, 0.0f, 0.0f);
+		vector3 camPosition = vector3(0.0f, 0.0f, 0.8f);
+		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+
+		OrthographicCamera orthoCamera(camPosition, camTarget, camLookUp);
+		orthoCamera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			UserConfig::COMMON_RENDER_LEFT, UserConfig::COMMON_RENDER_RIGHT, 
+			UserConfig::COMMON_RENDER_BOTTOM, UserConfig::COMMON_RENDER_TOP));
+
+		HitRecord hitRec;
+
+		for (unsigned int i = 0; i < orthoCamera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < orthoCamera.m_film->m_height; ++j)
+			{
+				Ray ray = orthoCamera.GetRay(i, j);
+
+				if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
+				{
+					whitePixel.SetChannel<RGBA::RED>((hitRec.m_hitT / 1.8f));
+					whitePixel.SetChannel<RGBA::GREEN>((hitRec.m_hitT / 1.8f));
+					whitePixel.SetChannel<RGBA::BLUE>((hitRec.m_hitT / 1.8f));
+					orthoCamera.IncomeLight(i, j, whitePixel);
+					errorLogger++;
+				}
+				else
+				{
+					orthoCamera.IncomeLight(i, j, blackPixel);
+				}
+			}
+		}
+
+		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraRenderSphere.png");
 
 	TEST_UNIT_END;
 #pragma endregion
