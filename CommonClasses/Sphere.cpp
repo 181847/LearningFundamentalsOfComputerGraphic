@@ -18,69 +18,51 @@ bool Sphere::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitR
 {
 	assert(pHitRec != nullptr && "argument nullptr error");
 
-	vector3 sphereToRay = ray.m_origin - m_center;
-	Types::F32 tempVal = ray.m_direction * sphereToRay;
-	Types::F32 delta = 
-		tempVal * tempVal -
-		(ray.m_direction * ray.m_direction) * (sphereToRay * sphereToRay - m_radius * m_radius);
-	
-	Types::F32 sqrtDelta = 0.0f;
-
-	if (delta < 0)
-	{
-		return false;
-	}
-	else
-	{
-		sqrtDelta = std::sqrtf(delta);
-	}
-
-	Types::F32 headExpr = -(ray.m_direction * sphereToRay);
-	Types::F32 recipocalDirectionSquare = 1.0f / (ray.m_direction * ray.m_direction);
-
-	Types::F32 plusDT, minusDT;
-	if (delta == 0.0f)
-	{
-		plusDT = minusDT = headExpr * recipocalDirectionSquare;
-	}
-	else
-	{
-		plusDT = (headExpr + sqrtDelta) * recipocalDirectionSquare;
-		minusDT = (headExpr - sqrtDelta) * recipocalDirectionSquare;
-	}
-
 	Types::F32 finalT;
 
-	int flag = 0;
+	// next code reference from "Real-Time Rendering 3rd"
+	vector3 l = m_center - ray.m_origin;
+	Types::F32 s = l * ray.m_direction;
+	Types::F32 squareL = l * l;
+	Types::F32 squareR = m_radius * m_radius;
 
-	if (t0 < plusDT && plusDT < t1)
+	// whether the ray starts outside the sphere, and point outside the sphere.
+	if (s < 0 && squareL > squareR)
 	{
-		flag += 1;
-	}
-	if (t0 < minusDT && minusDT < t1)
-	{
-		flag += 2;
-	}
-
-	switch (flag)
-	{
-	case 0:
 		return false;
-
-	case 1:
-		finalT = plusDT;
-		break;
-
-	case 2:
-		finalT = minusDT;
-		break;
-
-	case 3:
-		finalT = std::fminf(plusDT, minusDT);
-		break;
 	}
 
+	Types::F32 squareM = squareL - s * s;
+
+	// whether distance from the sphere center to the ray line is longer than sphere radius.
+	if (squareM > squareR)
+	{
+		return false;
+	}
+
+	Types::F32 q = std::sqrtf(squareR - squareM);
+
+	if (squareL > squareR)
+	{
+		// ray starts outside the sphere
+		finalT = s - q;
+	}
+	else
+	{
+		// ray start inside the sphere
+		finalT = s + q;
+		// here is some issue about whether allow to capture intersection behind the rayDirection.
+		// but here I just ignore the argument t0, and assume that the ray only interset the positive direction.
+	}
+
+	// check whether out of range.
+	if (finalT < t0 || t1 < finalT)
+	{
+		return false;
+	}
+	
 	pHitRec->m_hitT = finalT;
+
 	return true;
 }
 
