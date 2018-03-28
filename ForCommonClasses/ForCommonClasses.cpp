@@ -694,9 +694,15 @@ void AddTestUnit()
 
 				if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
 				{
-					whitePixel.SetChannel<RGBA::RED>((hitRec.m_hitT / 1.8f));
-					whitePixel.SetChannel<RGBA::GREEN>((hitRec.m_hitT / 1.8f));
-					whitePixel.SetChannel<RGBA::BLUE>((hitRec.m_hitT / 1.8f));
+					whitePixel.SetChannel<RGBA::RED>((hitRec.m_hitT / 3.8f));
+					whitePixel.SetChannel<RGBA::GREEN>((hitRec.m_hitT / 3.8f));
+					whitePixel.SetChannel<RGBA::BLUE>((hitRec.m_hitT / 3.8f));
+					
+					if (1.5f < hitRec.m_hitT && hitRec.m_hitT < 1.8f)
+					{
+						whitePixel.SetChannel<RGBA::RED>((hitRec.m_hitT - 1.5f) / 0.3f);
+					}
+
 					orthoCamera.IncomeLight(i, j, whitePixel);
 					errorLogger++;
 				}
