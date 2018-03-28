@@ -145,6 +145,7 @@
     <Text Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="Film.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="vector3.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="HitRecord.cpp" />
