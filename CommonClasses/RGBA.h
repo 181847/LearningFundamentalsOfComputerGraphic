@@ -21,10 +21,10 @@ public:
 	*/
 	enum
 	{
-		RED = 0,
-		GREEN,
-		BLUE,
-		ALPHA
+		R = 0,
+		G,
+		B,
+		A
 	};
 
 	/*!
@@ -35,7 +35,20 @@ public:
 	const static Types::F32 HALF_CHANNEL_VALUE;
 	const static Types::F32 ALPHA_CHANNEL_OPAQUE;
 	const static Types::F32 ALPHA_CHANNEL_TRANSPARENT;
-	
+
+	/*!
+		\brief some useful color value.
+	*/
+	const static RGBA RED;
+	const static RGBA GREEN;
+	const static RGBA BLUE;
+	const static RGBA YELLOW;
+	const static RGBA CYAN;
+	const static RGBA MAGENTA;
+	const static RGBA WHITE;
+	const static RGBA BLACK;
+
+
 	/*!
 		\brief decide the precision of the almost equal floats£¬less it is, more acurate the equal comparing will be.
 	*/
@@ -121,17 +134,11 @@ public:
 	*/
 	static Types::F32 ClampChannel(const Types::F32 & value);
 };
+/* ensurance the size of RGBA */
+static_assert(sizeof(RGBA) == sizeof(Types::F32) * 4, "size of RGBA is wrong");
 
 bool operator == (const RGBA & a, const RGBA & b); 
 bool operator != (const RGBA & a, const RGBA & b);
-
-/*!
-	\brief two RGBA are almost equal
-	\param a compared pixel
-	\param b compared pixel
-	\param ulp the precision of compare, lower and more accurate.
-*/
-bool AlmostEqual(const RGBA & a, const RGBA & b, int ulp = RGBA::COMPARE_ULP);
 
 template<Types::U8 ch>
 inline void RGBA::SetChannel(const Types::F32 & value)
@@ -140,22 +147,30 @@ inline void RGBA::SetChannel(const Types::F32 & value)
 
 	switch (ch)
 	{
-	case RGBA::RED:
+	case RGBA::R:
 		m_r = clamppedValue;
 		break;
 
-	case RGBA::GREEN:
+	case RGBA::G:
 		m_g = clamppedValue;
 		break;
 
-	case RGBA::BLUE:
+	case RGBA::B:
 		m_b = clamppedValue;
 		break;
 
-	case RGBA::ALPHA:
+	case RGBA::A:
 		m_a = clamppedValue;
 		break;
 	}
 }
+
+/*!
+	\brief two RGBA are almost equal
+	\param a compared pixel
+	\param b compared pixel
+	\param ulp the precision of compare, lower and more accurate.
+*/
+bool AlmostEqual(const RGBA & a, const RGBA & b, int ulp = RGBA::COMPARE_ULP);
 
 }// namespace CommonClass
