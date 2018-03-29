@@ -6,6 +6,8 @@
 #include <limits>
 #pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
 
+#include "../CommonClasses/DebugHelpers.h"
+
 // include test target code
 #include "../CommonClasses/vector2.h"
 #include "../CommonClasses/vector3.h"
@@ -43,25 +45,25 @@ namespace UserConfig
 	/*!
 		\brief common render option, left bound location
 	*/
-	const Types::F32 COMMON_RENDER_LEFT     = -1.0f;
+	const Types::F32 COMMON_RENDER_LEFT     = -3.0f;
 
 	
 	/*!
 		\brief common render option, right bound location
 	*/
-	const Types::F32 COMMON_RENDER_RIGHT    = +1.0f;
+	const Types::F32 COMMON_RENDER_RIGHT    = +3.0f;
 
 	
 	/*!
 		\brief common render option, bottom bound location
 	*/
-	const Types::F32 COMMON_RENDER_BOTTOM   = -1.0f;
+	const Types::F32 COMMON_RENDER_BOTTOM   = -3.0f;
 
 	
 	/*!
 		\brief common render option, right bound location
 	*/
-	const Types::F32 COMMON_RENDER_TOP      = +1.0f;
+	const Types::F32 COMMON_RENDER_TOP      = +3.0f;
 
 }
 
@@ -666,15 +668,61 @@ void AddTestUnit()
 	TEST_UNIT_END;
 #pragma endregion
 
+#pragma region test camere pixel location
+	TEST_UNIT_START("test camere pixel location")
+		using namespace CommonClass;
+		vector3 origin(0.0f, 0.0f, 0.0f);
+		vector3 target(1.0f, 0.0f, 0.0f);
+		vector3 dummyLookUp(0.0f, 1.0f, 0.0f);
+
+		const Types::U32 WIDTH(512), HEIGHT(512);
+		OrthographicCamera orthoCamera(origin, target, dummyLookUp);
+		orthoCamera.SetFilm(std::make_unique<Film>(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f));
+
+		RGBA pixelSetter;
+		RGBA black(0.0f, 0.0f, 0.0f);
+		RGBA white(1.0f, 1.0f, 1.0f);
+		RGBA red(1.0f, 0.0f, 0.0f);
+		RGBA green(0.0f, 1.0f, 0.0f);
+		RGBA blue(0.0f, 0.0f, 1.0f);
+
+
+		// background as black
+		for (int x = 0; x < WIDTH; ++x)
+		{
+			for (int y = 0; y < HEIGHT; ++y)
+			{
+				orthoCamera.IncomeLight(x, y, black);
+			}
+		}
+		// counterclockwise from left top corner: 
+		// white ------------------------> red 
+		//  A                               |
+		//  |                               |
+		//  |           black               |
+		//  |                               |
+		//  |                               |
+		//  |                               V
+		//  blue <------------------------ green
+		orthoCamera.IncomeLight(0,			HEIGHT - 1, white);
+		orthoCamera.IncomeLight(WIDTH - 1,	HEIGHT - 1, red);
+		orthoCamera.IncomeLight(WIDTH - 1,	0,			green);
+		orthoCamera.IncomeLight(0,			0,			blue);
+
+		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraPixelLoc.png");
+	TEST_UNIT_END;
+#pragma endregion
+
 #pragma region check sphere ray collision
 	TEST_UNIT_START("check sphere ray collision")
 		using namespace CommonClass;
 
 
-		Sphere tsph(vector3(1.0f, 0.0f, 0.0f), 1.0f);
-		RGBA whitePixel(1.0f, 1.0f, 1.0f);
-		RGBA blackPixel(0.0f, 0.0f, 0.0f);
-		vector3 camPosition = vector3(0.0f, 0.0f, 0.8f);
+		Sphere tsph(vector3(-1.0f, 2.0f, 2.0f), 0.9f);
+		RGBA hitPixel(1.0f, 1.0f, 1.0f);
+		RGBA missSphPixel(0.0f, 0.0f, 0.0f);
+		RGBA missAABBPixel(0.0f, 0.5f, 0.0f);
+		vector3 camPosition = vector3(2.0f, 1.0f, 3.0f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
 
@@ -691,24 +739,31 @@ void AddTestUnit()
 			for (unsigned int j = 0; j < orthoCamera.m_film->m_height; ++j)
 			{
 				Ray ray = orthoCamera.GetRay(i, j);
+				
+				//BREAK_POINT_IF(i == 400 && j == 256);
 
-				if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
+				// try bounding box first
+				if (tsph.BoundingBox().Hit(ray, 0.0f, 1000.0f, &hitRec))
 				{
-					whitePixel.SetChannel<RGBA::RED>((hitRec.m_hitT / 3.8f));
-					whitePixel.SetChannel<RGBA::GREEN>((hitRec.m_hitT / 3.8f));
-					whitePixel.SetChannel<RGBA::BLUE>((hitRec.m_hitT / 3.8f));
 					
-					if (1.5f < hitRec.m_hitT && hitRec.m_hitT < 1.8f)
+					// try sphere
+					if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
 					{
-						whitePixel.SetChannel<RGBA::RED>((hitRec.m_hitT - 1.5f) / 0.3f);
+						hitPixel.SetChannel<RGBA::RED>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGBA::GREEN>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGBA::BLUE>((hitRec.m_hitT / 3.8f));
+						
+						orthoCamera.IncomeLight(i, j, hitPixel);
+						errorLogger++;
 					}
-
-					orthoCamera.IncomeLight(i, j, whitePixel);
-					errorLogger++;
+					else
+					{
+						orthoCamera.IncomeLight(i, j, missSphPixel);
+					}
 				}
 				else
 				{
-					orthoCamera.IncomeLight(i, j, blackPixel);
+					orthoCamera.IncomeLight(i, j, missAABBPixel);
 				}
 			}
 		}
@@ -717,6 +772,7 @@ void AddTestUnit()
 
 	TEST_UNIT_END;
 #pragma endregion
+
 }// AddTestUnit()
 
 }// namespace TestUnit
