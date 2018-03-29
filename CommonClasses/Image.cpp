@@ -42,7 +42,7 @@ const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) con
 	assert((0 <= x && x < m_width) && (0 <= y && y < m_height)
 		&& "pixel index out of range.");
 
-	return x * m_height + (m_height - 1 - y);
+	return (m_height - 1 - y) * m_width + x;
 }
 
 void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
