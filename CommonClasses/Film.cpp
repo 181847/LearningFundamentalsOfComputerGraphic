@@ -3,8 +3,8 @@
 namespace CommonClass
 {
 
-Film::Film(const Types::U32 pixelWidth, const Types::U32 pixelHeight, const Types::F32 left, const Types::F32 right, const Types::F32 top, const Types::F32 bottom)
-	:Image(pixelWidth, pixelHeight), m_left(left), m_right(right), m_top(top), m_bottom(bottom)
+Film::Film(const Types::U32 pixelWidth, const Types::U32 pixelHeight, const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top)
+	:Image(pixelWidth, pixelHeight), m_left(left), m_right(right), m_bottom(bottom), m_top(top)
 {
 }
 

@@ -11,7 +11,7 @@ namespace CommonClass
 class Film: public Image
 {
 public:
-	const Types::F32 m_left, m_right, m_top, m_bottom;
+	const Types::F32 m_left, m_right, m_bottom, m_top;
 
 public:
 	/*!
@@ -20,7 +20,7 @@ public:
 		\param pixelHeigth num pixels in vertical
 		\param left/right/top/bottom film borders from origin
 	*/
-	Film(const Types::U32 pixelWidth, const Types::U32 pixelHeight, const Types::F32 left, const Types::F32 right, const Types::F32 top, const Types::F32 bottom);
+	Film(const Types::U32 pixelWidth, const Types::U32 pixelHeight, const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top);
 
 	// prevent copy construct and equal assignment.
 	Film(const Film&) = delete;
