@@ -1,8 +1,5 @@
 #pragma once
-#include "Film.h"
-#include "vector3.h"
-#include "Ray.h"
-#include <memory>
+#include "Camera.h"
 
 namespace CommonClass
 {
@@ -12,30 +9,8 @@ namespace CommonClass
 	the main functionality of this class is to generate perspective ray through Film class
 */
 class OrthographicCamera
+	:public Camera
 {
-public:
-	/*!
-		\brief camera position
-	*/
-	CommonClass::vector3 m_origin;
-
-	/*!
-		\brief point to up
-	*/
-	CommonClass::vector3 m_u;
-
-	/*!
-		\brief point to right
-	*/
-	CommonClass::vector3 m_v;
-
-	/*!
-		\brief point to the photographer( or negative to the direction of camera-->scene)
-	*/
-	CommonClass::vector3 m_w;
-
-	std::unique_ptr<Film> m_film;
-
 public:
 	/*!
 		\brief init camera's position and pose
@@ -49,25 +24,11 @@ public:
 	~OrthographicCamera();
 
 	/*!
-		\brief get ray of the tracing route.
+		\brief get parallel ray of the tracing route.
 		\param x horizontal index from left to right
 		\param y vertical index from bottom to top
 	*/
-	Ray GetRay(const Types::U32 x, const Types::U32 y);
-
-	/*!
-		\brief set color of the film
-		\param x horizontal index from left to right
-		\param y vertical index from bottom to top
-		\param color set color into the film.
-	*/
-	void IncomeLight(const Types::U32 x, const Types::U32 y, const CommonClass::RGBA& color);
-
-	/*!
-		\brief set a new film on the camera
-	*/
-	void SetFilm(std::unique_ptr<Film> newFilm);
-	
+	virtual Ray GetRay(const Types::U32 x, const Types::U32 y) override;
 };
 
 } // namespace CommonClass
