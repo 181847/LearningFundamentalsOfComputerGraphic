@@ -31,7 +31,7 @@ bool AABB::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRec
 		f = ray.m_direction.m_arr[i];
 
 		// is the ray parallel to the plane?
-		if (f > Types::Constant::EPSILON_F32)
+		if (std::fabsf(f) > Types::Constant::EPSILON_F32)
 		{
 			recipocalF = 1.0f / f;
 
@@ -48,6 +48,7 @@ bool AABB::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRec
 				return false;
 
 		}
+		// is the ray stand out side the two parallel planes?
 		else if (p < m_minPoint.m_arr[i] || p > m_maxPoint.m_arr[i])
 		{
 			return false;
