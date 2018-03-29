@@ -17,6 +17,7 @@
 #include "../CommonClasses/OrthographicCamera.h"
 #include "../CommonClasses/Ray.h"
 #include "../CommonClasses/Sphere.h"
+#include "../CommonClasses/PerspectiveCamera.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 RandomTool::MTRandom globalMtr;
@@ -31,7 +32,7 @@ namespace UserConfig
 		\brief whether let user check some output image file is right,
 		if false every check about the Image will be default to be correct.
 	*/
-	const bool LET_USER_CHECK_IMG = true;
+	const bool LET_USER_CHECK_IMG = false;
 
 	/*!
 		\brief common image resolution on width
@@ -108,10 +109,9 @@ unsigned int LetUserCheckJudge(const std::string& msg, bool force = UserConfig::
 			return 1;
 		}
 
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
 	}
-
-	std::cin.clear();
-	std::cin.ignore(std::numeric_limits<int>::max(), '\n');
 
 	// no error happend 
 	return 0;
@@ -811,6 +811,71 @@ void AddTestUnit()
 			"check OutputTestImage\\ConstantColorCheck.png\n"
 			"it should look like 8 color strip:\n"
 			"red -> green -> blue -> black -> yellow -> cyan -> manenta -> white -> black");
+
+	TEST_UNIT_END;
+#pragma endregion
+
+	
+#pragma region check orrhographic camera and sphere-ray collision
+	TEST_UNIT_START("check sphere ray collision")
+		using namespace CommonClass;
+
+		Sphere tsph(vector3(0.0f, 0.0f, 0.0f), 1.0f);
+
+		RGBA hitPixel(1.0f, 1.0f, 1.0f);
+		RGBA missSphPixel(0.0f, 0.0f, 0.0f);
+		RGBA missAABBPixel(0.0f, 0.5f, 0.0f);
+
+		vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
+		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+
+		PerspectiveCamera perspectCamera(0.5f, camPosition, camTarget, camLookUp);
+		perspectCamera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+		HitRecord hitRec;
+
+		for (unsigned int i = 0; i < perspectCamera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < perspectCamera.m_film->m_height; ++j)
+			{
+				Ray ray = perspectCamera.GetRay(i, j);
+				
+				//BREAK_POINT_IF(i == 256 && j == 256);
+
+				// try bounding box first
+				if (tsph.BoundingBox().Hit(ray, 0.0f, 1000.0f, &hitRec))
+				{
+					
+					// try sphere
+					if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
+					{
+						hitPixel.SetChannel<RGBA::R>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGBA::G>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGBA::B>((hitRec.m_hitT / 3.8f));
+						
+						perspectCamera.IncomeLight(i, j, hitPixel);
+					}
+					else
+					{
+						perspectCamera.IncomeLight(i, j, missSphPixel);
+					}
+				}
+				else
+				{
+					perspectCamera.IncomeLight(i, j, missAABBPixel);
+				}
+			}
+		}
+
+		perspectCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForPerspectiveCameraRenderSphere.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForPerspectiveCameraRenderSphere.png\"\n"
+			"you should have seen sphere is wrapped in a black box area(3D perspective), back ground is green.");
 
 	TEST_UNIT_END;
 #pragma endregion
