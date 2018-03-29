@@ -147,12 +147,14 @@
   <ItemGroup>
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Box.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="DebugHelpers.h" />
     <ClInclude Include="HitRecord.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="OrthographicCamera.h" />
+    <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RGBA.h" />
     <ClInclude Include="Sphere.h" />
@@ -163,10 +165,12 @@
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Box.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="HitRecord.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="OrthographicCamera.cpp" />
+    <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RGBA.cpp" />
     <ClCompile Include="Sphere.cpp" />
