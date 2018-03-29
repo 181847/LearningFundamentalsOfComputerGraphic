@@ -28,7 +28,7 @@ public:
 	/*!
 		\brief get bounding box of the sphere.
 	*/
-	virtual Box BoundingBox() override;
+	virtual AABB BoundingBox() override;
 };
 
 } // namespace CommonClass

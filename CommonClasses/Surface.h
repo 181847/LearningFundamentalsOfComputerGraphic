@@ -2,6 +2,7 @@
 #include "Ray.h"
 #include "Box.h"
 #include "HitRecord.h"
+#include "AABB.h"
 
 namespace CommonClass
 {
@@ -13,7 +14,7 @@ class Surface
 {
 public:
 	virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) = 0;
-	virtual Box BoundingBox() = 0;
+	virtual AABB BoundingBox() = 0;
 };
 
 } // namespace CommonClass
