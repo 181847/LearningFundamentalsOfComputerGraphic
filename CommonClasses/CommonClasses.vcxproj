@@ -149,6 +149,7 @@
     <ClInclude Include="Box.h" />
     <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="Film.h" />
+    <ClInclude Include="DebugHelpers.h" />
     <ClInclude Include="HitRecord.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="OrthographicCamera.h" />

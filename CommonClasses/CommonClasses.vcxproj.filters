@@ -53,6 +53,9 @@
     <ClInclude Include="AABB.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="DebugHelpers.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
