@@ -4,6 +4,7 @@
 #include <MyTools\RandomToolNeedLib\MTRandom.h>
 #include <MyTools\MathTool.h>
 #include <limits>
+#include <array>
 #pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
 
 #include "../CommonClasses/DebugHelpers.h"
@@ -30,7 +31,7 @@ namespace UserConfig
 		\brief whether let user check some output image file is right,
 		if false every check about the Image will be default to be correct.
 	*/
-	const bool LET_USER_CHECK_IMG = false;
+	const bool LET_USER_CHECK_IMG = true;
 
 	/*!
 		\brief common image resolution on width
@@ -85,6 +86,35 @@ CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 	
 
 	return randVec;
+}
+
+/*!
+	\brief let user to check the local image file, this function can be disabled by the constant UserConfig::LET_USER_CHECK_IMG.
+	if the user input some number, then we think this test is passed, and return 0 for no error.
+*/
+unsigned int LetUserCheckJudge(const std::string& msg, bool force = UserConfig::LET_USER_CHECK_IMG)
+{
+	if (force)
+	{
+		std::cout << "Please check: " << msg << std::endl
+			<< "Input '0' ~ '9' for test pass." << std::endl
+			<< "Else hit enter for some error: ";
+
+		char ch = std::cin.get();
+
+		// if the character is not number, then the image is wrong.
+		if (ch < '0' || ch > '9')
+		{
+			return 1;
+		}
+
+	}
+
+	std::cin.clear();
+	std::cin.ignore(std::numeric_limits<int>::max(), '\n');
+
+	// no error happend 
+	return 0;
 }
 
 DECLARE_TEST_UNITS;
@@ -357,15 +387,15 @@ void AddTestUnit()
 		CommonClass::Image testImage(WIDTH, HEIGHT);
 
 		CommonClass::RGBA pixelSetter;
-		pixelSetter.SetChannel<CommonClass::RGBA::BLUE>(0.5f);
+		pixelSetter.SetChannel<CommonClass::RGBA::B>(0.5f);
 
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			for (int y = 0; y < HEIGHT; ++y)
 			{
-				pixelSetter.SetChannel<CommonClass::RGBA::RED>  (         x / 512.0f);
-				pixelSetter.SetChannel<CommonClass::RGBA::GREEN>(         y / 512.0f);
-				pixelSetter.SetChannel<CommonClass::RGBA::ALPHA>( ( x + y ) / 1024.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::R>  (         x / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::G>(         y / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::A>( ( x + y ) / 1024.0f);
 
 				testImage.SetPixel(x, y, pixelSetter);
 			}
@@ -373,27 +403,10 @@ void AddTestUnit()
 
 		testImage.SaveTo("OutputTestImage\\ThisImageIsForTest.png");
 
-		if (UserConfig::LET_USER_CHECK_IMG)
-		{
-
-			std::cout << "Please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForTest.png\"\n"
-				<< "check it with the file in the same folder \"CheckWithMe.png\""
-				<< "if the image is right, input a single number\n"
-				<< "else just hit ENTER, which means there's error:";
-
-			char ch = std::getchar();
-
-			// if the character is not number, then the image is wrong.
-			if (ch < '0' || ch > '9')
-			{
-				errorLogger.addErrorCount(true);
-			}
-			else
-			{
-				// consume the extra 'ENTER'.
-				std::getchar();
-			}
-		}
+		errorLogger += LetUserCheckJudge(
+				"check \".\\OutputTestImage\\ThisImageIsForTest.png\"\n"
+				"with the file in the same folder \"CheckWithMe.png\"\n"
+				"if they are the SAME, means RIGHT.");
 
 	TEST_UNIT_END;
 #pragma endregion
@@ -448,15 +461,15 @@ void AddTestUnit()
 		Film tfilm(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f);
 
 		RGBA pixelSetter;
-		pixelSetter.SetChannel<RGBA::BLUE>(0.5f);
+		pixelSetter.SetChannel<RGBA::B>(0.5f);
 
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			for (int y = 0; y < HEIGHT; ++y)
 			{
-				pixelSetter.SetChannel<CommonClass::RGBA::RED>(x / 512.0f);
-				pixelSetter.SetChannel<CommonClass::RGBA::GREEN>(y / 512.0f);
-				pixelSetter.SetChannel<CommonClass::RGBA::ALPHA>((x + y) / 1024.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::R>(x / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::G>(y / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::A>((x + y) / 1024.0f);
 
 				tfilm.SetPixel(x, y, pixelSetter);
 			}
@@ -465,26 +478,11 @@ void AddTestUnit()
 
 		tfilm.SaveTo("OutputTestImage\\ThisImageIsForFilm.png");
 
-		if (UserConfig::LET_USER_CHECK_IMG)
-		{
-			std::cout << "Film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForFilm.png\"\n"
-				<< "check it with the file in the same folder \"CheckWithMe.png\""
-				<< "if the image is same, input a single number\n"
-				<< "else just hit ENTER, which means there's error:";
 
-			char ch = std::getchar();
-
-			// if the character is not number, then the image is wrong.
-			if (ch < '0' || ch > '9')
-			{
-				errorLogger.addErrorCount(true);
-			}
-			else
-			{
-				// consume the extra 'ENTER'.
-				std::getchar();
-			}
-		}
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForFilm.png\"\n"
+			"with the file in the same folder \"CheckWithMe.png\"\n"
+			"if they are the SAME, means RIGHT.");
 		
 	TEST_UNIT_END;
 #pragma endregion
@@ -584,15 +582,15 @@ void AddTestUnit()
 		orthoCamera.SetFilm(std::make_unique<Film>(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f));
 
 		RGBA pixelSetter;
-		pixelSetter.SetChannel<RGBA::BLUE>(0.5f);
+		pixelSetter.SetChannel<RGBA::B>(0.5f);
 
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			for (int y = 0; y < HEIGHT; ++y)
 			{
-				pixelSetter.SetChannel<CommonClass::RGBA::RED>(x / 512.0f);
-				pixelSetter.SetChannel<CommonClass::RGBA::GREEN>(y / 512.0f);
-				pixelSetter.SetChannel<CommonClass::RGBA::ALPHA>((x + y) / 1024.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::R>(x / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::G>(y / 512.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::A>((x + y) / 1024.0f);
 
 				orthoCamera.IncomeLight(x, y, pixelSetter);
 			}
@@ -600,28 +598,10 @@ void AddTestUnit()
 
 		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCamera.png");
 
-
-
-		if (UserConfig::LET_USER_CHECK_IMG)
-		{
-			std::cout << "OrthoCamera film output test: please check the project folder, and see the Image \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
-				<< "check it with the file in the same folder \"CheckWithMe.png\""
-				<< "if the image is same, input a single number\n"
-				<< "else just hit ENTER, which means there's error:";
-
-			char ch = std::getchar();
-
-			// if the character is not number, then the image is wrong.
-			if (ch < '0' || ch > '9')
-			{
-				errorLogger.addErrorCount(true);
-			}
-			else
-			{
-				// consume the extra 'ENTER'.
-				std::getchar();
-			}
-		}
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
+			"with the file in the same folder \"CheckWithMe.png\"\n"
+			"if they are the SAME, means RIGHT.");
 		
 	TEST_UNIT_END;
 #pragma endregion
@@ -710,18 +690,34 @@ void AddTestUnit()
 		orthoCamera.IncomeLight(0,			0,			blue);
 
 		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraPixelLoc.png");
+
+
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
+			"four different pixel in the corner (very small), it should look like:\n"
+			"white ------------------------> red \n"
+			" A                               | \n"
+			" |                               | \n"
+			" |           black               | \n"
+			" |                               | \n"
+			" |                               | \n"
+			" |                               V \n"
+			" blue <------------------------ green \n"
+			"if they are the SAME, means RIGHT.");
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region check sphere ray collision
+#pragma region check orrhographic camera and sphere-ray collision
 	TEST_UNIT_START("check sphere ray collision")
 		using namespace CommonClass;
 
-
 		Sphere tsph(vector3(-1.0f, 2.0f, 2.0f), 0.9f);
+
 		RGBA hitPixel(1.0f, 1.0f, 1.0f);
 		RGBA missSphPixel(0.0f, 0.0f, 0.0f);
 		RGBA missAABBPixel(0.0f, 0.5f, 0.0f);
+
 		vector3 camPosition = vector3(2.0f, 1.0f, 3.0f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
@@ -749,12 +745,11 @@ void AddTestUnit()
 					// try sphere
 					if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
 					{
-						hitPixel.SetChannel<RGBA::RED>((hitRec.m_hitT / 3.8f));
-						hitPixel.SetChannel<RGBA::GREEN>((hitRec.m_hitT / 3.8f));
-						hitPixel.SetChannel<RGBA::BLUE>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGBA::R>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGBA::G>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGBA::B>((hitRec.m_hitT / 3.8f));
 						
 						orthoCamera.IncomeLight(i, j, hitPixel);
-						errorLogger++;
 					}
 					else
 					{
@@ -769,6 +764,53 @@ void AddTestUnit()
 		}
 
 		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraRenderSphere.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
+			"you should have seen sphere is wrapped in a black box area(3D), back ground is green.");
+
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region try rgba constant colors
+	TEST_UNIT_START("try rgba constant colors")
+		using namespace CommonClass;
+		using namespace Types;
+
+		const U32 WIDTH(512), HEIGHT(512);
+		Image img(WIDTH, HEIGHT);
+
+		std::array<RGBA, 8> colors = {
+			RGBA::RED,
+			RGBA::GREEN,
+			RGBA::BLUE,
+			RGBA::YELLOW,
+			RGBA::CYAN,
+			RGBA::MAGENTA,
+			RGBA::WHITE,
+			RGBA::BLACK
+		};
+
+		int i = 0;
+
+		for (RGBA& oneColor : colors)
+		{
+			for (int count = 0; count < 64; ++count)
+			{
+				for (int row = 0; row < HEIGHT; ++row)
+				{
+					img.SetPixel(i + count, row, oneColor);
+				}
+			}
+			i += 64;
+		}
+
+		img.SaveTo("OutputTestImage\\ConstantColorCheck.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check OutputTestImage\\ConstantColorCheck.png\n"
+			"it should look like 8 color strip:\n"
+			"red -> green -> blue -> black -> yellow -> cyan -> manenta -> white -> black");
 
 	TEST_UNIT_END;
 #pragma endregion
