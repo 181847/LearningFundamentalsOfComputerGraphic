@@ -5,6 +5,7 @@
 #include <MyTools\MathTool.h>
 #include <limits>
 #include <array>
+#include <ctime>
 #pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
 
 #include "../CommonClasses/DebugHelpers.h"
@@ -117,15 +118,8 @@ unsigned int LetUserCheckJudge(const std::string& msg, bool force = UserConfig::
 	return 0;
 }
 
-DECLARE_TEST_UNITS;
+TEST_MODULE_START
 
-namespace TestUnit
-{
-void GetReady() {}
-void AfterTest() {}
-
-void AddTestUnit()
-{
 #pragma region Try the testUnit
 	TEST_UNIT_START("a test always success")
 	TEST_UNIT_END;
@@ -708,8 +702,8 @@ void AddTestUnit()
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region check orrhographic camera and sphere-ray collision
-	TEST_UNIT_START("check sphere ray collision")
+#pragma region check orhographic camera and sphere-ray collision
+	TEST_UNIT_START("check orhographic camera and sphere-ray collision")
 		using namespace CommonClass;
 
 		Sphere tsph(vector3(-1.0f, 2.0f, 2.0f), 0.9f);
@@ -815,9 +809,8 @@ void AddTestUnit()
 	TEST_UNIT_END;
 #pragma endregion
 
-	
-#pragma region check orrhographic camera and sphere-ray collision
-	TEST_UNIT_START("check sphere ray collision")
+#pragma region check perspective camera and sphere-ray collision
+	TEST_UNIT_START("check perspective camera and sphere-ray collision")
 		using namespace CommonClass;
 
 		Sphere tsph(vector3(0.0f, 0.0f, 0.0f), 1.0f);
@@ -830,7 +823,9 @@ void AddTestUnit()
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
 
-		PerspectiveCamera perspectCamera(0.5f, camPosition, camTarget, camLookUp);
+		Types::F32 focalLength = 0.5f;
+
+		PerspectiveCamera perspectCamera(focalLength, camPosition, camTarget, camLookUp);
 		perspectCamera.SetFilm(std::make_unique<Film>(
 			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
 			-0.5f, +0.5f,
@@ -875,17 +870,37 @@ void AddTestUnit()
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForPerspectiveCameraRenderSphere.png\"\n"
-			"you should have seen sphere is wrapped in a black box area(3D perspective), back ground is green.");
+			"you should have seen a sphere is wrapped in a black box area(3D perspective), back ground is green.");
 
 	TEST_UNIT_END;
 #pragma endregion
 
-}// AddTestUnit()
+#pragma region test std::chrono
+	TEST_UNIT_START("test std::chrono")
+		using namespace std::chrono;
+		
+		system_clock::time_point tp_epoch;
+		time_point<system_clock, duration<int>> tp_seconds(duration<int>(1));
 
-}// namespace TestUnit
+		system_clock::time_point tp(tp_seconds);
 
-int main()
-{
-	TestUnit::testMain();
-	return 0;
-}
+		auto start = system_clock::now();
+
+		std::cout	<< "1 second since system_clock epoch = "
+					<< tp.time_since_epoch().count()
+					<< " system_clock periods." << std::endl;
+
+		auto end = system_clock::now();
+
+		auto durat = duration_cast<milliseconds>(end - start);
+
+		std::cout << "time for previous printing is milliseconds: "
+			<< durat.count() << std::endl;
+
+		//std::time_t tt = system_clock::to_time_t(tp);
+		//std::cout << "time_point tp is: " << std::ctime(&tt);
+
+	TEST_UNIT_END;
+#pragma endregion
+
+TEST_MODULE_END
