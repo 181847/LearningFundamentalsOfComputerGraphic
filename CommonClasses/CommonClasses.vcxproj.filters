@@ -62,6 +62,9 @@
     <ClInclude Include="Camera.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -104,6 +107,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Triangle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
