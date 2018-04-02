@@ -13,6 +13,10 @@ public:
 	RGBA		m_kAmbient;
 	RGBA		m_kDiffuse;
 
+	/*!
+		\brief is the hit position is the back of the surface?
+	*/
+	bool        m_isBackFace = false;
 
 public:
 };
