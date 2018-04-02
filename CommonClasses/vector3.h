@@ -30,6 +30,8 @@ public:
 	vector3(const Types::F32 & x, const Types::F32 & y, const Types::F32 & z);
 	~vector3();
 };
+/*! ensurance */
+static_assert(sizeof(vector3) == 3 * sizeof(Types::F32), "size of vector3 is wrong");
 
 vector3    operator + (const vector3 & a, const vector3 & b);
 vector3    operator - (const vector3 & a, const vector3 & b);
