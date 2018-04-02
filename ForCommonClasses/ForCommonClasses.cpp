@@ -19,7 +19,9 @@
 #include "../CommonClasses/Ray.h"
 #include "../CommonClasses/Sphere.h"
 #include "../CommonClasses/PerspectiveCamera.h"
+#include "../CommonClasses/Triangle.h"
 #pragma comment(lib, "CommonClasses.lib")
+
 
 RandomTool::MTRandom globalMtr;
 const unsigned int G_MAX_INT = 1000;
@@ -886,20 +888,99 @@ TEST_MODULE_START
 
 		auto start = system_clock::now();
 
-		std::cout	<< "1 second since system_clock epoch = "
-					<< tp.time_since_epoch().count()
-					<< " system_clock periods." << std::endl;
+		//std::cout	<< "1 second since system_clock epoch = "
+		//			<< tp.time_since_epoch().count()
+		//			<< " system_clock periods." << std::endl;
 
 		auto end = system_clock::now();
 
 		auto durat = duration_cast<milliseconds>(end - start);
 
-		std::cout << "time for previous printing is milliseconds: "
-			<< durat.count() << std::endl;
+		//std::cout << "time for previous printing is milliseconds: "
+		//	<< durat.count() << std::endl;
 
 		//std::time_t tt = system_clock::to_time_t(tp);
 		//std::cout << "time_point tp is: " << std::ctime(&tt);
 
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region try ray-triangle hit
+	TEST_UNIT_START("try ray-triangle hit")
+		using namespace CommonClass;
+
+		Triangle tri(
+			vector3(1.0f, 0.0f, 0.0f), 
+			vector3(-1.0f, 0.0f, 0.0f), 
+			vector3(0.0f, 2.0f, 1.0f));
+
+		RGBA hitPixel(1.0f, 1.0f, 1.0f);
+		RGBA missSphPixel(0.0f, 0.0f, 0.0f);
+		RGBA missAABBPixel(0.0f, 0.5f, 0.0f);
+		RGBA positivePixel(RGBA::RED);
+		RGBA negativePixel(RGBA::GREEN);
+
+		vector3 camPosition = vector3(3.0f, 3.0f, 3.0f);
+		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+
+		Types::F32 focalLength = 0.5f;
+		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+		camera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+		HitRecord hitRec;
+
+		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+			{
+				Ray ray = camera.GetRay(i, j);
+				
+				//BREAK_POINT_IF(i == 256 && j == 256);
+
+				// try bounding box first
+				if (tri.BoundingBox().Hit(ray, 0.0f, 1000.0f, &hitRec))
+				{
+					
+					// try triangle
+					if (tri.Hit(ray, 0.0f, 1000.0f, &hitRec))
+					{
+						//hitPixel.SetChannel<RGBA::R>((hitRec.m_hitT / 3.8f));
+						//hitPixel.SetChannel<RGBA::G>((hitRec.m_hitT / 3.8f));
+						//hitPixel.SetChannel<RGBA::B>((hitRec.m_hitT / 3.8f));
+						
+						//orthoCamera.IncomeLight(i, j, hitPixel);
+
+						if ( ! hitRec.m_isBackFace)
+						{
+							camera.IncomeLight(i, j, positivePixel);
+						}
+						else
+						{
+							//PUT_BREAK_POINT;
+							camera.IncomeLight(i, j, negativePixel);
+						}
+					}
+					else
+					{
+						camera.IncomeLight(i, j, missSphPixel);
+					}
+				}
+				else
+				{
+					camera.IncomeLight(i, j, missAABBPixel);
+				}
+			}
+		}
+
+		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraRenderTriangle.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForOrthoCameraRenderTriangle.png\"\n"
+			"you should have seen a triangle in the center.");
 	TEST_UNIT_END;
 #pragma endregion
 
