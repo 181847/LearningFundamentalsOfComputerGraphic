@@ -21,6 +21,7 @@
 #include "../CommonClasses/PerspectiveCamera.h"
 #include "../CommonClasses/Triangle.h"
 #include "../CommonClasses/Scene.h"
+#include "../CommonClasses/Polygon.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -1004,10 +1005,17 @@ TEST_MODULE_START
 			vector3(+borderLength, -2.0f, +borderLength),
 			vector3(+borderLength, -2.0f, -borderLength));
 
+		auto poly = std::make_unique<Polygon>(
+			vector3(-borderLength, -borderLength, -2.0f),
+			vector3(-borderLength, borderLength, -2.0f),
+			vector3(+borderLength, borderLength, -2.0f)
+			);
+
 		testScene.Add(std::move(sph1));
 		testScene.Add(std::move(sph2));
 		testScene.Add(std::move(tri1));
 		testScene.Add(std::move(tri2));
+		testScene.Add(std::move(poly));
 
 		RGBA backgroundColor(RGBA::BLACK);
 		RGBA hitColor(RGBA::RED);
