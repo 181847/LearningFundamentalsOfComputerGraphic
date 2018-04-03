@@ -20,6 +20,7 @@
 #include "../CommonClasses/Sphere.h"
 #include "../CommonClasses/PerspectiveCamera.h"
 #include "../CommonClasses/Triangle.h"
+#include "../CommonClasses/Scene.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -981,6 +982,79 @@ TEST_MODULE_START
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForOrthoCameraRenderTriangle.png\"\n"
 			"you should have seen a triangle in the center.");
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region hit with scene
+	TEST_UNIT_START("hit with scene")
+		using namespace CommonClass;
+		
+		Scene testScene;
+
+		auto sph1 = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
+		auto sph2 = std::make_unique<Sphere>(vector3(3.0f, 2.0f, 1.0f), 0.6f);
+
+		const Types::F32 borderLength = 20.0f;
+		auto tri1 = std::make_unique<Triangle>(
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(-borderLength, -2.0f, borderLength),
+			vector3(+borderLength, -2.0f, borderLength));
+		auto tri2 = std::make_unique<Triangle>(
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(+borderLength, -2.0f, +borderLength),
+			vector3(+borderLength, -2.0f, -borderLength));
+
+		testScene.Add(std::move(sph1));
+		testScene.Add(std::move(sph2));
+		testScene.Add(std::move(tri1));
+		testScene.Add(std::move(tri2));
+
+		RGBA backgroundColor(RGBA::BLACK);
+		RGBA hitColor(RGBA::RED);
+
+		vector3 camPosition = vector3(3.0f, 4.0f, 2.0f);
+		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+
+		Types::F32 focalLength = 0.5f;
+		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+		camera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+		HitRecord hitRec;
+
+		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+			{
+				Ray ray = camera.GetRay(i, j);
+
+				//BREAK_POINT_IF(i == 256 && j == 256);
+
+				// try triangle
+				if (testScene.Hit(ray, 0.0f, 1000.0f, &hitRec))
+				{
+					//hitPixel.SetChannel<RGBA::R>((hitRec.m_hitT / 3.8f));
+					//hitPixel.SetChannel<RGBA::G>((hitRec.m_hitT / 3.8f));
+					//hitPixel.SetChannel<RGBA::B>((hitRec.m_hitT / 3.8f));
+					hitColor.SetChannel<RGBA::A>(hitRec.m_hitT / 8.0f);
+
+					camera.IncomeLight(i, j, hitColor);
+				}
+				else
+				{
+					camera.IncomeLight(i, j, backgroundColor);
+				}
+			}
+		}
+
+		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForSceneHit.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForSceneHit.png\"\n"
+			"you should have seen multiple object in the scene, the background color is cyan.");
 	TEST_UNIT_END;
 #pragma endregion
 
