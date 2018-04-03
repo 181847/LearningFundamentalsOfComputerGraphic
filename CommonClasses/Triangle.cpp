@@ -73,6 +73,7 @@ AABB Triangle::BoundingBox()
 	vector3 minPoint(Types::Constant::MAX_F32, Types::Constant::MAX_F32, Types::Constant::MAX_F32), 
 		    maxPoint(Types::Constant::MIN_F32, Types::Constant::MIN_F32, Types::Constant::MIN_F32);
 
+	// loop for x, y, z
 	for (int i = 0; i < 3; ++i)
 	{
 		if (m_points[0].m_arr[i] < m_points[1].m_arr[i])
