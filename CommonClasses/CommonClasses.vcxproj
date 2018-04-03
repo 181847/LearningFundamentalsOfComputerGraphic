@@ -157,6 +157,7 @@
     <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RGBA.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="Triangle.h" />
@@ -174,6 +175,7 @@
     <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RGBA.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Surface.cpp" />
     <ClCompile Include="Triangle.cpp" />
