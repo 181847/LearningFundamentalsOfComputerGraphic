@@ -55,6 +55,13 @@ bool Triangle::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hi
 	}
 
 	Types::F32 t = f * dotProd(r, e2);
+
+	if (t < t0 || t1 < t)
+	{
+		// out of range
+		return false;
+	}
+
 	pHitRec->m_hitT = t;
 	pHitRec->m_isBackFace = a < 0.0f;
 	return true;
