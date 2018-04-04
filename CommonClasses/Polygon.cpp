@@ -77,7 +77,7 @@ bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hit
 	vector3* e0 = &(m_points[numPoints - 1]);
 	vector3* e1 = nullptr;
 
-	bool y0 = (e0->m_arr[m_index1] > t_arr1);
+	bool y0 = (e0->m_arr[m_index1] >= t_arr1);
 	bool y1 = false;
 
 	for (unsigned int i = 0; i < numPoints; ++i)
@@ -145,11 +145,11 @@ void Polygon::BuildBoundingBox()
 		{
 			if (m_points[j].m_arr[i] < minPoint.m_arr[i])
 			{
-				minPoint.m_arr[i] = m_points[2].m_arr[j];
+				minPoint.m_arr[i] = m_points[j].m_arr[i];
 			}
 			else if (m_points[j].m_arr[i] > maxPoint.m_arr[i])
 			{
-				maxPoint.m_arr[i] = m_points[2].m_arr[j];
+				maxPoint.m_arr[i] = m_points[j].m_arr[i];
 			}
 		}// end for unsigned int i = 2
 	}// end for x, y, z
