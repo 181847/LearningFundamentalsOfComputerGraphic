@@ -1066,4 +1066,87 @@ TEST_MODULE_START
 	TEST_UNIT_END;
 #pragma endregion
 
+#pragma region hit with polygon in scene
+	TEST_UNIT_START("hit with polygon in scene")
+		using namespace CommonClass;
+		
+		Scene testScene;
+		const Types::F32 borderLength = 3.0f;
+
+		/*auto sph1 = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
+		auto sph2 = std::make_unique<Sphere>(vector3(3.0f, 2.0f, 1.0f), 0.6f);
+
+		auto tri1 = std::make_unique<Triangle>(
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(-borderLength, -2.0f, borderLength),
+			vector3(+borderLength, -2.0f, borderLength));
+		auto tri2 = std::make_unique<Triangle>(
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(+borderLength, -2.0f, +borderLength),
+			vector3(+borderLength, -2.0f, -borderLength));*/
+
+		auto poly = std::make_unique<Polygon>(
+			vector3(-borderLength, -borderLength, -2.0f),
+			vector3(-borderLength, borderLength, -2.0f),
+			vector3(+borderLength, borderLength, -2.0f)
+			);
+
+		poly->AddPoint(vector3(borderLength * 0.5f, -borderLength * 0.5f, -2.0f));
+
+		/*testScene.Add(std::move(sph1));
+		testScene.Add(std::move(sph2));
+		testScene.Add(std::move(tri1));
+		testScene.Add(std::move(tri2));*/
+		testScene.Add(std::move(poly));
+
+		RGBA backgroundColor(RGBA::BLACK);
+		RGBA hitColor(RGBA::RED);
+
+		vector3 camPosition = vector3(0.0f, 0.0f, 4.0f);
+		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+
+		Types::F32 focalLength = 0.5f;
+		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+		camera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+		HitRecord hitRec;
+
+		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+			{
+				Ray ray = camera.GetRay(i, j);
+
+				BREAK_POINT_IF(i == 278 && j == 192);
+				//BREAK_POINT_IF(i == 185 && j == 195);
+
+				// try triangle
+				if (testScene.Hit(ray, 0.0f, 1000.0f, &hitRec))
+				{
+					//hitPixel.SetChannel<RGBA::R>((hitRec.m_hitT / 3.8f));
+					//hitPixel.SetChannel<RGBA::G>((hitRec.m_hitT / 3.8f));
+					//hitPixel.SetChannel<RGBA::B>((hitRec.m_hitT / 3.8f));
+					hitColor.SetChannel<RGBA::A>(hitRec.m_hitT / 4.0f);
+
+					camera.IncomeLight(i, j, hitColor);
+				}
+				else
+				{
+					camera.IncomeLight(i, j, backgroundColor);
+				}
+			}
+		}
+
+		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForHitPolygon.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForHitPolygon.png\"\n"
+			"you should have seen a polygon(red) in the scene, the background color is black.");
+	TEST_UNIT_END;
+#pragma endregion
+
 TEST_MODULE_END
