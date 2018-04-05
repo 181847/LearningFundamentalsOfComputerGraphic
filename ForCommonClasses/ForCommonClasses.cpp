@@ -22,6 +22,7 @@
 #include "../CommonClasses/Triangle.h"
 #include "../CommonClasses/Scene.h"
 #include "../CommonClasses/Polygon.h"
+#include "../CommonClasses/ColorTemplate.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -1073,18 +1074,20 @@ TEST_MODULE_START
 		const Types::F32 borderLength = 3.0f;
 
 		auto poly = std::make_unique<Polygon>(
-			vector3(-borderLength, -borderLength, +2.0f),
-			vector3(-borderLength, borderLength, -3.0f),
-			vector3(+borderLength, borderLength, -1.0f)
+			vector3(-borderLength, -borderLength, +4.0f),
+			vector3(-borderLength, borderLength, -4.0f),
+			vector3(+borderLength, borderLength, -4.0f)
 			);
 
-		poly->AddPoint(vector3(borderLength * 0.5f, -borderLength * 1.5f, -2.0f));
+		poly->AddPoint(vector3(borderLength * 0.9f, -borderLength * 3.0f, -2.0f));
+		poly->AddPoint(vector3(borderLength * 0.1f, -borderLength * 4.0f, -2.0f));
 
 		RGBA backgroundColor(RGBA::GREEN);
+		backgroundColor.MulRGB(0.5f); // make color darker
 		RGBA hitBBoxColor(RGBA::BLACK);
 		RGBA hitColor(RGBA::RED);
 
-		vector3 camPosition = vector3(4.0f, 8.0f, 8.0f);
+		vector3 camPosition = vector3(-4.0f, 8.0f, 8.0f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
 
@@ -1135,8 +1138,97 @@ TEST_MODULE_START
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForHitPolygon.png\"\n"
-			"you should have seen a polygon(red) in the scene, the background color is black.");
+			"you should have seen a polygon(red) in the scene, surrounded by a black box area(3D), the background color is dark green.");
 	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region render a sphere with a point light
+	TEST_UNIT_START("render a sphere with a point light")
+		using namespace CommonClass;
+
+		/*!
+		`	\brief set scene and light.
+		*/
+		Scene scene;
+		scene.m_pointLight = Light(vector3(0.0f, 2.0f, 3.0f), RGBA::RED);
+
+		/*!
+			\brief set a sphere to render.
+		*/
+		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
+		tsph->m_kDiffuse = RGBA::WHITE;
+		tsph->m_kAmbient = RGBA::WHITE;
+		tsph->m_kSpecular = RGBA::WHITE;
+		scene.Add(std::move(tsph));
+
+		RGBA hitPixel(1.0f, 1.0f, 1.0f);
+		RGBA backgroundColor(RGBA::BLACK);
+
+		/*!
+			\brief config a camera.
+		*/
+		vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
+		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+		Types::F32 focalLength = 0.5f;
+		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+
+		camera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+		HitRecord hitRec;
+		Ray viewRay;
+		Ray toLightRay;
+		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+			{
+				viewRay = camera.GetRay(i, j);
+				
+				//BREAK_POINT_IF(i == 256 && j == 256);
+
+				if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
+				{
+					toLightRay = scene.m_pointLight.ToLight(hitRec.m_hitPoint);
+
+					camera.IncomeLight(i, j, hitPixel);
+				}
+				else
+				{
+					camera.IncomeLight(i, j, backgroundColor);
+				}
+			}
+		}
+
+		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForPointLight.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\ThisImageIsForPointLight.png\"\n"
+			"you should have seen a sphere rendered under a point light");
+
+	TEST_UNIT_END;
+#pragma endregion
+	TEST_UNIT_START("")
+		using CC4 = ColorTemplate<true>;
+		using CC3 = ColorTemplate<false>;
+
+		const unsigned int size_cc4 = sizeof(CC4);
+		const unsigned int size_cc3 = sizeof(CC3);
+		CC4 color4;
+		CC3 color3;
+		color4.m_chas.m_a;
+		color3.m_chas.m_r;
+		const Types::F32 conmin = CC4::MIN_CHANNEL_VALUE;
+
+		color4.SetChannel<CC4::R>(2.0f);
+		errorLogger.LogIfNotEq(CC4::MAX_CHANNEL_VALUE, color4.m_chas.m_r);
+
+		std::cout << "CC4::MIN_CHANNEL_VALUE is " << conmin << std::endl;
+	TEST_UNIT_END;
+#pragma region try instance the ColorTemplate
+
 #pragma endregion
 
 TEST_MODULE_END
