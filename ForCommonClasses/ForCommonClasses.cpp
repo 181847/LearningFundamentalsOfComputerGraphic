@@ -26,6 +26,8 @@
 #pragma comment(lib, "CommonClasses.lib")
 
 
+
+
 RandomTool::MTRandom globalMtr;
 const unsigned int G_MAX_INT = 1000;
 
@@ -1210,25 +1212,164 @@ TEST_MODULE_START
 
 	TEST_UNIT_END;
 #pragma endregion
-	TEST_UNIT_START("")
-		using CC4 = ColorTemplate<true>;
-		using CC3 = ColorTemplate<false>;
 
-		const unsigned int size_cc4 = sizeof(CC4);
-		const unsigned int size_cc3 = sizeof(CC3);
-		CC4 color4;
-		CC3 color3;
+#pragma region a temp test for ColorTemplate
+	TEST_UNIT_START("a temp test for ColorTemplate")
+
+		const unsigned int size_cc4 = sizeof(TRGBA);
+		const unsigned int size_cc3 = sizeof(TRGB);
+		TRGBA color4(0.0f, 1.0f, 0.0f, 2.0f);
+		TRGB color3(0.8f, 1.0f);
 		color4.m_chas.m_a;
 		color3.m_chas.m_r;
-		const Types::F32 conmin = CC4::MIN_CHANNEL_VALUE;
+		const Types::F32 conmin = TRGBA::MIN_CHANNEL_VALUE;
 
-		color4.SetChannel<CC4::R>(2.0f);
-		errorLogger.LogIfNotEq(CC4::MAX_CHANNEL_VALUE, color4.m_chas.m_r);
+        color4.SetChannel<3>(2.0f);
 
-		std::cout << "CC4::MIN_CHANNEL_VALUE is " << conmin << std::endl;
+		color4.SetChannel<TRGBA::R>(2.0f);
+		errorLogger.LogIfNotEq  (1.0f, color4.m_chas.m_r);
+        errorLogger.LogIfEq     (3.0f, color4.m_chas.m_r);
+
+        color4.SetChannel<TRGBA::G>(-1.0f);
+        errorLogger.LogIfNotEq  (0.0f, color4.m_chas.m_g);
+        errorLogger.LogIfEq     (0.4f, color4.m_chas.m_g);
+
+        color4.SetChannel<TRGBA::B>(0.3f);
+        errorLogger.LogIfNotEq  (0.3f, color4.m_chas.m_b);
+        errorLogger.LogIfEq     (0.2f, color4.m_chas.m_b);
+
+        color4.SetChannel<TRGBA::A>(0.6f);
+        errorLogger.LogIfNotEq  (0.6f, color4.m_chas.m_a);
+        errorLogger.LogIfEq     (0.7f, color4.m_chas.m_a);
+
+
+
+        //color3.SetChannel<45>(2.0f);
+        //color3.SetChannel<TRGBA::A>(2.0f);
+        color3.SetChannel<TRGBA::R>(2.0f);
+        errorLogger.LogIfNotEq  (1.0f, color3.m_chas.m_r);
+        errorLogger.LogIfEq     (3.0f, color4.m_chas.m_r);
+
+        color3.SetChannel<TRGBA::G>(-1.0f);
+        errorLogger.LogIfNotEq  (0.0f, color3.m_chas.m_g);
+        errorLogger.LogIfEq     (0.4f, color4.m_chas.m_g);
+
+        color3.SetChannel<TRGBA::B>(0.3f);
+        errorLogger.LogIfNotEq  (0.3f, color3.m_chas.m_b);
+        errorLogger.LogIfEq     (0.2f, color4.m_chas.m_b);
+
+        TRGBA try324 = Cast(color3);
+
 	TEST_UNIT_END;
-#pragma region try instance the ColorTemplate
+#pragma endregion
 
+#pragma region test RGBA +/ -/ rgbMulti/ *(scalar)/ /(scalar)
+	TEST_UNIT_START("test RGBA +/ -/ */ *(scalar)/ /(scalar)")
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 64;
+
+		/*!
+			\brief clamp the channel to [0.0f, 1.0f]
+		*/
+		auto clampChannel = [](Types::F32 ch)-> Types::F32
+		{
+			if (ch <= 0.0f)
+			{
+				return 0.0f;
+			}
+			else if (ch >= 1.0f)
+			{
+				return 1.0f;
+			}
+			else
+			{
+				return ch;
+			}
+		};
+
+		for (int i = 0; i < 200; ++i)
+		{
+			/*!
+				make up the RGBA channel
+			*/
+			const Types::F32	comu1(mtr.Random()),
+								comu2(mtr.Random()),
+								comu3(mtr.Random()),
+								comu4(mtr.Random()),
+								comu5(mtr.Random()),
+								comu6(mtr.Random()),
+								comu7(mtr.Random()),
+								comu8(mtr.Random());
+
+			/*!
+				scale the RGB with float.
+			*/
+			const Types::F32	comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
+								comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
+
+			TRGBA cmp1(comu1, comu2, comu3, comu4);
+			TRGBA cmp2(comu5, comu6, comu7, comu8);
+
+			/*!
+				\brief recover the cmp1's value
+			*/
+			auto recoverCMP1 = [&cmp1, comu1, comu2, comu3, comu4]()
+			{
+				cmp1 = TRGBA(comu1, comu2, comu3, comu4);
+			};
+
+			// default constructor can ignore alpha channel, the alpha of the pixel will be set to max(opaque).
+			errorLogger.LogIfNotEq(
+                TRGBA(comu1, comu2, comu3),
+                TRGBA(comu1, comu2, comu3, TRGBA::ALPHA_CHANNEL_OPAQUE));
+
+			// assign
+			cmp1 = cmp2;
+			errorLogger.LogIfNotEq(
+				cmp1,
+                TRGBA(comu5, comu6, comu7, comu8));
+			recoverCMP1();
+
+			// cmp1 + cmp2
+			//cmp1 = cmp1 + cmp2;
+			errorLogger.LogIfNotEq( 
+				cmp1 + cmp2,
+                TRGBA(clampChannel(comu1 + comu5), clampChannel(comu2 + comu6), clampChannel(comu3 + comu7), clampChannel(comu4 + comu8)));
+			//recoverCMP1();
+
+			// cmp1 - cmp2
+            //cmp1 = cmp1 - cmp2;
+			errorLogger.LogIfNotEq(
+				cmp1 - cmp2,
+                TRGBA(clampChannel(comu1 - comu5), clampChannel(comu2 - comu6), clampChannel(comu3 - comu7), clampChannel(comu4 - comu8)));
+			//recoverCMP1();
+			
+			// cmp1 * cmp2
+			//cmp1 = cmp1 * cmp2,
+			errorLogger.LogIfNotEq(
+				cmp1 * cmp2,
+				TRGBA(clampChannel(comu1 * comu5), clampChannel(comu2 * comu6), clampChannel(comu3 * comu7), clampChannel(comu4 * comu8)));
+			//recoverCMP1();
+
+			// cmp1 * scalar
+			//cmp1.MulRGB(comf1),
+			errorLogger.LogIfNotEq(
+				cmp1 * comf1,
+                TRGBA(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), clampChannel(comu4 * comf1)));
+			errorLogger.LogIfNotEq(
+			    comf1 * cmp1,       // switch RGBA and scalar
+				TRGBA(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), clampChannel(comu4 * comf1)));
+			//recoverCMP1();
+
+			// cmp1 / scalar
+			//Types::F32 reciprocalComf2 = 1.0f / comf2;
+			//cmp1.DivRGB(comf2),
+			errorLogger.LogIfNotEq(
+				cmp1 / comf2,
+				TRGBA(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2), clampChannel(comu4 / comf2)));
+			//recoverCMP1();
+		}
+	TEST_UNIT_END;
 #pragma endregion
 
 TEST_MODULE_END
