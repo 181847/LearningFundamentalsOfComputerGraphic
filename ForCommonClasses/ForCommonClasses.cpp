@@ -469,17 +469,24 @@ TEST_MODULE_START
 		Film tfilm(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f);
 
 		RGBA pixelSetter;
+        TRGBA pixelSetterT;
 		pixelSetter.SetChannel<RGBA::B>(0.5f);
+        pixelSetterT.SetChannel<TRGBA::B>(0.5f);
 
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			for (int y = 0; y < HEIGHT; ++y)
 			{
-				pixelSetter.SetChannel<CommonClass::RGBA::R>(x / 512.0f);
+				/*pixelSetter.SetChannel<CommonClass::RGBA::R>(x / 512.0f);
 				pixelSetter.SetChannel<CommonClass::RGBA::G>(y / 512.0f);
-				pixelSetter.SetChannel<CommonClass::RGBA::A>((x + y) / 1024.0f);
+				pixelSetter.SetChannel<CommonClass::RGBA::A>((x + y) / 1024.0f);*/
 
-				tfilm.SetPixel(x, y, pixelSetter);
+                
+                pixelSetterT.SetChannel<TRGBA::R>(      x / 512.0f);
+                pixelSetterT.SetChannel<TRGBA::G>(      y / 512.0f);
+                pixelSetterT.SetChannel<TRGBA::A>((x + y) / 1024.0f);
+
+				tfilm.SetPixel(x, y, pixelSetterT);
 			}
 		}
 
