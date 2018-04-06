@@ -55,6 +55,15 @@ void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
 	modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_a * 255);
 }
 
+void Image::SetPixel(const Types::U32 x, const Types::U32 y, const TRGBA & pixel)
+{
+    Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
+    modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
+    modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
+    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);
+    modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_chas.m_a * 255);
+}
+
 RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 {
 	const Pixel& returnedPixel = m_canvas[To1DArrIndex(x, y)];

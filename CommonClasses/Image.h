@@ -1,5 +1,6 @@
 #pragma once
 #include "RGBA.h"
+#include "ColorTemplate.h"
 #include <string>
 #include <vector>
 
@@ -65,6 +66,14 @@ public:
 		\param pixel the pixel value
 	*/
 	void SetPixel(const Types::U32 x, const Types::U32 y, const RGBA& pixel);
+
+    /*!
+        \brief set one pixel with TRGBA
+		\param x column of the pixel, from top to bottom
+		\param y row of the pixel, from left to right
+		\param pixel the pixel value
+    */
+    void SetPixel(const Types::U32 x, const Types::U32 y, const TRGBA& pixel);
 
 	/*!
 		\brief get one pixel value
