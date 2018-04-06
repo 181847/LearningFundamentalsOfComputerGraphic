@@ -116,25 +116,12 @@ public:
 
 
     /*!
-        \brief for RGBA to set channels
+        \brief set individual channels, the template parameter ch can be ColorTemplate<...>::R/G/B/A or 0/1/2/3, but setting alpha channel on a RGB will cause a compile error.
+        \param value the value to set the channel, it will be clampped into the avaliable interval.
     */
-    template<Types::U8 ch, std::enable_if_t<HAVE_ALPHA && ch <= ColorTemplate<HAVE_ALPHA>::A>* = nullptr>
-    void SetChannel(const Types::F32& value)
-    {
-        // the implementation must be in the class defination, or will have redefine error with another SetChannel()
-        m_arr[ch] = ClampChannel(value);
-    }
- 
-    /*!
-        \brief for RGB to set channels,
-        this function disable the abllity to set alpha channel.
-    */
-    template<Types::U8 ch, std::enable_if_t< !HAVE_ALPHA && ch <= ColorTemplate<HAVE_ALPHA>::B>* = nullptr>
-    void SetChannel(const Types::F32& value)
-    {
-        // the implementation must be in the class defination, or will have redefine error with another SetChannel()
-        m_arr[ch] = ClampChannel(value);
-    }
+    template<Types::U8 ch>
+    typename std::enable_if<(ch <= (2 + HAVE_ALPHA))>::type
+        SetChannel(const Types::F32& value);
     
     /*!
         \brief clamp the value to [MIN_CHANNEL_VALUE, MAX_CHANNEL_VALUE].
@@ -237,6 +224,16 @@ inline Types::F32 ColorTemplate<HAVE_ALPHA>::ClampChannel(const Types::F32 & val
 }
 
 template<bool HAVE_ALPHA>
+inline ColorTemplate<HAVE_ALPHA>::ColorTemplate()
+{
+    // set RGB channels to 1.0f.
+    for (unsigned char i = 0; i < (HAVE_ALPHA ? 4 : 3); ++i)
+    {
+        m_arr[i] = MAX_CHANNEL_VALUE;
+    }
+}
+
+template<bool HAVE_ALPHA>
 template<typename T, typename std::enable_if<HAVE_ALPHA && std::is_same<T, Types::F32>::value>::type* >
 inline ColorTemplate<HAVE_ALPHA>::ColorTemplate(const T & r, const T & g, const T & b, const T & a)
 {
@@ -256,13 +253,10 @@ inline ColorTemplate<HAVE_ALPHA>::ColorTemplate(const T & r, const T & g, const 
 }
 
 template<bool HAVE_ALPHA>
-inline ColorTemplate<HAVE_ALPHA>::ColorTemplate()
+template<Types::U8 ch>
+typename std::enable_if<(ch <= (2 + HAVE_ALPHA))>::type ColorTemplate<HAVE_ALPHA>::SetChannel(const Types::F32 & value)
 {
-    // set RGB channels to 1.0f.
-    for (unsigned char i = 0; i < (HAVE_ALPHA ? 4 : 3); ++i)
-    {
-        m_arr[i] = MAX_CHANNEL_VALUE;
-    }
+    m_arr[ch] = ColorTemplate<HAVE_ALPHA>::ClampChannel(value);
 }
 
 template<bool HAVE_ALPHA>
@@ -380,20 +374,14 @@ inline bool AlmostEqual(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<
     \brief cast function from RGBA to RGB.
     \param color the rgba color
 */
-inline ColorTemplate<false> Cast(const ColorTemplate<true>& color)
-{
-    return ColorTemplate<false>(color.m_chas.m_r, color.m_chas.m_g, color.m_chas.m_b);
-}
+ColorTemplate<false> Cast(const ColorTemplate<true>& color);
 
 /*!
     \brief cast function from RGB to RGBA.
     \param color rgb color
     \param alpha additional alpha channel default to be opaque
 */
-ColorTemplate<true> Cast(const ColorTemplate<false>& color, const Types::F32 alpha = ColorTemplate<true>::ALPHA_CHANNEL_OPAQUE)
-{
-    return ColorTemplate<true>(color.m_chas.m_r, color.m_chas.m_g, color.m_chas.m_b, alpha);
-}
+ColorTemplate<true> Cast(const ColorTemplate<false>& color, const Types::F32 alpha = ColorTemplate<true>::ALPHA_CHANNEL_OPAQUE);
 
 /*!
     \brief give the ColorTemplate names.
