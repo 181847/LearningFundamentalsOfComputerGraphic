@@ -88,47 +88,53 @@ public:
     ColorTemplate();
 
     /*!
-        \brief this constructor is only avaliable for RGBA(or ColorTemplate<true>), accept four parameters for intializing RGBA channels.
-        \param r red channel
-        \param g green channel
-        \param b blue channel
-        \param a alpha channel, the type of this argument is complicated, 
-                 it using the SFINAE to ensure only the ColorTemplate<true> instantiation version can use this 4 parameters constructor.
+        \brief a constructor only for ColorTemplate<true> or RGBA
+        \param r red channel, default to be zero
+        \param g green channel, default to be zero
+        \param b blue channel, default to be zero
+        \param a alpha channel, default to be Opaque
     */
-    template<typename T = Types::F32>
+    template<typename T = Types::F32, typename std::enable_if<HAVE_ALPHA && std::is_same<T, Types::F32>::value>::type* = nullptr>
     ColorTemplate(
-        const T& r = MIN_CHANNEL_VALUE, 
-        const T& g = MIN_CHANNEL_VALUE, 
-        const T& b = MIN_CHANNEL_VALUE, 
-        const typename std::enable_if<std::is_same<T, Types::F32>::value && HAVE_ALPHA, T>::type& // enable the type T only when T is Types::F32 and HAVE_ALPHA is TRUE.
-                 a = ALPHA_CHANNEL_OPAQUE);
+        const T& r = MIN_CHANNEL_VALUE,
+        const T& g = MIN_CHANNEL_VALUE,
+        const T& b = MIN_CHANNEL_VALUE,
+        const T& a = ALPHA_CHANNEL_OPAQUE);
 
-    template<typename T = Types::F32>
-    ColorTemplate(
-        const T& r = MIN_CHANNEL_VALUE, 
-        const T& g = MIN_CHANNEL_VALUE, 
-        const typename std::enable_if<std::is_same<T, Types::F32>::value && ! HAVE_ALPHA, T>::type& // enable the type T only when T is Types::F32 and HAVE_ALPHA is FALSE.
-                 b = MIN_CHANNEL_VALUE);
-
-    /*!
-        \brief set one channel value
-        \param value new value of one channel, this value will be clampped between [0.0f, 1.0f]
-    */
-    /*template<Types::U8 ch>
-    void SetChannel(const Types::F32 & value);*/
-
-    /*!
-        \brief set channels for RGBA which enable four channel setting.
-    */
-    template<Types::U8 ch>
-    void SetChannel(const typename std::enable_if<HAVE_ALPHA, Types::F32>::type& value);
     
     /*!
-        \brief set channels for RGB which only allow three channels to set.
+        \brief a constructor only for ColorTemplate<false> or RGB
+        \param r red channel, default to be zero
+        \param g green channel, default to be zero
+        \param b blue channel, default to be zero
     */
-    template<Types::U8 ch>
-    void SetChannel(const typename std::enable_if< ( !HAVE_ALPHA && ch != ColorTemplate<HAVE_ALPHA>::A) , Types::F32>::type& value);
+    template<typename T = Types::F32, typename std::enable_if< ! HAVE_ALPHA && std::is_same<T, Types::F32>::value>::type* = nullptr>
+    ColorTemplate(
+        const T& r = MIN_CHANNEL_VALUE,
+        const T& g = MIN_CHANNEL_VALUE,
+        const T& b = MIN_CHANNEL_VALUE);
 
+
+    /*!
+        \brief for RGBA to set channels
+    */
+    template<Types::U8 ch, std::enable_if_t<HAVE_ALPHA && ch <= ColorTemplate<HAVE_ALPHA>::A>* = nullptr>
+    void SetChannel(const Types::F32& value)
+    {
+        // the implementation must be in the class defination, or will have redefine error with another SetChannel()
+        m_arr[ch] = ClampChannel(value);
+    }
+ 
+    /*!
+        \brief for RGB to set channels,
+        this function disable the abllity to set alpha channel.
+    */
+    template<Types::U8 ch, std::enable_if_t< !HAVE_ALPHA && ch <= ColorTemplate<HAVE_ALPHA>::B>* = nullptr>
+    void SetChannel(const Types::F32& value)
+    {
+        // the implementation must be in the class defination, or will have redefine error with another SetChannel()
+        m_arr[ch] = ClampChannel(value);
+    }
     
     /*!
         \brief clamp the value to [MIN_CHANNEL_VALUE, MAX_CHANNEL_VALUE].
@@ -178,8 +184,14 @@ ColorTemplate<HAVE_ALPHA> operator * (const ColorTemplate<HAVE_ALPHA>& a, const 
 /*!
     \brief multiply a scalar on each channel.
 */
-//template<bool HAVE_ALPHA>
-//ColorTemplate<HAVE_ALPHA> operator * (const Types::F32& b, const ColorTemplate<HAVE_ALPHA>& a);
+template<bool HAVE_ALPHA>
+ColorTemplate<HAVE_ALPHA> operator * (const Types::F32& b, const ColorTemplate<HAVE_ALPHA>& a);
+
+/*!
+    \brief divided a scalar on each channel.
+*/
+template<bool HAVE_ALPHA>
+ColorTemplate<HAVE_ALPHA> operator / (const ColorTemplate<HAVE_ALPHA>& a, const Types::F32& by);
 
 /*!
     \brief AlmostEqual can check whether two color is likely.
@@ -208,8 +220,25 @@ template<bool HAVE_ALPHA>
 const Types::F32    ColorTemplate<HAVE_ALPHA>::ALPHA_CHANNEL_TRANSPARENT = 0.0f;
 
 template<bool HAVE_ALPHA>
-template<typename T>
-inline ColorTemplate<HAVE_ALPHA>::ColorTemplate(const T& r, const T& g, const T& b, const typename std::enable_if<std::is_same<T, Types::F32>::value && HAVE_ALPHA, T>::type& a)
+inline Types::F32 ColorTemplate<HAVE_ALPHA>::ClampChannel(const Types::F32 & value)
+{
+    if (value < MIN_CHANNEL_VALUE)
+    {
+        return MIN_CHANNEL_VALUE;
+    }
+    else if (value > MAX_CHANNEL_VALUE)
+    {
+        return MAX_CHANNEL_VALUE;
+    }
+    else
+    {
+        return value;
+    }
+}
+
+template<bool HAVE_ALPHA>
+template<typename T, typename std::enable_if<HAVE_ALPHA && std::is_same<T, Types::F32>::value>::type* >
+inline ColorTemplate<HAVE_ALPHA>::ColorTemplate(const T & r, const T & g, const T & b, const T & a)
 {
     m_arr[0] = r;
     m_arr[1] = g;
@@ -218,88 +247,13 @@ inline ColorTemplate<HAVE_ALPHA>::ColorTemplate(const T& r, const T& g, const T&
 }
 
 template<bool HAVE_ALPHA>
-template<typename T>
-inline ColorTemplate<HAVE_ALPHA>::ColorTemplate(const T& r, const T& g, const typename std::enable_if<std::is_same<T, Types::F32>::value && !HAVE_ALPHA, T>::type& b)
+template<typename T, typename std::enable_if< !HAVE_ALPHA && std::is_same<T, Types::F32>::value>::type*>
+inline ColorTemplate<HAVE_ALPHA>::ColorTemplate(const T & r, const T & g, const T & b)
 {
     m_arr[0] = r;
     m_arr[1] = g;
     m_arr[2] = b;
 }
-
-template<bool HAVE_ALPHA>
-template<Types::U8 ch>
-inline void ColorTemplate<HAVE_ALPHA>::SetChannel(const typename std::enable_if<HAVE_ALPHA, Types::F32>::type & value)
-{
-}
-
-template<bool HAVE_ALPHA>
-template<Types::U8 ch>
-inline void ColorTemplate<HAVE_ALPHA>::SetChannel(const typename std::enable_if< (!HAVE_ALPHA && ch != ColorTemplate<HAVE_ALPHA>::A) , Types::F32>::type & value)
-{
-}
-
-//template<>
-//template<Types::U8 ch>
-//void ColorTemplate<true>::SetChannel(const Types::F32 & value)
-//{
-//    const Types::F32 clamppedValue = ClampChannel(value);
-//
-//    switch (ch)
-//    {
-//    case AliasOfThisType::R:
-//        m_chas.m_r = clamppedValue;
-//        break;
-//
-//    case AliasOfThisType::G:
-//        m_chas.m_g = clamppedValue;
-//        break;
-//
-//    case AliasOfThisType::B:
-//        m_chas.m_b = clamppedValue;
-//        break;
-//
-//    case AliasOfThisType::A:
-//        m_chas.m_a = clamppedValue;
-//        break;
-//
-//    default:
-//        assert(false && "unexpected channel to set");
-//        break;
-//    }
-//}
-//
-//template<>
-//template<Types::U8 ch>
-//void ColorTemplate<false>::SetChannel(const Types::F32 & value)
-//{
-//    const Types::F32 clamppedValue = ClampChannel(value);
-//
-//    switch (ch)
-//    {
-//    case AliasOfThisType::R:
-//        m_chas.m_r = clamppedValue;
-//        break;
-//
-//    case AliasOfThisType::G:
-//        m_chas.m_g = clamppedValue;
-//        break;
-//
-//    case AliasOfThisType::B:
-//        m_chas.m_b = clamppedValue;
-//        break;
-//
-//    default:
-//        assert(false && "unexpected channel to set");
-//        break;
-//    }
-//}
-
-//template<>
-//template<>
-//void ColorTemplate<false>::SetChannel<ColorTemplate<false>::A>(const Types::F32& value)
-//{
-//    static_assert(false, "ColorTemplate<false> means RGB, it has no alpha channel, please don't set alpha channel on it!");
-//}
 
 template<bool HAVE_ALPHA>
 inline ColorTemplate<HAVE_ALPHA>::ColorTemplate()
@@ -312,26 +266,9 @@ inline ColorTemplate<HAVE_ALPHA>::ColorTemplate()
 }
 
 template<bool HAVE_ALPHA>
-Types::F32 ColorTemplate<HAVE_ALPHA>::ClampChannel(const Types::F32 & value)
-{
-    if (value < MIN_CHANNEL_VALUE)
-    {
-        return 0.0f;
-    }
-    else if (value > MAX_CHANNEL_VALUE)
-    {
-        return 1.0f;
-    }
-    else
-    {
-        return value;
-    }
-}
-
-template<bool HAVE_ALPHA>
 inline bool operator==(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<HAVE_ALPHA>& b)
 {
-    for (unsigned char i = 0; i < HAVE_ALPHA ? 4 : 3; ++i)
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
     {
         if (a.m_arr[i] != b.m_arr[i])
         {
@@ -345,7 +282,7 @@ inline bool operator==(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<H
 template<bool HAVE_ALPHA>
 inline bool operator!=(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<HAVE_ALPHA>& b)
 {
-    for (unsigned char i = 0; i < HAVE_ALPHA ? 4 : 3; ++i)
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
     {
         if (a.m_arr[i] != b.m_arr[i])
         {
@@ -361,9 +298,9 @@ template<bool HAVE_ALPHA>
 inline ColorTemplate<HAVE_ALPHA> operator*(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<HAVE_ALPHA>& b)
 {
     ColorTemplate<HAVE_ALPHA> ret;
-    for (unsigned char i = 0; i < HAVE_ALPHA ? 4 : 3; ++i)
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
     {
-        ret.m_arr[i] = ClampChannel(a.m_arr[i] * b.m_arr[i]);
+        ret.m_arr[i] = ColorTemplate<HAVE_ALPHA>::ClampChannel(a.m_arr[i] * b.m_arr[i]);
     }
     return ret;
 }
@@ -372,9 +309,9 @@ template<bool HAVE_ALPHA>
 inline ColorTemplate<HAVE_ALPHA> operator+(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<HAVE_ALPHA>& b)
 {
     ColorTemplate<HAVE_ALPHA> ret;
-    for (unsigned char i = 0; i < HAVE_ALPHA ? 4 : 3; ++i)
+    for (unsigned char i = 0; i < (HAVE_ALPHA ? 4 : 3); ++i)
     {
-        ret.m_arr[i] = ClampChannel(a.m_arr[i] + b.m_arr[i]);
+        ret.m_arr[i] = ColorTemplate<HAVE_ALPHA>::ClampChannel(a.m_arr[i] + b.m_arr[i]);
     }
     return ret;
 }
@@ -383,9 +320,9 @@ template<bool HAVE_ALPHA>
 inline ColorTemplate<HAVE_ALPHA> operator-(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<HAVE_ALPHA>& b)
 {
     ColorTemplate<HAVE_ALPHA> ret;
-    for (unsigned char i = 0; i < HAVE_ALPHA ? 4 : 3; ++i)
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
     {
-        ret.m_arr[i] = ClampChannel(a.m_arr[i] - b.m_arr[i]);
+        ret.m_arr[i] = ColorTemplate<HAVE_ALPHA>::ClampChannel(a.m_arr[i] - b.m_arr[i]);
     }
     return ret;
 }
@@ -393,13 +330,40 @@ inline ColorTemplate<HAVE_ALPHA> operator-(const ColorTemplate<HAVE_ALPHA>& a, c
 template<bool HAVE_ALPHA>
 inline ColorTemplate<HAVE_ALPHA> operator*(const ColorTemplate<HAVE_ALPHA>& a, const Types::F32 & b)
 {
-    return ColorTemplate<HAVE_ALPHA>();
+    ColorTemplate<HAVE_ALPHA> ret;
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
+    {
+        ret.m_arr[i] = ColorTemplate<HAVE_ALPHA>::ClampChannel(a.m_arr[i] * b);
+    }
+    return ret;
+}
+
+template<bool HAVE_ALPHA>
+inline ColorTemplate<HAVE_ALPHA> operator*(const Types::F32 & b, const ColorTemplate<HAVE_ALPHA>& a)
+{
+    ColorTemplate<HAVE_ALPHA> ret;
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
+    {
+        ret.m_arr[i] = ColorTemplate<HAVE_ALPHA>::ClampChannel(a.m_arr[i] * b);
+    }
+    return ret;
+}
+
+template<bool HAVE_ALPHA>
+inline ColorTemplate<HAVE_ALPHA> operator/(const ColorTemplate<HAVE_ALPHA>& a, const Types::F32 & by)
+{
+    ColorTemplate<HAVE_ALPHA> ret;
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
+    {
+        ret.m_arr[i] = ColorTemplate<HAVE_ALPHA>::ClampChannel(a.m_arr[i] / by);
+    }
+    return ret;
 }
 
 template<bool HAVE_ALPHA>
 inline bool AlmostEqual(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<HAVE_ALPHA>& b, int ulp)
 {
-    for (unsigned char i = 0; i < HAVE_ALPHA ? 4 : 3; ++i)
+    for (unsigned char i = 0; i < ( HAVE_ALPHA ? 4 : 3 ); ++i)
     {
         if ( ! MathTool::almost_equal(a.m_arr[i], b.m_arr[i], ulp))
         {
@@ -411,6 +375,25 @@ inline bool AlmostEqual(const ColorTemplate<HAVE_ALPHA>& a, const ColorTemplate<
 }
 
 #pragma endregion
+
+/*!
+    \brief cast function from RGBA to RGB.
+    \param color the rgba color
+*/
+inline ColorTemplate<false> Cast(const ColorTemplate<true>& color)
+{
+    return ColorTemplate<false>(color.m_chas.m_r, color.m_chas.m_g, color.m_chas.m_b);
+}
+
+/*!
+    \brief cast function from RGB to RGBA.
+    \param color rgb color
+    \param alpha additional alpha channel default to be opaque
+*/
+ColorTemplate<true> Cast(const ColorTemplate<false>& color, const Types::F32 alpha = ColorTemplate<true>::ALPHA_CHANNEL_OPAQUE)
+{
+    return ColorTemplate<true>(color.m_chas.m_r, color.m_chas.m_g, color.m_chas.m_b, alpha);
+}
 
 /*!
     \brief give the ColorTemplate names.
