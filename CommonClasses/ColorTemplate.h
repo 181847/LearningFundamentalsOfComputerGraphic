@@ -84,9 +84,19 @@ public:
     const static Types::F32 ALPHA_CHANNEL_OPAQUE;
     const static Types::F32 ALPHA_CHANNEL_TRANSPARENT;
 
-public:
-    ColorTemplate();
+    /*!
+        \brief useful constant colors, if the color have alpha, default to be opaque.
+    */
+    const static ColorTemplate<HAVE_ALPHA> RED;
+    const static ColorTemplate<HAVE_ALPHA> GREEN;
+    const static ColorTemplate<HAVE_ALPHA> BLUE;
+    const static ColorTemplate<HAVE_ALPHA> YELLOW;
+    const static ColorTemplate<HAVE_ALPHA> CYAN;
+    const static ColorTemplate<HAVE_ALPHA> MAGENTA;
+    const static ColorTemplate<HAVE_ALPHA> WHITE;
+    const static ColorTemplate<HAVE_ALPHA> BLACK;
 
+public:
     /*!
         \brief a constructor only for ColorTemplate<true> or RGBA
         \param r red channel, default to be zero
@@ -207,6 +217,30 @@ template<bool HAVE_ALPHA>
 const Types::F32    ColorTemplate<HAVE_ALPHA>::ALPHA_CHANNEL_TRANSPARENT = 0.0f;
 
 template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::RED      = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::GREEN    = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::BLUE     = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::YELLOW   = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::CYAN     = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::MAGENTA  = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::WHITE    = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MAX_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
+const ColorTemplate<HAVE_ALPHA> ColorTemplate<HAVE_ALPHA>::BLACK    = ColorTemplate<HAVE_ALPHA>(ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE, ColorTemplate<HAVE_ALPHA>::MIN_CHANNEL_VALUE);
+
+template<bool HAVE_ALPHA>
 inline Types::F32 ColorTemplate<HAVE_ALPHA>::ClampChannel(const Types::F32 & value)
 {
     if (value < MIN_CHANNEL_VALUE)
@@ -220,16 +254,6 @@ inline Types::F32 ColorTemplate<HAVE_ALPHA>::ClampChannel(const Types::F32 & val
     else
     {
         return value;
-    }
-}
-
-template<bool HAVE_ALPHA>
-inline ColorTemplate<HAVE_ALPHA>::ColorTemplate()
-{
-    // set RGB channels to 1.0f.
-    for (unsigned char i = 0; i < (HAVE_ALPHA ? 4 : 3); ++i)
-    {
-        m_arr[i] = MAX_CHANNEL_VALUE;
     }
 }
 
