@@ -4,6 +4,7 @@
 #include "Ray.h"
 #include "HitRecord.h"
 #include "Surface.h"
+#include "Light.h"
 
 namespace CommonClass
 {
@@ -13,6 +14,9 @@ namespace CommonClass
 */
 class Scene
 {
+public:
+	Light m_pointLight;
+	
 private:
 	std::vector<std::unique_ptr<Surface>> m_surfaces;
 
