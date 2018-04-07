@@ -8,7 +8,14 @@ namespace CommonClass
 Image::Image(const Types::U32 width, const Types::U32 height)
 	:m_width(width), m_height(height), m_canvas(width * height)
 {
-	// empty
+    // set all pixel to solid black
+    for (auto & pixel : m_canvas)
+    {
+        pixel.m_r = 0x00;
+        pixel.m_g = 0x00;
+        pixel.m_b = 0x00;
+        pixel.m_a = 0xFF;
+    }
 }
 
 Image::~Image()
@@ -45,16 +52,6 @@ const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) con
 	return (m_height - 1 - y) * m_width + x;
 }
 
-void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
-{
-
-	Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
-	modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_r * 255);
-	modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_g * 255);
-	modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_b * 255);
-	modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_a * 255);
-}
-
 void Image::SetPixel(const Types::U32 x, const Types::U32 y, const TRGBA & pixel)
 {
     Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
@@ -64,7 +61,20 @@ void Image::SetPixel(const Types::U32 x, const Types::U32 y, const TRGBA & pixel
     modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_chas.m_a * 255);
 }
 
-RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
+void Image::SetPixel(const Types::U32 x, const Types::U32 y, const TRGB & pixel)
+{
+    Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
+    modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
+    modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
+    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);
+}
+
+void Image::SetAlpha(const Types::U32 x, const Types::U32 y, const Types::F32 & alpha)
+{
+    m_canvas[To1DArrIndex(x, y)].m_a = static_cast<Types::U8>(alpha * 255);
+}
+
+TRGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 {
 	const Pixel& returnedPixel = m_canvas[To1DArrIndex(x, y)];
 
@@ -75,7 +85,7 @@ RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 					 floatBlue (returnedPixel.m_g * reciprocal8BitsOne),
 					 floatAlpha(returnedPixel.m_g * reciprocal8BitsOne);
 
-	return RGBA(floatRed, floatGreen, floatBlue, floatAlpha);
+	return TRGBA(floatRed, floatGreen, floatBlue, floatAlpha);
 }
 
 Image::Pixel::Pixel(Types::U8 r, Types::U8 g, Types::U8 b, Types::U8 a)
