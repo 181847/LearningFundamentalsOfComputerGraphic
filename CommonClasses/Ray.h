@@ -18,6 +18,10 @@ public:
 	vector3 m_direction;
 
 public:
+	/*!
+		\brief construct a default ray, which start at the origin, point at the positive direction of X axis.
+	*/
+	Ray();
 
 	/*!
 		\brief construct a ray
