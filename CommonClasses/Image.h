@@ -59,20 +59,20 @@ public:
 	void SaveTo(const std::string& filePath) const;
 
     /*!
-        \brief set one pixel with TRGBA
+        \brief set one pixel with RGBA
 		\param x column of the pixel, from top to bottom
 		\param y row of the pixel, from left to right
 		\param pixel the pixel value
     */
-    void SetPixel(const Types::U32 x, const Types::U32 y, const TRGBA& pixel);
+    void SetPixel(const Types::U32 x, const Types::U32 y, const RGBA& pixel);
 
     /*!
-        \brief set one pixel with TRGB
+        \brief set one pixel with RGB
 		\param x column of the pixel, from top to bottom
 		\param y row of the pixel, from left to right
 		\param pixel the pixel value, only rgb is setted
     */
-    void SetPixel(const Types::U32 x, const Types::U32 y, const TRGB& pixel);
+    void SetPixel(const Types::U32 x, const Types::U32 y, const RGB& pixel);
 
     /*!
         \brief set alpha of one pixel with single value.
@@ -87,7 +87,7 @@ public:
 		\param x column of the pixel, from top to bottom
 		\param y row of the pixel, from left to right
 	*/
-	TRGBA GetPixel(const Types::U32 x, const Types::U32 y) const;
+	RGBA GetPixel(const Types::U32 x, const Types::U32 y) const;
 
 protected:
 	/*!

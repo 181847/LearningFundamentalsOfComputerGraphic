@@ -63,7 +63,7 @@ public:
 		\param y vertical index from bottom to top
 		\param color set color into the film.
 	*/
-    void IncomeLight(const Types::U32& x, const Types::U32& y, const TRGBA& color);
+    void IncomeLight(const Types::U32& x, const Types::U32& y, const RGBA& color);
     
 	/*!
 		\brief set rgb color of the film
@@ -71,7 +71,7 @@ public:
 		\param y vertical index from bottom to top
 		\param color set rgb color into the film.
 	*/
-    void IncomeLight(const Types::U32& x, const Types::U32& y, const TRGB& color);
+    void IncomeLight(const Types::U32& x, const Types::U32& y, const RGB& color);
     
 	/*!
 		\brief set color of the film

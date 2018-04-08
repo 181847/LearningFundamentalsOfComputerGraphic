@@ -245,8 +245,8 @@ TEST_MODULE_START
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region test TRGB +/ -/ rgbMulti/ *(scalar)/ /(scalar)
-	TEST_UNIT_START("test TRGB +/ -/ */ *(scalar)/ /(scalar)")
+#pragma region test RGBA +/ -/ rgbMulti/ *(scalar)/ /(scalar)
+	TEST_UNIT_START("test RGBA +/ -/ */ *(scalar)/ /(scalar)")
 		RandomTool::MTRandom mtr;
 		const unsigned int MAX_RAND_INT = 64;
 
@@ -289,58 +289,58 @@ TEST_MODULE_START
 			const Types::F32	comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
 								comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
 
-			TRGBA cmp1(comu1, comu2, comu3, comu4);
-			TRGBA cmp2(comu5, comu6, comu7, comu8);
+			RGBA cmp1(comu1, comu2, comu3, comu4);
+			RGBA cmp2(comu5, comu6, comu7, comu8);
 
 			/*!
 				\brief recover the cmp1's value
 			*/
 			auto recoverCMP1 = [&cmp1, comu1, comu2, comu3, comu4]()
 			{
-				cmp1 = TRGBA(comu1, comu2, comu3, comu4);
+				cmp1 = RGBA(comu1, comu2, comu3, comu4);
 			};
 
 			// default constructor can ignore alpha channel, the alpha of the pixel will be set to max(opaque).
 			errorLogger.LogIfNotEq(
-                TRGBA(comu1, comu2, comu3),
-                TRGBA(comu1, comu2, comu3, TRGBA::ALPHA_CHANNEL_OPAQUE));
+                RGBA(comu1, comu2, comu3),
+                RGBA(comu1, comu2, comu3, RGBA::ALPHA_CHANNEL_OPAQUE));
 
 			// assign
 			cmp1 = cmp2;
 			errorLogger.LogIfNotEq(
 				cmp1,
-                TRGBA(comu5, comu6, comu7, comu8));
+                RGBA(comu5, comu6, comu7, comu8));
 			recoverCMP1();
 
 			// cmp1 + cmp2
 			//cmp1 = cmp1 + cmp2;
 			errorLogger.LogIfNotEq( 
 				cmp1 + cmp2,
-                TRGBA(clampChannel(comu1 + comu5), clampChannel(comu2 + comu6), clampChannel(comu3 + comu7), clampChannel(comu4 + comu8)));
+                RGBA(clampChannel(comu1 + comu5), clampChannel(comu2 + comu6), clampChannel(comu3 + comu7), clampChannel(comu4 + comu8)));
 			//recoverCMP1();
 
 			// cmp1 - cmp2
             //cmp1 = cmp1 - cmp2;
 			errorLogger.LogIfNotEq(
 				cmp1 - cmp2,
-                TRGBA(clampChannel(comu1 - comu5), clampChannel(comu2 - comu6), clampChannel(comu3 - comu7), clampChannel(comu4 - comu8)));
+                RGBA(clampChannel(comu1 - comu5), clampChannel(comu2 - comu6), clampChannel(comu3 - comu7), clampChannel(comu4 - comu8)));
 			//recoverCMP1();
 			
 			// cmp1 * cmp2
 			//cmp1 = cmp1 * cmp2,
 			errorLogger.LogIfNotEq(
 				cmp1 * cmp2,
-				TRGBA(clampChannel(comu1 * comu5), clampChannel(comu2 * comu6), clampChannel(comu3 * comu7), clampChannel(comu4 * comu8)));
+				RGBA(clampChannel(comu1 * comu5), clampChannel(comu2 * comu6), clampChannel(comu3 * comu7), clampChannel(comu4 * comu8)));
 			//recoverCMP1();
 
 			// cmp1 * scalar
 			//cmp1.MulRGB(comf1),
 			errorLogger.LogIfNotEq(
 				cmp1 * comf1,
-                TRGBA(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), clampChannel(comu4 * comf1)));
+                RGBA(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), clampChannel(comu4 * comf1)));
 			errorLogger.LogIfNotEq(
 			    comf1 * cmp1,       // switch RGBA and scalar
-				TRGBA(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), clampChannel(comu4 * comf1)));
+				RGBA(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1), clampChannel(comu4 * comf1)));
 			//recoverCMP1();
 
 			// cmp1 / scalar
@@ -348,10 +348,168 @@ TEST_MODULE_START
 			//cmp1.DivRGB(comf2),
 			errorLogger.LogIfNotEq(
 				cmp1 / comf2,
-				TRGBA(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2), clampChannel(comu4 / comf2)));
+				RGBA(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2), clampChannel(comu4 / comf2)));
 			//recoverCMP1();
 		}
 	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region test RGB +/ -/ rgbMulti/ *(scalar)/ /(scalar)
+	TEST_UNIT_START("test RGB +/ -/ */ *(scalar)/ /(scalar)")
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 64;
+
+		/*!
+			\brief clamp the channel to [0.0f, 1.0f]
+		*/
+		auto clampChannel = [](Types::F32 ch)-> Types::F32
+		{
+			if (ch <= 0.0f)
+			{
+				return 0.0f;
+			}
+			else if (ch >= 1.0f)
+			{
+				return 1.0f;
+			}
+			else
+			{
+				return ch;
+			}
+		};
+
+		for (int i = 0; i < 200; ++i)
+		{
+			/*!
+				make up the RGBA channel
+			*/
+			const Types::F32	comu1(mtr.Random()),
+								comu2(mtr.Random()),
+								comu3(mtr.Random()),
+								comu4(mtr.Random()),
+								comu5(mtr.Random()),
+								comu6(mtr.Random()),
+								comu7(mtr.Random()),
+								comu8(mtr.Random());
+
+			/*!
+				scale the RGB with float.
+			*/
+			const Types::F32	comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
+								comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
+
+			RGB cmp1(comu1, comu2, comu3);
+			RGB cmp2(comu5, comu6, comu7);
+
+			/*!
+				\brief recover the cmp1's value
+			*/
+			auto recoverCMP1 = [&cmp1, comu1, comu2, comu3, comu4]()
+			{
+				cmp1 = RGB(comu1, comu2, comu3);
+			};
+
+			// assign
+			cmp1 = cmp2;
+			errorLogger.LogIfNotEq(
+				cmp1,
+                RGB(comu5, comu6, comu7));
+			recoverCMP1();
+
+			// cmp1 + cmp2
+			//cmp1 = cmp1 + cmp2;
+			errorLogger.LogIfNotEq( 
+				cmp1 + cmp2,
+                RGB(clampChannel(comu1 + comu5), clampChannel(comu2 + comu6), clampChannel(comu3 + comu7)));
+			//recoverCMP1();
+
+			// cmp1 - cmp2
+            //cmp1 = cmp1 - cmp2;
+			errorLogger.LogIfNotEq(
+				cmp1 - cmp2,
+                RGB(clampChannel(comu1 - comu5), clampChannel(comu2 - comu6), clampChannel(comu3 - comu7)));
+			//recoverCMP1();
+			
+			// cmp1 * cmp2
+			//cmp1 = cmp1 * cmp2,
+			errorLogger.LogIfNotEq(
+				cmp1 * cmp2,
+				RGB(clampChannel(comu1 * comu5), clampChannel(comu2 * comu6), clampChannel(comu3 * comu7)));
+			//recoverCMP1();
+
+			// cmp1 * scalar
+			//cmp1.MulRGB(comf1),
+			errorLogger.LogIfNotEq(
+				cmp1 * comf1,
+                RGB(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1)));
+			errorLogger.LogIfNotEq(
+			    comf1 * cmp1,       // switch RGBA and scalar
+				RGB(clampChannel(comu1 * comf1), clampChannel(comu2 * comf1), clampChannel(comu3 * comf1)));
+			//recoverCMP1();
+
+			// cmp1 / scalar
+			//Types::F32 reciprocalComf2 = 1.0f / comf2;
+			//cmp1.DivRGB(comf2),
+			errorLogger.LogIfNotEq(
+				cmp1 / comf2,
+				RGB(clampChannel(comu1 / comf2), clampChannel(comu2 / comf2), clampChannel(comu3 / comf2)));
+			//recoverCMP1();
+		}
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region cast between RGBA and RGB
+    TEST_UNIT_START("cast between RGBA and RGB")
+        RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 64;
+
+		/*!
+			\brief clamp the channel to [0.0f, 1.0f]
+		*/
+		auto clampChannel = [](Types::F32 ch)-> Types::F32
+		{
+			if (ch <= 0.0f)
+			{
+				return 0.0f;
+			}
+			else if (ch >= 1.0f)
+			{
+				return 1.0f;
+			}
+			else
+			{
+				return ch;
+			}
+		};
+
+		for (int i = 0; i < 200; ++i)
+		{
+			/*!
+				make up the RGBA channel
+			*/
+			const Types::F32	comu1(mtr.Random()),
+								comu2(mtr.Random()),
+								comu3(mtr.Random()),
+								comu4(mtr.Random()),
+								comu5(mtr.Random()),
+								comu6(mtr.Random()),
+								comu7(mtr.Random()),
+								comu8(mtr.Random());
+
+			/*!
+				scale the RGB with float.
+			*/
+			const Types::F32	comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
+								comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
+
+            RGBA color4(comu1, comu2, comu3, comu4);
+            RGB color3(comu5, comu6, comu7);
+
+            errorLogger.LogIfNotEq(Cast(color4), RGB(comu1, comu2, comu3));
+            errorLogger.LogIfNotEq(Cast(color3), RGBA(comu5, comu6, comu7, RGBA::ALPHA_CHANNEL_OPAQUE));
+            errorLogger.LogIfNotEq(Cast(color3, comu8), RGBA(comu5, comu6, comu7, comu8));
+        }
+    TEST_UNIT_END;
 #pragma endregion
 
 #pragma region test Image
@@ -359,17 +517,17 @@ TEST_MODULE_START
 		const Types::U32 WIDTH(512), HEIGHT(512);
 		CommonClass::Image testImage(WIDTH, HEIGHT);
 
-        TRGBA pixelSetterT;
+        RGBA pixelSetterT;
 
-        pixelSetterT.SetChannel<TRGBA::B>(0.5f);
+        pixelSetterT.SetChannel<RGBA::B>(0.5f);
 
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			for (int y = 0; y < HEIGHT; ++y)
 			{
-                pixelSetterT.SetChannel<TRGBA::R>(      x / 512.0f);
-                pixelSetterT.SetChannel<TRGBA::G>(      y / 512.0f);
-                pixelSetterT.SetChannel<TRGBA::A>((x + y) / 1024.0f);
+                pixelSetterT.SetChannel<RGBA::R>(      x / 512.0f);
+                pixelSetterT.SetChannel<RGBA::G>(      y / 512.0f);
+                pixelSetterT.SetChannel<RGBA::A>((x + y) / 1024.0f);
 
 				testImage.SetPixel(x, y, pixelSetterT);
 			}
@@ -390,20 +548,20 @@ TEST_MODULE_START
 		const Types::U32 WIDTH(512), HEIGHT(512);
 		CommonClass::Image testImage(WIDTH, HEIGHT);
 
-        TRGBA pixelSetterT;
-        TRGB pixelSetterRGB;
+        RGBA pixelSetterT;
+        RGB pixelSetterRGB;
         Types::F32 alphaSetter = 1.0f;
 
-        pixelSetterT.SetChannel<TRGBA::B>(0.5f);
-        pixelSetterRGB.SetChannel<TRGB::B>(0.5f);
+        pixelSetterT.SetChannel<RGBA::B>(0.5f);
+        pixelSetterRGB.SetChannel<RGB::B>(0.5f);
 
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			for (int y = 0; y < HEIGHT; ++y)
 			{
 
-                pixelSetterRGB.SetChannel<TRGBA::R>(      x / 512.0f);
-                pixelSetterRGB.SetChannel<TRGBA::G>(      y / 512.0f);
+                pixelSetterRGB.SetChannel<RGBA::R>(      x / 512.0f);
+                pixelSetterRGB.SetChannel<RGBA::G>(      y / 512.0f);
                 alphaSetter = ((x + y) / 1024.0f);
 
 				testImage.SetPixel(x, y, pixelSetterRGB);
@@ -470,16 +628,16 @@ TEST_MODULE_START
 		
 		Film tfilm(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f);
 
-        TRGBA pixelSetterT;
-        pixelSetterT.SetChannel<TRGBA::B>(0.5f);
+        RGBA pixelSetterT;
+        pixelSetterT.SetChannel<RGBA::B>(0.5f);
 
 		for (int x = 0; x < WIDTH; ++x)
 		{
 			for (int y = 0; y < HEIGHT; ++y)
 			{
-                pixelSetterT.SetChannel<TRGBA::R>(      x / 512.0f);
-                pixelSetterT.SetChannel<TRGBA::G>(      y / 512.0f);
-                pixelSetterT.SetChannel<TRGBA::A>((x + y) / 1024.0f);
+                pixelSetterT.SetChannel<RGBA::R>(      x / 512.0f);
+                pixelSetterT.SetChannel<RGBA::G>(      y / 512.0f);
+                pixelSetterT.SetChannel<RGBA::A>((x + y) / 1024.0f);
 
 				tfilm.SetPixel(x, y, pixelSetterT);
 			}
@@ -591,10 +749,10 @@ TEST_MODULE_START
 		OrthographicCamera orthoCamera(origin, target, dummyLookUp);
 		orthoCamera.SetFilm(std::make_unique<Film>(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f));
 
-        TRGBA pixelSetterT;
-        pixelSetterT.SetChannel<TRGBA::B>(0.5f);
-        TRGB pixelSetterRGB;
-        pixelSetterRGB.SetChannel<TRGBA::B>(0.5f);
+        RGBA pixelSetterT;
+        pixelSetterT.SetChannel<RGBA::B>(0.5f);
+        RGB pixelSetterRGB;
+        pixelSetterRGB.SetChannel<RGBA::B>(0.5f);
         Types::F32 alphaSetter = 1.0f;
 
 		for (int x = 0; x < WIDTH; ++x)
@@ -603,15 +761,15 @@ TEST_MODULE_START
 			{
                 if (x < WIDTH / 2)
                 {
-                    pixelSetterT.SetChannel<TRGBA::R>(x / 512.0f);
-                    pixelSetterT.SetChannel<TRGBA::G>(y / 512.0f);
-                    pixelSetterT.SetChannel<TRGBA::A>((x + y) / 1024.0f);
+                    pixelSetterT.SetChannel<RGBA::R>(x / 512.0f);
+                    pixelSetterT.SetChannel<RGBA::G>(y / 512.0f);
+                    pixelSetterT.SetChannel<RGBA::A>((x + y) / 1024.0f);
                     orthoCamera.IncomeLight(x, y, pixelSetterT);
                 }
                 else
                 {
-                    pixelSetterRGB.SetChannel<TRGBA::R>(x / 512.0f);
-                    pixelSetterRGB.SetChannel<TRGBA::G>(y / 512.0f);
+                    pixelSetterRGB.SetChannel<RGBA::R>(x / 512.0f);
+                    pixelSetterRGB.SetChannel<RGBA::G>(y / 512.0f);
                     alphaSetter = ((x + y) / 1024.0f);
 
                     orthoCamera.IncomeLight(x, y, pixelSetterRGB);
@@ -684,11 +842,11 @@ TEST_MODULE_START
 		OrthographicCamera orthoCamera(origin, target, dummyLookUp);
 		orthoCamera.SetFilm(std::make_unique<Film>(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f));
 
-        TRGBA blackT(0.0f, 0.0f, 0.0f);
-        TRGBA whiteT(1.0f, 1.0f, 1.0f);
-        TRGBA redT(1.0f, 0.0f, 0.0f);
-        TRGBA greenT(0.0f, 1.0f, 0.0f);
-        TRGBA blueT(0.0f, 0.0f, 1.0f);
+        RGBA blackT(0.0f, 0.0f, 0.0f);
+        RGBA whiteT(1.0f, 1.0f, 1.0f);
+        RGBA redT(1.0f, 0.0f, 0.0f);
+        RGBA greenT(0.0f, 1.0f, 0.0f);
+        RGBA blueT(0.0f, 0.0f, 1.0f);
 
 
 		// background as black
@@ -736,9 +894,9 @@ TEST_MODULE_START
 
 		Sphere tsph(vector3(-1.0f, 2.0f, 2.0f), 0.9f);
 
-		TRGB hitPixel(1.0f, 1.0f, 1.0f);
-		TRGB missSphPixel(0.0f, 0.0f, 0.0f);
-		TRGB missAABBPixel(0.0f, 0.5f, 0.0f);
+		RGB hitPixel(1.0f, 1.0f, 1.0f);
+		RGB missSphPixel(0.0f, 0.0f, 0.0f);
+		RGB missAABBPixel(0.0f, 0.5f, 0.0f);
 
 		vector3 camPosition = vector3(2.0f, 1.0f, 3.0f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -767,9 +925,9 @@ TEST_MODULE_START
 					// try sphere
 					if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
 					{
-						hitPixel.SetChannel<TRGB::R>((hitRec.m_hitT / 3.8f));
-						hitPixel.SetChannel<TRGB::G>((hitRec.m_hitT / 3.8f));
-						hitPixel.SetChannel<TRGB::B>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGB::R>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGB::G>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGB::B>((hitRec.m_hitT / 3.8f));
 						
 						orthoCamera.IncomeLight(i, j, hitPixel);
 					}
@@ -802,31 +960,31 @@ TEST_MODULE_START
 		const U32 WIDTH(512), HEIGHT(512);
 		Image img(WIDTH, HEIGHT);
 
-        std::array<TRGBA, 8> colorsT = {
-            TRGBA::RED,
-            TRGBA::GREEN,
-            TRGBA::BLUE,
-            TRGBA::YELLOW,
-            TRGBA::CYAN,
-            TRGBA::MAGENTA,
-            TRGBA::WHITE,
-            TRGBA::BLACK,
+        std::array<RGBA, 8> colorsT = {
+            RGBA::RED,
+            RGBA::GREEN,
+            RGBA::BLUE,
+            RGBA::YELLOW,
+            RGBA::CYAN,
+            RGBA::MAGENTA,
+            RGBA::WHITE,
+            RGBA::BLACK,
         };
 
-        std::array<TRGB, 8> colorsRGB = {
-            TRGB::RED,
-            TRGB::GREEN,
-            TRGB::BLUE,
-            TRGB::YELLOW,
-            TRGB::CYAN,
-            TRGB::MAGENTA,
-            TRGB::WHITE,
-            TRGB::BLACK,
+        std::array<RGB, 8> colorsRGB = {
+            RGB::RED,
+            RGB::GREEN,
+            RGB::BLUE,
+            RGB::YELLOW,
+            RGB::CYAN,
+            RGB::MAGENTA,
+            RGB::WHITE,
+            RGB::BLACK,
         };
 
 		int i = 0;
         int colorIndex = 0;
-		for (TRGBA& oneColor : colorsT)
+		for (RGBA& oneColor : colorsT)
 		{
 			for (int count = 0; count < 64; ++count)
 			{
@@ -839,7 +997,7 @@ TEST_MODULE_START
                     else
                     {
                         img.SetPixel(i + count, row, colorsRGB[colorIndex]);
-                        img.SetAlpha(i + count, row, TRGB::HALF_CHANNEL_VALUE);
+                        img.SetAlpha(i + count, row, RGB::HALF_CHANNEL_VALUE);
                     }
 				}
 			}
@@ -864,9 +1022,9 @@ TEST_MODULE_START
 
 		Sphere tsph(vector3(0.0f, 0.0f, 0.0f), 1.0f);
 
-		TRGB hitPixel(1.0f, 1.0f, 1.0f);
-        TRGB missSphPixel(0.0f, 0.0f, 0.0f);
-        TRGB missAABBPixel(0.0f, 0.5f, 0.0f);
+		RGB hitPixel(1.0f, 1.0f, 1.0f);
+        RGB missSphPixel(0.0f, 0.0f, 0.0f);
+        RGB missAABBPixel(0.0f, 0.5f, 0.0f);
 
 		vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -897,9 +1055,9 @@ TEST_MODULE_START
 					// try sphere
 					if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
 					{
-						hitPixel.SetChannel<TRGB::R>((hitRec.m_hitT / 3.8f));
-						hitPixel.SetChannel<TRGB::G>((hitRec.m_hitT / 3.8f));
-						hitPixel.SetChannel<TRGB::B>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGB::R>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGB::G>((hitRec.m_hitT / 3.8f));
+						hitPixel.SetChannel<RGB::B>((hitRec.m_hitT / 3.8f));
 						
 						perspectCamera.IncomeLight(i, j, hitPixel);
 					}
@@ -961,11 +1119,11 @@ TEST_MODULE_START
 			vector3(-1.0f, 0.0f, 0.0f), 
 			vector3(0.0f, 2.0f, 1.0f));
 
-		TRGB hitPixel(1.0f, 1.0f, 1.0f);
-		TRGB missSphPixel(0.0f, 0.0f, 0.0f);
-		TRGB missAABBPixel(0.0f, 0.5f, 0.0f);
-		TRGB positivePixel(TRGB::RED);
-		TRGB negativePixel(TRGB::GREEN);
+		RGB hitPixel(1.0f, 1.0f, 1.0f);
+		RGB missSphPixel(0.0f, 0.0f, 0.0f);
+		RGB missAABBPixel(0.0f, 0.5f, 0.0f);
+		RGB positivePixel(RGB::RED);
+		RGB negativePixel(RGB::GREEN);
 
 		vector3 camPosition = vector3(3.0f, 3.0f, 3.0f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -1056,8 +1214,8 @@ TEST_MODULE_START
 		testScene.Add(std::move(tri2));
 		testScene.Add(std::move(poly));
 
-		TRGB backgroundColor(TRGB::BLACK);
-		TRGB hitColor(TRGB::RED);
+		RGB backgroundColor(RGB::BLACK);
+		RGB hitColor(RGB::RED);
 
 		vector3 camPosition = vector3(3.0f, 4.0f, 2.0f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -1083,7 +1241,7 @@ TEST_MODULE_START
 				// try triangle
 				if (testScene.Hit(ray, 0.0f, 1000.0f, &hitRec))
 				{
-					hitColor.SetChannel<TRGB::R>(hitRec.m_hitT / 8.0f);
+					hitColor.SetChannel<RGB::R>(hitRec.m_hitT / 8.0f);
 
 					camera.IncomeLight(i, j, hitColor);
 				}
@@ -1117,10 +1275,10 @@ TEST_MODULE_START
 		poly->AddPoint(vector3(borderLength * 0.9f, -borderLength * 3.0f, -2.0f));
 		poly->AddPoint(vector3(borderLength * 0.1f, -borderLength * 4.0f, -2.0f));
 
-		TRGB backgroundColor(TRGB::GREEN);
+		RGB backgroundColor(RGB::GREEN);
 		backgroundColor = backgroundColor * (0.5f); // make color darker
-		TRGB hitBBoxColor(TRGB::BLACK);
-		TRGB hitColor(TRGB::RED);
+		RGB hitBBoxColor(RGB::BLACK);
+		RGB hitColor(RGB::RED);
 
 		vector3 camPosition = vector3(-4.0f, 8.0f, 8.0f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -1149,7 +1307,7 @@ TEST_MODULE_START
 				{
 					if (poly->Hit(ray, 0.0f, 1000.0f, &hitRec))
 					{
-						hitColor.SetChannel<TRGB::R>(hitRec.m_hitT / 4.0f);
+						hitColor.SetChannel<RGB::R>(hitRec.m_hitT / 4.0f);
 
 						camera.IncomeLight(i, j, hitColor);
 					}
@@ -1182,19 +1340,19 @@ TEST_MODULE_START
 		`	\brief set scene and light.
 		*/
 		Scene scene;
-		//scene.m_pointLight = Light(vector3(0.0f, 2.0f, 3.0f), TRGB::RED);
+		//scene.m_pointLight = Light(vector3(0.0f, 2.0f, 3.0f), RGB::RED);
 
 		/*!
 			\brief set a sphere to render.
 		*/
 		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
-		/*tsph->m_kDiffuse = TRGB::WHITE;
-		tsph->m_kAmbient = TRGB::WHITE;
-		tsph->m_kSpecular = TRGB::WHITE;
+		/*tsph->m_kDiffuse = RGB::WHITE;
+		tsph->m_kAmbient = RGB::WHITE;
+		tsph->m_kSpecular = RGB::WHITE;
 		scene.Add(std::move(tsph));*/
 
-		TRGB hitPixel(1.0f, 1.0f, 1.0f);
-		TRGB backgroundColor(TRGB::BLACK);
+		RGB hitPixel(1.0f, 1.0f, 1.0f);
+		RGB backgroundColor(RGB::BLACK);
 
 		/*!
 			\brief config a camera.
@@ -1246,49 +1404,49 @@ TEST_MODULE_START
 #pragma region a temp test for ColorTemplate
 	TEST_UNIT_START("a temp test for ColorTemplate")
 
-		const unsigned int size_cc4 = sizeof(TRGBA);
-		const unsigned int size_cc3 = sizeof(TRGB);
-		TRGBA color4(0.0f, 1.0f, 0.0f, 2.0f);
-		TRGB color3(0.8f, 1.0f);
+		const unsigned int size_cc4 = sizeof(RGBA);
+		const unsigned int size_cc3 = sizeof(RGB);
+		RGBA color4(0.0f, 1.0f, 0.0f, 2.0f);
+		RGB color3(0.8f, 1.0f);
 		color4.m_chas.m_a;
 		color3.m_chas.m_r;
-		const Types::F32 conmin = TRGBA::MIN_CHANNEL_VALUE;
+		const Types::F32 conmin = RGBA::MIN_CHANNEL_VALUE;
 
         color4.SetChannel<3>(2.0f);
 
-		color4.SetChannel<TRGBA::R>(2.0f);
+		color4.SetChannel<RGBA::R>(2.0f);
 		errorLogger.LogIfNotEq  (1.0f, color4.m_chas.m_r);
         errorLogger.LogIfEq     (3.0f, color4.m_chas.m_r);
 
-        color4.SetChannel<TRGBA::G>(-1.0f);
+        color4.SetChannel<RGBA::G>(-1.0f);
         errorLogger.LogIfNotEq  (0.0f, color4.m_chas.m_g);
         errorLogger.LogIfEq     (0.4f, color4.m_chas.m_g);
 
-        color4.SetChannel<TRGBA::B>(0.3f);
+        color4.SetChannel<RGBA::B>(0.3f);
         errorLogger.LogIfNotEq  (0.3f, color4.m_chas.m_b);
         errorLogger.LogIfEq     (0.2f, color4.m_chas.m_b);
 
-        color4.SetChannel<TRGBA::A>(0.6f);
+        color4.SetChannel<RGBA::A>(0.6f);
         errorLogger.LogIfNotEq  (0.6f, color4.m_chas.m_a);
         errorLogger.LogIfEq     (0.7f, color4.m_chas.m_a);
 
 
 
         //color3.SetChannel<45>(2.0f);
-        //color3.SetChannel<TRGBA::A>(2.0f);
-        color3.SetChannel<TRGBA::R>(2.0f);
+        //color3.SetChannel<RGBA::A>(2.0f);
+        color3.SetChannel<RGBA::R>(2.0f);
         errorLogger.LogIfNotEq  (1.0f, color3.m_chas.m_r);
         errorLogger.LogIfEq     (3.0f, color4.m_chas.m_r);
 
-        color3.SetChannel<TRGBA::G>(-1.0f);
+        color3.SetChannel<RGBA::G>(-1.0f);
         errorLogger.LogIfNotEq  (0.0f, color3.m_chas.m_g);
         errorLogger.LogIfEq     (0.4f, color4.m_chas.m_g);
 
-        color3.SetChannel<TRGBA::B>(0.3f);
+        color3.SetChannel<RGBA::B>(0.3f);
         errorLogger.LogIfNotEq  (0.3f, color3.m_chas.m_b);
         errorLogger.LogIfEq     (0.2f, color4.m_chas.m_b);
 
-        TRGBA try324 = Cast(color3);
+        RGBA try324 = Cast(color3);
 
 	TEST_UNIT_END;
 #pragma endregion

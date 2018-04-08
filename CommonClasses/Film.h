@@ -5,7 +5,7 @@ namespace CommonClass
 {
 
 /*
-	\brief Film is used to store color capture in the rendering, it's extend from tth Image class.
+	\brief Film is used to store color captured in the rendering, it's extend from tth Image class.
 	Film add a rendering border, and helper function to get pixel position.
 */
 class Film: public Image
@@ -26,12 +26,13 @@ public:
 	Film(const Film&) = delete;
 	Film& operator=(const Film&) = delete;
 
+
 	~Film();
 
 	/*!
 		\brief get pixel uv through the pixel index in x, y
-		\param x horizontal direction(start from zero) ---->
-		\param y vertical direction(start from zero)     |^
+		\param x horizontal direction(start from zero) left ----> right
+		\param y vertical direction(start from zero)   bottom ----> top /\
 		\param outU return value response to x
 		\param outV return value response to y
 	*/

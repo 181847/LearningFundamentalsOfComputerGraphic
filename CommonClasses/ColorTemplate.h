@@ -410,5 +410,5 @@ ColorTemplate<true> Cast(const ColorTemplate<false>& color, const Types::F32 alp
 /*!
     \brief give the ColorTemplate names.
 */
-using TRGB = ColorTemplate<false>;
-using TRGBA = ColorTemplate<true>;
+using RGB = ColorTemplate<false>;
+using RGBA = ColorTemplate<true>;

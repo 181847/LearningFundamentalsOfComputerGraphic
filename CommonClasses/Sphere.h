@@ -1,6 +1,7 @@
 #pragma once
 #include "Surface.h"
 #include "HitRecord.h"
+#include "ColorTemplate.h"
 
 namespace CommonClass
 {

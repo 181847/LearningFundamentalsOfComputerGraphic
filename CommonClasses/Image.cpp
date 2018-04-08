@@ -52,7 +52,7 @@ const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) con
 	return (m_height - 1 - y) * m_width + x;
 }
 
-void Image::SetPixel(const Types::U32 x, const Types::U32 y, const TRGBA & pixel)
+void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
 {
     Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
     modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
@@ -61,7 +61,7 @@ void Image::SetPixel(const Types::U32 x, const Types::U32 y, const TRGBA & pixel
     modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_chas.m_a * 255);
 }
 
-void Image::SetPixel(const Types::U32 x, const Types::U32 y, const TRGB & pixel)
+void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGB & pixel)
 {
     Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
     modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
@@ -74,7 +74,7 @@ void Image::SetAlpha(const Types::U32 x, const Types::U32 y, const Types::F32 & 
     m_canvas[To1DArrIndex(x, y)].m_a = static_cast<Types::U8>(alpha * 255);
 }
 
-TRGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
+RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 {
 	const Pixel& returnedPixel = m_canvas[To1DArrIndex(x, y)];
 
@@ -85,7 +85,7 @@ TRGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 					 floatBlue (returnedPixel.m_g * reciprocal8BitsOne),
 					 floatAlpha(returnedPixel.m_g * reciprocal8BitsOne);
 
-	return TRGBA(floatRed, floatGreen, floatBlue, floatAlpha);
+	return RGBA(floatRed, floatGreen, floatBlue, floatAlpha);
 }
 
 Image::Pixel::Pixel(Types::U8 r, Types::U8 g, Types::U8 b, Types::U8 a)
