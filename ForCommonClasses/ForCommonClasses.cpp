@@ -1384,17 +1384,35 @@ TEST_MODULE_START
 		/*!
 		`	\brief set scene and light.
 		*/
-		Scene scene;
+        Scene scene;
+        RGB backgroundColor(RGB::BLACK);
 
-        vector3 pointLightPosition(-3.0f, 3.0f, 3.0f);
+        /*!
+            \brief make up materials.
+        */
+        Material sphereMat;
+        Material triMat;
+        Material polyMat;
+
+        sphereMat.m_kDiffuse        = RGB::RED;
+        sphereMat.m_shinness        = 12.0f;
+        sphereMat.SetRFresnel0(8);
+        triMat.m_kDiffuse           = RGB::GREEN;
+        triMat.m_shinness           = 1.0f;
+        triMat.SetRFresnel0(8);
+        polyMat.m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
+        polyMat.m_shinness          = 4.0f;
+        polyMat.SetRFresnel0(8);
+
+        vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
         RGB pointLightColor = RGB::WHITE;
-        Light pointLight(pointLightPosition, pointLightColor);
+        Light pointLight(pointLightPosition * 5.0f, pointLightColor);
 
 		/*!
 			\brief set a sphere to render.
 		*/
 		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
-        tsph->m_kDiffuse = RGB::RED; // give the sphere a red
+        tsph->m_material = sphereMat;
 
         /*!
             \brief render triangles
@@ -1408,7 +1426,8 @@ TEST_MODULE_START
 			vector3(+borderLength, -2.0f, +borderLength),
 			vector3(-borderLength, -2.0f, -borderLength),
 			vector3(+borderLength, -2.0f, -borderLength));
-        tri2->m_kDiffuse = tri1->m_kDiffuse = RGB(1.0f, 0.3f, 0.8f);
+        tri1->m_material = triMat;
+        tri2->m_material = triMat;
 
         /*!
             \brief render polygon
@@ -1420,19 +1439,13 @@ TEST_MODULE_START
             );
         poly->AddPoint(vector3(borderLength * 0.9f, -borderLength * 3.0f, -2.0f));
         poly->AddPoint(vector3(borderLength * 0.1f, -borderLength * 4.0f, -2.0f));
-        poly->m_kDiffuse = RGB::BLUE;
+        poly->m_material = polyMat;
 
 
         scene.Add(std::move(tsph));
         scene.Add(std::move(tri1));
         scene.Add(std::move(tri2));
         scene.Add(std::move(poly));
-
-        /*!
-            \brief a dummy global diffuse color.
-        */
-		RGB dummyLightDiffuse(RGB::WHITE);
-		RGB backgroundColor(RGB::GREEN * 0.5f);
 
 		/*!
 			\brief config a camera.
@@ -1448,7 +1461,7 @@ TEST_MODULE_START
 			-0.5f, +0.5f,
 			-0.5f, +0.5f));
 
-		HitRecord hitRec;
+		HitRecord hitRec, shadowHitRec;
 		Ray viewRay;
 		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
 		{
@@ -1456,14 +1469,33 @@ TEST_MODULE_START
 			{
 				viewRay = camera.GetRay(i, j);
 				
-				//BREAK_POINT_IF(i == 256 && j == 256);
+				//BREAK_POINT_IF(i == 203 && j == 511 - 187);
 
 				if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
 				{
-                    vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint);
-                    RGB color = hitRec.m_material.m_kDiffuse * std::max(0.0f, hitRec.m_normal * toLight);
-					camera.IncomeLight(i, j, color);
+                    RGB color;
 
+                    color = hitRec.m_material.m_kDiffuse * scene.m_ambient;
+
+                    vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint);
+
+                    Ray shadowRayTest = Ray(hitRec.m_hitPoint, toLight);
+
+                    if ( ! scene.Hit(shadowRayTest, 0.0f, 1000.0f, &shadowHitRec))
+                    {
+                        vector3 toEye = -viewRay.m_direction;
+                        vector3 halfVec = Normalize(toEye + toLight);
+
+                        RGB lightStrength = pointLight.m_color * std::max(0.0f, hitRec.m_normal * toLight);
+
+                        const Types::F32 m = hitRec.m_material.m_shinness;
+
+                        Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(halfVec * hitRec.m_normal, m);
+
+                        color = color + lightStrength * (hitRec.m_material.m_kDiffuse + hitRec.m_material.RFresnel(toEye * hitRec.m_normal) * shinnessSthrength);
+                    }
+
+					camera.IncomeLight(i, j, color);
 				}
 				else
 				{
@@ -1472,7 +1504,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForTempPointLight.png");
+		camera.m_film->SaveTo("OutputTestImage\\RenderMaterial\\ThisImageIsForTempPointLight10.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForTempPointLight.png\"\n"
