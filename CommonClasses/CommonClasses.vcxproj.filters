@@ -74,6 +74,9 @@
     <ClInclude Include="ColorTemplate.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -128,6 +131,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="ColorTemplate.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
