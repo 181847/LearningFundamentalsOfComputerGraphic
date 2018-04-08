@@ -12,9 +12,9 @@ Light::~Light()
 {
 }
 
-Ray Light::ToMeFrom(const vector3 & reflectPoint)
+vector3 Light::ToMeFrom(const vector3 & reflectPoint)
 {
-	return Ray(reflectPoint, Normalize(reflectPoint - m_position));
+	return Normalize(m_position - reflectPoint);
 }
 
 } // namespace CommonClass

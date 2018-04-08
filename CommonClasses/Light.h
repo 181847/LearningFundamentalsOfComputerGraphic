@@ -32,9 +32,9 @@ public:
 	~Light();
 
 	/*
-		\brief get a ray from the reflect point to the light.
+		\brief get a normalized vector from the reflect point to the light.
 	*/
-	Ray ToMeFrom(const vector3& reflectPoint);
+	vector3 ToMeFrom(const vector3& reflectPoint);
 };
 
 } // namespace CommonClass
