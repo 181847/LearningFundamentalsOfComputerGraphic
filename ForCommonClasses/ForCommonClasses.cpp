@@ -22,6 +22,7 @@
 #include "../CommonClasses/Scene.h"
 #include "../CommonClasses/Polygon.h"
 #include "../CommonClasses/ColorTemplate.h"
+#include "../CommonClasses/Light.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -1341,11 +1342,15 @@ TEST_MODULE_START
 		*/
 		Scene scene;
 
+        vector3 pointLightPosition(1.0f, 3.0f, 3.0f);
+        RGB pointLightColor = RGB::WHITE;
+        Light pointLight(pointLightPosition, pointLightColor);
+
 		/*!
 			\brief set a sphere to render.
 		*/
 		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
-        tsph->m_kDiffuse = RGB::RED * 0.5f; // give the sphere a dark red
+        tsph->m_kDiffuse = RGB::RED; // give the sphere a red
 
         scene.Add(std::move(tsph));
 
@@ -1371,7 +1376,6 @@ TEST_MODULE_START
 
 		HitRecord hitRec;
 		Ray viewRay;
-		Ray toLightRay;
 		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
 		{
 			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
@@ -1382,7 +1386,8 @@ TEST_MODULE_START
 
 				if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
 				{
-                    RGB color(dummyLightDiffuse * hitRec.m_kDiffuse);
+                    vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint);
+                    RGB color = hitRec.m_kDiffuse * std::max(0.0f, hitRec.m_normal * toLight);
 					camera.IncomeLight(i, j, color);
 				}
 				else
