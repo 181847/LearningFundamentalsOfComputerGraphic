@@ -1340,19 +1340,20 @@ TEST_MODULE_START
 		`	\brief set scene and light.
 		*/
 		Scene scene;
-		//scene.m_pointLight = Light(vector3(0.0f, 2.0f, 3.0f), RGB::RED);
 
 		/*!
 			\brief set a sphere to render.
 		*/
 		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
-		/*tsph->m_kDiffuse = RGB::WHITE;
-		tsph->m_kAmbient = RGB::WHITE;
-		tsph->m_kSpecular = RGB::WHITE;
-		scene.Add(std::move(tsph));*/
+        tsph->m_kDiffuse = RGB::RED * 0.5f; // give the sphere a dark red
 
-		RGB hitPixel(1.0f, 1.0f, 1.0f);
-		RGB backgroundColor(RGB::BLACK);
+        scene.Add(std::move(tsph));
+
+        /*!
+            \brief a dummy global diffuse color.
+        */
+		RGB dummyLightDiffuse(RGB::WHITE);
+		RGB backgroundColor(RGB::GREEN * 0.5f);
 
 		/*!
 			\brief config a camera.
@@ -1381,9 +1382,8 @@ TEST_MODULE_START
 
 				if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
 				{
-					toLightRay = scene.m_pointLight.ToLight(hitRec.m_hitPoint);
-
-					camera.IncomeLight(i, j, hitPixel);
+                    RGB color(dummyLightDiffuse * hitRec.m_kDiffuse);
+					camera.IncomeLight(i, j, color);
 				}
 				else
 				{
@@ -1392,11 +1392,11 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForPointLight.png");
+		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForSphereDiffuseColor.png");
 
 		errorLogger += LetUserCheckJudge(
-			"check \".\\OutputTestImage\\ThisImageIsForPointLight.png\"\n"
-			"you should have seen a sphere rendered under a point light");
+			"check \".\\OutputTestImage\\ThisImageIsForSphereDiffuseColor.png\"\n"
+			"you should have seen a sphere with some color, the background is dark green.");
 
 	TEST_UNIT_END;
 #pragma endregion
