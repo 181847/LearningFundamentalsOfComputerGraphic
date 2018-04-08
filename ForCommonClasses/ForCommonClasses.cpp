@@ -1461,7 +1461,7 @@ TEST_MODULE_START
 				if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
 				{
                     vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint);
-                    RGB color = hitRec.m_kDiffuse * std::max(0.0f, hitRec.m_normal * toLight);
+                    RGB color = hitRec.m_material.m_kDiffuse * std::max(0.0f, hitRec.m_normal * toLight);
 					camera.IncomeLight(i, j, color);
 
 				}
