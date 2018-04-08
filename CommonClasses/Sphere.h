@@ -10,8 +10,20 @@ class Sphere :
 	public Surface
 {
 public:
+    /*!
+        \brief the center of the sphere
+    */
 	vector3		m_center;
+
+    /*!
+        \brief the radius of the sphere
+    */
 	Types::F32	m_radius;
+
+    /*!
+        \brief the coefficient of the surface diffuse, default to be white.
+    */
+    RGB         m_kDiffuse = RGB::WHITE;
 
 public:
 	Sphere(const vector3& center, const Types::F32 radius);

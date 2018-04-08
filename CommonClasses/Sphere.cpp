@@ -61,9 +61,10 @@ bool Sphere::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitR
 		return false;
 	}
 	
-	pHitRec->m_hitT = finalT;
+	pHitRec->m_hitT     = finalT;
 	pHitRec->m_hitPoint = ray.m_origin + finalT * ray.m_direction;
-	pHitRec->m_normal = Normalize(pHitRec->m_hitPoint - m_center);
+	pHitRec->m_normal   = Normalize(pHitRec->m_hitPoint - m_center);
+    pHitRec->m_kDiffuse = m_kDiffuse;
 
 	return true;
 }
