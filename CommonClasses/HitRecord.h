@@ -1,6 +1,7 @@
 #pragma once
 #include "vector3.h"
 #include "ColorTemplate.h"
+#include "Material.h"
 
 namespace CommonClass
 {
@@ -32,6 +33,11 @@ public:
         \brief the diffuse coefficient of the hit point.
     */
     RGB         m_kDiffuse;
+
+    /*!
+        \brief the material of hit point.
+    */
+    Material    m_material;
 
 public:
 };
