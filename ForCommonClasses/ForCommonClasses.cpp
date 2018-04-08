@@ -1366,9 +1366,23 @@ TEST_MODULE_START
 			vector3(+borderLength, -2.0f, -borderLength));
         tri2->m_kDiffuse = tri1->m_kDiffuse = RGB(1.0f, 0.3f, 0.8f);
 
+        /*!
+            \brief render polygon
+        */
+        auto poly = std::make_unique<Polygon>(
+            vector3(-borderLength, -borderLength, -2.0f),
+            vector3(-borderLength, borderLength, -2.0f),
+            vector3(+borderLength, borderLength, -2.0f)
+            );
+        poly->AddPoint(vector3(borderLength * 0.9f, -borderLength * 3.0f, -2.0f));
+        poly->AddPoint(vector3(borderLength * 0.1f, -borderLength * 4.0f, -2.0f));
+        poly->m_kDiffuse = RGB::BLUE;
+
+
         scene.Add(std::move(tsph));
         scene.Add(std::move(tri1));
         scene.Add(std::move(tri2));
+        scene.Add(std::move(poly));
 
         /*!
             \brief a dummy global diffuse color.
