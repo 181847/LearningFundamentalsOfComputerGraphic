@@ -63,6 +63,8 @@ bool Triangle::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hi
 	}
 
 	pHitRec->m_hitT = t;
+    pHitRec->m_normal = Normalize(crossProd(e2, e1));
+    pHitRec->m_kDiffuse = m_kDiffuse;
 	pHitRec->m_isBackFace = a < 0.0f;
 	return true;
 }
