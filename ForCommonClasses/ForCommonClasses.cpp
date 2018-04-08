@@ -1333,8 +1333,8 @@ TEST_MODULE_START
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region render a sphere with a point light
-	TEST_UNIT_START("render a sphere with a point light")
+#pragma region render a scene with a point light
+	TEST_UNIT_START("render a scene with a point light")
 		using namespace CommonClass;
 
 		/*!
@@ -1342,7 +1342,7 @@ TEST_MODULE_START
 		*/
 		Scene scene;
 
-        vector3 pointLightPosition(1.0f, 3.0f, 3.0f);
+        vector3 pointLightPosition(-3.0f, 3.0f, 3.0f);
         RGB pointLightColor = RGB::WHITE;
         Light pointLight(pointLightPosition, pointLightColor);
 
@@ -1352,7 +1352,23 @@ TEST_MODULE_START
 		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
         tsph->m_kDiffuse = RGB::RED; // give the sphere a red
 
+        /*!
+            \brief render triangles
+        */
+		const Types::F32 borderLength = 20.0f;
+		auto tri1 = std::make_unique<Triangle>(
+			vector3(-borderLength, -2.0f, +borderLength),
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(+borderLength, -2.0f, borderLength));
+		auto tri2 = std::make_unique<Triangle>(
+			vector3(+borderLength, -2.0f, +borderLength),
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(+borderLength, -2.0f, -borderLength));
+        tri2->m_kDiffuse = tri1->m_kDiffuse = RGB(1.0f, 0.3f, 0.8f);
+
         scene.Add(std::move(tsph));
+        scene.Add(std::move(tri1));
+        scene.Add(std::move(tri2));
 
         /*!
             \brief a dummy global diffuse color.
@@ -1397,10 +1413,10 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForSphereDiffuseColor.png");
+		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForTempPointLight.png");
 
 		errorLogger += LetUserCheckJudge(
-			"check \".\\OutputTestImage\\ThisImageIsForSphereDiffuseColor.png\"\n"
+			"check \".\\OutputTestImage\\ThisImageIsForTempPointLight.png\"\n"
 			"you should have seen a sphere with some color, the background is dark green.");
 
 	TEST_UNIT_END;
