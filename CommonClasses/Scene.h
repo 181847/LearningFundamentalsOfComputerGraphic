@@ -14,8 +14,15 @@ namespace CommonClass
 */
 class Scene
 {
+public:
+    /*!
+        \brief ambient color.
+    */
+    RGB     m_ambient = RGB::WHITE * 0.1f;
+
 private:
 	std::vector<std::unique_ptr<Surface>> m_surfaces;
+
 
 public:
 	Scene();
