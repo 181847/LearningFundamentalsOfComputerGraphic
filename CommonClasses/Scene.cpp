@@ -45,6 +45,9 @@ bool Scene::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRe
     if (isHit)
     {
         pHitRec->m_hitPoint = ray.m_origin + pHitRec->m_hitT * ray.m_direction;
+
+        // push the hit point out from the surface a little.
+        pHitRec->m_hitPoint = pHitRec->m_hitPoint + Surface::s_offsetHitT * pHitRec->m_normal;
     }
 
 	return isHit;
