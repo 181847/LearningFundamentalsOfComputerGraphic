@@ -1419,6 +1419,7 @@ TEST_MODULE_START
                     vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint);
                     RGB color = hitRec.m_kDiffuse * std::max(0.0f, hitRec.m_normal * toLight);
 					camera.IncomeLight(i, j, color);
+
 				}
 				else
 				{
@@ -1432,56 +1433,6 @@ TEST_MODULE_START
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForTempPointLight.png\"\n"
 			"you should have seen a sphere with some color, the background is dark green.");
-
-	TEST_UNIT_END;
-#pragma endregion
-
-#pragma region a temp test for ColorTemplate
-	TEST_UNIT_START("a temp test for ColorTemplate")
-
-		const unsigned int size_cc4 = sizeof(RGBA);
-		const unsigned int size_cc3 = sizeof(RGB);
-		RGBA color4(0.0f, 1.0f, 0.0f, 2.0f);
-		RGB color3(0.8f, 1.0f);
-		color4.m_chas.m_a;
-		color3.m_chas.m_r;
-		const Types::F32 conmin = RGBA::MIN_CHANNEL_VALUE;
-
-        color4.SetChannel<3>(2.0f);
-
-		color4.SetChannel<RGBA::R>(2.0f);
-		errorLogger.LogIfNotEq  (1.0f, color4.m_chas.m_r);
-        errorLogger.LogIfEq     (3.0f, color4.m_chas.m_r);
-
-        color4.SetChannel<RGBA::G>(-1.0f);
-        errorLogger.LogIfNotEq  (0.0f, color4.m_chas.m_g);
-        errorLogger.LogIfEq     (0.4f, color4.m_chas.m_g);
-
-        color4.SetChannel<RGBA::B>(0.3f);
-        errorLogger.LogIfNotEq  (0.3f, color4.m_chas.m_b);
-        errorLogger.LogIfEq     (0.2f, color4.m_chas.m_b);
-
-        color4.SetChannel<RGBA::A>(0.6f);
-        errorLogger.LogIfNotEq  (0.6f, color4.m_chas.m_a);
-        errorLogger.LogIfEq     (0.7f, color4.m_chas.m_a);
-
-
-
-        //color3.SetChannel<45>(2.0f);
-        //color3.SetChannel<RGBA::A>(2.0f);
-        color3.SetChannel<RGBA::R>(2.0f);
-        errorLogger.LogIfNotEq  (1.0f, color3.m_chas.m_r);
-        errorLogger.LogIfEq     (3.0f, color4.m_chas.m_r);
-
-        color3.SetChannel<RGBA::G>(-1.0f);
-        errorLogger.LogIfNotEq  (0.0f, color3.m_chas.m_g);
-        errorLogger.LogIfEq     (0.4f, color4.m_chas.m_g);
-
-        color3.SetChannel<RGBA::B>(0.3f);
-        errorLogger.LogIfNotEq  (0.3f, color3.m_chas.m_b);
-        errorLogger.LogIfEq     (0.2f, color4.m_chas.m_b);
-
-        RGBA try324 = Cast(color3);
 
 	TEST_UNIT_END;
 #pragma endregion
