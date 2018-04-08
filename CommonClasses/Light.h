@@ -1,6 +1,7 @@
 #pragma once
 #include "vector3.h"
 #include "Ray.h"
+#include "ColorTemplate.h"
 
 namespace CommonClass
 {
@@ -11,17 +12,29 @@ namespace CommonClass
 class Light
 {
 public:
+    /*!
+        \brief the position of the light
+    */
 	vector3 m_position;
+
+    /*!
+        \brief the diffuse color of the color.
+    */
+    RGB     m_color;
 	
 public:
-	Light();
-	Light(const vector3& position);
+    /*!
+        \brief construct a light
+        \param position where the light is
+        \param diffuse the diffuse color of the light.
+    */
+	Light(const vector3& position, const RGB& color);
 	~Light();
 
 	/*
-		\brief get a ray from the hit point to the light.
+		\brief get a ray from the reflect point to the light.
 	*/
-	Ray ToLight(const vector3& reflectPoint);
+	Ray ToMeFrom(const vector3& reflectPoint);
 };
 
 } // namespace CommonClass
