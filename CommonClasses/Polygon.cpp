@@ -107,7 +107,7 @@ bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hit
         vector3 e2 = m_points[2] - m_points[0];
 		pHitRec->m_hitT = t;
         pHitRec->m_normal = Normalize(crossProd(e2, e1));
-        pHitRec->m_kDiffuse = m_kDiffuse;
+        pHitRec->m_material.m_kDiffuse = m_kDiffuse;
 		return true;
 	}
 	else
