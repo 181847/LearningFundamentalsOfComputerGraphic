@@ -1413,6 +1413,8 @@ TEST_MODULE_START
 		*/
 		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
         tsph->m_material = sphereMat;
+        auto tsph2 = std::make_unique<Sphere>(vector3(-1.0f, 2.0f, 0.5f), 1.0f);
+        tsph2->m_material = sphereMat;
 
         /*!
             \brief render triangles
@@ -1443,6 +1445,7 @@ TEST_MODULE_START
 
 
         scene.Add(std::move(tsph));
+        scene.Add(std::move(tsph2));
         scene.Add(std::move(tri1));
         scene.Add(std::move(tri2));
         scene.Add(std::move(poly));
@@ -1450,7 +1453,9 @@ TEST_MODULE_START
 		/*!
 			\brief config a camera.
 		*/
-		vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
+        //vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
+        vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
+        //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
 		Types::F32 focalLength = 0.5f;
@@ -1469,7 +1474,7 @@ TEST_MODULE_START
 			{
 				viewRay = camera.GetRay(i, j);
 				
-				//BREAK_POINT_IF(i == 203 && j == 511 - 187);
+				BREAK_POINT_IF(i == 224 && j == 511 - 231);
 
 				if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
 				{
@@ -1504,7 +1509,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderMaterial\\ThisImageIsForTempPointLight10.png");
+		camera.m_film->SaveTo("OutputTestImage\\RenderMaterial\\ThisImageIsForTempPointLight14.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForTempPointLight.png\"\n"
