@@ -105,9 +105,10 @@ bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hit
 	{
         vector3 e1 = m_points[1] - m_points[0];
         vector3 e2 = m_points[2] - m_points[0];
-		pHitRec->m_hitT = t;
+        // using Surface::s_offsetHitT to push hit point a little back to avoid numberic issue in shadow test.
+        pHitRec->m_hitT = t + Surface::s_offsetHitT;;
         pHitRec->m_normal = Normalize(crossProd(e2, e1));
-        pHitRec->m_material.m_kDiffuse = m_kDiffuse;
+        pHitRec->m_material = m_material;
 		return true;
 	}
 	else

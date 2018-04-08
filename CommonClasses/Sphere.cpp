@@ -61,10 +61,13 @@ bool Sphere::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitR
 		return false;
 	}
 	
+    // push hit point a little back to avoid numberic issue in shadow test.
+    finalT += Surface::s_offsetHitT;
+
 	pHitRec->m_hitT     = finalT;
     pHitRec->m_hitPoint = ray.m_origin + finalT * ray.m_direction;
 	pHitRec->m_normal   = Normalize(pHitRec->m_hitPoint - m_center);
-    pHitRec->m_material.m_kDiffuse = m_kDiffuse;
+    pHitRec->m_material = m_material;
 
 	return true;
 }

@@ -20,9 +20,9 @@ public:
 	std::vector<vector3> m_points;
 
     /*!
-        \brief the diffuse coefficient.
+        \brief the material of this polygon
     */
-    RGB                 m_kDiffuse;
+    Material            m_material;
 
 	/*!
 		\brief the normal of the plane, define by the first three vertices in the m_points.

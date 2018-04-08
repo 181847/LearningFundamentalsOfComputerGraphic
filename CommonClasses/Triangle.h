@@ -15,9 +15,9 @@ public:
 	std::array<vector3, 3> m_points;
 
     /*!
-        \brief the diffuse coefficient.
+        \brief the material of this triangle.
     */
-    RGB                    m_kDiffuse;
+    Material               m_material;
 
 public:
 	Triangle(const vector3& p0, const vector3& p1, const vector3& p2);
@@ -30,6 +30,6 @@ public:
 
 };
 /*! ensurance, extra 4 bytes stands for the virtual pointer int the Surface*/
-static_assert(sizeof(Triangle) == 4 + 3 * sizeof(vector3) + 3 * sizeof(Types::F32), "size of Triangle is wrong");
+static_assert(sizeof(Triangle) == 4 + 3 * sizeof(vector3) + sizeof(Material), "size of Triangle is wrong");
 
 } // namespace CommonClass

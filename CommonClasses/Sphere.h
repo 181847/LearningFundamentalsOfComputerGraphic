@@ -2,6 +2,7 @@
 #include "Surface.h"
 #include "HitRecord.h"
 #include "ColorTemplate.h"
+#include "Material.h"
 
 namespace CommonClass
 {
@@ -21,9 +22,9 @@ public:
 	Types::F32	m_radius;
 
     /*!
-        \brief the coefficient of the surface diffuse, default to be white.
+        \brief material of this sphere.
     */
-    RGB         m_kDiffuse = RGB::WHITE;
+    Material    m_material;
 
 public:
 	Sphere(const vector3& center, const Types::F32 radius);
