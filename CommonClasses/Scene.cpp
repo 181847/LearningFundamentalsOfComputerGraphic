@@ -41,6 +41,12 @@ bool Scene::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRe
 			}
 		}
 	}
+
+    if (isHit)
+    {
+        pHitRec->m_hitPoint = ray.m_origin + pHitRec->m_hitT * ray.m_direction;
+    }
+
 	return isHit;
 }
 
