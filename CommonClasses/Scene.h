@@ -14,9 +14,6 @@ namespace CommonClass
 */
 class Scene
 {
-public:
-	Light m_pointLight;
-	
 private:
 	std::vector<std::unique_ptr<Surface>> m_surfaces;
 
