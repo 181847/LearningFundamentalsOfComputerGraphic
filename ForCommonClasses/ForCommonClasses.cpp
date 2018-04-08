@@ -523,6 +523,40 @@ TEST_MODULE_START
     TEST_UNIT_END;
 #pragma endregion
 
+#pragma region check Material construct properties
+    TEST_UNIT_START("check Material construct properties")
+        using namespace CommonClass;
+        const unsigned int MAX_REFLECT_INDEX = 5;
+        // reset random seed
+        globalMtr.SetRandomSeed(1);
+
+        for (int i = 0; i < 20; ++i)
+        {
+            RGB color = GetRandomRGB();
+            RGB rFresnel0 = GetRandomRGB();
+            unsigned int randomReflectIndex = 1 + globalMtr.Random(MAX_REFLECT_INDEX - 1);
+
+            Material mat1;                              // default mat, white color, fresnel coefficient is zero
+            Material mat2(color, rFresnel0);            // specific the fresnel coefficient with RGB.
+            Material mat3(color, randomReflectIndex);   // calculate fresnel coefficient using reflect index.
+
+            errorLogger.LogIfNotEq(mat1.m_kDiffuse, RGB::WHITE);
+            errorLogger.LogIfNotEq(mat1.m_rFresnel_0, RGB::BLACK);
+
+            errorLogger.LogIfNotEq(mat2.m_kDiffuse, color);
+            errorLogger.LogIfNotEq(mat2.m_rFresnel_0, rFresnel0);
+
+            // manully calculate the fresnel coefficient.
+            Types::F32 reflectIndexToFresnel0 = (randomReflectIndex - 1) * 1.0f / (randomReflectIndex + 1);
+            reflectIndexToFresnel0 *= reflectIndexToFresnel0;
+
+            errorLogger.LogIfNotEq(mat3.m_kDiffuse, color);
+            errorLogger.LogIfNotEq(mat3.m_rFresnel_0, RGB(reflectIndexToFresnel0, reflectIndexToFresnel0, reflectIndexToFresnel0));
+
+        }
+    TEST_UNIT_END;
+#pragma endregion
+
 #pragma region test Image
 	TEST_UNIT_START("test Image")
 		const Types::U32 WIDTH(512), HEIGHT(512);
@@ -1445,40 +1479,6 @@ TEST_MODULE_START
 			"you should have seen a sphere with some color, the background is dark green.");
 
 	TEST_UNIT_END;
-#pragma endregion
-
-#pragma region check Material construct properties
-    TEST_UNIT_START("check Material construct properties")
-        using namespace CommonClass;
-        const unsigned int MAX_REFLECT_INDEX = 5;
-        // reset random seed
-        globalMtr.SetRandomSeed(1);
-
-        for (int i = 0; i < 20; ++i)
-        {
-            RGB color = GetRandomRGB();
-            RGB rFresnel0 = GetRandomRGB();
-            unsigned int randomReflectIndex = 1 + globalMtr.Random(MAX_REFLECT_INDEX - 1);
-
-            Material mat1;                              // default mat, white color, fresnel coefficient is zero
-            Material mat2(color, rFresnel0);            // specific the fresnel coefficient with RGB.
-            Material mat3(color, randomReflectIndex);   // calculate fresnel coefficient using reflect index.
-
-            errorLogger.LogIfNotEq(mat1.m_kDiffuse, RGB::WHITE);
-            errorLogger.LogIfNotEq(mat1.m_rFresnel_0, RGB::BLACK);
-
-            errorLogger.LogIfNotEq(mat2.m_kDiffuse, color);
-            errorLogger.LogIfNotEq(mat2.m_rFresnel_0, rFresnel0);
-
-            // manully calculate the fresnel coefficient.
-            Types::F32 reflectIndexToFresnel0 = (randomReflectIndex - 1) * 1.0f / (randomReflectIndex + 1);
-            reflectIndexToFresnel0 *= reflectIndexToFresnel0;
-
-            errorLogger.LogIfNotEq(mat3.m_kDiffuse, color);
-            errorLogger.LogIfNotEq(mat3.m_rFresnel_0, RGB(reflectIndexToFresnel0, reflectIndexToFresnel0, reflectIndexToFresnel0));
-
-        }
-    TEST_UNIT_END;
 #pragma endregion
 
 TEST_MODULE_END
