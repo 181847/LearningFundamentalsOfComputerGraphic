@@ -30,11 +30,6 @@ public:
 	bool        m_isBackFace = false;
 
     /*!
-        \brief the diffuse coefficient of the hit point.
-    */
-    RGB         m_kDiffuse;
-
-    /*!
         \brief the material of hit point.
     */
     Material    m_material;
