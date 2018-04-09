@@ -4,6 +4,7 @@ namespace CommonClass
 {
 
 Scene::Scene()
+    :m_pointLight(vector3(0.0f, 0.0f, 0.0f), RGB::WHITE)
 {
 	// empty
 }
@@ -51,6 +52,53 @@ bool Scene::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRe
     }
 
 	return isHit;
+}
+
+RGB Scene::RayColor(const Ray & ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex)
+{
+    HitRecord hitRec, shadowHitRec;
+    if (this->Hit(ray, t0, t1, &hitRec))
+    {
+        RGB color;
+
+        color = hitRec.m_material.m_kDiffuse * this->m_ambient;
+
+        vector3 toLight = m_pointLight.ToMeFrom(hitRec.m_hitPoint);
+
+        Ray shadowRayTest = Ray(hitRec.m_hitPoint, toLight);
+
+        if (reflectLayerIndex > 0)
+        {
+            vector3 reflectVec = ray.m_direction - 2 * (dotProd(ray.m_direction, hitRec.m_normal)) * hitRec.m_normal;
+            color = color + hitRec.m_material.m_shinness / 32.0f * RayColor(Ray(hitRec.m_hitPoint, reflectVec), t0, t1, reflectLayerIndex - 1);
+        }
+
+        // is the hit point in the shadow?
+        if (!this->Hit(shadowRayTest, 0.0f, 1000.0f, &shadowHitRec))
+        {// yes it's in the shadow.
+            vector3 toEye = -ray.m_direction;
+            vector3 halfVec = Normalize(toEye + toLight);
+
+            RGB lightStrength = m_pointLight.m_color * std::max(0.0f, hitRec.m_normal * toLight);
+
+            const Types::F32 m = hitRec.m_material.m_shinness;
+
+            Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(halfVec * hitRec.m_normal, m);
+
+            RGB fresnelCoefficient = hitRec.m_material.RFresnel(toEye * hitRec.m_normal);
+
+            color = color 
+                + lightStrength 
+                * (hitRec.m_material.m_kDiffuse 
+                    + fresnelCoefficient * shinnessSthrength);
+        }
+
+        return color;
+    }
+    else
+    {
+        return m_background;
+    }
 }
 
 } // namespace CommonClass

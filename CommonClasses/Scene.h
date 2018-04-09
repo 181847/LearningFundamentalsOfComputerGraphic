@@ -18,7 +18,20 @@ public:
     /*!
         \brief ambient color.
     */
-    RGB     m_ambient = RGB::WHITE * 0.1f;
+    RGB     m_ambient = RGB::WHITE * 0.3f;
+
+    /*!
+        \brief background color for rendering.
+        default to be black.
+    */
+    const RGB     m_background = RGB::BLACK;
+
+    /*!
+        \brief default point light
+        this is an experimental object for test.
+        default to be at origin, color is white.
+    */
+    Light   m_pointLight;
 
 private:
 	std::vector<std::unique_ptr<Surface>> m_surfaces;
@@ -44,6 +57,16 @@ public:
 		\param t1 maxmum distance(include t1)
 	*/
 	bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec);
+
+    /*!
+        \brief evaluate the color of the hit point.
+        \param ray ray to test
+        \param t0 min distance, should be positive
+        \param t1 max distance, shoubld be positive
+        \param reflectLayerIndex reflectLayerIndex is used to prevent deep recursion to compute specular color,
+                                only if reflectLayerIndex greater than 0, then generate another ray to compute specular color with RayColor(..., reflectLayerIndex - 1).
+    */
+    RGB RayColor(const Ray& ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex = 3);
 };
 
 } // namespace CommonClass
