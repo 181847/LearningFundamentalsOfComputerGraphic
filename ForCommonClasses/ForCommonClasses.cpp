@@ -1453,8 +1453,8 @@ TEST_MODULE_START
 		/*!
 			\brief config a camera.
 		*/
-        //vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
-        vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
+        vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
+        //vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
         //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
@@ -1474,7 +1474,7 @@ TEST_MODULE_START
 			{
 				viewRay = camera.GetRay(i, j);
 				
-				BREAK_POINT_IF(i == 224 && j == 511 - 231);
+				//BREAK_POINT_IF(i == 224 && j == 511 - 231);
 
 				if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
 				{
@@ -1513,6 +1513,211 @@ TEST_MODULE_START
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForTempPointLight.png\"\n"
+			"you should have seen a sphere with some color, the background is dark green.");
+
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region render a scene use scene RayColor() function
+	TEST_UNIT_START("render a scene use scene RayColor() function")
+		using namespace CommonClass;
+
+		/*!
+		`	\brief set scene and light.
+		*/
+        Scene scene;
+        RGB backgroundColor(RGB::BLACK);
+
+        /*!
+            \brief make up materials.
+        */
+        Material sphereMat;
+        Material triMat;
+        Material polyMat;
+
+        sphereMat.m_kDiffuse        = RGB::RED;
+        sphereMat.m_shinness        = 12.0f;
+        sphereMat.SetRFresnel0(8);
+        triMat.m_kDiffuse           = RGB::YELLOW;
+        triMat.m_shinness           = 1.0f;
+        triMat.SetRFresnel0(8);
+        polyMat.m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
+        polyMat.m_shinness          = 0.5f;
+        polyMat.SetRFresnel0(8);
+
+        vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
+        RGB pointLightColor = RGB::WHITE;
+        Light pointLight(pointLightPosition * 5.0f, pointLightColor);
+
+        scene.m_pointLight = pointLight;
+
+		/*!
+			\brief set a sphere to render.
+		*/
+		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
+        tsph->m_material = sphereMat;
+        auto tsph2 = std::make_unique<Sphere>(vector3(-1.0f, 2.0f, 0.5f), 1.0f);
+        tsph2->m_material = sphereMat;
+        auto tsph3 = std::make_unique<Sphere>(vector3(-1.0f, 0.0f, 2.0f), 1.0f);
+        tsph3->m_material = sphereMat;
+
+        /*!
+            \brief render triangles
+        */
+		const Types::F32 borderLength = 20.0f;
+		auto tri1 = std::make_unique<Triangle>(
+			vector3(-borderLength, -2.0f, +borderLength),
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(+borderLength, -2.0f, borderLength));
+		auto tri2 = std::make_unique<Triangle>(
+			vector3(+borderLength, -2.0f, +borderLength),
+			vector3(-borderLength, -2.0f, -borderLength),
+			vector3(+borderLength, -2.0f, -borderLength));
+        tri1->m_material = triMat;
+        tri2->m_material = triMat;
+
+        /*!
+            \brief render polygon
+        */
+        auto poly = std::make_unique<Polygon>(
+            vector3(-borderLength, -borderLength, -2.0f),
+            vector3(-borderLength, borderLength, -2.0f),
+            vector3(+borderLength, borderLength, -2.0f)
+            );
+        poly->AddPoint(vector3(borderLength * 0.9f, -borderLength * 3.0f, -2.0f));
+        poly->AddPoint(vector3(borderLength * 0.1f, -borderLength * 4.0f, -2.0f));
+        poly->m_material = polyMat;
+
+
+        scene.Add(std::move(tsph));
+        scene.Add(std::move(tsph2));
+        scene.Add(std::move(tsph3));
+        scene.Add(std::move(tri1));
+        scene.Add(std::move(tri2));
+        scene.Add(std::move(poly));
+
+		/*!
+			\brief config a camera.
+		*/
+        vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
+        //vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
+        //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
+		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+		Types::F32 focalLength = 0.5f;
+		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+
+		camera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+		HitRecord hitRec, shadowHitRec;
+		Ray viewRay;
+		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+			{
+				viewRay = camera.GetRay(i, j);
+
+                camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
+			}
+		}
+
+		camera.m_film->SaveTo("OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor01.png\"\n"
+			"you should have seen a sphere with some color, the background is dark green.");
+
+	TEST_UNIT_END;
+#pragma endregion
+
+#pragma region render inside boxes and sphere
+	TEST_UNIT_START("render inside boxes and sphere")
+		using namespace CommonClass;
+
+		/*!
+		`	\brief set scene and light.
+		*/
+        Scene scene;
+
+        /*!
+            \brief make up materials.
+        */
+        Material sphereMat;
+        Material triMat;
+        Material polyMat;
+
+        sphereMat.m_kDiffuse        = RGB::RED;
+        sphereMat.m_shinness        = 12.0f;
+        sphereMat.SetRFresnel0(8);
+        triMat.m_kDiffuse           = RGB::YELLOW;
+        triMat.m_shinness           = 1.0f;
+        triMat.SetRFresnel0(8);
+        polyMat.m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
+        polyMat.m_shinness          = 0.5f;
+        polyMat.SetRFresnel0(8);
+
+        vector3 pointLightPosition(0.0f, 5.0f, 0.0f);
+        RGB pointLightColor = RGB::WHITE;
+        Light pointLight(pointLightPosition, pointLightColor);
+
+        scene.m_pointLight = pointLight;
+
+		/*!
+			\brief set a sphere to render.
+		*/
+		auto tsph = std::make_unique<Sphere>(vector3(-1.0617f, 0.8190f, 1.2368f), 0.8f);
+        tsph->m_material = sphereMat;
+
+        /*!
+            \brief render polygon
+        */
+        /*auto poly = std::make_unique<Polygon>(
+            vector3(-borderLength, -borderLength, -2.0f),
+            vector3(-borderLength, borderLength, -2.0f),
+            vector3(+borderLength, borderLength, -2.0f)
+            );
+        poly->AddPoint(vector3(borderLength * 0.9f, -borderLength * 3.0f, -2.0f));
+        poly->AddPoint(vector3(borderLength * 0.1f, -borderLength * 4.0f, -2.0f));
+        poly->m_material = polyMat;*/
+
+
+        scene.Add(std::move(tsph));
+
+		/*!
+			\brief config a camera.
+		*/
+        vector3 camPosition = vector3(0.0f, 2.618f, 9.564f);
+        //vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
+        //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
+		vector3 camTarget = vector3(0.0f, 2.145f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+		Types::F32 focalLength = 35.0f;
+		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+
+		camera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+		HitRecord hitRec, shadowHitRec;
+		Ray viewRay;
+		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+		{
+			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+			{
+				viewRay = camera.GetRay(i, j);
+
+                camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
+			}
+		}
+
+		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox01.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\RenderInsideBox\\....png\"\n"
 			"you should have seen a sphere with some color, the background is dark green.");
 
 	TEST_UNIT_END;
