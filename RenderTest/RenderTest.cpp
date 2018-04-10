@@ -278,9 +278,9 @@ TEST_MODULE_START
 
         vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
         RGB pointLightColor = RGB::WHITE;
-        Light pointLight(pointLightPosition * 5.0f, pointLightColor);
+        auto pointLight = std::make_unique<Light>(pointLightPosition * 5.0f, pointLightColor);
 
-        scene.m_pointLight = pointLight;
+        scene.Add(std::move(pointLight));
 
 		/*!
 			\brief set a sphere to render.
@@ -384,23 +384,27 @@ TEST_MODULE_START
         /*!
             \brief make up materials.
         */
-        Material sphereMat      (RGB::WHITE,              8,  16.0f);
+        Material sphereMat      (RGB(0.5f, 0.2f, 1.0f),              8,  16.0f);
         Material triMat         (RGB::YELLOW,           8,  1.0f);
         Material polyMat        (RGB(0.3f, 0.5f, 0.9f), 8,  1.0f);
-        Material polyMat_left   (RGB::RED,              8,  5.0f);
-        Material polyMat_right  (RGB::GREEN,            8,  5.0f);
+        Material polyMat_left   (RGB::RED,              8,  1.0f);
+        Material polyMat_right  (RGB::GREEN,            8,  1.0f);
         Material polyMat_top    (RGB::WHITE * 0.6f,            8,  3.0f);
         Material polyMat_bottom (RGB::WHITE * 0.6f,            8,  3.0f);
         Material polyMat_back   (RGB::WHITE * 0.6f,            8,  3.0f);
-        Material box_1_Mat      (RGB::WHITE * 0.6f,            8,  3.0f);
-        Material box_2_Mat      (RGB::WHITE * 0.6f,            8,  3.0f);
+        Material box_1_Mat      (RGB::WHITE * 0.8f,            8,  2.0f);
+        Material box_2_Mat      (RGB::WHITE * 0.8f,            8,  2.0f);
 
 
         vector3 pointLightPosition(0.0f, 5.0f, 0.0f);
-        RGB pointLightColor = RGB::WHITE * 0.5f;
-        Light pointLight(pointLightPosition, pointLightColor);
+        RGB pointLightColor = RGB::WHITE;
+        auto pointLight1 = std::make_unique<Light>(pointLightPosition, pointLightColor * 0.5f);
+        auto pointLight2 = std::make_unique<Light>(vector3(2.2f, 2.7f, 0.0f), pointLightColor * 0.2f);
+        auto pointLight3 = std::make_unique<Light>(vector3(-2.2f, 2.7f, 0.0f), pointLightColor * 0.2f);
 
-        scene.m_pointLight = pointLight;
+        scene.Add(std::move(pointLight1));
+        scene.Add(std::move(pointLight2));
+        scene.Add(std::move(pointLight3));
 
 		/*!
 			\brief set a sphere to render.
@@ -603,7 +607,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox24.png");
+		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox29.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\RenderInsideBox\\....png\"\n"
