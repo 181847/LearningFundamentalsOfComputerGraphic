@@ -1453,8 +1453,8 @@ TEST_MODULE_START
 		/*!
 			\brief config a camera.
 		*/
-        vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
-        //vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
+        //vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
+        vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
         //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
 		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
@@ -1482,11 +1482,12 @@ TEST_MODULE_START
 
                     color = hitRec.m_material.m_kDiffuse * scene.m_ambient;
 
-                    vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint);
+                    Types::F32 toLightDist = 0.0f;
+                    vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint, &toLightDist);
 
                     Ray shadowRayTest = Ray(hitRec.m_hitPoint, toLight);
 
-                    if ( ! scene.Hit(shadowRayTest, 0.0f, 1000.0f, &shadowHitRec))
+                    if ( ! scene.Hit(shadowRayTest, 0.0f, toLightDist, &shadowHitRec))
                     {
                         vector3 toEye = -viewRay.m_direction;
                         vector3 halfVec = Normalize(toEye + toLight);
@@ -1509,7 +1510,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderMaterial\\ThisImageIsForTempPointLight14.png");
+		camera.m_film->SaveTo("OutputTestImage\\RenderMaterial\\ThisImageIsForTempPointLight15.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForTempPointLight.png\"\n"
