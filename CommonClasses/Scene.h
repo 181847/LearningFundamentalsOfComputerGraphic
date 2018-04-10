@@ -56,7 +56,7 @@ public:
 		\param t0 minimum distance(include t0, this should be positive, no gaurantee about that the negative value will work properly.).
 		\param t1 maxmum distance(include t1)
 	*/
-	bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec);
+	bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const;
 
     /*!
         \brief evaluate the color of the hit point.
@@ -66,7 +66,15 @@ public:
         \param reflectLayerIndex reflectLayerIndex is used to prevent deep recursion to compute specular color,
                                 only if reflectLayerIndex greater than 0, then generate another ray to compute specular color with RayColor(..., reflectLayerIndex - 1).
     */
-    RGB RayColor(const Ray& ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex = 3);
+    RGB RayColor(const Ray& ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex = 3) const;
+
+    /*!
+        \brief evaluate the light of this point.
+        \param viewRay the ray to capture the light
+        \param hitRec the properties of hit position
+        this will take multiple light into account.
+    */
+    RGB LightColor(const Ray& viewRay, const HitRecord& hitRec) const;
 };
 
 } // namespace CommonClass
