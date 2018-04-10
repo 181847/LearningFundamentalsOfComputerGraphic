@@ -384,26 +384,20 @@ TEST_MODULE_START
         /*!
             \brief make up materials.
         */
-        Material sphereMat;
-        Material triMat;
-        Material polyMat;
-        Material box_1_Mat;
+        Material sphereMat      (RGB::WHITE,              8,  16.0f);
+        Material triMat         (RGB::YELLOW,           8,  1.0f);
+        Material polyMat        (RGB(0.3f, 0.5f, 0.9f), 8,  1.0f);
+        Material polyMat_left   (RGB::RED,              8,  5.0f);
+        Material polyMat_right  (RGB::GREEN,            8,  5.0f);
+        Material polyMat_top    (RGB::WHITE * 0.6f,            8,  3.0f);
+        Material polyMat_bottom (RGB::WHITE * 0.6f,            8,  3.0f);
+        Material polyMat_back   (RGB::WHITE * 0.6f,            8,  3.0f);
+        Material box_1_Mat      (RGB::WHITE * 0.6f,            8,  3.0f);
+        Material box_2_Mat      (RGB::WHITE * 0.6f,            8,  3.0f);
 
-        sphereMat.m_kDiffuse        = RGB::RED;
-        sphereMat.m_shinness        = 12.0f;
-        sphereMat.SetRFresnel0(8);
-        triMat.m_kDiffuse           = RGB::YELLOW;
-        triMat.m_shinness           = 1.0f;
-        triMat.SetRFresnel0(8);
-        polyMat.m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
-        polyMat.m_shinness          = 0.5f;
-        polyMat.SetRFresnel0(8);
-        box_1_Mat.m_kDiffuse        = RGB(0.8f, 0.2f, 0.3f);
-        box_1_Mat.m_shinness        = 0.5f;
-        box_1_Mat.SetRFresnel0(8);
 
         vector3 pointLightPosition(0.0f, 5.0f, 0.0f);
-        RGB pointLightColor = RGB::WHITE;
+        RGB pointLightColor = RGB::WHITE * 0.5f;
         Light pointLight(pointLightPosition, pointLightColor);
 
         scene.m_pointLight = pointLight;
@@ -465,11 +459,11 @@ TEST_MODULE_START
             outBoxPoints[PointsOrder::BOTTOM_LEFT_BACK]
         );
 
-        leftPoly    ->m_material = polyMat;
-        rightPoly   ->m_material = polyMat;
-        bottomPoly  ->m_material = polyMat;
-        topPoly     ->m_material = polyMat;
-        backPoly    ->m_material = polyMat;
+        leftPoly    ->m_material = polyMat_left;
+        rightPoly   ->m_material = polyMat_right;
+        bottomPoly  ->m_material = polyMat_bottom;
+        topPoly     ->m_material = polyMat_top;
+        backPoly    ->m_material = polyMat_back;
 
         scene.Add(std::move(leftPoly));
         scene.Add(std::move(rightPoly));
@@ -479,7 +473,7 @@ TEST_MODULE_START
 
 #pragma endregion
 
-#pragma region build inner box
+#pragma region build inner box 1
         std::array<vector3, 8> innerBox_1_Points = {
             vector3(-1.689f, +3.286f, -0.560f),
             vector3(-2.187f, +3.286f, -2.007f),
@@ -520,14 +514,56 @@ TEST_MODULE_START
 
 #pragma endregion
 
+#pragma region build inner box 2
+        std::array<vector3, 8> innerBox_2_Points = {
+            vector3(+0.612f, +2.001f, -0.716f),
+            vector3(+1.077f, +2.001f, -1.671f),
+            vector3(+2.184f, +2.001f, -1.131f),
+            vector3(+1.718f, +2.001f, -0.177f),
+            vector3(+0.612f, +0.112f, -0.716f),
+            vector3(+1.077f, +0.112f, -1.671f),
+            vector3(+2.184f, +0.112f, -1.131f),
+            vector3(+1.718f, +0.112f, -0.177f)};
+
+        auto innerBox2 = CreatBox(innerBox_2_Points);
+
+        for (auto & polyFace : innerBox2)
+        {
+            polyFace->m_material = box_2_Mat;
+        }
+
+        /*!
+            \brief add each poly seperately for debuging.
+        */
+        // TOP
+        scene.Add(std::move(innerBox2[0]));
+        
+        // BOTTOM
+        scene.Add(std::move(innerBox2[1]));
+
+        // LEFT
+        scene.Add(std::move(innerBox2[2]));
+
+        // RIGHT
+        scene.Add(std::move(innerBox2[3]));
+
+        // FRONT
+        scene.Add(std::move(innerBox2[4]));
+
+        // BACK
+        scene.Add(std::move(innerBox2[5]));
+
+#pragma endregion
+
         scene.Add(std::move(tsph));
 
 		/*!
 			\brief config a camera.
 		*/
-        vector3 camPosition = vector3(0.0f, 2.618f, 9.564f);        // original camera position
+        //vector3 camPosition = vector3(0.0f, 2.618f, 9.564f);        // original camera position
         //vector3 camPosition = vector3(-0.2f, 5.5f, 3.0f);
         //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
+        vector3 camPosition = vector3(0.0f, 3.6f, 8.0f);
 		vector3 camTarget = vector3(0.0f, 2.145f, 0.0f);
 		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
 		Types::F32 focalLength = 1.0f;
@@ -555,7 +591,7 @@ TEST_MODULE_START
                 const unsigned int CURR_COUNT_PIXE = j + i * PIXEL_HEIGHT + 1;
                 if (CURR_COUNT_PIXE % 2500 == 0)
                 {
-                    std::printf("progress: %.4f%%\r", CURR_COUNT_PIXE * 1.0f / NUM_ALL_PIXEL * 100.0f);
+                    ShowProgress(CURR_COUNT_PIXE * 1.0f / NUM_ALL_PIXEL);
                 }
 
                 //BREAK_POINT_IF(i == 90 && j == 511 - 298);
@@ -563,11 +599,11 @@ TEST_MODULE_START
 				viewRay = camera.GetRay(i, j);
 
                 //BREAK_POINT_IF(i == 93 && j == 511 - 76);
-                camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f, 0));
+                camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox16.png");
+		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox24.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\RenderInsideBox\\....png\"\n"
