@@ -29,6 +29,8 @@
 RandomTool::MTRandom globalMtr;
 const unsigned int G_MAX_INT = 1000;
 
+using namespace CommonClass;
+
 /*!
 	\brief some common configurations for the test.
 */
@@ -72,8 +74,8 @@ namespace UserConfig
 		\brief common render option, right bound location
 	*/
 	const Types::F32 COMMON_RENDER_TOP      = +3.0f;
-
 }
+
 
 /*!
 	\brief get random vector3.
@@ -102,6 +104,111 @@ CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 RGB GetRandomRGB()
 {
     return RGB(globalMtr.Random(), globalMtr.Random(), globalMtr.Random());
+}
+
+/*!
+    \brief create a quad poly.
+    \param p1-4 four point position
+    remember the clockwise is front face.
+    A-------->
+    |
+    |   front order
+    |
+    <--------
+*/
+auto CreatQuadPoly(const vector3 &p1, const vector3 &p2, const vector3 &p3, const vector3 &p4)
+{
+
+    auto poly = std::make_unique<Polygon>(
+        p1,
+        p2,
+        p3
+        );
+
+    poly->AddPoint(p4);
+
+    return poly;
+}
+
+/*!
+    \brief help to get point position in an array whose size is 8.
+*/
+enum PointsOrder
+{
+    TOP_LEFT_FRONT = 0,
+    TOP_LEFT_BACK,
+    TOP_RIGHT_BACK,
+    TOP_RIGHT_FRONT,
+    BOTTOM_LEFT_FRONT,
+    BOTTOM_LEFT_BACK,
+    BOTTOM_RIGHT_BACK,
+    BOTTOM_RIGHT_FRONT
+};
+/*!
+    \brief build six poly for a box
+    \param points eight points to consist a box,
+    \return 6 polygons which is visible from the outside of the box, polygons are in the order of {top, bottom, left, right, front, back}
+    first four points is on the top, ranged in clockwise
+    last four points is on the botom, ranged ALSO in clockwise
+    --------->
+    A        |  \
+    |  top   |   \
+    |start   V    \
+    *<--------     V
+    \       ---------->
+     \      A         |
+      \     |   bottom|
+       \    |start    V
+        V   *<---------
+
+*/
+std::array<std::unique_ptr<Polygon>, 6> CreatBox(const std::array<vector3, 8>& points)
+{
+    std::array<std::unique_ptr<Polygon>, 6> boxPolys;
+
+    // top
+    boxPolys[0] = std::move(CreatQuadPoly(
+        points[PointsOrder::TOP_LEFT_FRONT],
+        points[PointsOrder::TOP_LEFT_BACK], 
+        points[PointsOrder::TOP_RIGHT_BACK], 
+        points[PointsOrder::TOP_RIGHT_FRONT]));
+
+    // bottom
+    boxPolys[1] = std::move(CreatQuadPoly(
+        points[PointsOrder::BOTTOM_LEFT_BACK],
+        points[PointsOrder::BOTTOM_LEFT_FRONT],
+        points[PointsOrder::BOTTOM_RIGHT_FRONT],
+        points[PointsOrder::BOTTOM_RIGHT_BACK]));
+
+    // left
+    boxPolys[2] = std::move(CreatQuadPoly(
+        points[PointsOrder::TOP_LEFT_BACK],
+        points[PointsOrder::TOP_LEFT_FRONT],
+        points[PointsOrder::BOTTOM_LEFT_FRONT],
+        points[PointsOrder::BOTTOM_LEFT_BACK]));
+
+    // right
+    boxPolys[3] = std::move(CreatQuadPoly(
+        points[PointsOrder::TOP_RIGHT_FRONT],
+        points[PointsOrder::TOP_RIGHT_BACK],
+        points[PointsOrder::BOTTOM_RIGHT_BACK],
+        points[PointsOrder::BOTTOM_RIGHT_FRONT]));
+
+    // front
+    boxPolys[4] = std::move(CreatQuadPoly(
+        points[PointsOrder::TOP_LEFT_FRONT],
+        points[PointsOrder::TOP_RIGHT_FRONT],
+        points[PointsOrder::BOTTOM_RIGHT_FRONT],
+        points[PointsOrder::BOTTOM_LEFT_FRONT]));
+
+    // back
+    boxPolys[5] = std::move(CreatQuadPoly(
+        points[PointsOrder::TOP_RIGHT_BACK],
+        points[PointsOrder::TOP_LEFT_BACK],
+        points[PointsOrder::BOTTOM_LEFT_BACK],
+        points[PointsOrder::BOTTOM_RIGHT_BACK]));
+
+    return boxPolys;
 }
 
 /*!
@@ -137,6 +244,14 @@ TEST_MODULE_START
 #pragma region render a scene use scene RayColor() function
 	TEST_UNIT_START("render a scene use scene RayColor() function")
 		using namespace CommonClass;
+
+        const bool SKIP_THIS_TEST = true;
+
+        if (SKIP_THIS_TEST)
+        {
+            std::cout << "test skipped";
+            return errorLogger.conclusion();
+        }
 
 		/*!
 		`	\brief set scene and light.
@@ -244,6 +359,218 @@ TEST_MODULE_START
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor01.png\"\n"
+			"you should have seen a sphere with some color, the background is dark green.");
+
+	TEST_UNIT_END;
+#pragma endregion
+ 
+#pragma region render inside boxes and sphere
+	TEST_UNIT_START("render inside boxes and sphere")
+		using namespace CommonClass;
+
+        const bool SKIP_THIS_TEST = false;
+
+        if (SKIP_THIS_TEST)
+        {
+            std::cout << "test skipped";
+            return errorLogger.conclusion();
+        }
+
+		/*!
+		`	\brief set scene and light.
+		*/
+        Scene scene;
+
+        /*!
+            \brief make up materials.
+        */
+        Material sphereMat;
+        Material triMat;
+        Material polyMat;
+        Material box_1_Mat;
+
+        sphereMat.m_kDiffuse        = RGB::RED;
+        sphereMat.m_shinness        = 12.0f;
+        sphereMat.SetRFresnel0(8);
+        triMat.m_kDiffuse           = RGB::YELLOW;
+        triMat.m_shinness           = 1.0f;
+        triMat.SetRFresnel0(8);
+        polyMat.m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
+        polyMat.m_shinness          = 0.5f;
+        polyMat.SetRFresnel0(8);
+        box_1_Mat.m_kDiffuse        = RGB(0.8f, 0.2f, 0.3f);
+        box_1_Mat.m_shinness        = 0.5f;
+        box_1_Mat.SetRFresnel0(8);
+
+        vector3 pointLightPosition(0.0f, 5.0f, 0.0f);
+        RGB pointLightColor = RGB::WHITE;
+        Light pointLight(pointLightPosition, pointLightColor);
+
+        scene.m_pointLight = pointLight;
+
+		/*!
+			\brief set a sphere to render.
+		*/
+		auto tsph = std::make_unique<Sphere>(vector3(-1.0617f, 0.8190f, 1.2368f), 0.8f);
+        tsph->m_material = sphereMat;
+
+#pragma region build the big open box
+
+        Types::F32 outBoxLeft = -2.5f;
+        Types::F32 outBoxRight = +2.5f;
+        Types::F32 outBoxTop = 5.470f;
+        Types::F32 outBoxBack = -2.813f;
+        Types::F32 outBoxFront = 2.813f;
+        Types::F32 outBoxBottom = 0.100f;
+
+        std::array<vector3, 8> outBoxPoints = {
+            vector3(outBoxLeft, outBoxTop, outBoxFront),
+            vector3(outBoxLeft, outBoxTop, outBoxBack),
+            vector3(outBoxRight, outBoxTop, outBoxBack),
+            vector3(outBoxRight, outBoxTop, outBoxFront),
+            vector3(outBoxLeft, outBoxBottom, outBoxFront),
+            vector3(outBoxLeft, outBoxBottom, outBoxBack),
+            vector3(outBoxRight, outBoxBottom, outBoxBack),
+            vector3(outBoxRight, outBoxBottom, outBoxFront)
+        };
+        
+        auto leftPoly = CreatQuadPoly(
+            outBoxPoints[PointsOrder::TOP_LEFT_FRONT],
+            outBoxPoints[PointsOrder::TOP_LEFT_BACK],
+            outBoxPoints[PointsOrder::BOTTOM_LEFT_BACK],
+            outBoxPoints[PointsOrder::BOTTOM_LEFT_FRONT]
+        );
+        auto rightPoly = CreatQuadPoly(
+            outBoxPoints[PointsOrder::TOP_RIGHT_BACK],
+            outBoxPoints[PointsOrder::TOP_RIGHT_FRONT],
+            outBoxPoints[PointsOrder::BOTTOM_RIGHT_FRONT],
+            outBoxPoints[PointsOrder::BOTTOM_RIGHT_BACK]
+        );
+        auto bottomPoly = CreatQuadPoly(
+            outBoxPoints[PointsOrder::BOTTOM_LEFT_FRONT],
+            outBoxPoints[PointsOrder::BOTTOM_LEFT_BACK],
+            outBoxPoints[PointsOrder::BOTTOM_RIGHT_BACK],
+            outBoxPoints[PointsOrder::BOTTOM_RIGHT_FRONT]
+        );
+        auto topPoly = CreatQuadPoly(
+            outBoxPoints[PointsOrder::TOP_LEFT_FRONT],
+            outBoxPoints[PointsOrder::TOP_RIGHT_FRONT],
+            outBoxPoints[PointsOrder::TOP_RIGHT_BACK],
+            outBoxPoints[PointsOrder::TOP_LEFT_BACK]
+        );
+        auto backPoly = CreatQuadPoly(
+            outBoxPoints[PointsOrder::TOP_LEFT_BACK],
+            outBoxPoints[PointsOrder::TOP_RIGHT_BACK],
+            outBoxPoints[PointsOrder::BOTTOM_RIGHT_BACK],
+            outBoxPoints[PointsOrder::BOTTOM_LEFT_BACK]
+        );
+
+        leftPoly    ->m_material = polyMat;
+        rightPoly   ->m_material = polyMat;
+        bottomPoly  ->m_material = polyMat;
+        topPoly     ->m_material = polyMat;
+        backPoly    ->m_material = polyMat;
+
+        scene.Add(std::move(leftPoly));
+        scene.Add(std::move(rightPoly));
+        scene.Add(std::move(bottomPoly));
+        scene.Add(std::move(topPoly));
+        scene.Add(std::move(backPoly));
+
+#pragma endregion
+
+#pragma region build inner box
+        std::array<vector3, 8> innerBox_1_Points = {
+            vector3(-1.689f, +3.286f, -0.560f),
+            vector3(-2.187f, +3.286f, -2.007f),
+            vector3(-0.503f, +3.286f, -2.587f),
+            vector3(-0.005f, +3.286f, -1.140f),
+            vector3(-1.689f, +0.112f, -0.560f),
+            vector3(-2.187f, +0.112f, -2.007f),
+            vector3(-0.503f, +0.112f, -2.587f),
+            vector3(-0.005f, +0.112f, -1.140f)};
+
+        auto innerBox1 = CreatBox(innerBox_1_Points);
+
+        for (auto & polyFace : innerBox1)
+        {
+            polyFace->m_material = box_1_Mat;
+        }
+
+        /*!
+            \brief add each poly seperately for debuging.
+        */
+        // TOP
+        scene.Add(std::move(innerBox1[0]));
+        
+        // BOTTOM
+        scene.Add(std::move(innerBox1[1]));
+
+        // LEFT
+        scene.Add(std::move(innerBox1[2]));
+
+        // RIGHT
+        scene.Add(std::move(innerBox1[3]));
+
+        // FRONT
+        scene.Add(std::move(innerBox1[4]));
+
+        // BACK
+        scene.Add(std::move(innerBox1[5]));
+
+#pragma endregion
+
+        scene.Add(std::move(tsph));
+
+		/*!
+			\brief config a camera.
+		*/
+        vector3 camPosition = vector3(0.0f, 2.618f, 9.564f);        // original camera position
+        //vector3 camPosition = vector3(-0.2f, 5.5f, 3.0f);
+        //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
+		vector3 camTarget = vector3(0.0f, 2.145f, 0.0f);
+		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+		Types::F32 focalLength = 1.0f;
+		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+
+		camera.SetFilm(std::make_unique<Film>(
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			-0.5f, +0.5f,
+			-0.5f, +0.5f));
+
+        /*!
+            \brief help to trace the rendering progress.
+        */
+        const unsigned int PIXEL_WIDTH = camera.m_film->m_width;
+        const unsigned int PIXEL_HEIGHT = camera.m_film->m_height;
+        const unsigned int NUM_ALL_PIXEL = PIXEL_WIDTH * PIXEL_HEIGHT;
+
+		HitRecord hitRec, shadowHitRec;
+		Ray viewRay;
+		for (unsigned int i = 0; i < PIXEL_WIDTH; ++i)
+		{
+			for (unsigned int j = 0; j < PIXEL_HEIGHT; ++j)
+			{
+                // print the progress
+                const unsigned int CURR_COUNT_PIXE = j + i * PIXEL_HEIGHT + 1;
+                if (CURR_COUNT_PIXE % 2500 == 0)
+                {
+                    std::printf("progress: %.4f%%\r", CURR_COUNT_PIXE * 1.0f / NUM_ALL_PIXEL * 100.0f);
+                }
+
+                //BREAK_POINT_IF(i == 90 && j == 511 - 298);
+
+				viewRay = camera.GetRay(i, j);
+
+                //BREAK_POINT_IF(i == 93 && j == 511 - 76);
+                camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f, 0));
+			}
+		}
+
+		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox16.png");
+
+		errorLogger += LetUserCheckJudge(
+			"check \".\\OutputTestImage\\RenderInsideBox\\....png\"\n"
 			"you should have seen a sphere with some color, the background is dark green.");
 
 	TEST_UNIT_END;
