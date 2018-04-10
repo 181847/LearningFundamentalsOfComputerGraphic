@@ -58,9 +58,23 @@ vector3    crossProd  (const vector3 & a, const vector3 & b);
 vector3	   Normalize(const vector3 & a);
 
 /*!
+    \brief normalize the vector3 and return the length of it (before normalize)
+    \param a the vector to be normalized
+    \param pOutLength point to the return length.
+*/
+vector3    Normalize(const vector3 & a, Types::F32 * const pOutLength);
+
+/*!
 	\brief get length of the vector.
 */
 Types::F32 Length(const vector3 & a);
+
+/*!
+    \brief reflect a vector by a unit vector
+    \param incomeVec the vector to be reflected
+    \param unitNormal the normal of the reflect plane.
+*/
+vector3 Reflect(const vector3& incomeVec, const vector3& unitNormal);
 
 /*!
 	\brief two vector are almost equal

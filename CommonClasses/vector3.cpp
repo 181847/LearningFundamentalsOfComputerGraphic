@@ -87,13 +87,30 @@ vector3 Normalize(const vector3 & a)
 		throw std::exception("cannot normalize a zero vector.");
 	}
 	const Types::F32 reciprocalLen = 1 / (std::sqrtf(squreLen));
-	return vector3(a.m_x * reciprocalLen, a.m_y * reciprocalLen, a.m_z * reciprocalLen);
+	return a * reciprocalLen;
+}
+
+vector3 Normalize(const vector3 & a, Types::F32 * const pOutLength)
+{
+	const Types::F32 squreLen = a.m_x * a.m_x + a.m_y * a.m_y + a.m_z * a.m_z;
+	if (squreLen == 0.0f)
+	{
+		throw std::exception("cannot normalize a zero vector.");
+	}
+    *pOutLength = std::sqrtf(squreLen);
+	const Types::F32 reciprocalLen = 1 / (*pOutLength);
+	return a * reciprocalLen;
 }
 
 Types::F32 Length(const vector3 & a)
 {
 	return std::sqrtf(a.m_x * a.m_x + a.m_y * a.m_y + a.m_z * a.m_z);
-};
+}
+
+vector3 Reflect(const vector3 & incomeVec, const vector3 & unitNormal)
+{
+    return incomeVec - (2.0f * (dotProd(incomeVec, unitNormal)) * unitNormal);
+}
 
 bool AlmostEqual(const vector3 & a, const vector3 & b, int ulp)
 {
