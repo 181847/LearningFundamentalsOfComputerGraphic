@@ -4,7 +4,6 @@ namespace CommonClass
 {
 
 Scene::Scene()
-    :m_pointLight(vector3(0.0f, 0.0f, 0.0f), RGB::WHITE)
 {
 	// empty
 }
@@ -17,6 +16,11 @@ Scene::~Scene()
 void Scene::Add(std::unique_ptr<Surface> surf)
 {
 	m_surfaces.push_back(std::move(surf));
+}
+
+void Scene::Add(std::unique_ptr<Light> light)
+{
+    m_lights.push_back(std::move(light));
 }
 
 bool Scene::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRecord * pHitRec) const
@@ -86,32 +90,35 @@ RGB Scene::LightColor(const Ray & viewRay, const HitRecord & hitRec) const
 {
     RGB lightColor = RGB::BLACK;
 
-    // shadow test
-    Types::F32 toLightDist = 0.0f;
-    vector3 toLight = m_pointLight.ToMeFrom(hitRec.m_hitPoint, &toLightDist);
+    for (auto & light : m_lights)
+    {
+        // shadow test
+        Types::F32 toLightDist = 0.0f;
+        vector3 toLight = light->ToMeFrom(hitRec.m_hitPoint, &toLightDist);
 
-    Ray shadowRayTest = Ray(hitRec.m_hitPoint, toLight);
+        Ray shadowRayTest = Ray(hitRec.m_hitPoint, toLight);
 
-    HitRecord shadowHitRec;
-    // is the hit point in the shadow?
-    if (!this->Hit(shadowRayTest, 0.0f, toLightDist, &shadowHitRec))
-    {// yes it's in the shadow.
-        vector3 toEye = -viewRay.m_direction;
-        vector3 halfVec = Normalize(toEye + toLight);
+        HitRecord shadowHitRec;
+        // is the hit point in the shadow?
+        if (!this->Hit(shadowRayTest, 0.0f, toLightDist, &shadowHitRec))
+        {// yes it's in the shadow.
+            vector3 toEye = -viewRay.m_direction;
+            vector3 halfVec = Normalize(toEye + toLight);
 
-        RGB lightStrength = m_pointLight.m_color * std::max(0.0f, hitRec.m_normal * toLight);
+            RGB lightStrength = light->m_color * std::max(0.0f, hitRec.m_normal * toLight);
 
-        const Types::F32 m = hitRec.m_material.m_shinness;
+            const Types::F32 m = hitRec.m_material.m_shinness;
 
-        Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(halfVec * hitRec.m_normal, m);
+            Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(halfVec * hitRec.m_normal, m);
 
-        RGB fresnelCoefficient = hitRec.m_material.RFresnel(toEye * hitRec.m_normal);
+            RGB fresnelCoefficient = hitRec.m_material.RFresnel(toEye * hitRec.m_normal);
 
-        lightColor = lightColor +
-            lightStrength
-            * (hitRec.m_material.m_kDiffuse
-                + fresnelCoefficient * shinnessSthrength);
-    }
+            lightColor = lightColor +
+                lightStrength
+                * (hitRec.m_material.m_kDiffuse
+                    + fresnelCoefficient * shinnessSthrength);
+        }// end if
+    }// end for
 
     return lightColor;
 }

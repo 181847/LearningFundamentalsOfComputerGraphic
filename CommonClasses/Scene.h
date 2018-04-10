@@ -26,16 +26,13 @@ public:
     */
     const RGB     m_background = RGB::BLACK;
 
-    /*!
-        \brief default point light
-        this is an experimental object for test.
-        default to be at origin, color is white.
-    */
-    Light   m_pointLight;
-
 private:
 	std::vector<std::unique_ptr<Surface>> m_surfaces;
 
+    /*!
+        \brief all the point light in the scene
+    */
+    std::vector<std::unique_ptr<Light>> m_lights;
 
 public:
 	Scene();
@@ -49,6 +46,12 @@ public:
 		\param surf the new surface
 	*/
 	void Add(std::unique_ptr<Surface> surf);
+
+    /*!
+        \brief add a new light to the scene
+        \param light the point light to be added.
+    */
+    void Add(std::unique_ptr<Light> light);
 
 	/*!
 		\brief find the closest hit point in the scene.
