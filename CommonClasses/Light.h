@@ -36,7 +36,7 @@ public:
         \param reflectPoint the position of reflection
         \param pOutDistance return the distance between reflectPoint and light.
 	*/
-	vector3 ToMeFrom(const vector3& reflectPoint, Types::F32 * const pOutDistance);
+	vector3 ToMeFrom(const vector3& reflectPoint, Types::F32 * const pOutDistance) const;
 };
 
 } // namespace CommonClass

@@ -12,7 +12,7 @@ Light::~Light()
 {
 }
 
-vector3 Light::ToMeFrom(const vector3 & reflectPoint, Types::F32 * const pOutDistance)
+vector3 Light::ToMeFrom(const vector3 & reflectPoint, Types::F32 * const pOutDistance) const
 {
 	return Normalize(m_position - reflectPoint, pOutDistance);
 }

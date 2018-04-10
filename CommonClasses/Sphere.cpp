@@ -14,7 +14,7 @@ Sphere::~Sphere()
 {
 }
 
-bool Sphere::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRecord * pHitRec)
+bool Sphere::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRecord * pHitRec) const
 {
 	assert(pHitRec != nullptr && "argument nullptr error");
 
@@ -69,7 +69,7 @@ bool Sphere::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitR
 	return true;
 }
 
-AABB Sphere::BoundingBox()
+AABB Sphere::BoundingBox() const
 {
 	const vector3 corner(m_radius, m_radius, m_radius);
 	return AABB(m_center - corner, m_center + corner);

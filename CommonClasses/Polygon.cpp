@@ -54,7 +54,7 @@ void Polygon::AddPoint(const vector3 & p)
 	BuildBoundingBox();
 }
 
-bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRecord * pHitRec)
+bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRecord * pHitRec) const
 {
 	const Types::F32 t = (-m_d - dotProd(m_normal, ray.m_origin)) / dotProd(m_normal, ray.m_direction);
 	
@@ -74,8 +74,8 @@ bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hit
 	unsigned int numPoints = m_points.size();
 	bool inside = false;
 
-	vector3* e0 = &(m_points[numPoints - 1]);
-	vector3* e1 = nullptr;
+    const vector3* e0 = &(m_points[numPoints - 1]);
+	const vector3* e1 = nullptr;
 
 	bool y0 = (e0->m_arr[m_index1] >= t_arr1);
 	bool y1 = false;
@@ -116,7 +116,7 @@ bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hit
 	}
 }
 
-AABB Polygon::BoundingBox()
+AABB Polygon::BoundingBox() const
 {
 	return m_boundingBox;
 }

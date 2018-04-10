@@ -29,8 +29,8 @@ public:
 	Triangle(std::array<vector3, 3>& threePoints);
 	~Triangle();
 
-	virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) override;
-	virtual AABB BoundingBox() override;
+	virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const override;
+	virtual AABB BoundingBox() const override;
 
 
 };

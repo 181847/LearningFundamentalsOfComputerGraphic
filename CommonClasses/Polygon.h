@@ -79,12 +79,12 @@ public:
 		\param t1 max T value
 		\param pHitRec return the hit detail
 	*/
-	virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) override;
+	virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const override;
 
 	/*!
 		\brief get bounding box of the sphere.
 	*/
-	virtual AABB BoundingBox() override;
+	virtual AABB BoundingBox() const override;
 
 protected:
 	/*!

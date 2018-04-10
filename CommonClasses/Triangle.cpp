@@ -23,7 +23,7 @@ Triangle::~Triangle()
 {
 }
 
-bool Triangle::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRecord * pHitRec)
+bool Triangle::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRecord * pHitRec) const
 {
 	vector3 e1 = m_points[1] - m_points[0];
 	vector3 e2 = m_points[2] - m_points[0];
@@ -69,7 +69,7 @@ bool Triangle::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hi
 	return true;
 }
 
-AABB Triangle::BoundingBox()
+AABB Triangle::BoundingBox() const
 {
 	//assert(false && "Triangle::BoundingBox not implemented.");
 	vector3 minPoint(Types::Constant::MAX_F32, Types::Constant::MAX_F32, Types::Constant::MAX_F32), 
