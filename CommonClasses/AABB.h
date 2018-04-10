@@ -32,7 +32,9 @@ public:
 		\param ray ray to test
 		\param t0 min intersect dist(typical to be >= 0.0f. NOT ensure the negative number will work)
 		\param t1 max intersect dist
-		\param pHitRec return hit record, but the AABB is a basic collision shape, the record may only have the t(distance to ray origin), other property like diffuse/normal may not be recorded.
+		\param pHitRec return limited hit record, the AABB may not return entire information,
+                       WARNING!! when try hitting test with bounding box, PLEASE use another HitRecord object
+                       in order to avoid the confusion ( when the bounding box hit distance may overwirte the normal surface hit distance.) 
 		In the distance interval, if ray dosen't hit the box,
 		it should never hit the inside object.
 	*/
