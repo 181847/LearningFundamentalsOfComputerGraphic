@@ -20,6 +20,11 @@ public:
     Material               m_material;
 
 public:
+    /*!
+        \brief build a triangle by three points
+        \param p0-2 three point position
+        clockwise is front face.
+    */
 	Triangle(const vector3& p0, const vector3& p1, const vector3& p2);
 	Triangle(std::array<vector3, 3>& threePoints);
 	~Triangle();
