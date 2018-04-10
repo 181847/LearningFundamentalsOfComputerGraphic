@@ -57,6 +57,11 @@ protected:
 	unsigned int m_index0, m_index1;
 
 public:
+    /*!
+        \brief build a polygon plane throught three points.
+        \param p0 - 2 three point position
+        clockwise is front face.
+    */
 	Polygon(const vector3& p0, const vector3& p1, const vector3& p2);
 	~Polygon();
 
