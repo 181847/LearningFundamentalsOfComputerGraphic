@@ -9,13 +9,13 @@ Material::Material()
 {
 }
 
-Material::Material(const RGB & kDiffuse, const RGB & rFresnel_0)
-    :m_kDiffuse(kDiffuse), m_rFresnel_0(rFresnel_0)
+Material::Material(const RGB & kDiffuse, const RGB & rFresnel_0, const Types::F32 shinness)
+    :m_kDiffuse(kDiffuse), m_rFresnel_0(rFresnel_0), m_shinness(shinness)
 {
 }
 
-Material::Material(const RGB & kDiffuse, const unsigned int & reflectIndex)
-    :m_kDiffuse(kDiffuse)
+Material::Material(const RGB & kDiffuse, const unsigned int & reflectIndex, const Types::F32 shinness)
+    :m_kDiffuse(kDiffuse), m_shinness(shinness)
 {
     SetRFresnel0(reflectIndex);
 }
@@ -31,7 +31,7 @@ void Material::SetRFresnel0(const unsigned int & reflectIndex)
     m_rFresnel_0 = RGB(fresenel0, fresenel0, fresenel0);
 }
 
-RGB Material::RFresnel(const Types::F32 & cosTheta)
+RGB Material::RFresnel(const Types::F32 & cosTheta) const
 {
     Types::F32 cosThetaPow5 = (1 - cosTheta);
     cosThetaPow5 = cosThetaPow5 * cosThetaPow5 * cosThetaPow5 * cosThetaPow5 * cosThetaPow5;

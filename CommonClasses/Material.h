@@ -24,8 +24,8 @@ public:
 
 public:
     Material();
-    Material(const RGB& kDiffuse, const RGB& rFresnel_0);
-    Material(const RGB& kDiffuse, const unsigned int& reflectIndex);
+    Material(const RGB& kDiffuse, const RGB& rFresnel_0, const Types::F32 shinness = 2.0f);
+    Material(const RGB& kDiffuse, const unsigned int& reflectIndex, const Types::F32 shinness = 2.0f);
     ~Material();
 
     /*!
@@ -45,7 +45,7 @@ public:
         -------------
         
     */
-    RGB RFresnel(const Types::F32& cosTheta);
+    RGB RFresnel(const Types::F32& cosTheta) const;
 };
 
 } // namespace CommonClass
