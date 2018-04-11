@@ -28,8 +28,19 @@ public:
         \param (x1, y1) start point
         \param (x2, y2) end point
         \param color the color of the line
+        reference from: https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
     */
     void DrawBresenhamLine(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB& color = RGB::BLACK);
+
+    /*!
+        \brief draw a line using Xiaolin Wu's line algorithm
+        \param (x1, y1) start point
+        \param (x2, y2) end point
+        \param foreColor the color of the line
+        \param backColor background color
+        reference from: https://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm
+    */
+    void DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, const RGB& foreColor = RGB::BLACK, const RGB& backgroundColor = RGB::WHITE);
 
 private:
     /*!
@@ -40,12 +51,12 @@ private:
     bool IsOutOfRange(const Types::I32 x, const Types::I32 y);
     
     /*!
-        \brief plot line for the low slope line (-1, +1)
+        \brief plot line for the low slope line (-1, +1), assists function DrawBresenhamLine()
     */
     void plotLineLow(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB& color = RGB::BLACK);
 
     /*!
-        \brief plot line for the height slope line (-inf, -1] && [+1, inf)
+        \brief plot line for the height slope line (-inf, -1] && [+1, inf), assists function DrawBresenhamLine()
     */
     void plotLineHeight(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB& color = RGB::BLACK);
 };
