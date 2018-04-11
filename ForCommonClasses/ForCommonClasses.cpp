@@ -1548,9 +1548,8 @@ TEST_MODULE_START
 
         vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
         RGB pointLightColor = RGB::WHITE;
-        Light pointLight(pointLightPosition * 5.0f, pointLightColor);
+        scene.Add(std::make_unique<Light>(pointLightPosition * 5.0f, pointLightColor));
 
-        scene.m_pointLight = pointLight;
 
 		/*!
 			\brief set a sphere to render.
@@ -1662,9 +1661,7 @@ TEST_MODULE_START
 
         vector3 pointLightPosition(0.0f, 5.0f, 0.0f);
         RGB pointLightColor = RGB::WHITE;
-        Light pointLight(pointLightPosition, pointLightColor);
-
-        scene.m_pointLight = pointLight;
+        scene.Add(std::make_unique<Light>(pointLightPosition * 5.0f, pointLightColor));
 
 		/*!
 			\brief set a sphere to render.
