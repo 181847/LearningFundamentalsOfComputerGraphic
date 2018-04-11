@@ -42,11 +42,11 @@ public:
 
 public:
 	/*!
-		\brief create a image with the size, the color is initialized to [0, 0, 0, 0]
+		\brief create a image with the size, the color is initialized to [0, 0, 0, 0] (* BLACK and OPAQUE *)
 		\param width width of the image
 		\param height height of the image
 	*/
-	Image(const Types::U32 width, const Types::U32 height);
+	Image(const Types::U32 width, const Types::U32 height, const RGBA& initColor = RGBA::BLACK);
 	Image(const Image&) = delete;
 	Image& operator=(const Image&) = delete;
 	~Image();

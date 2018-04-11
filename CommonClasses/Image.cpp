@@ -5,16 +5,16 @@
 namespace CommonClass
 {
 
-Image::Image(const Types::U32 width, const Types::U32 height)
+Image::Image(const Types::U32 width, const Types::U32 height, const RGBA& initColor)
 	:m_width(width), m_height(height), m_canvas(width * height)
 {
     // set all pixel to solid black
     for (auto & pixel : m_canvas)
     {
-        pixel.m_r = 0x00;
-        pixel.m_g = 0x00;
-        pixel.m_b = 0x00;
-        pixel.m_a = 0xFF;
+        pixel.m_r = static_cast<Types::U8>(initColor.m_chas.m_r * 255);
+        pixel.m_g = static_cast<Types::U8>(initColor.m_chas.m_g * 255);
+        pixel.m_b = static_cast<Types::U8>(initColor.m_chas.m_b * 255);
+        pixel.m_a = static_cast<Types::U8>(initColor.m_chas.m_a * 255);
     }
 }
 
