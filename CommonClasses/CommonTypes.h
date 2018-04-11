@@ -8,6 +8,7 @@ using F32 = float;
 using I32 = int;
 using U32 = unsigned int;
 using U8  = unsigned char;
+using I32 = int;
 
 namespace Constant
 {
