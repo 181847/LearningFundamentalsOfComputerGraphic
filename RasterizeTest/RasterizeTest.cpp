@@ -135,4 +135,24 @@ TEST_MODULE_START
     TEST_UNIT_END;
 #pragma endregion
 
+#pragma region draw bresenham lines
+    TEST_UNIT_START("draw bresenham lines")
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+
+        defaultImg.DrawWuXiaolinLine(
+            0.0f, 
+            0.0f, 
+            static_cast<Types::F32>(UserConfig::COMMON_PIXEL_WIDTH - 23), 
+            static_cast<Types::F32>(UserConfig::COMMON_PIXEL_HEIGHT - 2),
+            RGB::RED);
+        
+        defaultImg.DrawWuXiaolinLine(100.0f, 50.0f, 400.0f, 300.0f);
+        defaultImg.DrawWuXiaolinLine(100.0f, 400.0f, 50.0f, 300.0f);
+        defaultImg.DrawWuXiaolinLine(500.0f, 400.0f, 200.0f, 300.0f);
+        
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawWuXiaolinLine\\default_color.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
 TEST_MODULE_END
