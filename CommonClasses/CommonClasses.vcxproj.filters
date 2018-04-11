@@ -77,6 +77,9 @@
     <ClInclude Include="Material.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="RasterizeImage.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -134,6 +137,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Material.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="RasterizeImage.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

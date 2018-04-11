@@ -158,6 +158,7 @@
     <ClInclude Include="OrthographicCamera.h" />
     <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="Polygon.h" />
+    <ClInclude Include="RasterizeImage.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="ColorTemplate.h" />
     <ClInclude Include="Scene.h" />
@@ -180,6 +181,7 @@
     <ClCompile Include="OrthographicCamera.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="RasterizeImage.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sphere.cpp" />
