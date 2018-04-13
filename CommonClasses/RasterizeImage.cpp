@@ -43,17 +43,81 @@ RGB Interpolate(const RGB& src, const RGB& dest, const Types::F32 t)
 
 }
 
+namespace LiangBarskyCliping
+{
+
+/*!
+    \brief max value in the arr for n elements.
+    \param arr start of the array
+    \param n num elements to compare
+*/
+Types::F32 maxi(const Types::F32 arr[], const unsigned int n)
+{
+    // m is initialized to 0, this is designed by the Liang-Barsky-Algorithm
+    Types::F32 m = 0.0f;
+    for (unsigned int i = 0; i < n; ++i)
+    {
+        if (m < arr[i])
+        {
+            m = arr[i];
+        }
+    }
+    return m;
+}
+
+
+/*!
+    \brief max value in the arr for n elements.
+    \param arr start of the array
+    \param n num elements to compare
+*/
+Types::F32 mini(const Types::F32 arr[], const unsigned  n)
+{
+    // m is initialized to 1.0f, this is designed by the Liang-Barsky-Algorithm
+    Types::F32 m = 1.0f;
+    for (unsigned int i = 0; i < n; ++i)
+    {
+        if (m > arr[i])
+        {
+            m = arr[i];
+        }
+    }
+    return m;
+}
+
+}
+
 namespace CommonClass
 {
 
 RasterizeImage::RasterizeImage(const Types::U32 pixelWidth, const Types::U32 pixelHeight, const RGBA& initColor)
     :Image(pixelWidth, pixelHeight, initColor)
 {
+    // empty
 }
 
 RasterizeImage::~RasterizeImage()
 {
     // empty
+}
+
+void RasterizeImage::DrawLine(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const RGB & color)
+{
+    Types::F32 p1 = x0 - x1;
+    Types::F32 p2 = -p1;
+    Types::F32 p3 = y0 - y1;
+    Types::F32 p4 = -p3;
+
+    Types::F32 q1 = x0 - NORMALIZED_X_MIN;
+    Types::F32 q2 = NORMALIZED_X_MAX - x0;
+    Types::F32 q3 = y0 - NORMALIZED_Y_MIN;
+    Types::F32 q4 = NORMALIZED_Y_MAX - y0;
+
+    Types::F32 posArr[5], negArr[5];
+    unsigned int posind = 1, ngind = 1;
+    posArr[0] = 1.0f;
+    negArr[0] = 0.0f;
+    
 }
 
 void RasterizeImage::DrawBresenhamLine(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB & color)
@@ -84,6 +148,49 @@ void RasterizeImage::DrawBresenhamLine(const Types::I32 x0, const Types::I32 y0,
             plotLineHeight(x0, y0, x1, y1, color);
         }
     }
+}
+
+void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, Types::I32 x1, Types::I32 y1, const RGB & color)
+{
+    bool steep = std::abs(y1 - y0) > abs(x1 - x0);
+    if (steep)
+    {
+        std::swap(x0, y0);
+        std::swap(x1, y1);
+    }
+    if (x0 > x1)
+    {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+
+    int deltaX = x1 - x0;
+    int deltaY = std::abs(y1 - y0);
+    int deltaErr = deltaY * 2;
+    int y = y0;
+    int error = -deltaX;
+    int ystep = y0 < y1 ? 1 : -1;
+
+    for (auto x = x0; x <= x1; ++x)
+    {
+        if (steep)
+        {
+            SetPixel(y, x, color);
+        }
+        else
+        {
+            SetPixel(x, y, color);
+        }
+
+        error += 2 * deltaY;
+
+        if (error > 0)
+        {
+            y += ystep;
+            error -= 2 * deltaX;
+        }
+    }
+    
 }
 
 void RasterizeImage::DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, const RGB& foreColor, const RGB& backgroundColor)
@@ -182,91 +289,59 @@ bool RasterizeImage::IsOutOfRange(const Types::I32 x, const Types::I32 y)
 
 void RasterizeImage::plotLineLow(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB & color)
 {
-    /*
-    plotLineLow(x0, y0, x1, y1)
-        dx = x1 - x0
-        dy = y1 - y0
-        yi = 1
-        if dy < 0
-            yi = -1
-            dy = -dy
-        end if
-        D = 2 * dy - dx
-        y = y0
-
-        for x from x0 to x1
-            plot(x, y)
-            if D > 0
-                y = y + yi
-                D = D - 2 * dx
-            end if
-            D = D + 2 * dy
-    */
-
     Types::I32 dx = x1 - x0;
-    Types::I32 dy = y1 - y0;
+    Types::I32 twoDy = 2 * (y1 - y0);
     Types::I32 yi = 1;
-    if (dy < 0)
+    if (twoDy < 0)
     {
         yi = -1;
-        dy = -dy;
+        twoDy = -twoDy;
     }
     Types::I32 y = y0;
-    Types::I32 D = 2 * dy - dx;
-    for (Types::I32 x = x0; x < x1; ++x)
+    Types::I32 D = twoDy - dx;
+    Types::I32 twoDyMinusTwoDx = D - dx;    // equals ( 2 * dy - 2 * dx )
+    for (Types::I32 x = x0; x <= x1; ++x)
     {
         SetPixel(x, y, color);
         if (D > 0)
         {
             y += yi;
-            D -= 2 * dx;
+            D += twoDyMinusTwoDx;
         }
-        D += 2 * dy;
+        else
+        {
+            D += twoDy;
+        }
     }
 }
 
 void RasterizeImage::plotLineHeight(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB & color)
 {
-    /*
-    plotLineHigh(x0,y0, x1,y1)
-    dx = x1 - x0
-    dy = y1 - y0
-    xi = 1
-    if dx < 0
-        xi = -1
-        dx = -dx
-    end if
-    D = 2*dx - dy
-    x = x0
-
-    for y from y0 to y1
-        plot(x,y)
-        if D > 0
-            x = x + xi
-            D = D - 2*dy
-        end if
-        D = D + 2*dx
-    */
-    Types::I32 dx = x1 - x0;
     Types::I32 dy = y1 - y0;
+    Types::I32 twoDx = 2 * (x1 - x0);
+    //Types::I32 twoDy = 2 * dy;
     Types::I32 xi = 1;
-    if (dx < 0)
+    if (twoDx < 0)
     {
         xi = -1;
-        dx = -dx;
+        twoDx = -twoDx;
     }
 
-    Types::I32 D = 2 * dx - dy;
+    Types::I32 D = twoDx - dy;
     Types::I32 x = x0;
+    Types::I32 twoDxMinusTwoDy = D - dy;    // equals ( 2 * dx - 2 * dy )
     for (Types::I32 y = y0; y <= y1; ++y)
     {
         SetPixel(x, y, color);
         if (D > 0)
         {
             x += xi;
-            D -= 2 * dy;
+            D += twoDxMinusTwoDy;
         }
-        D += 2 * dx;
+        else
+        {
+            D += twoDx;
+        }
     }
 }
 
