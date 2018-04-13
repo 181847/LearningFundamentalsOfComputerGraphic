@@ -152,6 +152,9 @@ void RasterizeImage::DrawBresenhamLine(const Types::I32 x0, const Types::I32 y0,
 
 void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, Types::I32 x1, Types::I32 y1, const RGB & color)
 {
+
+//#define MY_PROFILE
+
     bool steep = std::abs(y1 - y0) > abs(x1 - x0);
     if (steep)
     {
@@ -163,13 +166,16 @@ void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, T
         std::swap(x0, x1);
         std::swap(y0, y1);
     }
-
-    int deltaX = x1 - x0;
-    int deltaY = std::abs(y1 - y0);
-    int deltaErr = deltaY * 2;
-    int y = y0;
-    int error = -deltaX;
-    int ystep = y0 < y1 ? 1 : -1;
+    
+#ifdef MY_PROFILE
+    Types::I32 deltaX = x1 - x0;
+    Types::I32 deltaY = std::abs(y1 - y0);
+    Types::I32 twoDy = 2 * deltaY;
+    Types::I32 twoDx = 2 * deltaX;
+    Types::I32 deltaErr = twoDy;
+    Types::I32 y = y0;
+    Types::I32 error = -deltaX;
+    Types::I32 ystep = y0 < y1 ? 1 : -1;
 
     for (auto x = x0; x <= x1; ++x)
     {
@@ -182,14 +188,52 @@ void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, T
             SetPixel(x, y, color);
         }
 
-        error += 2 * deltaY;
+        error += twoDy;
 
         if (error > 0)
         {
             y += ystep;
-            error -= 2 * deltaX;
+            error -= twoDx;
         }
     }
+#else
+    Types::I32 dx = x1 - x0;
+    Types::I32 twoDy = 2 * (y1 - y0);
+    Types::I32 yi = 1;
+    if (twoDy < 0)
+    {
+        yi = -1;
+        twoDy = -twoDy;
+    }
+    Types::I32 twoDx = 2 * dx;
+    Types::I32 y = y0;
+    Types::I32 error = twoDy - dx;
+    Types::I32 twoDyMinusTwoDx = error - dx;
+
+    for (auto x = x0; x <= x1; ++x)
+    {
+        if (steep)
+        {
+            SetPixel(y, x, color);
+        }
+        else
+        {
+            SetPixel(x, y, color);
+        }
+
+        if (error > 0)
+        {
+            y += yi;
+            error += twoDyMinusTwoDx;
+        }
+        else
+        {
+            error += twoDy;
+        }
+    }
+#endif// MY_PROFILE
+
+    
     
 }
 
