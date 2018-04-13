@@ -6,6 +6,7 @@
 #include <limits>
 #include <array>
 #include <ctime>
+#include <MyTools\MathTool.h>
 #pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
 
 #include "../CommonClasses/DebugHelpers.h"
@@ -98,6 +99,48 @@ CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 	return randVec;
 }
 
+/*!
+    \brief help to generate sphere ray lines to be drawn.
+    \param centerLocationX the center x location of the sphere.
+    \param centerLocationY the center y location of the sphere.
+    \param segmentLength the length of each segment
+    \param startInnerRadius the minimum radius of the spheres
+    \param numRounds how many rounds to draw.
+    \param drawLine the function to recieve the line start and end points.
+*/
+void SphereRay(
+    std::function<void(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1)>
+    drawLine,
+    const Types::F32 centerLocationX,
+    const Types::F32 centerLocationY,
+    const Types::F32 segmentLength = 35.0f,
+    const Types::F32 startInnerRadius = 30.0f,
+    const Types::U32 numRounds = 5)
+{
+        Types::F32 deltaTheta = 2.0f * MathTool::PI_F / 64.0f;
+        Types::F32 theta = 0.0f;
+        Types::F32 segmentLen = 35.0f;
+        Types::F32 rIn = 30.0f;
+        Types::F32 rOut = rIn + segmentLen;
+
+        Types::F32 x0, y0, x1, y1;
+        for (unsigned int i = 0; i < numRounds; ++i)
+        {
+            for (unsigned int j = 0; j < 64; ++j)
+            {
+                theta = deltaTheta * j + (i % 2) * deltaTheta * 0.5f;
+                x0 = centerLocationX + rIn  * std::cos(theta);
+                y0 = centerLocationY + rIn  * std::sin(theta);
+                x1 = centerLocationX + rOut * std::cos(theta);
+                y1 = centerLocationY + rOut * std::sin(theta);
+
+                drawLine(x0, y0, x1, y1);
+            }
+            rIn = rOut;
+            rOut += segmentLen;
+        } // end outer for loop
+}
+
 TEST_MODULE_START
 
 #pragma region check module work
@@ -124,33 +167,67 @@ TEST_MODULE_START
     TEST_UNIT_START("draw bresenham lines")
         RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
-        defaultImg.DrawBresenhamLine(0, 0, UserConfig::COMMON_PIXEL_WIDTH - 1, UserConfig::COMMON_PIXEL_HEIGHT - 1);
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TimeGuard countDrawLines(timeCounter);
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void{
+                defaultImg.DrawBresenhamLine(
+                    static_cast<Types::U32>(x0),
+                    static_cast<Types::U32>(y0),
+                    static_cast<Types::U32>(x1),
+                    static_cast<Types::U32>(y1));
+            }, CENTER_X, CENTER_Y);
+        }// end time counter
         
-        defaultImg.DrawBresenhamLine(100, 50, 400, 300);
-        defaultImg.DrawBresenhamLine(100, 400, 50, 300);
-        defaultImg.DrawBresenhamLine(500, 400, 200, 10);
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color.png");
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
 
 #pragma region draw bresenham lines
-    TEST_UNIT_START("draw bresenham lines")
+    TEST_UNIT_START("draw WuXiaolin lines")
         RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
-        defaultImg.DrawWuXiaolinLine(
-            0.0f, 
-            0.0f, 
-            static_cast<Types::F32>(UserConfig::COMMON_PIXEL_WIDTH - 23), 
-            static_cast<Types::F32>(UserConfig::COMMON_PIXEL_HEIGHT - 2),
-            RGB::RED);
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TimeGuard countDrawLines(timeCounter);
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+                defaultImg.DrawWuXiaolinLine(x0, y0, x1, y1);
+            }, CENTER_X, CENTER_Y);
+        }// end time counter
         
-        defaultImg.DrawWuXiaolinLine(100.0f, 50.0f, 400.0f, 300.0f);
-        defaultImg.DrawWuXiaolinLine(100.0f, 400.0f, 50.0f, 300.0f);
-        defaultImg.DrawWuXiaolinLine(500.0f, 400.0f, 200.0f, 300.0f);
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawWuXiaolinLine\\sphere_ray.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region draw bresenham lines
+    TEST_UNIT_START("draw bresenham lines in one call")
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TimeGuard countDrawLines(timeCounter);
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+                defaultImg.DrawBresenhamLine_inOneCall(
+                    static_cast<Types::U32>(x0),
+                    static_cast<Types::U32>(y0),
+                    static_cast<Types::U32>(x1),
+                    static_cast<Types::U32>(y1));
+            }, CENTER_X, CENTER_Y);
+        }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawWuXiaolinLine\\default_color.png");
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
