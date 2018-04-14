@@ -168,6 +168,7 @@ void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, T
     }
     
 #ifdef MY_PROFILE
+
     Types::I32 deltaX = x1 - x0;
     Types::I32 deltaY = std::abs(y1 - y0);
     Types::I32 twoDy = 2 * deltaY;
@@ -196,15 +197,12 @@ void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, T
             error -= twoDx;
         }
     }
+
 #else
+
     Types::I32 dx = x1 - x0;
-    Types::I32 twoDy = 2 * (y1 - y0);
-    Types::I32 yi = 1;
-    if (twoDy < 0)
-    {
-        yi = -1;
-        twoDy = -twoDy;
-    }
+    Types::I32 twoDy = std::abs(2 * (y1 - y0));
+    Types::I32 yi = y1 > y0 ? 1 : -1;
     Types::I32 twoDx = 2 * dx;
     Types::I32 y = y0;
     Types::I32 error = twoDy - dx;
@@ -231,6 +229,7 @@ void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, T
             error += twoDy;
         }
     }
+
 #endif// MY_PROFILE
 
     
