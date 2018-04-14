@@ -76,6 +76,16 @@ namespace UserConfig
 		\brief common render option, right bound location
 	*/
 	const Types::F32 COMMON_RENDER_TOP      = +3.0f;
+
+    /*!
+        \brief for some draw line tests, the loop time
+    */
+    const unsigned int LOOP_DRAW_LINE_COUNT = 3200;
+
+    /*!
+        \brief for some loop test, between several(the value) test output one message.
+    */
+    const unsigned int PRINT_MSG_DIST = 800;
 }
 
 
@@ -101,12 +111,12 @@ CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 
 /*!
     \brief help to generate sphere ray lines to be drawn.
+    \param drawLine the function to recieve the line start and end points.
     \param centerLocationX the center x location of the sphere.
     \param centerLocationY the center y location of the sphere.
     \param segmentLength the length of each segment
     \param startInnerRadius the minimum radius of the spheres
     \param numRounds how many rounds to draw.
-    \param drawLine the function to recieve the line start and end points.
 */
 void SphereRay(
     std::function<void(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1)>
@@ -119,9 +129,8 @@ void SphereRay(
 {
         Types::F32 deltaTheta = 2.0f * MathTool::PI_F / 64.0f;
         Types::F32 theta = 0.0f;
-        Types::F32 segmentLen = 35.0f;
         Types::F32 rIn = 30.0f;
-        Types::F32 rOut = rIn + segmentLen;
+        Types::F32 rOut = rIn + segmentLength;
 
         Types::F32 x0, y0, x1, y1;
         for (unsigned int i = 0; i < numRounds; ++i)
@@ -137,7 +146,7 @@ void SphereRay(
                 drawLine(x0, y0, x1, y1);
             }
             rIn = rOut;
-            rOut += segmentLen;
+            rOut += segmentLength;
         } // end outer for loop
 }
 
@@ -163,32 +172,7 @@ TEST_MODULE_START
     TEST_UNIT_END;
 #pragma endregion
 
-#pragma region draw bresenham lines
-    TEST_UNIT_START("draw bresenham lines")
-        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
-
-        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
-                         CENTER_Y = defaultImg.m_height / 2.0f;
-
-        {
-            TimeGuard countDrawLines(timeCounter);
-
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void{
-                defaultImg.DrawBresenhamLine(
-                    static_cast<Types::U32>(x0),
-                    static_cast<Types::U32>(y0),
-                    static_cast<Types::U32>(x1),
-                    static_cast<Types::U32>(y1));
-            }, CENTER_X, CENTER_Y);
-        }// end time counter
-        
-        
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
-
-    TEST_UNIT_END;
-#pragma endregion
-
-#pragma region draw bresenham lines
+#pragma region draw WuXiaolin lines
     TEST_UNIT_START("draw WuXiaolin lines")
         RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
@@ -196,7 +180,7 @@ TEST_MODULE_START
                          CENTER_Y = defaultImg.m_height / 2.0f;
 
         {
-            TimeGuard countDrawLines(timeCounter);
+            TIME_GUARD;
 
             SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
                 defaultImg.DrawWuXiaolinLine(x0, y0, x1, y1);
@@ -209,14 +193,66 @@ TEST_MODULE_START
 #pragma endregion
 
 #pragma region draw bresenham lines
-    TEST_UNIT_START("draw bresenham lines in one call")
+    TEST_UNIT_START("draw bresenham lines")
+        testConfig.m_loopTime = UserConfig::LOOP_DRAW_LINE_COUNT;
+
+        if (testParameter.m_runningIndex % UserConfig::PRINT_MSG_DIST == 0)
+        {
+            testConfig.m_hideThisOutput = false;
+        }
+        else
+        {
+            testConfig.m_hideThisOutput = true;
+            ShowProgress(testParameter.m_runningIndex * 1.0f / testConfig.m_loopTime);
+        }
+
         RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+        testConfig.m_testName += ("--index: " + std::to_string(testParameter.m_runningIndex));
 
         const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
                          CENTER_Y = defaultImg.m_height / 2.0f;
 
         {
-            TimeGuard countDrawLines(timeCounter);
+            TIME_GUARD;
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void{
+                defaultImg.DrawBresenhamLine(
+
+                    static_cast<Types::U32>(x0),
+                    static_cast<Types::U32>(y0),
+                    static_cast<Types::U32>(x1),
+                    static_cast<Types::U32>(y1));
+            }, CENTER_X, CENTER_Y);
+        }// end time counter
+        
+        
+        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region draw bresenham lines
+    TEST_UNIT_START("draw bresenham lines in one call")
+        testConfig.m_loopTime = UserConfig::LOOP_DRAW_LINE_COUNT;
+
+        if (testParameter.m_runningIndex % UserConfig::PRINT_MSG_DIST == 0)
+        {
+            testConfig.m_hideThisOutput = false;
+        }
+        else
+        {
+            testConfig.m_hideThisOutput = true;
+            ShowProgress(testParameter.m_runningIndex * 1.0f / testConfig.m_loopTime);
+        }
+
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+        testConfig.m_testName += ("--index: " + std::to_string(testParameter.m_runningIndex));
+
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TIME_GUARD;
 
             SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
                 defaultImg.DrawBresenhamLine_inOneCall(
@@ -227,7 +263,83 @@ TEST_MODULE_START
             }, CENTER_X, CENTER_Y);
         }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
+        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region draw bresenham lines retry
+    TEST_UNIT_START("draw bresenham lines retry")
+        testConfig.m_loopTime = UserConfig::LOOP_DRAW_LINE_COUNT;
+
+        if (testParameter.m_runningIndex % UserConfig::PRINT_MSG_DIST == 0)
+        {
+            testConfig.m_hideThisOutput = false;
+        }
+        else
+        {
+            testConfig.m_hideThisOutput = true;
+            ShowProgress(testParameter.m_runningIndex * 1.0f / testConfig.m_loopTime);
+        }
+
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+        testConfig.m_testName += ("--index: " + std::to_string(testParameter.m_runningIndex));
+
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TIME_GUARD;
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void{
+                defaultImg.DrawBresenhamLine(
+
+                    static_cast<Types::U32>(x0),
+                    static_cast<Types::U32>(y0),
+                    static_cast<Types::U32>(x1),
+                    static_cast<Types::U32>(y1));
+            }, CENTER_X, CENTER_Y);
+        }// end time counter
+        
+        
+        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region draw bresenham lines retry
+    TEST_UNIT_START("draw bresenham lines in one call retry")
+        testConfig.m_loopTime = UserConfig::LOOP_DRAW_LINE_COUNT;
+
+        if (testParameter.m_runningIndex % UserConfig::PRINT_MSG_DIST == 0)
+        {
+            testConfig.m_hideThisOutput = false;
+        }
+        else
+        {
+            testConfig.m_hideThisOutput = true;
+            ShowProgress(testParameter.m_runningIndex * 1.0f / testConfig.m_loopTime);
+        }
+
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+        testConfig.m_testName += ("--index: " + std::to_string(testParameter.m_runningIndex));
+
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TIME_GUARD;
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+                defaultImg.DrawBresenhamLine_inOneCall(
+                    static_cast<Types::U32>(x0),
+                    static_cast<Types::U32>(y0),
+                    static_cast<Types::U32>(x1),
+                    static_cast<Types::U32>(y1));
+            }, CENTER_X, CENTER_Y);
+        }// end time counter
+        
+        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
