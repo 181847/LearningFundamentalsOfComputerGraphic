@@ -12,10 +12,10 @@ class RasterizeImage
     :public Image
 {
 public:
-    const Types::F32 NORMALIZED_X_MIN = 0.0f;
-    const Types::F32 NORMALIZED_X_MAX = 1.0f;
-    const Types::F32 NORMALIZED_Y_MIN = 0.0f;
-    const Types::F32 NORMALIZED_Y_MAX = 1.0f;
+    static const Types::F32 NORMALIZED_X_MIN;
+    static const Types::F32 NORMALIZED_X_MAX;
+    static const Types::F32 NORMALIZED_Y_MIN;
+    static const Types::F32 NORMALIZED_Y_MAX;
 
 public:
     /*!
@@ -34,9 +34,12 @@ public:
         \param (x0, y0) start point
         \param (x1, y1) end point
         \param color the color of the line
-        the viewed space is x belong [NORMALIZED_X_MIN, NORMALIZED_X_MAX], and y belong [NORMALIZED_Y_MIN, NORMALIZED_Y_MAX].
+        the viewed space is (0, 0) -> (1, 1).
     */
-    void DrawLine(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const RGB& color = RGB::BLACK);
+    void DrawLine(
+        const Types::F32 x0, const Types::F32 y0, 
+        const Types::F32 x1, const Types::F32 y1, 
+        const RGB& color = RGB::BLACK);
 
     /*!
         \brief draw a line in the image.
