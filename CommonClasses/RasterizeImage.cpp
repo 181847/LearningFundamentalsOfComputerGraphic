@@ -203,7 +203,8 @@ void RasterizeImage::DrawLine(
         static_cast<Types::I32>(xn1 * (m_width  - 1)), 
         static_cast<Types::I32>(yn1 * (m_height - 1)),
         static_cast<Types::I32>(xn2 * (m_width  - 1)),
-        static_cast<Types::I32>(yn2 * (m_height - 1))
+        static_cast<Types::I32>(yn2 * (m_height - 1)),
+        color
     );
 }
 
