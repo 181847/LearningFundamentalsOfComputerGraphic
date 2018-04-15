@@ -80,12 +80,12 @@ namespace UserConfig
     /*!
         \brief for some draw line tests, the loop time
     */
-    const unsigned int LOOP_DRAW_LINE_COUNT = 3200;
+    const unsigned int LOOP_DRAW_LINE_COUNT = 1;
 
     /*!
         \brief for some loop test, between several(the value) test output one message.
     */
-    const unsigned int PRINT_MSG_DIST = 800;
+    const unsigned int PRINT_MSG_DIST = 1;
 }
 
 
@@ -129,7 +129,7 @@ void SphereRay(
 {
         Types::F32 deltaTheta = 2.0f * MathTool::PI_F / 64.0f;
         Types::F32 theta = 0.0f;
-        Types::F32 rIn = 30.0f;
+        Types::F32 rIn = startInnerRadius;
         Types::F32 rOut = rIn + segmentLength;
 
         Types::F32 x0, y0, x1, y1;
@@ -137,6 +137,7 @@ void SphereRay(
         {
             for (unsigned int j = 0; j < 64; ++j)
             {
+                //BREAK_POINT_IF(i == 3 && j == 0 && centerLocationX == 0.5f);
                 theta = deltaTheta * j + (i % 2) * deltaTheta * 0.5f;
                 x0 = centerLocationX + rIn  * std::cos(theta);
                 y0 = centerLocationY + rIn  * std::sin(theta);
@@ -340,6 +341,40 @@ TEST_MODULE_START
         }// end time counter
         
         //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region 2d line clipping
+    TEST_UNIT_START(" 2d line clipping")
+        testConfig.m_loopTime = UserConfig::LOOP_DRAW_LINE_COUNT;
+
+        /*if (testParameter.m_runningIndex % UserConfig::PRINT_MSG_DIST == 0)
+        {
+            testConfig.m_hideThisOutput = false;
+        }
+        else
+        {
+            testConfig.m_hideThisOutput = true;
+            ShowProgress(testParameter.m_runningIndex * 1.0f / testConfig.m_loopTime);
+        }*/
+
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+        //testConfig.m_testName += ("--index: " + std::to_string(testParameter.m_runningIndex));
+
+        const Types::F32 CENTER_X = 0.5,
+                         CENTER_Y = 0.5;
+
+        {
+            TIME_GUARD;
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+                //BREAK_POINT_IF((x0 - x1) * (y0 - y1) < 0.0f);
+                defaultImg.DrawLine(x0, y0, x1, y1);
+            }, CENTER_X, CENTER_Y, 0.1f, 0.1f, 6);
+        }// end time counter
+        
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\2d_line_clipping.png");
 
     TEST_UNIT_END;
 #pragma endregion
