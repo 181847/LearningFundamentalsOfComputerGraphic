@@ -368,10 +368,25 @@ TEST_MODULE_START
         {
             TIME_GUARD;
 
+            defaultImg.SetScissor(ScissorRect(  0, 300, 300, 511));
+
             SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
-                //BREAK_POINT_IF((x0 - x1) * (y0 - y1) < 0.0f);
-                defaultImg.DrawLine(x0, y0, x1, y1);
+                defaultImg.DrawLine(x0, y0, x1, y1, RGB::GREEN);
             }, CENTER_X, CENTER_Y, 0.1f, 0.1f, 6);
+
+
+            defaultImg.SetScissor(ScissorRect(300, 511,   0, 511));
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+                defaultImg.DrawLine(x0, y0, x1, y1, RGB::RED);
+            }, CENTER_X, CENTER_Y, 0.3f, 0.2f, 6);
+
+
+            defaultImg.SetScissor(ScissorRect(  0, 300,   0, 300));
+
+            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+                defaultImg.DrawLine(x0, y0, x1, y1, RGB::BLUE);
+            }, CENTER_X, CENTER_Y, 0.05f, 0.1f, 8);
         }// end time counter
         
         defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\2d_line_clipping.png");
