@@ -90,6 +90,11 @@ Types::F32 mini(const Types::F32 arr[], const unsigned  n)
 namespace CommonClass
 {
 
+const Types::F32 RasterizeImage::NORMALIZED_X_MIN = 0.0f;
+const Types::F32 RasterizeImage::NORMALIZED_X_MAX = 1.0f;
+const Types::F32 RasterizeImage::NORMALIZED_Y_MIN = 0.0f;
+const Types::F32 RasterizeImage::NORMALIZED_Y_MAX = 1.0f;
+
 RasterizeImage::RasterizeImage(const Types::U32 pixelWidth, const Types::U32 pixelHeight, const RGBA& initColor)
     :Image(pixelWidth, pixelHeight, initColor)
 {
@@ -101,7 +106,10 @@ RasterizeImage::~RasterizeImage()
     // empty
 }
 
-void RasterizeImage::DrawLine(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const RGB & color)
+void RasterizeImage::DrawLine(
+    const Types::F32 x0, const Types::F32 y0, 
+    const Types::F32 x1, const Types::F32 y1, 
+    const RGB & color)
 {
     Types::F32 p1 = x0 - x1;
     Types::F32 p2 = -p1;
@@ -114,10 +122,71 @@ void RasterizeImage::DrawLine(const Types::F32 x0, const Types::F32 y0, const Ty
     Types::F32 q4 = NORMALIZED_Y_MAX - y0;
 
     Types::F32 posArr[5], negArr[5];
-    unsigned int posind = 1, ngind = 1;
+    unsigned int posind = 1, negind = 1;
     posArr[0] = 1.0f;
     negArr[0] = 0.0f;
-    
+
+    if ((p1 == 0.0f && q1 < 0.0f) || (p3 == 0.0f && q3 < 0))
+    {
+        // discard whole segment, parellele to clipping window
+        return;
+    }
+
+    if (p1 != 0)
+    {
+        Types::F32 r1 = q1 / p1;
+        Types::F32 r2 = q2 / p2;
+        if (p1 < 0)
+        {
+            negArr[negind++]  = r1;
+            posArr[posind++] = r2;
+        }
+        else
+        {
+            negArr[negind++]  = r2;
+            posArr[posind++] = r1;
+        }
+    }
+
+    if (p3 != 0)
+    {
+        Types::F32 r3 = q3 / p3;
+        Types::F32 r4 = q4 / p4;
+        if (p3 < 0)
+        {
+            negArr[negind++]  = r3;
+            posArr[posind++] = r4;
+        }
+        else
+        {
+            negArr[negind++]  = r4;
+            posArr[posind++] = r3;
+        }
+    }
+
+    Types::F32 xn1, yn1, xn2, yn2;
+    Types::F32 rn1, rn2;
+    rn1 = LiangBarskyCliping::maxi(negArr, negind);
+    rn2 = LiangBarskyCliping::mini(posArr, posind);
+
+    if (rn1 > rn2)
+    {
+        // line is out of the clipping window
+        return;
+    }
+
+    xn1 = x0 + p2 * rn1;
+    yn1 = y0 + p4 * rn1;
+
+    xn2 = x0 + p2 * rn2;
+    yn2 = y0 + p4 * rn2;
+
+    DrawBresenhamLine(
+        static_cast<Types::I32>(xn1 * (m_width  - 1)), 
+        static_cast<Types::I32>(yn1 * (m_height - 1)),
+        static_cast<Types::I32>(xn2 * (m_width  - 1)),
+        static_cast<Types::I32>(yn2 * (m_height - 1))
+    );
 }
 
 void RasterizeImage::DrawBresenhamLine(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB & color)
