@@ -5,6 +5,20 @@
 namespace CommonClass
 {
 
+struct ScissorRect
+{
+    Types::U32 m_minX;
+    Types::U32 m_maxX;
+    Types::U32 m_minY;
+    Types::U32 m_maxY;
+
+    ScissorRect(const Types::U32 minX, const Types::U32 maxX, const Types::U32 minY, const Types::U32 maxY)\
+        :m_minX(minX), m_maxX(maxX), m_minY(minY), m_maxY(maxY)
+    {
+        // empty
+    }
+};
+
 /*!
     \brief RasterizeImage used to draw lines/triangles...
 */
@@ -16,6 +30,15 @@ public:
     static const Types::F32 NORMALIZED_X_MAX;
     static const Types::F32 NORMALIZED_Y_MIN;
     static const Types::F32 NORMALIZED_Y_MAX;
+
+private:
+    struct NormalizedScissor
+    {
+        Types::F32 m_minX = NORMALIZED_X_MIN;
+        Types::F32 m_maxX = NORMALIZED_X_MAX;
+        Types::F32 m_minY = NORMALIZED_Y_MIN;
+        Types::F32 m_maxY = NORMALIZED_Y_MAX;
+    } m_normalizedScissor;
 
 public:
     /*!
@@ -30,11 +53,17 @@ public:
     ~RasterizeImage();
 
     /*!
+        \brief set scissor for the rasterize.
+        this scissor is avaliable for specific function (DrawLine...).
+    */
+    void SetScissor(const ScissorRect& rect);
+
+    /*!
         \brief draw line (Bresenham Algorithm) with normalized coordinates, climp the portions out of range.
         \param (x0, y0) start point
         \param (x1, y1) end point
         \param color the color of the line
-        the viewed space is (0, 0) -> (1, 1).
+        the viewed space is setted by the m_normalizedScissor.
     */
     void DrawLine(
         const Types::F32 x0, const Types::F32 y0, 

@@ -106,6 +106,24 @@ RasterizeImage::~RasterizeImage()
     // empty
 }
 
+void RasterizeImage::SetScissor(const ScissorRect & rect)
+{
+    assert(rect.m_minX < rect.m_maxX
+        && rect.m_minY < rect.m_maxY
+        && rect.m_minX >= 0
+        && rect.m_maxX <= m_width - 1
+        && rect.m_minY >= 0
+        && rect.m_maxY <= m_height - 1);
+    
+    Types::F32 reciprocalWidth  = 1.0f / (m_width  - 1);
+    Types::F32 reciprocalHeight = 1.0f / (m_height - 1);
+
+    m_normalizedScissor.m_minX = rect.m_minX * reciprocalWidth;
+    m_normalizedScissor.m_maxX = rect.m_maxX * reciprocalWidth;
+    m_normalizedScissor.m_minY = rect.m_minY * reciprocalHeight;
+    m_normalizedScissor.m_maxY = rect.m_maxY * reciprocalHeight;
+}
+
 void RasterizeImage::DrawLine(
     const Types::F32 x0, const Types::F32 y0, 
     const Types::F32 x1, const Types::F32 y1, 
@@ -116,10 +134,10 @@ void RasterizeImage::DrawLine(
     Types::F32 p3 = y0 - y1;
     Types::F32 p4 = -p3;
 
-    Types::F32 q1 = x0 - NORMALIZED_X_MIN;
-    Types::F32 q2 = NORMALIZED_X_MAX - x0;
-    Types::F32 q3 = y0 - NORMALIZED_Y_MIN;
-    Types::F32 q4 = NORMALIZED_Y_MAX - y0;
+    Types::F32 q1 = x0 - m_normalizedScissor.m_minX;
+    Types::F32 q2 = m_normalizedScissor.m_maxX - x0;
+    Types::F32 q3 = y0 - m_normalizedScissor.m_minY;
+    Types::F32 q4 = m_normalizedScissor.m_maxY - y0;
 
     Types::F32 posArr[5], negArr[5];
     unsigned int posind = 1, negind = 1;
