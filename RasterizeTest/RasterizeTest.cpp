@@ -349,18 +349,7 @@ TEST_MODULE_START
     TEST_UNIT_START(" 2d line clipping")
         testConfig.m_loopTime = UserConfig::LOOP_DRAW_LINE_COUNT;
 
-        /*if (testParameter.m_runningIndex % UserConfig::PRINT_MSG_DIST == 0)
-        {
-            testConfig.m_hideThisOutput = false;
-        }
-        else
-        {
-            testConfig.m_hideThisOutput = true;
-            ShowProgress(testParameter.m_runningIndex * 1.0f / testConfig.m_loopTime);
-        }*/
-
         RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
-        //testConfig.m_testName += ("--index: " + std::to_string(testParameter.m_runningIndex));
 
         const Types::F32 CENTER_X = 0.5,
                          CENTER_Y = 0.5;
@@ -390,6 +379,59 @@ TEST_MODULE_START
         }// end time counter
         
         defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\2d_line_clipping.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
+
+#pragma region draw triangle flat bottom
+    TEST_UNIT_START("draw triangle flat bottom")
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+        
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TIME_GUARD;
+
+            defaultImg.DrawTri_flatBottom(
+                256.0f, 500.0f,
+                100.0f, 300.0f,
+                300.0f, 300.0f,
+                RGB::BLUE);
+
+            defaultImg.DrawTri_flatTop(
+                256.0f, 100.0f,
+                100.0f, 300.0f,
+                300.0f, 300.0f,
+                RGB::RED);
+
+        }// end time counter
+        
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\triangleFlatBottom.png");
+
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region draw triangle general tri
+    TEST_UNIT_START("draw triangle general tri")
+        RasterizeImage defaultImg(UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+        
+        const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
+                         CENTER_Y = defaultImg.m_height / 2.0f;
+
+        {
+            TIME_GUARD;
+
+            defaultImg.DrawTriangle(
+                256.0f, 500.0f,
+                100.0f, 300.0f,
+                300.0f, 100.0f,
+                RGB::BLUE);
+
+        }// end time counter
+        
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\generalTriangle.png");
 
     TEST_UNIT_END;
 #pragma endregion
