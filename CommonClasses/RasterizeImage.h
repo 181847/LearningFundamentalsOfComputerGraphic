@@ -31,6 +31,12 @@ public:
     static const Types::F32 NORMALIZED_Y_MIN;
     static const Types::F32 NORMALIZED_Y_MAX;
 
+    /*!
+        \brief the presicion compare two float are equal or not.
+        LESS the FLOAT_CMP_ULP is, more accurate.
+    */
+    const int FLOAT_CMP_ULP = 8;
+
 private:
     struct NormalizedScissor
     {
@@ -106,6 +112,38 @@ public:
         reference from: https://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm
     */
     void DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, const RGB& foreColor = RGB::BLACK, const RGB& backgroundColor = RGB::WHITE);
+
+    /*!
+        \brief draw an triangle in the scene.
+        \param (x0~x2, y0~y2) three point location (in the pixel coordinate [0, pixelWidht/Height - 1])
+        \param color the color of the triangle.
+    */
+    void DrawTriangle(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB& color = RGB::BLACK);
+
+    /*!
+        \brief draw the triangle with flat bottom
+        \param (x0, y0) the top of the triangle
+        \param (x1~x2, y1~y2) the locations of flat line points(in the pixel coordinate [0, pixelWidht/Height - 1]).
+        \param color the color of the triangle
+    */
+    void DrawTri_flatBottom(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB& color = RGB::BLACK);
+    
+    /*!
+        \brief draw the triangle with flat top
+        \param (x0, y0) the bottom vertex of the triangle
+        \param (x1~x2, y1~y2) the locations of flat line points(in the pixel coordinate [0, pixelWidht/Height - 1]).
+        \param color the color of the triangle
+    */
+    void DrawTri_flatTop(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB& color = RGB::BLACK);
+
+    /*!
+        \brief draw a horizontal line with the color
+        \param xLeft left x of the line
+        \param xRight right x of the line
+        \param y the y location of the line, two point share the same y
+        \param color the color the line
+    */
+    void DrawFlatLine(const Types::U32 xLeft, const Types::U32 xRight, const Types::U32 y, const RGB& color = RGB::BLACK);
 
 private:
     /*!

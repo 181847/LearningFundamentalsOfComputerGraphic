@@ -408,6 +408,97 @@ void RasterizeImage::DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 
     }
 }
 
+void RasterizeImage::DrawTriangle(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB & color)
+{
+    if (y0 < y1)
+    {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+
+    if (y1 < y2)
+    {
+        std::swap(x1, x2);
+        std::swap(y1, y2);
+
+        if (y0 < y1)
+        {
+            std::swap(x0, x1);
+            std::swap(y0, y1);
+        }
+    }
+
+    
+
+    if (MathTool::almost_equal(y1, y2, FLOAT_CMP_ULP))
+    {
+        DrawTri_flatBottom(x0, y0, x1, y1, x2, y2, color);
+    }
+    else if (MathTool::almost_equal(y0, y1, 8))
+    {
+        DrawTri_flatTop(x2, y2, x0, y0, x1, y1, color);
+    }
+    else
+    {
+        const Types::F32 newX = x0 + (y1 - y0) * (x2 - x0) / (y2 - y0);
+        DrawTri_flatBottom(x0, y0, x1, y1, newX, y1);
+        DrawTri_flatTop(x2, y2, x1, y1, newX, y1);
+
+    }
+}
+
+void RasterizeImage::DrawTri_flatBottom(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB & color)
+{
+    assert(MathTool::almost_equal(y1, y2, FLOAT_CMP_ULP));
+    if (x1 > x2)
+    {
+        std::swap(x1, x2);
+    }
+
+    const Types::F32 dxLeft  = (x1 - x0) / (y2 - y0);
+    const Types::F32 dxRight = (x2 - x0) / (y1 - y0);
+
+    Types::F32 xLeft  = x0;
+    Types::F32 xRight = x0;
+
+    for (int y = y0; y >= y1; --y)
+    {
+        DrawFlatLine(xLeft, xRight, y, color);
+        xLeft  -= dxLeft;
+        xRight -= dxRight;
+    }
+}
+
+void RasterizeImage::DrawTri_flatTop(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB & color)
+{
+    assert(MathTool::almost_equal(y1, y2, FLOAT_CMP_ULP));
+    if (x1 > x2)
+    {
+        std::swap(x1, x2);
+    }
+
+    const Types::F32 dxLeft  = (x1 - x0) / (y2 - y0);
+    const Types::F32 dxRight = (x2 - x0) / (y1 - y0);
+
+    Types::F32 xLeft = x0;
+    Types::F32 xRight = x0;
+
+    for (int y = y0; y <= y1; ++y)
+    {
+        DrawFlatLine(xLeft, xRight, y, color);
+        xLeft += dxLeft;
+        xRight += dxRight;
+    }
+}
+
+void RasterizeImage::DrawFlatLine(Types::U32 xLeft, Types::U32 xRight, Types::U32 y, const RGB & color)
+{
+    for (Types::U32 x = xLeft; x <= xRight; ++x)
+    {
+        SetPixel(x, y, color);
+    }
+}
+
 bool RasterizeImage::IsOutOfRange(const Types::I32 x, const Types::I32 y)
 {
     if (x < 0 || x > static_cast<Types::I32>(m_width - 1)
