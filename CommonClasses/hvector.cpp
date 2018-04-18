@@ -115,4 +115,16 @@ bool operator!=(const hvector & v1, const hvector & v2)
     return false;
 }
 
+bool operator==(const hvector & v1, const hvector & v2)
+{
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+        if (v1.m_arr[i] != v2.m_arr[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace CommonClass

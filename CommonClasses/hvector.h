@@ -23,12 +23,12 @@ public:
     };
 public:
     /*!
-        \brief construct a homogeneous vector, the w component default to be 1.0f, or the vector is default to be a LOCATION in the origin.
+        \brief construct a homogeneous vector, default to be (0, 0, 0, 1)
     */
     hvector(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f, const Types::F32 w = 1.0f);
     ~hvector();
 };
-static_assert(sizeof(hvector) == 4 * sizeof(Types::F32), "sizeof hvector should be four F32");
+static_assert(sizeof(hvector) == 4 * sizeof(Types::F32), "sizeof hvector should be four times of F32");
 
 hvector  operator +  (const hvector&    v1,     const hvector&      v2      );
 hvector  operator -  (const hvector&    v1,     const hvector&      v2      );
@@ -44,11 +44,12 @@ hvector& operator /= (hvector&          v1,     const hvector&      v2      );
 hvector& operator *= (hvector&          v,      Types::F32          s       );
 hvector& operator /= (hvector&          v,      Types::F32          s       );
 bool     operator != (const hvector&    v1,     const hvector&      v2      );
+bool     operator == (const hvector&    v1,     const hvector&      v2);
 
 /*!
     \brief prevent any other type do the comparison with hvector
     In some situation, <hvector == float> will be transfered to <hvector == hvector(float, ...)>,
-    next two template delelte declare is to prevent the situation.
+    next two template can prevent that situation.
 */
 template<typename T>
 bool operator != (const hvector& v, const T&) = delete;
