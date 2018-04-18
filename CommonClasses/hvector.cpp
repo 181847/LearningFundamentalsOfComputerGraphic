@@ -1,4 +1,5 @@
 #include "hvector.h"
+#include <MyTools\MathTool.h>
 
 namespace CommonClass
 {
@@ -120,6 +121,18 @@ bool operator==(const hvector & v1, const hvector & v2)
     for (unsigned int i = 0; i < 4; ++i)
     {
         if (v1.m_arr[i] != v2.m_arr[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AlmostEqual(const hvector & v1, const hvector & v2, Types::F32 tolerance)
+{
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+        if ( std::abs(v1.m_arr[i] - v2.m_arr[i]) > tolerance)
         {
             return false;
         }

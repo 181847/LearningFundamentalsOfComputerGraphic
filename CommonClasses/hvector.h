@@ -6,6 +6,7 @@ namespace CommonClass
 
 /*!
     \brief homogeneous vector with four components
+    we assume the hvector is column vector
 */
 class hvector
 {
@@ -55,5 +56,12 @@ template<typename T>
 bool operator != (const hvector& v, const T&) = delete;
 template<typename T>
 bool operator == (const hvector& v, const T&) = delete;
+
+/*!
+    \brief whether two hvector are almost equal
+    \param v1,v2 the two hvector to compare
+    \param tolerance the avaiable interval in which we think two float is almost equal
+*/
+bool AlmostEqual(const hvector& v1, const hvector& v2, Types::F32 tolerance = 1e-7f);
 
 } // namespace CommonClass
