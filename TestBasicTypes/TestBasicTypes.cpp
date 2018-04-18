@@ -601,5 +601,89 @@ TEST_MODULE_START
 	TEST_UNIT_END;
 #pragma endregion
 
+#pragma region hvector operation tests
+    TEST_UNIT_START("hvector operation tests")
+        using namespace CommonClass;
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 600;
+		
+        for (int i = 0; i < 200; ++i)
+        {
+            const Types::F32	comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf5(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf6(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf7(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf8(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf9(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+
+
+            hvector cmp1(comf1, comf2, comf3, comf4);
+            hvector cmp2(comf5, comf6, comf7, comf8);
+
+            // declare some hvector for result comparison
+            hvector h_plus_h(comf1 + comf5, comf2 + comf6, comf3 + comf7, comf4 + comf8),
+                    h_minu_h(comf1 - comf5, comf2 - comf6, comf3 - comf7, comf4 - comf8),
+                    h_mult_h(comf1 * comf5, comf2 * comf6, comf3 * comf7, comf4 * comf8),
+                    h_dive_h(comf1 / comf5, comf2 / comf6, comf3 / comf7, comf4 / comf8),
+                    h_mult_s(comf1 * comf9, comf2 * comf9, comf3 * comf9, comf4 * comf9),
+                    s_mult_h(comf1 * comf9, comf2 * comf9, comf3 * comf9, comf4 * comf9),
+                    h_dive_s(comf1 / comf9, comf2 / comf9, comf3 / comf9, comf4 / comf9);
+
+            TEST_ASSERT((cmp1 + cmp2)   == h_plus_h);
+
+            TEST_ASSERT((cmp1 - cmp2)   == h_minu_h);
+
+            TEST_ASSERT((cmp1 * cmp2)   == h_mult_h);
+
+            TEST_ASSERT((cmp1 / cmp2)   == h_dive_h);
+
+            hvector temp = cmp1;
+            temp += cmp2;
+            TEST_ASSERT(     temp       == h_plus_h);
+
+            temp = cmp1;
+            temp -= cmp2;
+            TEST_ASSERT(     temp       == h_minu_h);
+
+            temp = cmp1;
+            temp *= cmp2;
+            TEST_ASSERT(     temp       == h_mult_h);
+
+            temp = cmp1;
+            temp /= cmp2;
+            TEST_ASSERT(     temp       == h_dive_h);
+
+            // Next codes is about operations between hvector and scalar
+            // hvector * scalar
+            TEST_ASSERT( (cmp1 * comf9) == h_mult_s);
+
+            // scalar * hvector
+            TEST_ASSERT( (comf9 * cmp1) == s_mult_h);
+
+            // hvector / scalar
+            TEST_ASSERT( (cmp1 / comf9) == h_dive_s);
+
+            // hvector *= scalar
+            temp = cmp1;
+            temp *= comf9;
+            TEST_ASSERT(     temp       == h_mult_s);
+
+            // hvector /= scalar
+            temp = cmp1;
+            temp /= comf9;
+            TEST_ASSERT(     temp       == h_dive_s);
+
+            // Next codes ensure that the comparison is not always return true.
+            // next comparison will all return false.
+            TEST_ASSERT( ! (h_mult_h    == h_dive_h));
+            TEST_ASSERT( ! (h_plus_h    == h_minu_h));
+
+        }
+    TEST_UNIT_END;
+#pragma endregion
+
 TEST_MODULE_END
 
