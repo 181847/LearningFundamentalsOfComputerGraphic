@@ -25,9 +25,10 @@
 #include "../CommonClasses/Light.h"
 #include "../CommonClasses/Material.h"
 #include "../CommonClasses/hvector.h"
+#include "../CommonClasses/Transform.h"
 #pragma comment(lib, "CommonClasses.lib")
 
-
+using namespace CommonClass;
 
 
 RandomTool::MTRandom globalMtr;
@@ -681,6 +682,188 @@ TEST_MODULE_START
             TEST_ASSERT( ! (h_mult_h    == h_dive_h));
             TEST_ASSERT( ! (h_plus_h    == h_minu_h));
 
+        }
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region transform construct tests
+    TEST_UNIT_START("transform construct tests")
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 600;
+		
+        for (int i = 0; i < 200; ++i)
+        {
+            TIME_GUARD;
+            const Types::F32	comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf5(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf6(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf7(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf8(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf9(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+
+
+            Transform trl = Transform::Translation(comf1, comf2, comf3);
+            Transform trl_compare(
+                1.0f, 0.0f, 0.0f, comf1,
+                0.0f, 1.0f, 0.0f, comf2,
+                0.0f, 0.0f, 1.0f, comf3,
+                0.0f, 0.0f, 0.0f, 1.0f);
+
+            TEST_ASSERT(trl == trl_compare);
+
+            const Types::F32 cosTheta = std::cosf(comf4),
+                             sinTheta = std::sinf(comf4);
+
+            Transform rtx = Transform::RotationX(comf4),
+                      rty = Transform::RotationY(comf4),
+                      rtz = Transform::RotationZ(comf4);
+            
+            Transform rtx_compare(
+                        1.0f, 0.0f, 0.0f, 0.0f,
+                        0.0f, cosTheta, -sinTheta, 0.0f,
+                        0.0f, sinTheta, cosTheta, 0.0f,
+                        0.0f, 0.0f, 0.0f, 1.0f
+                      ),
+                      rty_compare(
+                          cosTheta, 0.0f, sinTheta, 0.0f,
+                          0.0f, 1.0f, 0.0f, 0.0f,
+                          -sinTheta, 0.0f, cosTheta, 0.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f
+                      ),
+                      rtz_compare(
+                          cosTheta, -sinTheta, 0.0f, 0.0f,
+                          sinTheta, cosTheta, 0.0f, 0.0f,
+                          0.0f, 0.0f, 1.0f, 0.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f
+                      );
+            
+            TEST_ASSERT(rtx == rtx_compare);
+            TEST_ASSERT(rty == rty_compare);
+            TEST_ASSERT(rtz == rtz_compare);
+
+            TEST_ASSERT(rtx != trl);
+            TEST_ASSERT(rty != trl);
+            TEST_ASSERT(rtz != trl);
+            TEST_ASSERT(rtx != rty);
+            TEST_ASSERT(rtz != rty);
+        }
+        
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region translate and rotation hvector
+    TEST_UNIT_START("translate and rotation hvector")
+        
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 600;
+		
+        for (int i = 0; i < 200; ++i)
+        {
+            TIME_GUARD;
+            const Types::F32	comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf5(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf6(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf7(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf8(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf9(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+
+
+            Transform trl = Transform::Translation(comf1, comf2, comf3);
+
+            hvector vt(comf5, comf6, comf7);
+
+            TEST_ASSERT(
+                hvector(comf5 + comf1, comf6 + comf2, comf7 + comf3) 
+                == (trl * vt));
+            
+            const Types::F32 pi_div_2 = Types::Constant::PI_F * 0.5f;
+            const Transform
+                rotX = Transform::RotationX(pi_div_2),
+                rotY = Transform::RotationY(pi_div_2),
+                rotZ = Transform::RotationZ(pi_div_2);
+
+            /*!
+                \brief preRotOrder (previous rotation order)
+                used to assist next 8 vector rotations.
+                later we will create 8 vector,
+                they will be like (1, 1, 1)
+                (1, 1, -1), (1, -1, 1)...
+                the first eight array respond to those vector, and next three
+            */
+            const unsigned preRotOrder[8][3] = {
+                {
+                    2, 1, 4
+                },
+                {
+                    0, 5, 5
+                },
+                {
+                    3, 3, 0
+                },
+                {
+                    1, 7, 1
+                },
+                {
+                    6, 0, 6
+                },
+                {
+                    4, 4, 7
+                },
+                {
+                    7, 2, 2
+                },
+                {
+                    5, 6, 3
+                }
+            };
+
+            std::array<hvector, 8> midVs;
+            std::array<Transform, 3> rotations = {rotX, rotY, rotZ};
+            for (unsigned int i = 0; i < midVs.size(); ++i)
+            {
+                Types::F32 cx, cy, cz;
+                
+                cx = (i & 4) ? +1.0f : -1.0f;
+                cy = (i & 2) ? +1.0f : -1.0f;
+                cz = (i & 1) ? +1.0f : -1.0f;
+
+                midVs[i] = hvector(cx, cy, cz, 1.0f);
+            }
+
+            for (unsigned int i = 0; i < midVs.size(); ++i)
+            {
+                for (unsigned int j = 0; j < rotations.size(); ++j)
+                {
+                    TEST_ASSERT(AlmostEqual(rotations[j] * midVs[i], midVs[preRotOrder[i][j]], 1e-7f));
+
+                    // ensure the test not always return true;
+                    TEST_ASSERT( ! AlmostEqual(rotations[j] * midVs[i] + hvector(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
+                }
+            }
+            
+
+            hvector axisx(1.0f, 0.0f, 0.0f, 1.0f);
+            hvector axisy(0.0f, 1.0f, 0.0f, 1.0f);
+            hvector axisz(0.0f, 0.0f, 1.0f, 1.0f);
+            hvector axisx_compare = rotY * axisz;
+            hvector axisy_compare = rotZ * axisx;
+            hvector axisz_compare = rotX * axisy;
+
+            TEST_ASSERT(AlmostEqual(axisx, axisx_compare, 1e-7f));
+            TEST_ASSERT(AlmostEqual(axisy, axisy_compare, 1e-7f));
+            TEST_ASSERT(AlmostEqual(axisz, axisz_compare, 1e-7f));
+
+            // next few check ensure that test is not always return true.
+            TEST_ASSERT( ! AlmostEqual(axisx, axisy_compare, 1e-7f));
+            TEST_ASSERT( ! AlmostEqual(axisy, axisz_compare, 1e-7f));
+            TEST_ASSERT( ! AlmostEqual(axisz, axisx_compare, 1e-7f));
+            
         }
     TEST_UNIT_END;
 #pragma endregion
