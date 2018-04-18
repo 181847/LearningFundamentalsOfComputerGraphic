@@ -210,48 +210,6 @@ TEST_MODULE_START
 	TEST_UNIT_END;
 #pragma endregion
 
-#pragma region vector3 copy constructor
-	TEST_UNIT_START("vector3 copy constructor")
-		using namespace CommonClass;
-		vector3 m3(1.0f, 2.0f, 3.0f);
-		vector3 m_toBeError(1.1f, 2.2f, 3.3f);
-		vector3 m_copy(m3);
-
-		// construct success
-		errorLogger.LogIfFalse(AlmostEqual(m3, m_copy));
-
-		// ensure function AlmostEqual is right
-		errorLogger.LogIfTrue(AlmostEqual(m3, m_toBeError));
-	TEST_UNIT_END;
-#pragma endregion
-
-#pragma region vector3 normalize
-	TEST_UNIT_START("vector3 normalize")
-		using namespace CommonClass;
-		using namespace MathTool;
-		
-		globalMtr.SetRandomSeed(5);
-
-		
-
-		for (int i = 0; i < 20; ++i)
-		{
-			vector3 v1(GetRandomVector3(false));
-
-			v1 = Normalize(v1);
-
-			errorLogger.LogIfFalse(almost_equal(Length(v1), 1.0f, 8));
-
-			v1.m_x *= 2.0f;
-			v1.m_y *= 2.0f;
-			v1.m_z *= 3.0f;
-
-			// ensurance, make vector's length not equal to unit.
-			errorLogger.LogIfTrue(almost_equal(Length(v1), 1.0f, 8));
-		}
-	TEST_UNIT_END;
-#pragma endregion
-
 #pragma region film capture light test
 	TEST_UNIT_START("film capture light test")
 		using namespace CommonClass;
