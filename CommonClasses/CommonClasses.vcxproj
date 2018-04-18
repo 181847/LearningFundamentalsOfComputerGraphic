@@ -152,6 +152,7 @@
     <ClInclude Include="Film.h" />
     <ClInclude Include="DebugHelpers.h" />
     <ClInclude Include="HitRecord.h" />
+    <ClInclude Include="hvector.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Surface.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="vector2.h" />
     <ClInclude Include="vector3.h" />
@@ -175,6 +177,7 @@
     <ClCompile Include="ColorTemplate.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="HitRecord.cpp" />
+    <ClCompile Include="hvector.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -186,6 +189,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="vector2.cpp" />
     <ClCompile Include="vector3.cpp" />

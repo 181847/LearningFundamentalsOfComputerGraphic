@@ -80,6 +80,12 @@
     <ClInclude Include="RasterizeImage.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="hvector.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -140,6 +146,12 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="RasterizeImage.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="hvector.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
