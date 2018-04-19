@@ -26,6 +26,7 @@
 #include "../CommonClasses/Light.h"
 #include "../CommonClasses/Material.h"
 #include "../CommonClasses/RasterizeImage.h"
+#include "../CommonClasses/Pipline.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 RandomTool::MTRandom globalMtr;
@@ -151,6 +152,8 @@ void SphereRay(
         } // end outer for loop
 }
 
+#define HELP_SPHERE_RAY_LAMBDA_PARAMETERS const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1
+
 TEST_MODULE_START
 
 #pragma region check module work
@@ -227,7 +230,7 @@ TEST_MODULE_START
         }// end time counter
         
         
-        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -264,7 +267,7 @@ TEST_MODULE_START
             }, CENTER_X, CENTER_Y);
         }// end time counter
         
-        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -303,7 +306,7 @@ TEST_MODULE_START
         }// end time counter
         
         
-        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -340,7 +343,7 @@ TEST_MODULE_START
             }, CENTER_X, CENTER_Y);
         }// end time counter
         
-        //defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
+        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -382,7 +385,6 @@ TEST_MODULE_START
 
     TEST_UNIT_END;
 #pragma endregion
-
 
 #pragma region draw triangle flat bottom
     TEST_UNIT_START("draw triangle flat bottom")
@@ -433,6 +435,77 @@ TEST_MODULE_START
         
         defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\generalTriangle.png");
 
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region draw line with pipline
+    TEST_UNIT_START("draw line with pipline")
+
+        // create and config pipline state object
+        auto pso = std::make_unique<PiplineStateObject>();
+        pso->m_primitiveType = PrimitiveType::LINE_LIST;
+        pso->m_vertexLayout.vertexShaderInputSize = 4 * sizeof(Types::F32);
+        pso->m_vertexLayout.pixelShaderInputSize  = 4 * sizeof(Types::F32);
+
+        Viewport viewport;
+        viewport.left = 0;
+        viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+        viewport.bottom = 0;
+        viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+        pso->SetViewport(viewport);
+
+        // create and set a pipline.
+        Pipline pipline;
+        pipline.SetPSO(std::move(pso));
+
+        // set a backbuffer
+        pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+            UserConfig::COMMON_PIXEL_WIDTH, 
+            UserConfig::COMMON_PIXEL_HEIGHT, 
+            RGBA::WHITE));
+
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
+
+        std::vector<SimplePoint> points;
+        std::vector<unsigned int> indices;
+        unsigned int numIndices = 0;
+
+        // create line segments in sphere ray.
+        SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
+
+            // add start vertex and its index
+            points.push_back(SimplePoint(hvector(x0, y0)));
+            indices.push_back(numIndices++);
+
+            // add end vertex and its index
+            points.push_back(SimplePoint(hvector(x1, y1)));
+            indices.push_back(numIndices++);
+        }, 
+            0.0f, 0.0f, // center location
+            0.2f,       // segment length
+            0.1f,       // start radius
+            4);         // num rounds
+
+        auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * 4 * sizeof(Types::F32));
+        memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
+
+        {
+            TIME_GUARD;
+            pipline.DrawInstance(indices, vertexBuffer.get());
+        }
+
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\drawLines.png");
+        
     TEST_UNIT_END;
 #pragma endregion
 
