@@ -158,6 +158,8 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="OrthographicCamera.h" />
     <ClInclude Include="PerspectiveCamera.h" />
+    <ClInclude Include="Pipline.h" />
+    <ClInclude Include="PiplineStateObject.h" />
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="RasterizeImage.h" />
     <ClInclude Include="Ray.h" />
@@ -183,6 +185,8 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="OrthographicCamera.cpp" />
     <ClCompile Include="PerspectiveCamera.cpp" />
+    <ClCompile Include="Pipline.cpp" />
+    <ClCompile Include="PiplineStateObject.cpp" />
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="RasterizeImage.cpp" />
     <ClCompile Include="Ray.cpp" />
