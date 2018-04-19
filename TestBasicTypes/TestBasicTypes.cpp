@@ -26,6 +26,7 @@
 #include "../CommonClasses/Material.h"
 #include "../CommonClasses/hvector.h"
 #include "../CommonClasses/Transform.h"
+#include "../CommonClasses/Pipline.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 using namespace CommonClass;
@@ -901,6 +902,46 @@ TEST_MODULE_START
             TEST_ASSERT( ! AlmostEqual(axisz, axisx_compare, 1e-7f));
             
         }
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region test F32Buffer
+    TEST_UNIT_START("test F32Buffer")
+        RandomTool::MTRandom mtr;
+        const unsigned int MAX_RAND_INT = 600;
+
+        std::vector<Types::F32> storeF32s;
+
+        auto checkWithStdVector = [&testParameter, &errorLogger, &storeF32s](std::unique_ptr<F32Buffer> buffer)->void {
+            TEST_ASSERT(storeF32s.size() == buffer->GetSize());
+            const unsigned int NUM_CHECKED_FLOATS = buffer->GetSize();
+            Types::F32 * pBuffer = buffer->GetBuffer();
+
+
+            for (unsigned int i = 0; i < NUM_CHECKED_FLOATS; ++i)
+            {
+                TEST_ASSERT(storeF32s[i] == pBuffer[i]);
+            }
+        };
+
+        for (int i = 0; i < 30; ++i)
+        {
+            const unsigned int NUM_FLOATS = mtr.Random(MAX_RAND_INT);
+
+            storeF32s.resize(NUM_FLOATS);
+            auto floatBuffer = std::make_unique<F32Buffer>(NUM_FLOATS);
+
+            Types::F32 * pBuffer = floatBuffer->GetBuffer();
+            for (unsigned int i = 0; i < NUM_FLOATS; ++i)
+            {
+                Types::F32 comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+                pBuffer[i] = comf1;
+                storeF32s[i] = comf1;
+            }
+
+            checkWithStdVector(std::move(floatBuffer));
+        }
+
     TEST_UNIT_END;
 #pragma endregion
 
