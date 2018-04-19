@@ -704,7 +704,7 @@ TEST_MODULE_START
                                 comf8(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
                                 comf9(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
 
-
+            // Translation 
             Transform trl = Transform::Translation(comf1, comf2, comf3);
             Transform trl_compare(
                 1.0f, 0.0f, 0.0f, comf1,
@@ -714,6 +714,7 @@ TEST_MODULE_START
 
             TEST_ASSERT(trl == trl_compare);
 
+            // Rotation transformation
             const Types::F32 cosTheta = std::cosf(comf4),
                              sinTheta = std::sinf(comf4);
 
@@ -749,13 +750,58 @@ TEST_MODULE_START
             TEST_ASSERT(rtz != trl);
             TEST_ASSERT(rtx != rty);
             TEST_ASSERT(rtz != rty);
+
+
+            // Viewport transformation
+            const Types::U32 
+                comu1(mtr.Random(MAX_RAND_INT)),
+                comu2(mtr.Random(MAX_RAND_INT)),
+                comu3(mtr.Random(MAX_RAND_INT)), 
+                comu4(mtr.Random(MAX_RAND_INT));
+
+            // boundries
+            const Types::U32 left = comu1, right = comu1 + comu2, bottom = comu3, top = comu3 + comu4;
+
+            Transform viewt = Transform::Viewport(left, right, bottom, top);
+
+            // build nine hvector for view port transformation test.
+            std::array<hvector, 9> normalizedPos;
+            std::array<Types::F32, 3> constFloats = { -1.0f, 0.0f, 1.0f };
+            for (int i = 0; i < 3; ++i)
+            {
+                for (int j = 0; j < 3; ++j)
+                {
+                    normalizedPos[i * 3 + j] = hvector(constFloats[i], constFloats[j], 0.0f, 1.0f);
+                }
+            }
+
+            // build nine hvector which should be the vectors transformed by the Viewport transformation.
+            std::array<hvector, 9> screenPos;
+            std::array<Types::F32, 3> horizontalPoses = {left - 0.5f, (left + right) * 0.5f , right + 0.5f};
+            std::array<Types::F32, 3> verticalPoses   = {bottom - 0.5f, (bottom + top) * 0.5f , top + 0.5f};
+            for (int i = 0; i < 3; ++i)
+            {
+                for (int j = 0; j < 3; ++j)
+                {
+                    screenPos[i * 3 + j] = hvector(horizontalPoses[i], verticalPoses[j], 0.0f, 1.0f);
+                }
+            }
+
+            // check whether it is true that "normalizedPos" can be transformed to "screenPos" by "viewt"
+            for (int i = 0; i < 9; ++i)
+            {
+                hvector convertToViewport(viewt * normalizedPos[i]);
+                TEST_ASSERT(AlmostEqual(screenPos[i], convertToViewport));
+            }
         }
         
     TEST_UNIT_END;
 #pragma endregion
 
-#pragma region translate and rotation hvector
-    TEST_UNIT_START("translate and rotation hvector")
+#pragma region translate and rotate hvector
+    TEST_UNIT_START("translate and rotate hvector")
+
+        testConfig.m_skipThisOneTest = true;
         
 		RandomTool::MTRandom mtr;
 		const unsigned int MAX_RAND_INT = 600;
@@ -774,57 +820,25 @@ TEST_MODULE_START
                                 comf9(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
 
 
-            Transform trl = Transform::Translation(comf1, comf2, comf3);
+            Transform trl = Transform::Translation(comf1, comf2, comf3);    // translation matrix
 
-            hvector vt(comf5, comf6, comf7);
+            hvector vt(comf5, comf6, comf7);    // the vector used to test translation matrix 
 
             TEST_ASSERT(
                 hvector(comf5 + comf1, comf6 + comf2, comf7 + comf3) 
                 == (trl * vt));
             
             const Types::F32 pi_div_2 = Types::Constant::PI_F * 0.5f;
+
+            // build rotations about axis of x/y/z
             const Transform
                 rotX = Transform::RotationX(pi_div_2),
                 rotY = Transform::RotationY(pi_div_2),
                 rotZ = Transform::RotationZ(pi_div_2);
+            std::array<Transform, 3> rotations = { rotX, rotY, rotZ }; // each one rotate pi/2 about x,y,z
 
-            /*!
-                \brief preRotOrder (previous rotation order)
-                used to assist next 8 vector rotations.
-                later we will create 8 vector,
-                they will be like (1, 1, 1)
-                (1, 1, -1), (1, -1, 1)...
-                the first eight array respond to those vector, and next three
-            */
-            const unsigned preRotOrder[8][3] = {
-                {
-                    2, 1, 4
-                },
-                {
-                    0, 5, 5
-                },
-                {
-                    3, 3, 0
-                },
-                {
-                    1, 7, 1
-                },
-                {
-                    6, 0, 6
-                },
-                {
-                    4, 4, 7
-                },
-                {
-                    7, 2, 2
-                },
-                {
-                    5, 6, 3
-                }
-            };
 
-            std::array<hvector, 8> midVs;
-            std::array<Transform, 3> rotations = {rotX, rotY, rotZ};
+            std::array<hvector, 8> midVs;   // eight vector point at eight quadrants of the space.
             for (unsigned int i = 0; i < midVs.size(); ++i)
             {
                 Types::F32 cx, cy, cz;
@@ -836,6 +850,28 @@ TEST_MODULE_START
                 midVs[i] = hvector(cx, cy, cz, 1.0f);
             }
 
+            
+            /*!
+                \brief preRotOrder (previous rotation order)
+                assist rotation check, used with array "midVs" and "rotations"
+                For example:
+                preRotOrder[0][0] = 2 means that rotating vector "midVs[0]" with "rotations[0]" will end up with "midVs[2]"
+                preRotOrder[2][1] = 3 means that rotating vector "midVs[2]" with "rotations[1]" will end up with "midVs[3]"
+            */
+            const unsigned preRotOrder[8][3] = {
+                { 2, 1, 4 },
+                { 0, 5, 5 },
+                { 3, 3, 0 },
+                { 1, 7, 1 },
+                { 6, 0, 6 },
+                { 4, 4, 7 },
+                { 7, 2, 2 },
+                { 5, 6, 3 }
+            };
+
+            /*!
+                \brief for each vector of "midVs", rotate them with matrixes in "rotations"
+            */
             for (unsigned int i = 0; i < midVs.size(); ++i)
             {
                 for (unsigned int j = 0; j < rotations.size(); ++j)
@@ -847,7 +883,7 @@ TEST_MODULE_START
                 }
             }
             
-
+            // old rotations tests, just rotate axis x/y/z and get the results of x -> y -> z -> x...
             hvector axisx(1.0f, 0.0f, 0.0f, 1.0f);
             hvector axisy(0.0f, 1.0f, 0.0f, 1.0f);
             hvector axisz(0.0f, 0.0f, 1.0f, 1.0f);
