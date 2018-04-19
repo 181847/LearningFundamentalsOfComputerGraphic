@@ -99,6 +99,15 @@ Transform Transform::RotationZ(const Types::F32 z)
         0.0f,      0.0f,      0.0f,     1.0f);
 }
 
+Transform Transform::Viewport(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top)
+{
+    return Transform(
+        0.5f * (right - left + 1), 0.0f, 0.0f, 0.5f * (right + left),
+        0.0f, 0.5f * (top - bottom + 1), 0.0f, 0.5f * (top + bottom),
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f );
+}
+
 bool operator==(const Transform & m1, const Transform & m2)
 {
     for (unsigned int i = 0; i < 4; ++i)

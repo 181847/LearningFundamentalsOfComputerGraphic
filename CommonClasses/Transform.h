@@ -68,6 +68,18 @@ public:
         \param z rotate radians
     */
     static Transform RotationZ(const Types::F32 z);
+
+    /*!
+        \brief construct a viewport transformation with four window boundry, 
+        \param left left boundry of the screen space,     >= 0
+        \param right right boundry of the screen space,   <= PIXEL_WIDTH - 1
+        \param bottom bottom boundry of the screen space, >= 0
+        \param top top boundry of the screen space,       <= PIXEL_HEIGHT - 1
+        the NDC space this transformation based on is [-1, +1]^3, x, y
+        and in the right hand order.
+        the transformed location is bounded to [left - 0.5, right + 0.5]x[bottom - 0.5, top + 0.5]
+    */
+    static Transform Viewport(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top);
 };
 
 /*!
