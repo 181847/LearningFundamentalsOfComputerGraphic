@@ -86,11 +86,57 @@ void Pipline::DrawLineList(const std::vector<unsigned int>& indices, const std::
         const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexStride);
         const ScreenSpaceVertexTemplate* pv2 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i + 1] * vertexStride);
 
-        m_backBuffer->DrawBresenhamLine(
-            static_cast<Types::I32>(pv1->m_posH.m_x),
-            static_cast<Types::I32>(pv1->m_posH.m_y),
-            static_cast<Types::I32>(pv2->m_posH.m_x),
-            static_cast<Types::I32>(pv2->m_posH.m_y));
+       DrawBresenhamLine(pv1, pv2);
+    }
+}
+
+void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2)
+{
+    Types::I32 x0, y0, x1, y1;
+    x0 = static_cast<Types::I32>(pv1->m_posH.m_x);
+    y0 = static_cast<Types::I32>(pv1->m_posH.m_y);
+    x1 = static_cast<Types::I32>(pv2->m_posH.m_x);
+    y1 = static_cast<Types::I32>(pv2->m_posH.m_y);
+    bool steep = std::abs(y1 - y0) > abs(x1 - x0);
+    if (steep)
+    {
+        std::swap(x0, y0);
+        std::swap(x1, y1);
+    }
+    if (x0 > x1)
+    {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+
+    Types::I32 dx = x1 - x0;
+    Types::I32 twoDy = std::abs(2 * (y1 - y0));
+    Types::I32 yi = y1 > y0 ? 1 : -1;
+    Types::I32 twoDx = 2 * dx;
+    Types::I32 y = y0;
+    Types::I32 error = twoDy - dx;
+    Types::I32 twoDyMinusTwoDx = error - dx;
+
+    for (auto x = x0; x <= x1; ++x)
+    {
+        if (steep)
+        {
+            m_backBuffer->SetPixel(y, x, RGB::BLACK);
+        }
+        else
+        {
+            m_backBuffer->SetPixel(x, y, RGB::BLACK);
+        }
+
+        if (error > 0)
+        {
+            y += yi;
+            error += twoDyMinusTwoDx;
+        }
+        else
+        {
+            error += twoDy;
+        }
     }
 }
 

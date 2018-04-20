@@ -105,6 +105,14 @@ public:
         \param vertices endpoints of line segments. they should have been transfered to screen space.
     */
     void DrawLineList(const std::vector<unsigned int>& indices, const std::unique_ptr<F32Buffer> lineEndPointList);
+
+private:
+    /*!
+        \brief draw bresenhamLine.
+        \param (x0, y0) start point location in screen space
+        \param (x1, y1) ens point location in screen space
+    */
+    void DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2);
 };
 
 } // namespace CommonClass
