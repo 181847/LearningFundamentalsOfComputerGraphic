@@ -444,8 +444,8 @@ TEST_MODULE_START
         // create and config pipline state object
         auto pso = std::make_unique<PiplineStateObject>();
         pso->m_primitiveType = PrimitiveType::LINE_LIST;
-        pso->m_vertexLayout.vertexShaderInputSize = 4 * sizeof(Types::F32);
-        pso->m_vertexLayout.pixelShaderInputSize  = 4 * sizeof(Types::F32);
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
+        pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
 
         Viewport viewport;
         viewport.left = 0;
