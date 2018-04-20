@@ -10,6 +10,15 @@ hvector::hvector(const Types::F32 x, const Types::F32 y, const Types::F32 z, con
     // empty
 }
 
+hvector & hvector::operator=(const hvector & v)
+{
+    m_x = v.m_x;
+    m_y = v.m_y;
+    m_z = v.m_z;
+    m_w = v.m_w;
+    return *this;
+}
+
 hvector::~hvector()
 {
     // empty
