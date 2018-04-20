@@ -92,6 +92,9 @@
     <ClInclude Include="Pipline.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="ScreenSpaceVertexTemplate.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -164,6 +167,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Pipline.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenSpaceVertexTemplate.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

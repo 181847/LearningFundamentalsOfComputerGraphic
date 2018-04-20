@@ -165,6 +165,7 @@
     <ClInclude Include="Ray.h" />
     <ClInclude Include="ColorTemplate.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ScreenSpaceVertexTemplate.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="Transform.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="RasterizeImage.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="ScreenSpaceVertexTemplate.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Surface.cpp" />
     <ClCompile Include="Transform.cpp" />
