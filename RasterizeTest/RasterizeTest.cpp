@@ -446,6 +446,15 @@ TEST_MODULE_START
         pso->m_primitiveType = PrimitiveType::LINE_LIST;
         pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
         pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+        
+        pso->m_pixelShader = [](ScreenSpaceVertexTemplate* pVertex)->RGBA {
+
+            RGBA color;
+            color.m_chas.m_r = pVertex->m_posH.m_x * 1.0f / 512;
+            color.m_chas.m_g = pVertex->m_posH.m_y * 1.0f / 512;
+
+            return color;
+        };
 
         Viewport viewport;
         viewport.left = 0;
