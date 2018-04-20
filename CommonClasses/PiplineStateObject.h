@@ -1,6 +1,9 @@
 #pragma once
+#include <functional>
 #include "CommonTypes.h"
 #include "Transform.h"
+#include "ScreenSpaceVertexTemplate.h"
+#include "ColorTemplate.h"
 
 namespace CommonClass
 {
@@ -73,6 +76,11 @@ public:
         \brief the viewport transformation matrix.
     */
     Transform     m_viewportTransform;
+
+    /*!
+        \brief the pixel shader to compute the color.
+    */
+    std::function< RGBA(ScreenSpaceVertexTemplate *) > m_pixelShader = nullptr;
 
 public:
     PiplineStateObject();
