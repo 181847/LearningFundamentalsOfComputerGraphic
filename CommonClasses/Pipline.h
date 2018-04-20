@@ -3,7 +3,7 @@
 
 #include "RasterizeImage.h"
 #include "PiplineStateObject.h"
-
+#include "ScreenSpaceVertexTemplate.h"
 
 namespace CommonClass
 {
@@ -47,14 +47,6 @@ public:
     unsigned int GetSizeOfByte() const;
 };
 
-struct ScreenSpaceVertexTemplate
-{
-public:
-    CommonClass::hvector m_posH;
-    Types::F32 m_restDates[1];
-};
-// ensurance
-static_assert(sizeof(ScreenSpaceVertexTemplate) == (4 + 1) * sizeof(Types::F32), "size of template Vertex is wrong.");
 
     
 /*!

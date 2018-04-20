@@ -7,7 +7,6 @@ Pipline::Pipline()
 {
 }
 
-
 Pipline::~Pipline()
 {
 }
@@ -32,6 +31,11 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     if (m_pso->m_primitiveType != PrimitiveType::LINE_LIST)
     {
         throw std::exception("unsupported primitive type");
+    }
+
+    if (m_pso->m_pixelShader == nullptr)
+    {
+        throw std::exception("pipline state object lack of pixel shader.");
     }
 
     Transform& viewportTransformMat = m_pso->m_viewportTransform;
@@ -97,6 +101,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     y0 = static_cast<Types::I32>(pv1->m_posH.m_y);
     x1 = static_cast<Types::I32>(pv2->m_posH.m_x);
     y1 = static_cast<Types::I32>(pv2->m_posH.m_y);
+
     bool steep = std::abs(y1 - y0) > abs(x1 - x0);
     if (steep)
     {
@@ -117,16 +122,33 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     Types::I32 error = twoDy - dx;
     Types::I32 twoDyMinusTwoDx = error - dx;
 
+    // get pixel shader
+    auto & pixelShader = m_pso->m_pixelShader;
+
+    // create interpolated vertex buffer
+    const unsigned int PSVInputeSize = m_pso->m_vertexLayout.pixelShaderInputSize;
+    F32Buffer pixelShaderInputBuffer(PSVInputeSize);
+    // reinterpret it as ScreenSpaceVertexTemplate.
+    ScreenSpaceVertexTemplate* pPSVInput = reinterpret_cast<ScreenSpaceVertexTemplate *>(pixelShaderInputBuffer.GetBuffer());
+
+    // prepare interpolation coefficience.
+    Types::F32 u = 1.0f, du = 1.0f / dx;    // "u" is used to interpolate between (x0, y0) and (x1, y1);
     for (auto x = x0; x <= x1; ++x)
     {
+        Interpolate2(pv1, pv2, pPSVInput, u, PSVInputeSize);
         if (steep)
         {
-            m_backBuffer->SetPixel(y, x, RGB::BLACK);
+            //m_backBuffer->SetPixel(y, x, RGB::BLACK);
+            m_backBuffer->SetPixel(y, x, pixelShader(pPSVInput));
         }
         else
         {
-            m_backBuffer->SetPixel(x, y, RGB::BLACK);
+            //m_backBuffer->SetPixel(x, y, RGB::BLACK);
+            m_backBuffer->SetPixel(x, y, pixelShader(pPSVInput));
         }
+
+        // update interpolation coefficience.
+        u -= du;
 
         if (error > 0)
         {
@@ -177,6 +199,8 @@ unsigned int F32Buffer::GetSizeOfByte() const
 {
     return m_sizeInByte;
 }
+
+
 
 } // namespace CommonClass
 
