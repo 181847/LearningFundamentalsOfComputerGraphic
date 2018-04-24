@@ -25,12 +25,12 @@ static_assert(sizeof(ScreenSpaceVertexTemplate) == (4 + 1) * sizeof(Types::F32),
 
 
 /*!
-    \brief interpolate bewteen two vertex
+    \brief interpolate attributes bewteen two vertex
     \param pv1 the first vertex
     \param pv2 the second vertex
     \param result the interpolation result
     \param u the interpolation coefficience (should be [0, 1])
-    \param realVertexSizeInBytes the real size of the vertex, let user not how many floats should be interpolated.
+    \param realVertexSizeInBytes the real size of the vertex, all the vertex attributes are the float type.
 */
 void Interpolate2(
     const ScreenSpaceVertexTemplate* pv1, 
