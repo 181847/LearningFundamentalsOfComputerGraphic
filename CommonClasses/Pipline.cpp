@@ -66,7 +66,6 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     Transform& viewportTransformMat = m_pso->m_viewportTransform;
     for (unsigned int i = 0; i < numVertices; ++i)
     {
-        BREAK_POINT_IF(i == 256);
         ScreenSpaceVertexTemplate* pSrcVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pSrcFloat);
 
         ScreenSpaceVertexTemplate* pDestVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pDestFloat);
@@ -96,7 +95,6 @@ void Pipline::DrawLineList(const std::vector<unsigned int>& indices, const std::
     // for each two points, draw a segment
     for (unsigned int i = 0; i < numIndices - 1; i += 2)
     {
-        BREAK_POINT_IF(i == 256);
         const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexStride);
         const ScreenSpaceVertexTemplate* pv2 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i + 1] * vertexStride);
 
@@ -327,7 +325,6 @@ void Pipline::ClipLineList(
 
     for (unsigned int i = 0; i < numLineSegment; ++i)
     {
-        BREAK_POINT_IF(i == 128);
         // find source vertices of line segment
         pStartSrcVertex = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 ],     realVertexSize);
         pEndSrcVertex   = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 + 1 ], realVertexSize);
