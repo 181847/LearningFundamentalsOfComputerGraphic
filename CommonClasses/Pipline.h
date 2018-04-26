@@ -10,6 +10,15 @@ namespace CommonClass
 {
 
 /*!
+    \brief store the pipline light data, such as the VSVertexStrid,
+    the count of index, the count of vertex.
+*/
+struct InstanceParameter
+{
+
+};
+
+/*!
     \brief abstraction of graphic pipline
 */
 class Pipline
@@ -49,14 +58,18 @@ public:
         \param indices the indices of all the vertices
         \param vertices the vertex data to be drawn, the data can be line list or triangle list.
     */
-    void DrawInstance(const std::vector<unsigned int>& indices, const F32Buffer* vertices);
+    void DrawInstance(
+        const std::vector<unsigned int>& indices, 
+        const F32Buffer*                 vertices);
 
     /*!
         \brief draw line lists with out shader processing.
         \param indices indices of the line segments, length of it should be even
         \param vertices endpoints of line segments. they should have been transfered to screen space.
     */
-    void DrawLineList(const std::vector<unsigned int>& indices, const std::unique_ptr<F32Buffer> lineEndPointList);
+    void DrawLineList(
+        const std::vector<unsigned int>& indices, 
+        const std::unique_ptr<F32Buffer> lineEndPointList);
 
 #ifdef _DEBUG
 public:
@@ -70,9 +83,9 @@ private:
         \param realVertexSizeBytes the real vertex size in bytes.
     */
     void DrawBresenhamLine(
-        const ScreenSpaceVertexTemplate* pv1, 
-        const ScreenSpaceVertexTemplate* pv2, 
-        const unsigned int realVertexSizeBytes);
+        const ScreenSpaceVertexTemplate*    pv1, 
+        const ScreenSpaceVertexTemplate*    pv2, 
+        const unsigned int                  realVertexSizeBytes);
 
     /*!
         \brief clipping the line in homogenous clip space
@@ -86,11 +99,11 @@ private:
         yes, z is mapped to -1 (near plane), +1 (far plane).
     */
     static bool ClipLineInHomogenousClipSpace(
-        const ScreenSpaceVertexTemplate* pv1,
-        const ScreenSpaceVertexTemplate* pv2,
-        ScreenSpaceVertexTemplate* pOutV1,
-        ScreenSpaceVertexTemplate* pOutV2,
-        const unsigned int realVertexSize);
+        const ScreenSpaceVertexTemplate*    pv1,
+        const ScreenSpaceVertexTemplate*    pv2,
+        ScreenSpaceVertexTemplate*          pOutV1,
+        ScreenSpaceVertexTemplate*          pOutV2,
+        const unsigned int                  realVertexSize);
 
     /*!
         \brief clipe line list in homogenous clip space, where the perspective divide haven't been done.
@@ -101,11 +114,21 @@ private:
         \param pClippedVertices the vertex data afther clipping.
     */
     static void ClipLineList(
-        const std::vector<unsigned int>& indices, 
-        const F32Buffer* vertices,
-        const unsigned int realVertexSize,
-        std::vector<unsigned int> * pClippedIndices, 
-        std::unique_ptr<F32Buffer> * pClippedVertices);
+        const std::vector<unsigned int>&    indices, 
+        const F32Buffer*                    vertices,
+        const unsigned int                  realVertexSize,
+        std::vector<unsigned int> *         pClippedIndices, 
+        std::unique_ptr<F32Buffer> *        pClippedVertices);
+
+private:
+
+    /*!
+        \brief do the viewport transformation for the vertex stream.
+        for each vertex, we assum the first four component is the homogenous coordinates location, 
+        and all the vertex have been clipped, and we don't concern about the point out of range.
+    */
+    std::unique_ptr<F32Buffer> ViewportTransformVertexStream(
+        std::unique_ptr<F32Buffer> verticesToBeTransformed, const unsigned int realVertexSizeBytes);
 };
 
 } // namespace CommonClass

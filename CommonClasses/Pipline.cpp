@@ -40,42 +40,28 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
         throw std::exception("pipline state object lack of pixel shader.");
     }
 
+    // the vertex size which will be passed to vertexShader
     const unsigned int vsInputStride = m_pso->m_vertexLayout.vertexShaderInputSize;
+    // the vertex size which will be passed to pixelShader
     const unsigned int psInputStride = m_pso->m_vertexLayout.pixelShaderInputSize;
 
-    std::vector<unsigned int> clippedIndices;   // the index data that has been clipped.
+
+    std::vector<unsigned int>  clippedIndices;   // the index data that has been clipped.
     std::unique_ptr<F32Buffer> clippedLineData; // the vertex data that has been clipped.
+
     // clip all the line
     ClipLineList(indices, vertices, psInputStride, &clippedIndices, &clippedLineData);
 
+    // indices after clipping
     const unsigned int numIndices = clippedIndices.size();
+    // the byte size of vertex data after clipping
     const unsigned int numBytes = clippedLineData->GetSizeOfByte();
 
     // now the pipline is not complete, so for the simplification, we assume all the vertex is in the same size.
     assert(vsInputStride == psInputStride);
-    assert(numBytes % vsInputStride == 0 && "vertics data error, cannot ensure each vertex data is complete.");
+    assert(numBytes % vsInputStride == 0 && "vertics data error, cannot ensure every vertex data is complete.");
 
-    // compute the number of vertex.
-    const unsigned int numVertices = numBytes / psInputStride;
-    // create shader input buffer.
-    auto viewportTransData = std::make_unique<F32Buffer>(numVertices * psInputStride);
-
-    unsigned char * pSrcFloat = clippedLineData->GetBuffer();
-    unsigned char * pDestFloat = viewportTransData->GetBuffer();
-
-    Transform& viewportTransformMat = m_pso->m_viewportTransform;
-    for (unsigned int i = 0; i < numVertices; ++i)
-    {
-        ScreenSpaceVertexTemplate* pSrcVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pSrcFloat);
-
-        ScreenSpaceVertexTemplate* pDestVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pDestFloat);
-
-        pDestVertex->m_posH = viewportTransformMat * pSrcVertex->m_posH;
-
-        // move to next data.
-        pSrcFloat += vsInputStride;
-        pDestFloat += psInputStride;
-    }
+    auto viewportTransData = ViewportTransformVertexStream(std::move(clippedLineData), psInputStride);
 
     DrawLineList(clippedIndices, std::move(viewportTransData));
 }
@@ -375,6 +361,35 @@ void Pipline::ClipLineList(
     {
         assert(false && "Warning! After clipping, we get more vertices than expected, there must be some error.");
     }
+}
+
+std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_ptr<F32Buffer> verticesToBeTransformed, const unsigned int realVertexSizeBytes)
+{
+    // compute the number of vertex.
+    const unsigned int numVertices = verticesToBeTransformed->GetSizeOfByte() / realVertexSizeBytes;
+    // create transfered data buffer.
+    auto viewportTransData = std::make_unique<F32Buffer>(numVertices * realVertexSizeBytes);
+
+    // point to the vertex data before viewport transformation, a address in clippedLineData.
+    unsigned char * pSrcFloat = verticesToBeTransformed->GetBuffer();
+    // point to the vertex data after viewport transformation, address in viewportTransData.
+    unsigned char * pDestFloat = viewportTransData->GetBuffer();
+
+    Transform& viewportTransformMat = m_pso->m_viewportTransform;
+    for (unsigned int i = 0; i < numVertices; ++i)
+    {
+        ScreenSpaceVertexTemplate* pSrcVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pSrcFloat);
+
+        ScreenSpaceVertexTemplate* pDestVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pDestFloat);
+
+        pDestVertex->m_posH = viewportTransformMat * pSrcVertex->m_posH;
+
+        // move to next data.
+        pSrcFloat += realVertexSizeBytes;
+        pDestFloat += realVertexSizeBytes;
+    }
+
+    return viewportTransData;
 }
 
 } // namespace CommonClass
