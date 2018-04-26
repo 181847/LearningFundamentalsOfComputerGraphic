@@ -802,7 +802,6 @@ TEST_MODULE_START
 #pragma region translate and rotate hvector
     TEST_UNIT_START("translate and rotate hvector")
 
-        testConfig.m_skipThisOneTest = true;
         
 		RandomTool::MTRandom mtr;
 		const unsigned int MAX_RAND_INT = 600;
@@ -908,14 +907,15 @@ TEST_MODULE_START
 #pragma region test F32Buffer
     TEST_UNIT_START("test F32Buffer")
         RandomTool::MTRandom mtr;
-        const unsigned int MAX_RAND_INT = 600;
+        const unsigned int MAX_RAND_INT = 100;
+        const unsigned int SIZE_OF_FLOAT = sizeof(Types::F32);
 
         std::vector<Types::F32> storeF32s;
 
-        auto checkWithStdVector = [&testParameter, &errorLogger, &storeF32s](std::unique_ptr<F32Buffer> buffer)->void {
-            TEST_ASSERT(storeF32s.size() == buffer->GetSize());
-            const unsigned int NUM_CHECKED_FLOATS = buffer->GetSize();
-            Types::F32 * pBuffer = buffer->GetBuffer();
+        auto checkWithStdVector = [&testParameter, &errorLogger, &storeF32s, &SIZE_OF_FLOAT](std::unique_ptr<F32Buffer> buffer)->void {
+            TEST_ASSERT(storeF32s.size() * SIZE_OF_FLOAT == buffer->GetSizeOfByte());
+            const unsigned int NUM_CHECKED_FLOATS = buffer->GetSizeOfByte() / SIZE_OF_FLOAT;
+            Types::F32 * pBuffer = reinterpret_cast<Types::F32*>(buffer->GetBuffer());
 
 
             for (unsigned int i = 0; i < NUM_CHECKED_FLOATS; ++i)
@@ -929,9 +929,9 @@ TEST_MODULE_START
             const unsigned int NUM_FLOATS = mtr.Random(MAX_RAND_INT);
 
             storeF32s.resize(NUM_FLOATS);
-            auto floatBuffer = std::make_unique<F32Buffer>(NUM_FLOATS);
+            auto floatBuffer = std::make_unique<F32Buffer>(NUM_FLOATS * SIZE_OF_FLOAT);
 
-            Types::F32 * pBuffer = floatBuffer->GetBuffer();
+            Types::F32 * pBuffer = reinterpret_cast<Types::F32*>(floatBuffer->GetBuffer());
             for (unsigned int i = 0; i < NUM_FLOATS; ++i)
             {
                 Types::F32 comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
@@ -942,6 +942,74 @@ TEST_MODULE_START
             checkWithStdVector(std::move(floatBuffer));
         }
 
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region homogenous space clipping function test
+    TEST_UNIT_START("homogenous space clipping function test")
+        hvector clippedV0, clippedV1;
+
+        RandomTool::MTRandom mtr;
+        const unsigned int SCALE_COMPONENTS_TO = 2;
+
+        /*!
+            \brief scale float in [0.0, 1.0] to [-SCALE_COMPONENTS_TO, +SCALE_COMPONENTS_TO]
+        */
+        auto RemapFloat = [&](const Types::F32 f)->Types::F32 {
+            return (f * 2.0f - 1.0f) * SCALE_COMPONENTS_TO;
+        };
+
+        /*!
+            \brief is the vector's x/y/z in range [-1, +1].
+        */
+        auto InCube = [](const hvector& v)->bool {
+            const Types::F32 epsilon = 1e-5f;
+            if ((-1.0f - epsilon) <= v.m_x && v.m_x <= (+1.0f + epsilon)
+                && (-1.0f - epsilon) <= v.m_y && v.m_y <= (+1.0f + epsilon)
+                && ( -1.0f - epsilon ) <= v.m_z && v.m_z <= ( +1.0f + epsilon))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        };
+
+        unsigned out = 0, in = 0;
+        for (int i = 0; i < 100; ++i)
+        {
+            std::array<Types::F32, 6> randFloat;
+            for (auto & f : randFloat)
+            {
+                f = RemapFloat(mtr.Random());
+            }
+            hvector v0(randFloat[0], randFloat[1], randFloat[2], 1.0f);
+            hvector v1(randFloat[3], randFloat[4], randFloat[5], 1.0f);
+
+            //PUT_BREAK_POINT;
+            bool canDrawThisLine = Pipline::ClipLineInHomogenousClipSpace(
+                reinterpret_cast<ScreenSpaceVertexTemplate*>(&v0),
+                reinterpret_cast<ScreenSpaceVertexTemplate*>(&v1),
+                reinterpret_cast<ScreenSpaceVertexTemplate*>(&clippedV0),
+                reinterpret_cast<ScreenSpaceVertexTemplate*>(&clippedV1),
+                16);
+
+            if (canDrawThisLine)
+            {
+                // clipped point must be inside the visible area
+                TEST_ASSERT(InCube(clippedV0) && InCube(clippedV1));
+                ++in;
+            }
+            else
+            {
+                // one of the point must be outside the visible area.
+                TEST_ASSERT( (!InCube(v0)) || (!InCube(v1)));
+                ++out;
+            }// end else
+        }// end for
+
+        testConfig.m_testName += " out: " + std::to_string(out) + ", in: " + std::to_string(in);
     TEST_UNIT_END;
 #pragma endregion
 
