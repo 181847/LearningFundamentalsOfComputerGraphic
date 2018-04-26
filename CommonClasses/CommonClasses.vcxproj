@@ -149,6 +149,7 @@
     <ClInclude Include="Box.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonTypes.h" />
+    <ClInclude Include="F32Buffer.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="DebugHelpers.h" />
     <ClInclude Include="HitRecord.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ColorTemplate.cpp" />
+    <ClCompile Include="F32Buffer.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="HitRecord.cpp" />
     <ClCompile Include="hvector.cpp" />
