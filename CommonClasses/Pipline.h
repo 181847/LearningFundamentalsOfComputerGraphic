@@ -67,8 +67,12 @@ private:
         \brief draw bresenhamLine.
         \param (x0, y0) start point location in screen space
         \param (x1, y1) ens point location in screen space
+        \param realVertexSizeBytes the real vertex size in bytes.
     */
-    void DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2);
+    void DrawBresenhamLine(
+        const ScreenSpaceVertexTemplate* pv1, 
+        const ScreenSpaceVertexTemplate* pv2, 
+        const unsigned int realVertexSizeBytes);
 
     /*!
         \brief clipping the line in homogenous clip space
@@ -77,6 +81,7 @@ private:
         \param pOutV1 where to write clipped start point ( or not clipped ), address should't be the same as pv1
         \param pOutV2 where to write clipped end point ( or not clipped ), address should't be the same as pv2
         \return if the line can be drawn.(if the line is rejected, return false)
+        warning! the 'pOutV' address shouldn't equal the address of 'pv'
         we assum the NDC space is in [-1, +1]^3,
         yes, z is mapped to -1 (near plane), +1 (far plane).
     */

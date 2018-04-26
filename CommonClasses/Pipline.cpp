@@ -98,11 +98,11 @@ void Pipline::DrawLineList(const std::vector<unsigned int>& indices, const std::
         const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexStride);
         const ScreenSpaceVertexTemplate* pv2 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i + 1] * vertexStride);
 
-       DrawBresenhamLine(pv1, pv2);
+       DrawBresenhamLine(pv1, pv2, vertexStride);
     }
 }
 
-void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2)
+void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2, const unsigned int realVertexSizeBytes)
 {
     Types::I32 x0, y0, x1, y1;
     x0 = static_cast<Types::I32>(pv1->m_posH.m_x);
@@ -134,8 +134,8 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     auto & pixelShader = m_pso->m_pixelShader;
 
     // create interpolated vertex buffer
-    const unsigned int PSVInputeSize = m_pso->m_vertexLayout.pixelShaderInputSize;
-    F32Buffer pixelShaderInputBuffer(PSVInputeSize);
+    //const unsigned int PSVInputeSize = m_pso->m_vertexLayout.pixelShaderInputSize;
+    F32Buffer pixelShaderInputBuffer(realVertexSizeBytes);
     // reinterpret it as ScreenSpaceVertexTemplate.
     ScreenSpaceVertexTemplate* pPSVInput = reinterpret_cast<ScreenSpaceVertexTemplate *>(pixelShaderInputBuffer.GetBuffer());
 
@@ -143,7 +143,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     Types::F32 u = 1.0f, du = 1.0f / dx;    // "u" is used to interpolate between (x0, y0) and (x1, y1);
     for (auto x = x0; x <= x1; ++x)
     {
-        Interpolate2(pv1, pv2, pPSVInput, u, PSVInputeSize);
+        Interpolate2(pv1, pv2, pPSVInput, u, realVertexSizeBytes);
         if (steep)
         {
             //m_backBuffer->SetPixel(y, x, RGB::BLACK);
