@@ -66,10 +66,17 @@ public:
         \brief draw line lists with out shader processing.
         \param indices indices of the line segments, length of it should be even
         \param vertices endpoints of line segments. they should have been transfered to screen space.
+        \param vertexSizeInBytes the vertex size in bytes
+        we assum the four float in front of the vertex is the screen space vertex location.
+        -0.5 <= x <= pixelWidth - 0.5
+        -0.5 <= y <= pixelHeight - 0.5
+        -1 <= z <= 1
+        w == 1
     */
     void DrawLineList(
         const std::vector<unsigned int>& indices, 
-        const std::unique_ptr<F32Buffer> lineEndPointList);
+        const std::unique_ptr<F32Buffer> lineEndPointList,
+        const unsigned int vertexSizeInBytes);
 
 #ifdef _DEBUG
 public:

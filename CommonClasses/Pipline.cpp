@@ -63,10 +63,13 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
 
     auto viewportTransData = ViewportTransformVertexStream(std::move(clippedLineData), psInputStride);
 
-    DrawLineList(clippedIndices, std::move(viewportTransData));
+    DrawLineList(clippedIndices, std::move(viewportTransData), psInputStride);
 }
 
-void Pipline::DrawLineList(const std::vector<unsigned int>& indices, const std::unique_ptr<F32Buffer> lineEndPointList)
+void Pipline::DrawLineList(
+    const std::vector<unsigned int>& indices, 
+    const std::unique_ptr<F32Buffer> lineEndPointList,
+    const unsigned int vertexSizeInBytes)
 {
     const unsigned int numIndices = indices.size();
     if (numIndices % 2 != 0)
@@ -74,17 +77,17 @@ void Pipline::DrawLineList(const std::vector<unsigned int>& indices, const std::
         throw std::exception("indices of line list is not even");
     }
 
-    const unsigned int vertexStride = m_pso->m_vertexLayout.pixelShaderInputSize;
-    const unsigned int numVertices = lineEndPointList->GetSizeOfByte() / vertexStride;
+    //const unsigned int vertexStride = m_pso->m_vertexLayout.pixelShaderInputSize;
+    const unsigned int numVertices = lineEndPointList->GetSizeOfByte() / vertexSizeInBytes;
     unsigned char * pDataStart = lineEndPointList->GetBuffer();
 
     // for each two points, draw a segment
     for (unsigned int i = 0; i < numIndices - 1; i += 2)
     {
-        const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexStride);
-        const ScreenSpaceVertexTemplate* pv2 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i + 1] * vertexStride);
+        const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexSizeInBytes);
+        const ScreenSpaceVertexTemplate* pv2 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i + 1] * vertexSizeInBytes);
 
-       DrawBresenhamLine(pv1, pv2, vertexStride);
+       DrawBresenhamLine(pv1, pv2, vertexSizeInBytes);
     }
 }
 
@@ -168,8 +171,8 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 
     std::array<Types::F32, 6> p;
     std::array<Types::F32, 6> q;
-    Types::F32 t0 = 0.0f;       // start point 
-    Types::F32 t1 = 1.0f;       // end point
+    Types::F32 t0 = 0.0f;       // start point, zero means the pv1
+    Types::F32 t1 = 1.0f;       // end point, one means the pv2
     Types::F32 tempT = 0.0f;    // temp interpolate coefficience
 
     const Types::F32 deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
