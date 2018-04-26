@@ -1,4 +1,6 @@
 #include "Pipline.h"
+#include <array>
+#include "DebugHelpers.h"
 
 namespace CommonClass
 {
@@ -38,26 +40,33 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
         throw std::exception("pipline state object lack of pixel shader.");
     }
 
-    Transform& viewportTransformMat = m_pso->m_viewportTransform;
-
-    const unsigned int numBytes = vertices->GetSizeOfByte();
     const unsigned int vsInputStride = m_pso->m_vertexLayout.vertexShaderInputSize;
     const unsigned int psInputStride = m_pso->m_vertexLayout.pixelShaderInputSize;
+
+    std::vector<unsigned int> clippedIndices;   // the index data that has been clipped.
+    std::unique_ptr<F32Buffer> clippedLineData; // the vertex data that has been clipped.
+    // clip all the line
+    ClipLineList(indices, vertices, psInputStride, &clippedIndices, &clippedLineData);
+
+    const unsigned int numIndices = clippedIndices.size();
+    const unsigned int numBytes = clippedLineData->GetSizeOfByte();
 
     // now the pipline is not complete, so for the simplification, we assume all the vertex is in the same size.
     assert(vsInputStride == psInputStride);
     assert(numBytes % vsInputStride == 0 && "vertics data error, cannot ensure each vertex data is complete.");
 
     // compute the number of vertex.
-    const unsigned int numVertices = numBytes / vsInputStride;
+    const unsigned int numVertices = numBytes / psInputStride;
     // create shader input buffer.
     auto viewportTransData = std::make_unique<F32Buffer>(numVertices * psInputStride);
 
-    unsigned char * pSrcFloat = vertices->GetBuffer();
+    unsigned char * pSrcFloat = clippedLineData->GetBuffer();
     unsigned char * pDestFloat = viewportTransData->GetBuffer();
 
+    Transform& viewportTransformMat = m_pso->m_viewportTransform;
     for (unsigned int i = 0; i < numVertices; ++i)
     {
+        BREAK_POINT_IF(i == 256);
         ScreenSpaceVertexTemplate* pSrcVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pSrcFloat);
 
         ScreenSpaceVertexTemplate* pDestVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pDestFloat);
@@ -69,7 +78,7 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
         pDestFloat += psInputStride;
     }
 
-    DrawLineList(indices, std::move(viewportTransData));
+    DrawLineList(clippedIndices, std::move(viewportTransData));
 }
 
 void Pipline::DrawLineList(const std::vector<unsigned int>& indices, const std::unique_ptr<F32Buffer> lineEndPointList)
@@ -87,6 +96,7 @@ void Pipline::DrawLineList(const std::vector<unsigned int>& indices, const std::
     // for each two points, draw a segment
     for (unsigned int i = 0; i < numIndices - 1; i += 2)
     {
+        BREAK_POINT_IF(i == 256);
         const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexStride);
         const ScreenSpaceVertexTemplate* pv2 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i + 1] * vertexStride);
 
@@ -159,6 +169,214 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
         {
             error += twoDy;
         }
+    }
+}
+
+bool Pipline::ClipLineInHomogenousClipSpace(
+    const ScreenSpaceVertexTemplate* pv1,
+    const ScreenSpaceVertexTemplate* pv2,
+    ScreenSpaceVertexTemplate* pOutV1,
+    ScreenSpaceVertexTemplate* pOutV2, 
+    const unsigned int realVertexSize)
+{
+    assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
+    assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
+
+    std::array<Types::F32, 6> p;
+    std::array<Types::F32, 6> q;
+    Types::F32 t0 = 0.0f;       // start point 
+    Types::F32 t1 = 1.0f;       // end point
+    Types::F32 tempT = 0.0f;    // temp interpolate coefficience
+
+    const Types::F32 deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
+    const Types::F32 deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
+    const Types::F32 deltaZ = pv2->m_posH.m_z - pv1->m_posH.m_z;
+    const Types::F32 deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
+
+    p[0] = -(deltaX + deltaW);
+    p[1] = deltaX - deltaW;
+    p[2] = -(deltaY + deltaW);
+    p[3] = deltaY - deltaW;
+    p[4] = -(deltaZ + deltaW);
+    p[5] = deltaZ - deltaW;
+
+    q[0] = pv1->m_posH.m_x + pv1->m_posH.m_w;
+    q[1] = pv1->m_posH.m_w - pv1->m_posH.m_x;
+    q[2] = pv1->m_posH.m_y + pv1->m_posH.m_w;
+    q[3] = pv1->m_posH.m_w - pv1->m_posH.m_y;
+    q[4] = pv1->m_posH.m_z + pv1->m_posH.m_w;
+    q[5] = pv1->m_posH.m_w - pv1->m_posH.m_z;
+
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
+        {
+            if (q[i] < 0.0f)
+            {
+                return false;
+            }
+        }
+        else if (p[i] > 0.0f)
+        {
+            tempT = q[i] / p[i];
+            if (tempT < t0)
+            {
+                // new end point is after start point.
+                // early reject
+                return false;
+            }
+            else if (tempT < t1)
+            {
+                // update t1, new end point
+                t1 = tempT;
+            }
+        }
+        else // p[i] < 0.0f
+        {
+            tempT = q[i] / p[i];
+            if (tempT > t1)
+            {
+                // new start point is beyond end point.
+                // early reject
+                return false;
+            }
+            else if (tempT > t0)
+            {
+                // update t1, new start point
+                t0 = tempT;
+            }
+        }
+    }
+    
+    if (t0 == 0.0f)
+    {
+        memcpy(pOutV1, pv1, realVertexSize);
+    }
+    else
+    {
+        // warning, pOutV1 = (1 - t0) * pv1 + t0 * pv2
+        // this means:
+        // if t0 == 0, then pOutV1 = pv1
+        // if t0 == 1, then pOutV1 = pv2
+        // but this is opposited to interpolation between two value,
+        //      where if u == 1, then pOutV1 = pv1
+        //            if u == 0, then pOutV1 = pv2
+        // so here we flip the vertex order, to get correct interpolation result.
+        Interpolate2(pv2, pv1, pOutV1, t0, realVertexSize);
+    }
+    
+    if (t1 == 1.0f)
+    {
+        memcpy(pOutV2, pv2, realVertexSize);
+    }
+    else
+    {
+        // warning, pOutV1 = (1 - t0) * pv1 + t0 * pv2
+        // this means:
+        // if t0 == 0, then pOutV1 = pv1
+        // if t0 == 1, then pOutV1 = pv2
+        // but this is opposited to interpolation between two value,
+        //      where if u == 1, then pOutV1 = pv1
+        //            if u == 0, then pOutV1 = pv2
+        // so here we flip the vertex order, to get correct interpolation result.
+        Interpolate2(pv2, pv1, pOutV2, t1, realVertexSize);
+    }
+
+    BREAK_POINT_IF(
+        pOutV1->m_posH.m_x > 1.0f || pOutV1->m_posH.m_y > 1.0f || pOutV1->m_posH.m_z > 1.0f
+        || pOutV2->m_posH.m_x > 1.0f || pOutV2->m_posH.m_y > 1.0f || pOutV2->m_posH.m_z > 1.0f);
+
+    return true;
+}
+
+void Pipline::ClipLineList(
+    const std::vector<unsigned int>&    indices, 
+    const F32Buffer *                   vertices,
+    const unsigned int                  realVertexSize, 
+    std::vector<unsigned int> *         pClippedIndices, 
+    std::unique_ptr<F32Buffer> *        pClippedVertices)
+{
+    // For each line segment, the clip test will be executed, and return a new line segment,
+    // now we don't have optimization on reusing vertex by same index.
+    
+    assert(realVertexSize % 4 == 0                                      && "vertex size is not the times of four");
+    assert(pClippedIndices != nullptr && pClippedVertices != nullptr    && "argument nullptr error");
+    assert(indices.size() % 2 == 0                                      && "line indices is not pairs");
+
+    pClippedIndices->clear();   // empty the output indice buffer.
+    unsigned int numLineSegment = indices.size() / 2; // number of all line segments
+
+    // create a buffer stream which can hold every individual vertex for each line segment.
+    // each end point will have its own vertex.
+    auto clippedStream = std::make_unique<F32Buffer>(realVertexSize * 2 * numLineSegment);
+
+    const unsigned int twoRealVertexSizeBytes = 2 * realVertexSize;
+
+    unsigned char * pSrcVerticesAddr    = vertices->GetBuffer();                    // source vertex start address
+
+    unsigned char * pStartSrcVertex     = nullptr;                              // src start vertex location
+    unsigned char * pEndSrcVertex       = nullptr;                              // src end vertex location 
+    unsigned char * pStartClippedVertex = clippedStream->GetBuffer();           // output clipped start vertex
+    unsigned char * pEndClippedVertex   = pStartClippedVertex + realVertexSize; // output clipped end vertex
+
+    unsigned int    startClippedVertexIndex = 0;
+    unsigned int    endClippedVertexIndex = 1;
+    unsigned int    numClippedVertex = 0;   // how many vertex is added to clippedStream
+
+    bool canDrawThisSegment = false;    // for each clipping test, is this line can be draw,(or the line is rejected).
+
+    for (unsigned int i = 0; i < numLineSegment; ++i)
+    {
+        BREAK_POINT_IF(i == 128);
+        // find source vertices of line segment
+        pStartSrcVertex = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 ],     realVertexSize);
+        pEndSrcVertex   = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 + 1 ], realVertexSize);
+
+        // clipping test
+        canDrawThisSegment = ClipLineInHomogenousClipSpace(
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pStartSrcVertex), 
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pEndSrcVertex), 
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pStartClippedVertex), 
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pEndClippedVertex), 
+            realVertexSize);
+
+        if (canDrawThisSegment)
+        {
+            // output vertex address move on
+            pStartClippedVertex += twoRealVertexSizeBytes;
+            pEndClippedVertex   += twoRealVertexSizeBytes;
+
+            // push vertex index
+            pClippedIndices->push_back(startClippedVertexIndex);
+            pClippedIndices->push_back(endClippedVertexIndex);
+
+            // increase vertexIndex to next
+            startClippedVertexIndex += 2;
+            endClippedVertexIndex   += 2;
+
+            numClippedVertex += 2;
+        } // end if canDrawThisSegment
+    }// end for line segments
+
+    // after clipping, is the clipped vertices cost same space as we allocated?
+    const unsigned int realClippedStreamSize = numClippedVertex * realVertexSize;
+    if (realClippedStreamSize < clippedStream->GetSizeOfByte())
+    {
+        // if the vertices of visible line segment use less space than clippedStream stream
+        // creat another buffer stream which will only contain the useable data.
+        auto shrinkClippedStream = std::make_unique<F32Buffer>(realClippedStreamSize);
+        memcpy(shrinkClippedStream->GetBuffer(), clippedStream->GetBuffer(), shrinkClippedStream->GetSizeOfByte());
+        
+        // return vertex data
+        *pClippedVertices = std::move(shrinkClippedStream);
+    }
+    else if (realClippedStreamSize == clippedStream->GetSizeOfByte())
+    {
+        *pClippedVertices = std::move(clippedStream);
+    }
+    else
+    {
+        assert(false && "Warning! After clipping, we get more vertices than expected, there must be some error.");
     }
 }
 

@@ -47,6 +47,15 @@ public:
     unsigned int GetSizeOfByte() const;
 };
 
+/*!
+    \brief from a start address, get a vertex of specific index, and interpret it to the desired VERTEX_TYPE pointer.
+*/
+template<typename VERTEX_TYPE = unsigned char>
+inline VERTEX_TYPE * GetVertexPtrAt(unsigned char * pStartAddr, unsigned int vertexIndex, unsigned int vertexSizeInByte)
+{
+    return reinterpret_cast<VERTEX_TYPE * >(pStartAddr + vertexSizeInByte * vertexIndex);
+}
+
 
     
 /*!
@@ -98,13 +107,49 @@ public:
     */
     void DrawLineList(const std::vector<unsigned int>& indices, const std::unique_ptr<F32Buffer> lineEndPointList);
 
+#ifdef _DEBUG
+public:
+#else
 private:
+#endif
     /*!
         \brief draw bresenhamLine.
         \param (x0, y0) start point location in screen space
         \param (x1, y1) ens point location in screen space
     */
     void DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2);
+
+    /*!
+        \brief clipping the line in homogenous clip space
+        \param pv1 start point of the line
+        \param pv2 end point of the line
+        \param pOutV1 where to write clipped start point ( or not clipped ), address should't be the same as pv1
+        \param pOutV2 where to write clipped end point ( or not clipped ), address should't be the same as pv2
+        \return if the line can be drawn.(if the line is rejected, return false)
+        we assum the NDC space is in [-1, +1]^3,
+        yes, z is mapped to -1 (near plane), +1 (far plane).
+    */
+    static bool ClipLineInHomogenousClipSpace(
+        const ScreenSpaceVertexTemplate* pv1,
+        const ScreenSpaceVertexTemplate* pv2,
+        ScreenSpaceVertexTemplate* pOutV1,
+        ScreenSpaceVertexTemplate* pOutV2,
+        const unsigned int realVertexSize);
+
+    /*!
+        \brief clipe line list in homogenous clip space, where the perspective divide haven't been done.
+        \param indices input line list indices
+        \param vertices input vertex data
+        \param realVertexSize the vertes size of the input vertices in Bytes
+        \param pClippedIndices the index data afther clipping
+        \param pClippedVertices the vertex data afther clipping.
+    */
+    static void ClipLineList(
+        const std::vector<unsigned int>& indices, 
+        const F32Buffer* vertices,
+        const unsigned int realVertexSize,
+        std::vector<unsigned int> * pClippedIndices, 
+        std::unique_ptr<F32Buffer> * pClippedVertices);
 };
 
 } // namespace CommonClass
