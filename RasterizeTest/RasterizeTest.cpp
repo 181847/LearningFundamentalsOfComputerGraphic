@@ -641,9 +641,14 @@ TEST_MODULE_START
             RGBA color(RGBA::WHITE);
             //color.SetChannel<RGBA::R>(pVertex->m_posH.m_x * 1.0f / 512);
             //color.SetChannel<RGBA::G>(pVertex->m_posH.m_y * 1.0f / 512);
-            color.SetChannel<RGBA::B>((pVertex->m_posH.m_z + 1.0f) / 2.0f);
-            color.SetChannel<RGBA::R>((pVertex->m_posH.m_z + 1.0f) / 2.0f);
-            color.SetChannel<RGBA::G>((pVertex->m_posH.m_z + 1.0f) / 2.0f);
+
+            Types::F32 chanV = (pVertex->m_posH.m_z + 1.0f) / 2.0f;
+            const Types::F32 gamma = 4.0f;
+            chanV = std::powf(chanV, gamma);
+            chanV = 1.0f - chanV;
+            color.SetChannel<RGBA::B>(chanV);
+            color.SetChannel<RGBA::R>(chanV);
+            color.SetChannel<RGBA::G>(chanV);
 
             return color;
         };
@@ -706,7 +711,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineVertexShaderProcess.png");
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineVertexShaderProcess06.png");
         
     TEST_UNIT_END;
 #pragma endregion
