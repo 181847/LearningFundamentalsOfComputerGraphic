@@ -237,6 +237,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     
     if (t0 == 0.0f)
     {
+        // just copy original start point data.
         memcpy(pOutV1, pv1, realVertexSize);
     }
     else
@@ -254,6 +255,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     
     if (t1 == 1.0f)
     {
+        // just copy original end point data.
         memcpy(pOutV2, pv2, realVertexSize);
     }
     else
@@ -269,6 +271,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         Interpolate2(pv2, pv1, pOutV2, t1, realVertexSize);
     }
 
+    // an ensurance that all the components should be limited in [-1, +1].
     BREAK_POINT_IF(
         pOutV1->m_posH.m_x > 1.0f || pOutV1->m_posH.m_y > 1.0f || pOutV1->m_posH.m_z > 1.0f
         || pOutV2->m_posH.m_x > 1.0f || pOutV2->m_posH.m_y > 1.0f || pOutV2->m_posH.m_z > 1.0f);
@@ -290,12 +293,13 @@ void Pipline::ClipLineList(
     assert(pClippedIndices != nullptr && pClippedVertices != nullptr    && "argument nullptr error");
     assert(indices.size() % 2 == 0                                      && "line indices is not pairs");
 
-    pClippedIndices->clear();   // empty the output indice buffer.
+    // empty the output indice buffer.
+    pClippedIndices->clear();   
     unsigned int numLineSegment = indices.size() / 2; // number of all line segments
 
     // create a buffer stream which can hold every individual vertex for each line segment.
     // each end point will have its own vertex.
-    auto clippedStream = std::make_unique<F32Buffer>(realVertexSize * 2 * numLineSegment);
+    auto clippedStream = std::make_unique<F32Buffer>(realVertexSize * 2 * numLineSegment); // allocate buffer for clipped data
 
     const unsigned int twoRealVertexSizeBytes = 2 * realVertexSize;
 
@@ -307,8 +311,8 @@ void Pipline::ClipLineList(
     unsigned char * pEndClippedVertex   = pStartClippedVertex + realVertexSize; // output clipped end vertex
 
     unsigned int    startClippedVertexIndex = 0;
-    unsigned int    endClippedVertexIndex = 1;
-    unsigned int    numClippedVertex = 0;   // how many vertex is added to clippedStream
+    unsigned int    endClippedVertexIndex   = 1;
+    unsigned int    numClippedVertex        = 0;   // how many vertex is added to clippedStream
 
     bool canDrawThisSegment = false;    // for each clipping test, is this line can be draw,(or the line is rejected).
 

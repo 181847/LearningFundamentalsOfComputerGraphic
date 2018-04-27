@@ -104,6 +104,7 @@ private:
         warning! the 'pOutV' address shouldn't equal the address of 'pv'
         we assum the NDC space is in [-1, +1]^3,
         yes, z is mapped to -1 (near plane), +1 (far plane).
+        reference from: ¡¶Some Improvements to a Parametric Line Clipping Algorithm¡·Liang-Barsky
     */
     static bool ClipLineInHomogenousClipSpace(
         const ScreenSpaceVertexTemplate*    pv1,
