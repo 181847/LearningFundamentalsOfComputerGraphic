@@ -443,6 +443,18 @@ TEST_MODULE_START
         
         // skip this test due to the bug of clipping line function.
         //return 0;
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
+        static_assert(sizeof(SimplePoint) == 16, "size of SimplePoint is wrong");
 
         // create and config pipline state object
         auto pso = std::make_unique<PiplineStateObject>();
@@ -457,6 +469,10 @@ TEST_MODULE_START
             color.m_chas.m_g = pVertex->m_posH.m_y * 1.0f / 512;
 
             return color;
+        };
+
+        pso->m_vertexShader = [](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pdestV)->void {
+            memcpy(pdestV, pSrcVertex, sizeof(SimplePoint));
         };
 
         Viewport viewport;
@@ -475,18 +491,6 @@ TEST_MODULE_START
             UserConfig::COMMON_PIXEL_WIDTH, 
             UserConfig::COMMON_PIXEL_HEIGHT, 
             RGBA::WHITE));
-
-        // temp struct for line drawing.
-        struct SimplePoint
-        {
-        public:
-            hvector m_position;
-            SimplePoint(const hvector& pos)
-                :m_position(pos)
-            {
-                // empty
-            }
-        };
 
         std::vector<SimplePoint> points;
         std::vector<unsigned int> indices;
@@ -526,7 +530,19 @@ TEST_MODULE_START
 
         // skip this test due to the bug of clipping line function.
         //return 0;
+        
 
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
         // create and config pipline state object
         auto pso = std::make_unique<PiplineStateObject>();
         pso->m_primitiveType = PrimitiveType::LINE_LIST;
@@ -540,6 +556,10 @@ TEST_MODULE_START
             color.m_chas.m_g = pVertex->m_posH.m_y * 1.0f / 512;
 
             return color;
+        };
+
+        pso->m_vertexShader = [](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pdestV)->void {
+            memcpy(pdestV, pSrcVertex, sizeof(SimplePoint));
         };
 
         Viewport viewport;
@@ -558,18 +578,6 @@ TEST_MODULE_START
             UserConfig::COMMON_PIXEL_WIDTH, 
             UserConfig::COMMON_PIXEL_HEIGHT, 
             RGBA::WHITE));
-
-        // temp struct for line drawing.
-        struct SimplePoint
-        {
-        public:
-            hvector m_position;
-            SimplePoint(const hvector& pos)
-                :m_position(pos)
-            {
-                // empty
-            }
-        };
 
         std::vector<SimplePoint> points;
         std::vector<unsigned int> indices;
