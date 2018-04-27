@@ -98,6 +98,9 @@
     <ClInclude Include="F32Buffer.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="CoordinateFrame.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -176,6 +179,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="F32Buffer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CoordinateFrame.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
