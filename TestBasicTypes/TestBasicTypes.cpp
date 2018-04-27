@@ -27,6 +27,7 @@
 #include "../CommonClasses/hvector.h"
 #include "../CommonClasses/Transform.h"
 #include "../CommonClasses/Pipline.h"
+#include "../CommonClasses/CoordinateFrame.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 using namespace CommonClass;
@@ -1010,6 +1011,52 @@ TEST_MODULE_START
         }// end for
 
         testConfig.m_testName += " out: " + std::to_string(out) + ", in: " + std::to_string(in);
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region coordinate frame construct
+    TEST_UNIT_START("")
+        
+		/*!
+			\brief using cross product check two vectors is almost perpendicular to each other.
+			Warning: the result of cross product by have a huge differ from 0.0f,
+					so the almost_equal will not work properly,
+					here we just specify a range (-1e-7f, 1e-7f).
+		*/
+		auto almostPerpendicular = [](const vector3& a, const vector3& b)->bool
+		{
+			Types::F32 dpValue = dotProd(a, b);
+			//std::printf("## check perpendicular vector3 %f.\n", dpValue);
+
+			return (-1e-6f) < dpValue && dpValue < (1e-6f);
+		};
+
+        RandomTool::MTRandom mtr;
+
+        const unsigned int SCALE_FLOAT = 2;
+
+        std::array<Types::F32, 9> rfarr;
+
+        for (int i = 0; i < 20; ++i)
+        {
+            for (auto & randFloat : rfarr)
+            {
+                randFloat = SCALE_FLOAT * (mtr.Random() * 2.0f - 1.0f);
+            }
+
+            vector3 tu(rfarr[0], rfarr[1], rfarr[2]);
+            vector3 tv(rfarr[3], rfarr[4], rfarr[5]);
+            vector3 te(rfarr[6], rfarr[7], rfarr[8]);
+
+            CoordinateFrame tcf(tu, tv, te);
+
+            TEST_ASSERT(AlmostPerpendicular(tcf.m_u, tcf.m_v, 1e-6f));
+            TEST_ASSERT(AlmostPerpendicular(tcf.m_u, tcf.m_w, 1e-6f));
+            TEST_ASSERT(AlmostPerpendicular(tcf.m_v, tcf.m_w, 1e-6f));
+
+            TEST_ASSERT(tcf.m_e == te);
+        }
+        
     TEST_UNIT_END;
 #pragma endregion
 
