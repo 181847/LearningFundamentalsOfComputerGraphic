@@ -119,10 +119,10 @@ bool AlmostEqual(const vector3 & a, const vector3 & b, int ulp)
 		&& MathTool::almost_equal(a.m_z, b.m_z, ulp);
 }
 
-bool AlmostPerpendicular(const vector3 & a, const vector3 & b, const Types::F32 minBound, const Types::F32 maxBound)
+bool AlmostPerpendicular(const vector3 & a, const vector3 & b, const Types::F32 epsilon)
 {
 	Types::F32 dpValue = dotProd(a, b);
-	return minBound < dpValue && dpValue < maxBound;
+	return -epsilon < dpValue && dpValue < epsilon;
 }
 
 bool AlmostIsUnitVector(const vector3 & a, int ulp)
