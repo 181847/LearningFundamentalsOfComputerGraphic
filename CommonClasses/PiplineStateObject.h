@@ -79,8 +79,14 @@ public:
 
     /*!
         \brief the pixel shader to compute the color.
+        \paramType ScreenSpaceVertexTemplate 
     */
-    std::function< RGBA(ScreenSpaceVertexTemplate *) > m_pixelShader = nullptr;
+    std::function< RGBA(const ScreenSpaceVertexTemplate *) > m_pixelShader = nullptr;
+
+    /*!
+        \brief 
+    */
+    std::function< void(const unsigned char *, ScreenSpaceVertexTemplate*)> m_vertexShader = nullptr;
 
 public:
     PiplineStateObject();
