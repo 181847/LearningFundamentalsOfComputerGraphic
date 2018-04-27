@@ -116,6 +116,10 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     {
         std::swap(x0, x1);
         std::swap(y0, y1);
+
+        // if we swap (x0, y0) with (x1, y1)
+        // we should also swap two vertex inorder to get the correct interplotion between.
+        std::swap(pv1, pv2);
     }
 
     Types::I32 dx = x1 - x0;
