@@ -450,7 +450,7 @@ TEST_MODULE_START
         pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
         pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
         
-        pso->m_pixelShader = [](ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
 
             RGBA color;
             color.m_chas.m_r = pVertex->m_posH.m_x * 1.0f / 512;
@@ -533,7 +533,7 @@ TEST_MODULE_START
         pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
         pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
         
-        pso->m_pixelShader = [](ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
 
             RGBA color;
             color.m_chas.m_r = pVertex->m_posH.m_x * 1.0f / 512;
