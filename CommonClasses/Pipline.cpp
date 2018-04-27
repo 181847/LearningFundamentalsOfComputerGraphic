@@ -40,17 +40,24 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
         throw std::exception("pipline state object lack of pixel shader.");
     }
 
+    if (m_pso->m_vertexShader == nullptr)
+    {
+        throw std::exception("pipline state object lack of vertex shader.");
+    }
+
     // the vertex size which will be passed to vertexShader
     const unsigned int vsInputStride = m_pso->m_vertexLayout.vertexShaderInputSize;
     // the vertex size which will be passed to pixelShader
     const unsigned int psInputStride = m_pso->m_vertexLayout.pixelShaderInputSize;
-
+    
+    // process each vertex with vertexShader
+    std::unique_ptr<F32Buffer> vsOutputStream = VertexShaderTransform(vertices, vsInputStride, psInputStride);
 
     std::vector<unsigned int>  clippedIndices;   // the index data that has been clipped.
     std::unique_ptr<F32Buffer> clippedLineData; // the vertex data that has been clipped.
 
     // clip all the line
-    ClipLineList(indices, vertices, psInputStride, &clippedIndices, &clippedLineData);
+    ClipLineList(indices, vsOutputStream.get(), psInputStride, &clippedIndices, &clippedLineData);
 
     // indices after clipping
     const unsigned int numIndices = clippedIndices.size();
@@ -397,6 +404,32 @@ std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_pt
     }
 
     return viewportTransData;
+}
+
+std::unique_ptr<F32Buffer> Pipline::VertexShaderTransform(const F32Buffer * pVertexStream, const unsigned int vsInputStride, const unsigned int vsOutputStride)
+{
+    assert(pVertexStream != nullptr);
+
+    const unsigned int sizeOfInputStream = pVertexStream->GetSizeOfByte();
+    assert(sizeOfInputStream % vsInputStride == 0 && "vertexShader stream input error, the size is not complete.");
+
+    const unsigned int numVertex = sizeOfInputStream / vsInputStride;
+
+    auto vertexOutputStream = std::make_unique<F32Buffer>(numVertex * vsOutputStride);
+
+    unsigned char * pVSInput = pVertexStream->GetBuffer();
+    unsigned char * pVSOutput = vertexOutputStream->GetBuffer();
+
+    auto vertexShader = m_pso->m_vertexShader;
+    for (unsigned int i = 0; i < numVertex; ++i)
+    {
+        vertexShader(pVSInput, reinterpret_cast<ScreenSpaceVertexTemplate*>(pVSOutput));
+
+        pVSInput += vsInputStride;
+        pVSOutput += vsOutputStride;
+    }
+
+    return vertexOutputStream;
 }
 
 } // namespace CommonClass

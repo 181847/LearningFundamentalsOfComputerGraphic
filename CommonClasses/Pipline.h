@@ -137,6 +137,15 @@ private:
     */
     std::unique_ptr<F32Buffer> ViewportTransformVertexStream(
         std::unique_ptr<F32Buffer> verticesToBeTransformed, const unsigned int realVertexSizeBytes);
+
+    /*!
+        \brief for each vertex data, process it with vertex shader which is defined in the pipline state object
+        \param pVertexStream the input vertex buffer stream
+        \param vsInputStride the size(byte) of one vertex which will be passed into the vertexShader.
+        \param vsOutputStrid the size(byte) of one vertex which will be returned by the vertexShader.
+    */
+    std::unique_ptr<F32Buffer> VertexShaderTransform(
+        const F32Buffer* pVertexStream, const unsigned int vsInputStride, const unsigned int vsOutputStride);
 };
 
 } // namespace CommonClass
