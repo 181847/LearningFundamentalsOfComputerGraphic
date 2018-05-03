@@ -18,11 +18,27 @@ namespace CommonClass
 class Transform
 {
 public:
-    /*!
-        \brief transform are defined by 4 column vectors.
-    */
-    hvector m_column[4];
+    union
+    {
+        /*!
+            \brief transform are defined by 4 column vectors.
+        */
+        hvector m_column[4];
 
+        struct
+        {
+            // first number stand for row index(from 1 to 4), second number stand for column index(from 1 to 4).
+            Types::F32 
+                m_11, m_21, m_31, m_41, // T column 1
+
+                m_12, m_22, m_32, m_42, // T column 2
+
+                m_13, m_23, m_33, m_43, // T column 3
+
+                m_14, m_24, m_34, m_44; // T column 4
+        };
+    };
+    
 public:
     /*!
         \brief construct a unit matrix
@@ -42,6 +58,8 @@ public:
         const Types::F32 m41, const Types::F32 m42, const Types::F32 m43, const Types::F32 m44);
 
     ~Transform();
+
+    Transform& operator = (const Transform& m);
 
     /*!
         \brief construct a translation matrix for x/y/z.
@@ -80,7 +98,47 @@ public:
         the transformed location is bounded to [left - 0.5, right + 0.5]x[bottom - 0.5, top + 0.5]
     */
     static Transform Viewport(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top);
+
+    /*!
+        \brief build a transformation of orthographic transformation x,y,z in [-1, +1]
+        \param left left side of the boundry
+        \param right right side of the boundry
+        \param bottom bottom side of the boundry
+        \param top top side of the boundry
+        \param near near plane
+        \param far far plane
+        this is in the right hand coordinate system, so the near and far should be negative,
+        and near > far, in the mean while the projected NDCz should be +1 for near plane, -1 for far plane
+    */
+    static Transform OrthographicTransOG(
+        const Types::F32 left,
+        const Types::F32 right,
+        const Types::F32 bottom,
+        const Types::F32 top,
+        const Types::F32 near,
+        const Types::F32 far);
+
+    /*!
+        \brief build a perspective tranformation (OpenGL) using six boundry planes
+        \param left left side of the near plane
+        \param right right side of the near plane
+        \param bottom bottom side of the near plane
+        \param top top side of the near plane
+        \param near near plane, normally should be negative
+        \param far far plane, normally should be negative and less than the parameter near
+        this is in the right hand coordinate system, so the near and far should be negative,
+        and near > far, in the mean while the projected NDCz should be +1 for near plane, -1 for far plane
+    */
+    static Transform PerspectiveOG(
+        const Types::F32 left,
+        const Types::F32 right,
+        const Types::F32 bottom,
+        const Types::F32 top,
+        const Types::F32 near,
+        const Types::F32 far);
 };
+// ensurance
+static_assert(sizeof(Transform) == 16 * sizeof(Types::F32), "size of transform is wrong");
 
 /*!
     \brief two transform matrix is same only if all coresponding component is same.
@@ -96,5 +154,11 @@ bool operator != (const Transform& m1, const Transform& m2);
     \brief apply matrix transformation on the hvector, return an new instance.
 */
 hvector operator * (const Transform& m, const hvector& v);
+
+/*!
+    \brief combine two transformation together
+    \param m1, m2 the two matrix to be combined.
+*/
+Transform operator * (const Transform& m1, const Transform& m2);
 
 } // namespace CommonClass
