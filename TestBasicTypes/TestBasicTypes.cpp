@@ -627,13 +627,13 @@ TEST_MODULE_START
             hvector cmp2(comf5, comf6, comf7, comf8);
 
             // declare some hvector for result comparison
-            hvector h_plus_h(comf1 + comf5, comf2 + comf6, comf3 + comf7, comf4 + comf8),
-                    h_minu_h(comf1 - comf5, comf2 - comf6, comf3 - comf7, comf4 - comf8),
-                    h_mult_h(comf1 * comf5, comf2 * comf6, comf3 * comf7, comf4 * comf8),
-                    h_dive_h(comf1 / comf5, comf2 / comf6, comf3 / comf7, comf4 / comf8),
-                    h_mult_s(comf1 * comf9, comf2 * comf9, comf3 * comf9, comf4 * comf9),
-                    s_mult_h(comf1 * comf9, comf2 * comf9, comf3 * comf9, comf4 * comf9),
-                    h_dive_s(comf1 / comf9, comf2 / comf9, comf3 / comf9, comf4 / comf9);
+            hvector h_plus_h(comf1 + comf5, comf2 + comf6, comf3 + comf7, comf4),
+                    h_minu_h(comf1 - comf5, comf2 - comf6, comf3 - comf7, comf4),
+                    h_mult_h(comf1 * comf5, comf2 * comf6, comf3 * comf7, comf4),
+                    h_dive_h(comf1 / comf5, comf2 / comf6, comf3 / comf7, comf4),
+                    h_mult_s(comf1 * comf9, comf2 * comf9, comf3 * comf9, comf4),
+                    s_mult_h(comf1 * comf9, comf2 * comf9, comf3 * comf9, comf4),
+                    h_dive_s(comf1 / comf9, comf2 / comf9, comf3 / comf9, comf4);
 
             TEST_ASSERT((cmp1 + cmp2)   == h_plus_h);
 
@@ -1015,7 +1015,7 @@ TEST_MODULE_START
 #pragma endregion
 
 #pragma region coordinate frame construct
-    TEST_UNIT_START("")
+    TEST_UNIT_START("coordinate frame construct")
         
 		/*!
 			\brief using cross product check two vectors is almost perpendicular to each other.
@@ -1057,6 +1057,185 @@ TEST_MODULE_START
             TEST_ASSERT(tcf.m_e == te);
         }
         
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region orthographic transformation test
+    TEST_UNIT_START("orthographic transformation test")
+        RandomTool::MTRandom mtr;
+        const unsigned int MAX_INT = 1080;
+
+        for (int loopCount = 0; loopCount < 20; ++loopCount)
+        {
+
+            // six plane parameterss
+            const Types::F32 
+                LEFT    (-(mtr.Random() - 0.1f) * MAX_INT),
+                RIGHT   ( (mtr.Random() + 0.1f) * MAX_INT),
+                BOTTOM  (-(mtr.Random() - 0.1f) * MAX_INT),
+                TOP     ( (mtr.Random() + 0.1f) * MAX_INT),
+                NEAR    ((-mtr.Random() - 0.1f) * MAX_INT),
+                FAR     ( NEAR - (mtr.Random() + 0.1f) * MAX_INT); // far plane is more negative than near plane
+
+            // the tested transformation matrix
+            Transform orthTransformation = Transform::OrthographicTransOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+
+            // the array help to build hvectors before transformation
+            std::array<Types::F32, 3> 
+                X_VALUES = {LEFT,   0.5f * (LEFT + RIGHT), RIGHT}, 
+                Y_VALUES = {BOTTOM, 0.5f * (BOTTOM + TOP), TOP},
+                Z_VALUES = {NEAR,   0.5f * (NEAR + FAR),   FAR };
+
+            // the array help to test hvectors after transformation
+            std::array<Types::F32, 3>
+                X_NDC = { -1.0f, 0.0f, +1.0f },
+                Y_NDC = { -1.0f, 0.0f, +1.0f },
+                Z_NDC = { +1.0f, 0.0f, -1.0f };// notice: Z_NDC, +1.0f is for near plane, negative is for far plane
+
+            std::array<hvector, 27> testHvectors;   // the vectors to be transformed
+            std::array<hvector, 27> expectedVec;    // the expected result of the transformation result
+        
+            for (unsigned int i = 0; i < testHvectors.size(); ++i)
+            {
+                const unsigned int 
+                    indexX = i % 3,
+                    indexY = (i / 3) % 3,
+                    indexZ = (i / 9) % 3;
+
+                testHvectors[i] = hvector(X_VALUES[indexX], Y_VALUES[indexY], Z_VALUES[indexZ]);
+                expectedVec[i]  = hvector(X_NDC[indexX],    Y_NDC[indexY],    Z_NDC[indexZ]);
+            }// end for build hvectors
+
+            for (unsigned int i = 0; i < testHvectors.size(); ++i)
+            {
+                hvector transResult(orthTransformation * testHvectors[i]);
+                TEST_ASSERT(AlmostEqual(transResult, expectedVec[i], 1e-6f));
+
+                // transform another hvector, but check with the same expectedVec[i]
+                // CREATE AN ERROR
+                hvector mustFailResult(orthTransformation * testHvectors[(i + 4) % testHvectors.size()]);
+
+                // ensure the result is not always success
+                TEST_ASSERT( ! AlmostEqual(mustFailResult, expectedVec[i], 1e-6f));
+            }// end for testHvectors
+
+        }// end for loopCount
+
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region transformation matrix concation
+    TEST_UNIT_START("transformation matrix concation")
+
+        // the combination of two transformation
+        // for simplicity, just to multiply a transfrom with a unit matrix
+        // and ensure the result is still right.
+        
+        
+		RandomTool::MTRandom mtr;
+		const unsigned int MAX_RAND_INT = 600;
+
+        // the transform is default to be a unit matrix.
+        const Transform UNIT_MATRIX;
+		
+        for (int i = 0; i < 200; ++i)
+        {
+            TIME_GUARD;
+            const Types::F32	comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf5(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf6(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf7(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf8(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                                comf9(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+
+
+            // NOTICE, when build those matrix, multiply them by the unit matrix.
+            Transform trl = UNIT_MATRIX * Transform::Translation(comf1, comf2, comf3);    // translation matrix
+
+            hvector vt(comf5, comf6, comf7);    // the vector used to test translation matrix 
+
+            TEST_ASSERT(
+                hvector(comf5 + comf1, comf6 + comf2, comf7 + comf3) 
+                == (trl * vt));
+            
+            const Types::F32 pi_div_2 = Types::Constant::PI_F * 0.5f;
+
+            // build rotations about axis of x/y/z
+
+            // NOTICE, when build those matrix, multiply them by the unit matrix.
+            const Transform
+                rotX = UNIT_MATRIX * Transform::RotationX(pi_div_2),
+                rotY = UNIT_MATRIX * Transform::RotationY(pi_div_2),
+                rotZ = UNIT_MATRIX * Transform::RotationZ(pi_div_2);
+            std::array<Transform, 3> rotations = { rotX, rotY, rotZ }; // each one rotate pi/2 about x,y,z
+
+
+            std::array<hvector, 8> midVs;   // eight vector point at eight quadrants of the space.
+            for (unsigned int i = 0; i < midVs.size(); ++i)
+            {
+                Types::F32 cx, cy, cz;
+                
+                cx = (i & 4) ? +1.0f : -1.0f;
+                cy = (i & 2) ? +1.0f : -1.0f;
+                cz = (i & 1) ? +1.0f : -1.0f;
+
+                midVs[i] = hvector(cx, cy, cz, 1.0f);
+            }
+
+            
+            /*!
+                \brief preRotOrder (previous rotation order)
+                assist rotation check, used with array "midVs" and "rotations"
+                For example:
+                preRotOrder[0][0] = 2 means that rotating vector "midVs[0]" with "rotations[0]" will end up with "midVs[2]"
+                preRotOrder[2][1] = 3 means that rotating vector "midVs[2]" with "rotations[1]" will end up with "midVs[3]"
+            */
+            const unsigned preRotOrder[8][3] = {
+                { 2, 1, 4 },
+                { 0, 5, 5 },
+                { 3, 3, 0 },
+                { 1, 7, 1 },
+                { 6, 0, 6 },
+                { 4, 4, 7 },
+                { 7, 2, 2 },
+                { 5, 6, 3 }
+            };
+
+            /*!
+                \brief for each vector of "midVs", rotate them with matrixes in "rotations"
+            */
+            for (unsigned int i = 0; i < midVs.size(); ++i)
+            {
+                for (unsigned int j = 0; j < rotations.size(); ++j)
+                {
+                    TEST_ASSERT(AlmostEqual(rotations[j] * midVs[i], midVs[preRotOrder[i][j]], 1e-7f));
+
+                    // ensure the test not always return true;
+                    TEST_ASSERT( ! AlmostEqual(rotations[j] * midVs[i] + hvector(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
+                }
+            }
+            
+            // old rotations tests, just rotate axis x/y/z and get the results of x -> y -> z -> x...
+            hvector axisx(1.0f, 0.0f, 0.0f, 1.0f);
+            hvector axisy(0.0f, 1.0f, 0.0f, 1.0f);
+            hvector axisz(0.0f, 0.0f, 1.0f, 1.0f);
+            hvector axisx_compare = rotY * axisz;
+            hvector axisy_compare = rotZ * axisx;
+            hvector axisz_compare = rotX * axisy;
+
+            TEST_ASSERT(AlmostEqual(axisx, axisx_compare, 1e-7f));
+            TEST_ASSERT(AlmostEqual(axisy, axisy_compare, 1e-7f));
+            TEST_ASSERT(AlmostEqual(axisz, axisz_compare, 1e-7f));
+
+            // next few check ensure that test is not always return true.
+            TEST_ASSERT( ! AlmostEqual(axisx, axisy_compare, 1e-7f));
+            TEST_ASSERT( ! AlmostEqual(axisy, axisz_compare, 1e-7f));
+            TEST_ASSERT( ! AlmostEqual(axisz, axisx_compare, 1e-7f));
+            
+        }
     TEST_UNIT_END;
 #pragma endregion
 
