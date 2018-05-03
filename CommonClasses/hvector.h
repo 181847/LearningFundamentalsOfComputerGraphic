@@ -32,6 +32,9 @@ public:
 };
 static_assert(sizeof(hvector) == 4 * sizeof(Types::F32), "sizeof hvector should be four times of F32");
 
+/*!
+    \brief ignore the w component, which will stay same as the first hvector's w component
+*/
 hvector  operator +  (const hvector&    v1,     const hvector&      v2      );
 hvector  operator -  (const hvector&    v1,     const hvector&      v2      );
 hvector  operator *  (const hvector&    v1,     const hvector&      v2      );
