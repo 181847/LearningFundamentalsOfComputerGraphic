@@ -716,4 +716,106 @@ TEST_MODULE_START
     TEST_UNIT_END;
 #pragma endregion
 
+#pragma region orthographic view transformation
+    TEST_UNIT_START("orthographic view transformation")
+
+        // skip this test due to the bug of clipping line function.
+        //return 0;
+
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
+        // create and config pipline state object
+        auto pso = std::make_unique<PiplineStateObject>();
+        pso->m_primitiveType = PrimitiveType::LINE_LIST;
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
+        pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+        
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+
+            return RGBA::BLACK;
+        };
+
+        // using MARCO BEFORE TO select two output of images,
+        // BEFORE represent the regular sphere ray
+        // else represent the distortion sphere ray which will be stretched.
+//#define BEFORE
+
+#ifdef BEFORE
+        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(+1.0f), FAR(-1.0f);
+#else
+        const Types::F32 LEFT(-1.5f), RIGHT(-0.5f), BOTTOM(-1.0f), TOP(1.0f), NEAR(+1.0f), FAR(-1.0f);
+#endif// BEFORE
+
+        Transform orthTrans = Transform::OrthographicTransOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+
+        pso->m_vertexShader = [& orthTrans](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
+            hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+            
+            *pDestH = orthTrans * (*pSrcH);
+        };
+
+        Viewport viewport;
+        viewport.left = 0;
+        viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+        viewport.bottom = 0;
+        viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+        pso->SetViewport(viewport);
+
+        // create and set a pipline.
+        Pipline pipline;
+        pipline.SetPSO(std::move(pso));
+
+        // set a backbuffer
+        pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+            UserConfig::COMMON_PIXEL_WIDTH, 
+            UserConfig::COMMON_PIXEL_HEIGHT, 
+            RGBA::WHITE));
+
+        std::vector<SimplePoint> points;
+        std::vector<unsigned int> indices;
+        unsigned int numIndices = 0;
+
+        // create line segments in sphere ray.
+        SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
+
+            // add start vertex and its index
+            points.push_back(SimplePoint(hvector(x0, y0)));
+            indices.push_back(numIndices++);
+
+            // add end vertex and its index
+            points.push_back(SimplePoint(hvector(x1, y1)));
+            indices.push_back(numIndices++);
+        }, 
+            0.0f, 0.0f, // center location
+            0.3f,       // segment length
+            0.1f,       // start radius
+            3);         // num rounds
+
+        auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * 4 * sizeof(Types::F32));
+        memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
+
+        {
+            TIME_GUARD;
+            pipline.DrawInstance(indices, vertexBuffer.get());
+        }
+
+#ifdef BEFORE
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\orthographicViewTransformationBefore.png");
+#else
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\orthographicViewTransformationAfter.png");
+#endif
+        
+    TEST_UNIT_END;
+#pragma endregion
+
 TEST_MODULE_END
