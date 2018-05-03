@@ -1,5 +1,5 @@
 #include "Transform.h"
-
+#include <array>
 
 namespace CommonClass
 {
@@ -49,6 +49,15 @@ Transform::Transform(
 
 Transform::~Transform()
 {
+}
+
+Transform & Transform::operator=(const Transform & m)
+{
+    for (unsigned int c = 0; c < 4; ++c)
+    {
+        this->m_column[c] = m.m_column[c];
+    }
+    return *this;
 }
 
 Transform Transform::Translation(const Types::F32 x, const Types::F32 y, const Types::F32 z)
@@ -108,6 +117,26 @@ Transform Transform::Viewport(const Types::F32 left, const Types::F32 right, con
         0.0f, 0.0f, 0.0f, 1.0f );
 }
 
+Transform Transform::OrthographicTransOG(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top, const Types::F32 near, const Types::F32 far)
+{
+    const Types::F32 recipocalWidth  = 1.0f / (right - left);
+    const Types::F32 recipocalHeight = 1.0f / (top   - bottom);
+    const Types::F32 recipocalDist   = 1.0f / (near  - far);
+
+    
+    return Transform(
+        2.0f * recipocalWidth,  0.0f,                       0.0f,                   (right + left) * - recipocalWidth,
+        0.0f,                   2.0f * recipocalHeight,     0.0f,                   (top + bottom) * - recipocalHeight,
+        0.0f,                   0.0f,                       2.0f * recipocalDist,   (near + far) * - recipocalDist,
+        0.0f,                   0.0f,                       0.0f,                   1.0f);
+}
+
+Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top, const Types::F32 near, const Types::F32)
+{
+    throw std::exception("function PerspectiveOG not implemented.");
+    return Transform();
+}
+
 bool operator==(const Transform & m1, const Transform & m2)
 {
     for (unsigned int i = 0; i < 4; ++i)
@@ -145,6 +174,33 @@ hvector operator*(const Transform & m, const hvector & v)
         m.m_column[0].m_arr[1] * v.m_arr[0] + m.m_column[1].m_arr[1] * v.m_arr[1] + m.m_column[2].m_arr[1] * v.m_arr[2] + m.m_column[3].m_arr[1] * v.m_arr[3],
         m.m_column[0].m_arr[2] * v.m_arr[0] + m.m_column[1].m_arr[2] * v.m_arr[1] + m.m_column[2].m_arr[2] * v.m_arr[2] + m.m_column[3].m_arr[2] * v.m_arr[3],
         m.m_column[0].m_arr[3] * v.m_arr[0] + m.m_column[1].m_arr[3] * v.m_arr[1] + m.m_column[2].m_arr[3] * v.m_arr[2] + m.m_column[3].m_arr[3] * v.m_arr[3]
+    );
+}
+
+Transform operator*(const Transform & m1, const Transform & m2)
+{
+    std::array<std::array<Types::F32, 4>, 4> arr_4_4;
+
+    for (unsigned int row = 0; row < 4; ++row)
+    {
+        for (unsigned int column = 0; column < 4; ++column)
+        {
+            Types::F32 component = 0.0f;
+
+            for (unsigned int iter = 0; iter < 4; ++iter)
+            {
+                component += m1.m_column[iter].m_arr[row] * m2.m_column[column].m_arr[iter];
+            }
+
+            arr_4_4[row][column] = component;
+        }
+    }
+
+    return Transform(
+        arr_4_4[0][0], arr_4_4[0][1], arr_4_4[0][2], arr_4_4[0][3],
+        arr_4_4[1][0], arr_4_4[1][1], arr_4_4[1][2], arr_4_4[1][3],
+        arr_4_4[2][0], arr_4_4[2][1], arr_4_4[2][2], arr_4_4[2][3],
+        arr_4_4[3][0], arr_4_4[3][1], arr_4_4[3][2], arr_4_4[3][3]
     );
 }
 
