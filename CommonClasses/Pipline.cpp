@@ -59,6 +59,15 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     // clip all the line
     ClipLineList(indices, vsOutputStream.get(), psInputStride, &clippedIndices, &clippedLineData);
 
+    // all line has been clipped. return
+    if (clippedIndices.size() == 0)
+    {
+#ifdef _DEBUG
+        printf("clipped all line, no line rests\n");
+#endif
+        return;
+    }
+
     // indices after clipping
     const unsigned int numIndices = clippedIndices.size();
     // the byte size of vertex data after clipping
@@ -89,6 +98,10 @@ void Pipline::DrawLineList(
     unsigned char * pDataStart = lineEndPointList->GetBuffer();
 
     // for each two points, draw a segment
+    if (numIndices <= 0)
+    {
+        throw std::exception("DrawLineList get no index.");
+    }
     for (unsigned int i = 0; i < numIndices - 1; i += 2)
     {
         const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexSizeInBytes);
@@ -205,47 +218,162 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     q[4] = pv1->m_posH.m_z + pv1->m_posH.m_w;
     q[5] = pv1->m_posH.m_w - pv1->m_posH.m_z;
 
-    for (unsigned int i = 0; i < 6; ++i)
-    {
-        if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
+
+    const bool haveNegativeW = pv1->m_posH.m_w < 0 || pv2->m_posH.m_w < 0;
+
+    if (haveNegativeW)
+    {// if have any netative w component, then flip inequality direction.
+        for (unsigned int i = 0; i < 6; ++i)
         {
-            if (q[i] < 0.0f)
+            if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
             {
-                return false;
+                if (q[i] * pv1->m_posH.m_w < 0.0f)
+                {
+                    return false;
+                }
             }
-        }
-        else if (p[i] > 0.0f)
-        {
-            tempT = q[i] / p[i];
-            if (tempT < t0)
+            else if (p[i] < 0.0f)   // NOTICE: Here is difference
             {
-                // new end point is after start point.
-                // early reject
-                return false;
+                tempT = q[i] / p[i];
+                if (tempT < t0)
+                {
+                    // new end point is after start point.
+                    // early reject
+                    return false;
+                }
+                else if (tempT < t1)
+                {
+                    // update t1, new end point
+                    t1 = tempT;
+                }
             }
-            else if (tempT < t1)
+            else // p[i] < 0.0f
             {
-                // update t1, new end point
-                t1 = tempT;
-            }
-        }
-        else // p[i] < 0.0f
-        {
-            tempT = q[i] / p[i];
-            if (tempT > t1)
-            {
-                // new start point is beyond end point.
-                // early reject
-                return false;
-            }
-            else if (tempT > t0)
-            {
-                // update t1, new start point
-                t0 = tempT;
+                tempT = q[i] / p[i];
+                if (tempT > t1)
+                {
+                    // new start point is beyond end point.
+                    // early reject
+                    return false;
+                }
+                else if (tempT > t0)
+                {
+                    // update t1, new start point
+                    t0 = tempT;
+                }
             }
         }
     }
+    else
+    {
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
+            {
+                if (q[i] * pv1->m_posH.m_w < 0.0f)
+                {
+                    return false;
+                }
+            }
+            else if (p[i] > 0.0f)
+            {
+                tempT = q[i] / p[i];
+                if (tempT < t0)
+                {
+                    // new end point is after start point.
+                    // early reject
+                    return false;
+                }
+                else if (tempT < t1)
+                {
+                    // update t1, new end point
+                    t1 = tempT;
+                }
+            }
+            else // p[i] < 0.0f
+            {
+                tempT = q[i] / p[i];
+                if (tempT > t1)
+                {
+                    // new start point is beyond end point.
+                    // early reject
+                    return false;
+                }
+                else if (tempT > t0)
+                {
+                    // update t1, new start point
+                    t0 = tempT;
+                }
+            } // end else if p[i] > 0.0f
+        }// end else for
+    }// end else
     
+    
+    // prefix the hvector for homogenous clip
+    // for example, if w == -2.3, and x == -2.4 due to the numeric issue,
+    // here we will make x equal to w.
+    auto CutHvector = [](hvector & vec)->void {
+        if (vec.m_w > 0.0f)
+        {
+            if (vec.m_x < -vec.m_w)
+            {
+                vec.m_x = -vec.m_w;
+            }
+            else if (vec.m_x > vec.m_w)
+            {
+                vec.m_x = vec.m_w;
+            }
+
+            if (vec.m_y < -vec.m_w)
+            {
+                vec.m_y = -vec.m_w;
+            }
+            else if (vec.m_y > vec.m_w)
+            {
+                vec.m_y = vec.m_w;
+            }
+
+            if (vec.m_z < -vec.m_w)
+            {
+                vec.m_z = -vec.m_w;
+            }
+            else if (vec.m_z > vec.m_w)
+            {
+                vec.m_z = vec.m_w;
+            }
+        }
+        else
+        {
+            if (vec.m_x > -vec.m_w)     // positive greater -> -1 in NDC
+            {
+                vec.m_x = -vec.m_w;
+            }
+            else if (vec.m_x < vec.m_w) // negative less -> +1 in NDC
+            {
+                vec.m_x = vec.m_w;
+            }
+
+            if (vec.m_y > -vec.m_w)     // positive greater -> -1 in NDC
+            {
+                vec.m_y = -vec.m_w;
+            }
+            else if (vec.m_y < vec.m_w) // negative less -> +1 in NDC
+            {
+                vec.m_y = vec.m_w;
+            }
+
+            if (vec.m_z > -vec.m_w)     // positive greater -> -1 in NDC
+            {
+                vec.m_z = -vec.m_w;
+            }
+            else if (vec.m_z < vec.m_w) // negative less -> +1 in NDC
+            {
+                vec.m_z = vec.m_w;
+            }
+        }
+
+    };
+
     if (t0 == 0.0f)
     {
         // just copy original start point data.
@@ -262,6 +390,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
         Interpolate2(pv2, pv1, pOutV1, t0, realVertexSize);
+        CutHvector(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
     
     if (t1 == 1.0f)
@@ -280,12 +409,28 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
         Interpolate2(pv2, pv1, pOutV2, t1, realVertexSize);
+        CutHvector(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
 
     // an ensurance that all the components should be limited in [-1, +1].
+
+    const Types::F32 
+        x0(pOutV1->m_posH.m_x / pOutV1->m_posH.m_w), 
+        y0(pOutV1->m_posH.m_y / pOutV1->m_posH.m_w),
+        z0(pOutV1->m_posH.m_z / pOutV1->m_posH.m_w),
+        x1(pOutV2->m_posH.m_x / pOutV2->m_posH.m_w),
+        y1(pOutV2->m_posH.m_y / pOutV2->m_posH.m_w),
+        z1(pOutV2->m_posH.m_z / pOutV2->m_posH.m_w);
+
+#define OUT_RANGE_1(component) (component < (-1.0f - 0.01f) || (+1.0f + 0.01f) < component)
+
     BREAK_POINT_IF(
-        pOutV1->m_posH.m_x > 1.0f || pOutV1->m_posH.m_y > 1.0f || pOutV1->m_posH.m_z > 1.0f
-        || pOutV2->m_posH.m_x > 1.0f || pOutV2->m_posH.m_y > 1.0f || pOutV2->m_posH.m_z > 1.0f);
+        OUT_RANGE_1(x0)
+        || OUT_RANGE_1(y0)
+        || OUT_RANGE_1(z0)
+        || OUT_RANGE_1(x1)
+        || OUT_RANGE_1(y1)
+        || OUT_RANGE_1(z1));
 
     return true;
 }
@@ -400,7 +545,20 @@ std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_pt
 
         ScreenSpaceVertexTemplate* pDestVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pDestFloat);
 
-        pDestVertex->m_posH = viewportTransformMat * pSrcVertex->m_posH;
+        // copy all the memory for one vertex.
+        memcpy(pDestVertex, pSrcVertex, realVertexSizeBytes);
+
+        if (pDestVertex->m_posH.m_w != 1.0f)
+        {
+            // perspective divided
+            const Types::F32 RECIPOCAL_W = 1.0f / pDestVertex->m_posH.m_w;
+            pDestVertex->m_posH.m_x *= RECIPOCAL_W;
+            pDestVertex->m_posH.m_y *= RECIPOCAL_W;
+            pDestVertex->m_posH.m_z *= RECIPOCAL_W;
+            pDestVertex->m_posH.m_w = 1.0f;
+        }
+
+        pDestVertex->m_posH = viewportTransformMat * pDestVertex->m_posH;
 
         // move to next data.
         pSrcFloat += realVertexSizeBytes;
