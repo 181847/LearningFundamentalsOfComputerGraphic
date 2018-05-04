@@ -818,4 +818,196 @@ TEST_MODULE_START
     TEST_UNIT_END;
 #pragma endregion
 
+#pragma region perspective view transformation
+    TEST_UNIT_START("perspective view transformation")
+
+        // skip this test due to the bug of clipping line function.
+        //return 0;
+
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
+        // create and config pipline state object
+        auto pso = std::make_unique<PiplineStateObject>();
+        pso->m_primitiveType = PrimitiveType::LINE_LIST;
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
+        pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+        
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            const Types::F32 depth = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
+            RGBA color(depth, depth, depth, 1.0f);
+            return color;
+        };
+
+        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-4.0f);
+
+        // rotate the line a little.
+        Transform rotateY = Transform::RotationY(Types::Constant::PI_F / 3.0f);
+        Transform rotateZ = Transform::RotationZ(Types::Constant::PI_F / 3.0f);
+
+        Transform moveIntoScree = Transform::Translation(0.0f, 0.0f, -2.0f);
+
+        // perspective tranformation
+        Transform perTrans = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+        
+        Transform pushInto = Transform::Translation(0.0f, 0.0f, -2.0f);
+
+        Transform mat = perTrans * pushInto * rotateZ * rotateY;
+
+        pso->m_vertexShader = [&mat](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
+            hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+            
+            *pDestH = mat * (*pSrcH);
+        };
+
+        Viewport viewport;
+        viewport.left = 0;
+        viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+        viewport.bottom = 0;
+        viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+        pso->SetViewport(viewport);
+
+        // create and set a pipline.
+        Pipline pipline;
+        pipline.SetPSO(std::move(pso));
+
+        // set a backbuffer
+        pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+            UserConfig::COMMON_PIXEL_WIDTH, 
+            UserConfig::COMMON_PIXEL_HEIGHT, 
+            RGBA::WHITE));
+
+        std::vector<SimplePoint> points;
+        std::vector<unsigned int> indices;
+        unsigned int numIndices = 0;
+
+        // create line segments in sphere ray.
+        SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
+
+            // add start vertex and its index
+            points.push_back(SimplePoint(hvector(x0, y0, 0.0f)));
+            indices.push_back(numIndices++);
+
+            // add end vertex and its index
+            points.push_back(SimplePoint(hvector(x1, y1, 0.0f)));
+            indices.push_back(numIndices++);
+        }, 
+            0.0f, 0.0f, // center location
+            0.3f,       // segment length
+            0.1f,       // start radius
+            12);         // num rounds
+
+        auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * 4 * sizeof(Types::F32));
+        memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
+
+        {
+            TIME_GUARD;
+            //PUT_BREAK_POINT;
+            pipline.DrawInstance(indices, vertexBuffer.get());
+        }
+
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\perspectiveViewTransformation.png");
+        
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region perspective single line
+    TEST_UNIT_START("perspective single line")
+
+        // skip this test due to the bug of clipping line function.
+        //return 0;
+
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
+        // create and config pipline state object
+        auto pso = std::make_unique<PiplineStateObject>();
+        pso->m_primitiveType = PrimitiveType::LINE_LIST;
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
+        pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+        
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            
+            return RGBA::BLACK;
+        };
+
+        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-4.0f);
+
+        // rotate the line a little.
+        Transform rotateY = Transform::RotationY(Types::Constant::PI_F / 3.0f);
+
+        Transform moveIntoScree = Transform::Translation(0.0f, 0.0f, -2.0f);
+
+        // perspective tranformation
+        Transform perTrans = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+
+        Transform mat = perTrans;// * rotateY;
+
+        pso->m_vertexShader = [&mat](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
+            hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+            
+            *pDestH = mat * (*pSrcH);
+        };
+
+        Viewport viewport;
+        viewport.left = 0;
+        viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+        viewport.bottom = 0;
+        viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+        pso->SetViewport(viewport);
+
+        // create and set a pipline.
+        Pipline pipline;
+        pipline.SetPSO(std::move(pso));
+
+        // set a backbuffer
+        pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+            UserConfig::COMMON_PIXEL_WIDTH, 
+            UserConfig::COMMON_PIXEL_HEIGHT, 
+            RGBA::WHITE));
+
+        std::vector<SimplePoint> points;
+        std::vector<unsigned int> indices;
+
+        indices.push_back(0);
+        indices.push_back(1);
+
+        SimplePoint p1(hvector(0.5f, 0.5f, -7.0f, 1.0f));
+        SimplePoint p2(hvector(-0.5f, -0.5f, -6.0f, 1.0f));
+        points.push_back(p1);
+        points.push_back(p2);
+
+        auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * 4 * sizeof(Types::F32));
+        memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
+
+        {
+            TIME_GUARD;
+            //PUT_BREAK_POINT;
+            pipline.DrawInstance(indices, vertexBuffer.get());
+        }
+
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\perspectiveSingleLineShowInvisible.png");
+        
+    TEST_UNIT_END;
+#pragma endregion
+
+
 TEST_MODULE_END
