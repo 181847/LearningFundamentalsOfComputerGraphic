@@ -131,9 +131,24 @@ Transform Transform::OrthographicTransOG(const Types::F32 left, const Types::F32
         0.0f,                   0.0f,                       0.0f,                   1.0f);
 }
 
-Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top, const Types::F32 near, const Types::F32)
+Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top, const Types::F32 near, const Types::F32 far)
 {
-    throw std::exception("function PerspectiveOG not implemented.");
+    //throw std::exception("function PerspectiveOG not implemented.");
+
+    // bigger one minus small one, should result in a positive number.
+    const Types::F32 
+        RECIPO_WIDTH (1.0f / (right - left)),
+        RECIPO_HEIGHT(1.0f / (top - bottom)),
+        RECIPO_DIST  (1.0f / (near - far));
+
+    return Transform(
+        2.0f * near * RECIPO_WIDTH, 0.0f,                           (left + right) * -RECIPO_WIDTH,     0.0f,
+        0.0f,                       2.0f * near * RECIPO_HEIGHT,    (bottom + top) * -RECIPO_HEIGHT,    0.0f,
+        0.0f,                       0.0f,                           (far + near) * RECIPO_DIST,         2.0f * far * near * -RECIPO_DIST,
+        0.0f,                       0.0f,                           1.0f,                               0.0f
+    );
+
+
     return Transform();
 }
 
@@ -169,12 +184,16 @@ bool operator!=(const Transform & m1, const Transform & m2)
 
 hvector operator*(const Transform & m, const hvector & v)
 {
+    const Types::F32 column1 = m.m_column[0].m_arr[0] * v.m_arr[0] + m.m_column[1].m_arr[0] * v.m_arr[1] + m.m_column[2].m_arr[0] * v.m_arr[2] + m.m_column[3].m_arr[0] * v.m_arr[3];
+    const Types::F32 column2 = m.m_column[0].m_arr[1] * v.m_arr[0] + m.m_column[1].m_arr[1] * v.m_arr[1] + m.m_column[2].m_arr[1] * v.m_arr[2] + m.m_column[3].m_arr[1] * v.m_arr[3];
+    const Types::F32 column3 = m.m_column[0].m_arr[2] * v.m_arr[0] + m.m_column[1].m_arr[2] * v.m_arr[1] + m.m_column[2].m_arr[2] * v.m_arr[2] + m.m_column[3].m_arr[2] * v.m_arr[3];
+    const Types::F32 column4 = m.m_column[0].m_arr[3] * v.m_arr[0] + m.m_column[1].m_arr[3] * v.m_arr[1] + m.m_column[2].m_arr[3] * v.m_arr[2] + m.m_column[3].m_arr[3] * v.m_arr[3];
+
     return hvector(
-        m.m_column[0].m_arr[0] * v.m_arr[0] + m.m_column[1].m_arr[0] * v.m_arr[1] + m.m_column[2].m_arr[0] * v.m_arr[2] + m.m_column[3].m_arr[0] * v.m_arr[3],
-        m.m_column[0].m_arr[1] * v.m_arr[0] + m.m_column[1].m_arr[1] * v.m_arr[1] + m.m_column[2].m_arr[1] * v.m_arr[2] + m.m_column[3].m_arr[1] * v.m_arr[3],
-        m.m_column[0].m_arr[2] * v.m_arr[0] + m.m_column[1].m_arr[2] * v.m_arr[1] + m.m_column[2].m_arr[2] * v.m_arr[2] + m.m_column[3].m_arr[2] * v.m_arr[3],
-        m.m_column[0].m_arr[3] * v.m_arr[0] + m.m_column[1].m_arr[3] * v.m_arr[1] + m.m_column[2].m_arr[3] * v.m_arr[2] + m.m_column[3].m_arr[3] * v.m_arr[3]
-    );
+        column1, 
+        column2, 
+        column3, 
+        column4);
 }
 
 Transform operator*(const Transform & m1, const Transform & m2)
