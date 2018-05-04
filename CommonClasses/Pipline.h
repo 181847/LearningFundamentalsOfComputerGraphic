@@ -131,7 +131,7 @@ private:
 private:
 
     /*!
-        \brief do the viewport transformation for the vertex stream.
+        \brief first perspective divided, and then do the viewport transformation for the vertex stream.
         for each vertex, we assum the first four component is the homogenous coordinates location, 
         and all the vertex have been clipped, and we don't concern about the point out of range.
     */
