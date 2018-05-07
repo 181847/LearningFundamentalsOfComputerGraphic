@@ -28,6 +28,7 @@
 #include "../CommonClasses/Transform.h"
 #include "../CommonClasses/Pipline.h"
 #include "../CommonClasses/CoordinateFrame.h"
+#include "../CommonClasses/FixPointNumber.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 using namespace CommonClass;
@@ -764,7 +765,7 @@ TEST_MODULE_START
             // boundries
             const Types::U32 left = comu1, right = comu1 + comu2, bottom = comu3, top = comu3 + comu4;
 
-            Transform viewt = Transform::Viewport(left, right, bottom, top);
+            Transform viewt = Transform::Viewport(static_cast<Types::F32>(left), static_cast<Types::F32>(right), static_cast<Types::F32>(bottom), static_cast<Types::F32>(top));
 
             // build nine hvector for view port transformation test.
             std::array<hvector, 9> normalizedPos;
@@ -1236,6 +1237,51 @@ TEST_MODULE_START
             TEST_ASSERT( ! AlmostEqual(axisz, axisx_compare, 1e-7f));
             
         }
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region Fix Point Number basic test
+    TEST_UNIT_START("Fix Point Number basic test")
+        FixPointNumber a(100);
+        FixPointNumber b(100.0f);
+
+
+        TEST_ASSERT(a.ToFloat() == 100.0f);
+        TEST_ASSERT(b.ToFloat() == 100.0f);
+
+        RandomTool::MTRandom mtr;
+        
+        /*!
+            \brief return a random float in a large range.
+        */
+        auto RandFloat = [&mtr]()->Types::F32{
+            const int MAX_INT = 300;
+            return (mtr.Random() * 2.0f - 1.0f) * MAX_INT;
+        };
+        
+        const unsigned int NUM_FLOAT_PAIRS = 16;
+        std::array<Types::F32, NUM_FLOAT_PAIRS> farr1;
+        std::array<Types::F32, NUM_FLOAT_PAIRS> farr2;
+        std::array<FixPointNumber, NUM_FLOAT_PAIRS> fparr1;
+        std::array<FixPointNumber, NUM_FLOAT_PAIRS> fparr2;
+        for (int i = 0; i < NUM_FLOAT_PAIRS; ++i)
+        {
+            farr1[i] = RandFloat();
+            farr2[i] = RandFloat();
+            
+            fparr1[i] = FixPointNumber(farr1[i]);
+            fparr2[i] = FixPointNumber(farr2[i]);
+        }
+
+        for (int i = 0; i < NUM_FLOAT_PAIRS; ++i)
+        {
+            const Types::F32 rightResult = farr1[i] * farr2[i];
+            const Types::F32 testResult = (fparr1[i] * fparr2[i]).ToFloat();
+            TEST_ASSERT(MathTool::AlmostEqual(rightResult, testResult, 0.001));
+        }
+
+        
+
     TEST_UNIT_END;
 #pragma endregion
 
