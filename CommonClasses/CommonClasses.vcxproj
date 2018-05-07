@@ -153,6 +153,7 @@
     <ClInclude Include="F32Buffer.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="DebugHelpers.h" />
+    <ClInclude Include="FixPointNumber.h" />
     <ClInclude Include="HitRecord.h" />
     <ClInclude Include="hvector.h" />
     <ClInclude Include="Image.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="CoordinateFrame.cpp" />
     <ClCompile Include="F32Buffer.cpp" />
     <ClCompile Include="Film.cpp" />
+    <ClCompile Include="FixPointNumber.cpp" />
     <ClCompile Include="HitRecord.cpp" />
     <ClCompile Include="hvector.cpp" />
     <ClCompile Include="Image.cpp" />
