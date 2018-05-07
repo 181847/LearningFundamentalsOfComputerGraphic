@@ -193,16 +193,50 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
     assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
 
+    // using a macro to choose implementation code.
+    // is w less than zero, filp the sign only of the homogenous coordinate,
+    // but still represent the same point.
+#define FLIP_SIGN_WHEN_W_LT_ZERO
+
     std::array<Types::F32, 6> p;
     std::array<Types::F32, 6> q;
     Types::F32 t0 = 0.0f;       // start point, zero means the pv1
     Types::F32 t1 = 1.0f;       // end point, one means the pv2
     Types::F32 tempT = 0.0f;    // temp interpolate coefficience
 
+#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
+    hvector hv1 = pv1->m_posH;
+    hvector hv2 = pv2->m_posH;
+
+    // ensure the w component is positive
+    // WARNING!! hvector * scalar or (scalar * hvector) will not affect w component, so here we must do it manully.
+    if (hv1.m_w < 0)
+    {
+        hv1.m_x = -1 * hv1.m_x;
+        hv1.m_y = -1 * hv1.m_y;
+        hv1.m_z = -1 * hv1.m_z;
+        hv1.m_w = -1 * hv1.m_w;
+    }
+    if (hv2.m_w < 0)
+    {
+        hv2.m_x = -1 * hv2.m_x;
+        hv2.m_y = -1 * hv2.m_y;
+        hv2.m_z = -1 * hv2.m_z;
+        hv2.m_w = -1 * hv2.m_w;
+    }
+#endif // FLIP_SIGN_WHEN_W_LT_ZERO
+
+#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
+    const Types::F32 deltaX = hv2.m_x - hv1.m_x;
+    const Types::F32 deltaY = hv2.m_y - hv1.m_y;
+    const Types::F32 deltaZ = hv2.m_z - hv1.m_z;
+    const Types::F32 deltaW = hv2.m_w - hv1.m_w;
+#else
     const Types::F32 deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
     const Types::F32 deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
     const Types::F32 deltaZ = pv2->m_posH.m_z - pv1->m_posH.m_z;
     const Types::F32 deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
+#endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
     p[0] = -(deltaX + deltaW);
     p[1] = deltaX - deltaW;
@@ -210,15 +244,65 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     p[3] = deltaY - deltaW;
     p[4] = -(deltaZ + deltaW);
     p[5] = deltaZ - deltaW;
-
+    
+#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
+    q[0] = hv1.m_x + hv1.m_w;
+    q[1] = hv1.m_w - hv1.m_x;
+    q[2] = hv1.m_y + hv1.m_w;
+    q[3] = hv1.m_w - hv1.m_y;
+    q[4] = hv1.m_z + hv1.m_w;
+    q[5] = hv1.m_w - hv1.m_z;
+#else
     q[0] = pv1->m_posH.m_x + pv1->m_posH.m_w;
     q[1] = pv1->m_posH.m_w - pv1->m_posH.m_x;
     q[2] = pv1->m_posH.m_y + pv1->m_posH.m_w;
     q[3] = pv1->m_posH.m_w - pv1->m_posH.m_y;
     q[4] = pv1->m_posH.m_z + pv1->m_posH.m_w;
     q[5] = pv1->m_posH.m_w - pv1->m_posH.m_z;
+#endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
-
+#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
+        {
+            if (q[i] * hv1.m_w < 0.0f)
+            {
+                return false;
+            }
+        }
+        else if (p[i] > 0.0f)
+        {
+            tempT = q[i] / p[i];
+            if (tempT < t0)
+            {
+                // new end point is after start point.
+                // early reject
+                return false;
+            }
+            else if (tempT < t1)
+            {
+                // update t1, new end point
+                t1 = tempT;
+            }
+        }
+        else // p[i] < 0.0f
+        {
+            tempT = q[i] / p[i];
+            if (tempT > t1)
+            {
+                // new start point is beyond end point.
+                // early reject
+                return false;
+            }
+            else if (tempT > t0)
+            {
+                // update t1, new start point
+                t0 = tempT;
+            }
+        } // end else if p[i] > 0.0f
+    }// end else for
+#else  // FLIP_SING_WHEN_W_LT_ZERO is not defined
     const bool haveNegativeW = pv1->m_posH.m_w < 0 || pv2->m_posH.m_w < 0;
 
     if (haveNegativeW)
@@ -232,7 +316,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
                     return false;
                 }
             }
-            else if (p[i] < 0.0f)   // NOTICE: Here is difference
+            else if (p[i] < 0.0f)   // NOTICE: Here is different
             {
                 tempT = q[i] / p[i];
                 if (tempT < t0)
@@ -247,7 +331,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
                     t1 = tempT;
                 }
             }
-            else // p[i] < 0.0f
+            else // p[i] > 0.0f
             {
                 tempT = q[i] / p[i];
                 if (tempT > t1)
@@ -307,13 +391,15 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             } // end else if p[i] > 0.0f
         }// end else for
     }// end else
+#endif // FLIP_SING_WHEN_W_LT_ZERO
     
     
+    // the function is a temporary solution for the clipped point will outside of the boundary
     // prefix the hvector for homogenous clip
     // for example, if w == -2.3, and x == -2.4 due to the numeric issue,
     // here we will make x equal to w.
     auto CutHvector = [](hvector & vec)->void {
-        if (vec.m_w > 0.0f)
+        if (vec.m_w > 0.0f) 
         {
             if (vec.m_x < -vec.m_w)
             {
