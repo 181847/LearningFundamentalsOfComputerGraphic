@@ -194,7 +194,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
 
     // using a macro to choose implementation code.
-    // is w less than zero, filp the sign only of the homogenous coordinate,
+    // If w less than zero, filp the sign of the homogenous coordinate,
     // but still represent the same point.
 #define FLIP_SIGN_WHEN_W_LT_ZERO
 
@@ -205,24 +205,25 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     Types::F32 tempT = 0.0f;    // temp interpolate coefficience
 
 #ifdef FLIP_SIGN_WHEN_W_LT_ZERO
+    // retrive the homogenous position
     hvector hv1 = pv1->m_posH;
     hvector hv2 = pv2->m_posH;
 
     // ensure the w component is positive
-    // WARNING!! hvector * scalar or (scalar * hvector) will not affect w component, so here we must do it manully.
+    // WARNING!! (hvector * scalar) or (scalar * hvector) will not affect w component, so here we must do it manually.
     if (hv1.m_w < 0)
     {
-        hv1.m_x = -1 * hv1.m_x;
-        hv1.m_y = -1 * hv1.m_y;
-        hv1.m_z = -1 * hv1.m_z;
-        hv1.m_w = -1 * hv1.m_w;
+        hv1.m_x = - hv1.m_x;
+        hv1.m_y = - hv1.m_y;
+        hv1.m_z = - hv1.m_z;
+        hv1.m_w = - hv1.m_w;
     }
     if (hv2.m_w < 0)
     {
-        hv2.m_x = -1 * hv2.m_x;
-        hv2.m_y = -1 * hv2.m_y;
-        hv2.m_z = -1 * hv2.m_z;
-        hv2.m_w = -1 * hv2.m_w;
+        hv2.m_x = - hv2.m_x;
+        hv2.m_y = - hv2.m_y;
+        hv2.m_z = - hv2.m_z;
+        hv2.m_w = - hv2.m_w;
     }
 #endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
@@ -396,8 +397,9 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     
     // the function is a temporary solution for the clipped point will outside of the boundary
     // prefix the hvector for homogenous clip
-    // for example, if w == -2.3, and x == -2.4 due to the numeric issue,
-    // here we will make x equal to w.
+    // for example, if w == -2.3, and x == -2.4,
+    // after the perspective divide, the x will be 1.04... which is greater than one,
+    // to prevent this overflowing error, just make x = equal to w.
     auto CutHvector = [](hvector & vec)->void {
         if (vec.m_w > 0.0f) 
         {
