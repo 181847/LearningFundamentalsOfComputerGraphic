@@ -36,9 +36,10 @@ FixPointNumber operator*(const FixPointNumber & a, const FixPointNumber & b)
         bl = static_cast<long long>(b.m_iNumber);
     
     long long scaleResult = al * bl;
+    scaleResult >>= FixPointNumber::SHIFT_POINT;
 
     FixPointNumber ret;
-    ret.m_iNumber = static_cast<Types::I32>(scaleResult / FixPointNumber::MAG);
+    ret.m_iNumber = static_cast<Types::I32>(scaleResult);
     return ret;
 }
 
