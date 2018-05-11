@@ -6,7 +6,8 @@
 #include <limits>
 #include <array>
 #include <ctime>
-#pragma comment(lib, "MyTools\\RandomToolNeedLib\\LibForMTRandomAndPrimeSearch.lib")
+#include <iomanip>
+#pragma comment(lib, "MyTools\\lib\\MyTool.lib")
 
 #include "../CommonClasses/DebugHelpers.h"
 
@@ -29,6 +30,7 @@
 #include "../CommonClasses/Pipline.h"
 #include "../CommonClasses/CoordinateFrame.h"
 #include "../CommonClasses/FixPointNumber.h"
+#include "../CommonClasses/EFloat.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 using namespace CommonClass;
@@ -36,6 +38,36 @@ using namespace CommonClass;
 
 RandomTool::MTRandom globalMtr;
 const unsigned int G_MAX_INT = 1000;
+
+
+/*!
+    \brief the machine epsilon, should be 2^(-23) for float(4byte, IEEE754).
+*/
+constexpr float MachineEpsilon = std::numeric_limits<float>::epsilon() * 0.5f;
+
+/*!
+    \brief the gamma value used in float round error bound detection.
+    Comming from the <<Pysical Based Rendering Third>>:: chaper[3.9], page[217].
+*/
+constexpr float gamma(const int n)
+{
+    return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
+}
+
+/*!
+    \brief this function is for floating point number round error analysist.
+*/
+template<typename RESULT_T, typename LONG_RESULT_T, typename BOUND_T>
+void ShowNumberInBound(const RESULT_T value, const RESULT_T errorBound, const LONG_RESULT_T preciseValue, const BOUND_T low, const BOUND_T high)
+{
+    std::cout
+        << std::setprecision(std::numeric_limits<LONG_RESULT_T>::digits10 + 1)
+        << "||||\nlow resolution number = " << value << std::endl
+        << "error bound           = " << errorBound << std::endl
+        << "high precise number   = " << preciseValue << std::endl
+        << "bounded interval      = [ " << low << " , " << high << " ]" << std::endl
+        << "||||\n" << std::endl;
+}
 
 /*!
     \brief some common configurations for the test.
@@ -1242,9 +1274,9 @@ TEST_MODULE_START
 
 #pragma region Fix Point Number basic test
     TEST_UNIT_START("Fix Point Number basic test")
+        testParameter.m_breakIfTestAssertionFailed = true;
         FixPointNumber a(100);
         FixPointNumber b(100.0f);
-
 
         TEST_ASSERT(a.ToFloat() == 100.0f);
         TEST_ASSERT(b.ToFloat() == 100.0f);
@@ -1255,7 +1287,7 @@ TEST_MODULE_START
             \brief return a random float in a large range.
         */
         auto RandFloat = [&mtr]()->Types::F32{
-            const int MAX_INT = 300;
+            const int MAX_INT = 180;
             return (mtr.Random() * 2.0f - 1.0f) * MAX_INT;
         };
         
@@ -1275,14 +1307,145 @@ TEST_MODULE_START
 
         for (int i = 0; i < NUM_FLOAT_PAIRS; ++i)
         {
-            const Types::F32 rightResult = farr1[i] * farr2[i];
+            const Types::F32 correctResult = farr1[i] * farr2[i];
             const Types::F32 testResult = (fparr1[i] * fparr2[i]).ToFloat();
-            TEST_ASSERT(MathTool::AlmostEqual(rightResult, testResult, 0.001));
+            TEST_ASSERT(MathTool::AlmostEqual(correctResult, testResult, 0.01f));
         }
 
-        
+        // the fixed point number is not completed, so this test will always failed, 
+        // until you fix all the bugs.
+        errorLogger++;
 
     TEST_UNIT_END;
+#pragma endregion
+
+#pragma region float bound find
+TEST_UNIT_START("float bound find")
+    RandomTool::MTRandom mtr;
+
+    const unsigned int MAX_INT = 100;
+    
+    for (int loopTest = 0; loopTest < 20; ++loopTest)
+    {
+
+        float a = mtr.Random() * MAX_INT;
+        float b = mtr.Random() * MAX_INT;
+        long double la = a, lb = b;
+
+        const int sizeofDouble = sizeof(long double);
+
+        float c = a * b;
+        long double lc = la * lb;
+    
+        float errorBound = std::abs(c) * gamma(1);
+
+        float low = c - errorBound, high = c + errorBound;
+
+        // ensure the bound include the more precise value which is processed by production of double.
+        TEST_ASSERT(low <= lc && lc <= high);
+
+        //ShowNumberInBound(c, errorBound, lc, low, high);
+
+        // next codes will check whether the error bound caculateion still apply to sqrt operation
+        double lSqrtC = std::sqrt(lc);
+
+        float sqrtC = std::sqrt(c);
+
+        float sqrtErrorBound = std::abs(sqrtC) * gamma(2);
+
+        float sqrtLow = sqrtC - sqrtErrorBound, sqrtHigh = sqrtC + sqrtErrorBound;
+
+        TEST_ASSERT( sqrtLow <= lSqrtC && lSqrtC <= sqrtHigh );
+
+        //ShowNumberInBound(sqrtC, sqrtErrorBound, lSqrtC, sqrtLow, sqrtHigh);
+
+    } // end for loopTest
+
+TEST_UNIT_END;
+#pragma endregion
+
+#pragma region EFloat tool test
+TEST_UNIT_START("EFloat tool test")
+    RandomTool::MTRandom mtr;
+
+    const unsigned int MAX_INT = 100;
+
+    const unsigned int MAX_NUM = 50;
+    
+    for (int numLoop = 0; numLoop < 20; ++numLoop)
+    {
+        ShowProgress(numLoop * 1.0f / 20);
+
+        // original number array
+        std::array<float, MAX_NUM> farr;
+
+        // assign numbers to the Array "farr".
+        farr[0] = 0.0f;
+        farr[1] = -0.0f;
+        farr[2] = mtr.Random();
+
+        const int POSITIVE_INF = 3;
+        const int NEGATIVE_INF = 4;
+        const int POSITIVE_MAX = 5;
+        const int NEGATIVE_MAX = 6;
+        farr[POSITIVE_INF] = +std::numeric_limits<float>::infinity();
+        farr[NEGATIVE_INF] = -std::numeric_limits<float>::infinity();
+        farr[POSITIVE_MAX] = +std::numeric_limits<float>::max();
+        farr[NEGATIVE_MAX] = -std::numeric_limits<float>::max();
+
+        for (unsigned int i = NEGATIVE_MAX + 1; i < farr.size(); ++i)
+        {
+            farr[i] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+        }
+
+        // float up
+        std::array<float, farr.size()> fuparr;
+
+        // float down
+        std::array<float, farr.size()> fdownarr;
+
+        for (int i = 0; i < farr.size(); ++i)
+        {
+            //BREAK_POINT_IF(i == 4);
+            fuparr[i] = NextFloatUp(farr[i]);
+            fdownarr[i] = NextFloatDown(farr[i]);
+        }
+
+        for (int i = 0; i < farr.size(); ++i)
+        {
+            if (i == POSITIVE_INF)
+            {
+                TEST_ASSERT(fdownarr[i] < farr[i]);
+                TEST_ASSERT(std::isinf(fuparr[i]));// move +inf up will stay +inf
+            }
+            else if (i == NEGATIVE_INF)
+            {
+                TEST_ASSERT(std::isinf(fdownarr[i]));// move -inf down will stay -inf
+                TEST_ASSERT(fuparr[i] > farr[i]);
+            }
+            else if (i == POSITIVE_MAX)
+            {
+                TEST_ASSERT(fdownarr[i] < farr[i]);
+                TEST_ASSERT(std::isinf(fuparr[i]) && fuparr[i] > 0.);// move +max up will end with +inf
+            }
+            else if (i == NEGATIVE_MAX)
+            {
+                TEST_ASSERT(std::isinf(fdownarr[i]) && fdownarr[i] < 0.);// move -max down will end with -inf
+                TEST_ASSERT(fuparr[i] > farr[i]);
+            }
+            else // normal test
+            {
+                TEST_ASSERT(fuparr[i] > farr[i]);
+                TEST_ASSERT(fdownarr[i] < farr[i]);
+            }// end else normal test
+
+        }// end for test farr.
+
+
+    }// end for numLoop
+    
+    
+TEST_UNIT_END;
 #pragma endregion
 
 TEST_MODULE_END
