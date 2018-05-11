@@ -198,11 +198,19 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     // but still represent the same point.
 #define FLIP_SIGN_WHEN_W_LT_ZERO
 
-    std::array<Types::F32, 6> p;
-    std::array<Types::F32, 6> q;
-    Types::F32 t0 = 0.0f;       // start point, zero means the pv1
-    Types::F32 t1 = 1.0f;       // end point, one means the pv2
-    Types::F32 tempT = 0.0f;    // temp interpolate coefficience
+#define USING_DOUBLE_FOR_TEMP_VALUE
+#ifdef USING_DOUBLE_FOR_TEMP_VALUE
+    using FloatPointNumberType = double;
+#else
+    using FloatPointNumberType = Types::F32;
+#endif
+
+    std::array<FloatPointNumberType, 6> p;
+    std::array<FloatPointNumberType, 6> q;
+
+    FloatPointNumberType t0 = 0.0f;       // start point, zero means the pv1
+    FloatPointNumberType t1 = 1.0f;       // end point, one means the pv2
+    FloatPointNumberType tempT = 0.0f;    // temp interpolate coefficience
 
 #ifdef FLIP_SIGN_WHEN_W_LT_ZERO
     // retrive the homogenous position
@@ -228,15 +236,15 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 #endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
 #ifdef FLIP_SIGN_WHEN_W_LT_ZERO
-    const Types::F32 deltaX = hv2.m_x - hv1.m_x;
-    const Types::F32 deltaY = hv2.m_y - hv1.m_y;
-    const Types::F32 deltaZ = hv2.m_z - hv1.m_z;
-    const Types::F32 deltaW = hv2.m_w - hv1.m_w;
+    const FloatPointNumberType deltaX = hv2.m_x - hv1.m_x;
+    const FloatPointNumberType deltaY = hv2.m_y - hv1.m_y;
+    const FloatPointNumberType deltaZ = hv2.m_z - hv1.m_z;
+    const FloatPointNumberType deltaW = hv2.m_w - hv1.m_w;
 #else
-    const Types::F32 deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
-    const Types::F32 deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
-    const Types::F32 deltaZ = pv2->m_posH.m_z - pv1->m_posH.m_z;
-    const Types::F32 deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
+    const FloatPointNumberType deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
+    const FloatPointNumberType deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
+    const FloatPointNumberType deltaZ = pv2->m_posH.m_z - pv1->m_posH.m_z;
+    const FloatPointNumberType deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
 #endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
     p[0] = -(deltaX + deltaW);
@@ -477,7 +485,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
-        Interpolate2(pv2, pv1, pOutV1, t0, realVertexSize);
+        Interpolate2(pv2, pv1, pOutV1, static_cast<Types::F32>(t0), realVertexSize);
         CutHvector(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
     
@@ -496,7 +504,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
-        Interpolate2(pv2, pv1, pOutV2, t1, realVertexSize);
+        Interpolate2(pv2, pv1, pOutV2, static_cast<Types::F32>(t1), realVertexSize);
         CutHvector(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
 
