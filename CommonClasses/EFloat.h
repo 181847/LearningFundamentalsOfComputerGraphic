@@ -1,5 +1,6 @@
 #pragma once
 #include "CommonTypes.h"
+#include <ostream>
 
 #define EFLOAT_DEBUG
 
@@ -71,14 +72,72 @@ private:
 #endif
     
 public:
+    /*!
+        \brief default construct 0.0f +- 0
+    */
+    EFloat();
+
+    /*!
+        \brief construct a EFloat with an absolute error
+        \param v value of the float
+        \param error absolute error, should greater than 0
+        low <= v - err
+        v + err <= high
+        Warning!! Here we don't handle the situation when error bound get overflow or underflow.
+    */
     EFloat(Types::F32 v, Types::F32 err = 0.0f);
+
+    /*!
+        \brief copy assignment.
+    */
+    EFloat& operator = (const EFloat& ef);
     ~EFloat();
 
     /*!
         \brief check m_low < m_high (neighter should be infinity or nan) 
         In the EFLOAT_DEBUG mode, will check the (low < m_preciseV && m_prciseV < high) 
     */
-    void Check();
+    void Check() const;
+
+    Types::F32 LowerBound() const;
+    Types::F32 UpperBound() const;
+
+    explicit operator Types::F32() const;
+
+    friend EFloat operator + (const EFloat& ef1, const EFloat& ef2);
+    friend EFloat operator - (const EFloat& ef1, const EFloat& ef2);
+    friend EFloat operator * (const EFloat& ef1, const EFloat& ef2);
+    friend EFloat operator / (const EFloat& ef1, const EFloat& ef2);
+    friend std::ostream& operator << (std::ostream& out, const EFloat& ef);
 };
+
+/*!
+    \brief plus operation test
+    \param ef1, ef2 operate numbers
+*/
+EFloat operator + (const EFloat& ef1, const EFloat& ef2);
+
+/*!
+    \brief minus operation test
+    \param ef1, ef2 operate numbers
+*/
+EFloat operator - (const EFloat& ef1, const EFloat& ef2);
+
+/*!
+    \brief multiply operation test
+    \param ef1, ef2 operate numbers
+*/
+EFloat operator * (const EFloat& ef1, const EFloat& ef2);
+
+/*!
+    \brief divide operation test
+    \param ef1, ef2 operate numbers
+*/
+EFloat operator / (const EFloat& ef1, const EFloat& ef2);
+
+/*!
+    \brief output the EFloat number to console.
+*/
+std::ostream& operator << (std::ostream& out, const EFloat& ef);
 
 }// namespace CommonClass
