@@ -1495,7 +1495,7 @@ TEST_UNIT_START("EFloat operator test: plus")
     const int MAX_INT = 300;
     const int MAX_NUM = 7;
 
-    for (int numLoop = 0; numLoop < 2; ++numLoop)
+    for (int numLoop = 0; numLoop < 30; ++numLoop)
     {
         // original number array
         std::array<std::array<float, MAX_NUM>, 2> farr;
@@ -1541,9 +1541,39 @@ TEST_UNIT_START("EFloat operator test: plus")
             efResult = efarr[0][i] / efarr[1][i];
             floatResult = farr[0][i] / farr[1][i];
             TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-
             std::cout << farr[0][i] << " / " << farr[1][i] << " = \n"
                 << efResult << "\n\n";
+
+            // abs
+            // using the EFloat from previous divided result, which will have some error bound.
+            const EFloat efWithBound = efResult;
+            efResult = abs(efWithBound);
+            TEST_ASSERT(efResult.LowerBound() >= 0.0f);
+            TEST_ASSERT(efResult.UpperBound() >= 0.0f);
+            TEST_ASSERT(static_cast<Types::F32>(efResult) >= 0.0f);
+            TEST_ASSERT(std::abs(static_cast<Types::F32>(efWithBound)) == static_cast<Types::F32>(efResult));
+            std::cout << "original = " << efWithBound << std::endl
+                      << "absolute = " << efResult << std::endl;
+
+            // square root just use the absolute value from the abs(efWithBound)
+            const EFloat absWithBound = efResult;
+            efResult = sqrt(absWithBound);
+            TEST_ASSERT(static_cast<Types::F32>(efResult) == std::sqrt(static_cast<Types::F32>(absWithBound)));
+            std::cout << "square root = " << efResult << std::endl;
+
+            // negative
+            efResult = -efWithBound;
+            TEST_ASSERT( 
+                - (static_cast<Types::F32>(efWithBound)) 
+                == static_cast<Types::F32>(efResult));
+            TEST_ASSERT(
+                - efWithBound.LowerBound() 
+                == efResult.UpperBound());
+            TEST_ASSERT(
+                -efWithBound.UpperBound()
+                == efResult.LowerBound());
+            std::cout << "original = " << efWithBound << std::endl
+                      << "negative = " << efResult << std::endl;
         }// end for operation tests
 
     }// end for numLoop
