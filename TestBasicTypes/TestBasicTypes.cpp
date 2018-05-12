@@ -1448,5 +1448,108 @@ TEST_UNIT_START("EFloat tool test")
 TEST_UNIT_END;
 #pragma endregion
 
+#pragma region EFloat construct test
+TEST_UNIT_START("EFloat construct")
+    RandomTool::MTRandom mtr;
+    const int MAX_INT = 300;
+    const int MAX_NUM = 7;
+
+    for (int numLoop = 0; numLoop < 20; ++numLoop)
+    {
+        // original number array
+        std::array<float, MAX_NUM> farr;
+        std::array<EFloat, farr.size()> efarr;
+
+        // assign numbers to the Array "farr".
+        farr[0] = 0.0f;
+        farr[1] = -0.0f;
+        farr[2] = mtr.Random();
+    
+        const int POSITIVE_INF = 3;
+        const int NEGATIVE_INF = 4;
+        const int POSITIVE_MAX = 5;
+        const int NEGATIVE_MAX = 6;
+        farr[POSITIVE_INF] = +std::numeric_limits<float>::infinity();
+        farr[NEGATIVE_INF] = -std::numeric_limits<float>::infinity();
+        farr[POSITIVE_MAX] = +std::numeric_limits<float>::max();
+        farr[NEGATIVE_MAX] = -std::numeric_limits<float>::max();
+
+        for (unsigned int i = NEGATIVE_MAX + 1; i < farr.size(); ++i)
+        {
+            farr[i] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+            efarr[i] = EFloat(farr[i]);
+        }
+
+        for (auto & ef : efarr)
+        {
+            ef.Check();
+        }
+    }// end for numLoop
+
+TEST_UNIT_END;
+#pragma endregion
+
+#pragma region EFloat operator test
+TEST_UNIT_START("EFloat operator test: plus")
+    RandomTool::MTRandom mtr;
+    const int MAX_INT = 300;
+    const int MAX_NUM = 7;
+
+    for (int numLoop = 0; numLoop < 2; ++numLoop)
+    {
+        // original number array
+        std::array<std::array<float, MAX_NUM>, 2> farr;
+        std::array<std::array<EFloat, MAX_NUM>, 2> efarr;
+
+        // start efloat construction
+        for (int i = 0; i < 2; ++i)
+        {
+            for (int j = 0; j < MAX_NUM; ++j)
+            {
+                farr[i][j] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+                efarr[i][j] = EFloat(farr[i][j]);
+            }
+        }// end for farr[i] construction
+
+        for (int i = 0; i < MAX_NUM; ++i)
+        {
+            EFloat efResult;
+            float floatResult;
+
+            // operator +
+            efResult = efarr[0][i] + efarr[1][i];
+            floatResult = farr[0][i] + farr[1][i];
+            TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+            std::cout << farr[0][i] << " + " << farr[1][i] << " = \n"
+                      << efResult << "\n\n";
+
+            // operator -
+            efResult = efarr[0][i] - efarr[1][i];
+            floatResult = farr[0][i] - farr[1][i];
+            TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+            std::cout << farr[0][i] << " - " << farr[1][i] << " = \n"
+                << efResult << "\n\n";
+
+            // operator *
+            efResult = efarr[0][i] * efarr[1][i];
+            floatResult = farr[0][i] * farr[1][i];
+            TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+            std::cout << farr[0][i] << " * " << farr[1][i] << " = \n"
+                << efResult << "\n\n";
+
+            // operator /
+            efResult = efarr[0][i] / efarr[1][i];
+            floatResult = farr[0][i] / farr[1][i];
+            TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+
+            std::cout << farr[0][i] << " / " << farr[1][i] << " = \n"
+                << efResult << "\n\n";
+        }// end for operation tests
+
+    }// end for numLoop
+
+TEST_UNIT_END;
+#pragma endregion
+
 TEST_MODULE_END
 
