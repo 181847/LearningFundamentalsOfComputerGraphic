@@ -1,6 +1,9 @@
 #pragma once
 #include "CommonTypes.h"
 
+#define EFLOAT_DEBUG
+
+
 /*!
     \brief this file define many accurancy analysis tool
     main of the codes is copy from the
@@ -9,8 +12,7 @@
 
 namespace CommonClass
 {
- 
-        
+   
 /*!
     \brief copy bits data from float to bits
     \param f the 4 bytes floating point number
@@ -52,8 +54,31 @@ Types::F32 NextFloatDown(Types::F32 f);
 class EFloat
 {
 public:
-    EFloat();
+    
+    Types::F32
+        m_v;    // main value of the float 
+
+private:
+    Types::F32
+        m_low,    // lower bound
+        m_high;   // higher bound
+
+#ifdef EFLOAT_DEBUG
+    /*!
+        \brief the precise value store in long double type
+    */
+    long double m_preciseV;
+#endif
+    
+public:
+    EFloat(Types::F32 v, Types::F32 err = 0.0f);
     ~EFloat();
+
+    /*!
+        \brief check m_low < m_high (neighter should be infinity or nan) 
+        In the EFLOAT_DEBUG mode, will check the (low < m_preciseV && m_prciseV < high) 
+    */
+    void Check();
 };
 
 }// namespace CommonClass

@@ -1,16 +1,51 @@
 #include "EFloat.h"
+#include <assert.h>
 
 namespace CommonClass
 {
 
 
-EFloat::EFloat()
+EFloat::EFloat(Types::F32 v, Types::F32 err)
+    :m_v(v)
 {
-}
+    if (err == 0.0f)
+    {
+        m_low = m_high = 0.0f;
+    }
+    else
+    {
+        m_low = NextFloatDown(v - err);
+        m_high = NextFloatUp(v + err);
+    }
 
+#ifdef EFLOAT_DEBUG
+    m_preciseV = m_v;
+    Check();
+#endif // EFLOAT_DEBUG
+}
 
 EFloat::~EFloat()
 {
+}
+
+void EFloat::Check()
+{
+    // ensure m_low and m_high is comparable
+    if (!std::isinf(m_low)
+        && !std::isnan(m_low)
+        && !std::isinf(m_high)
+        && !std::isnan(m_high)) 
+    {
+        assert(m_low < m_high);
+    }
+
+#ifdef EFLOAT_DEBUG
+    if (!std::isinf(m_v) && !std::isnan(m_v))
+    {
+        assert(m_low < m_preciseV);
+        assert(m_preciseV < m_high);
+    }
+#endif // EFLOAT_DEBUG
 }
 
 Types::U32 FloatToBits(const Types::F32 & f)
