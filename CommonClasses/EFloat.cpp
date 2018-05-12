@@ -236,6 +236,69 @@ EFloat operator/(const EFloat & ef1, const EFloat & ef2)
     return r;
 }
 
+EFloat operator-(const EFloat & ef)
+{
+    EFloat r;
+    r.m_v        = -ef.m_v;
+    r.m_low      = -ef.m_high;
+    r.m_high     = -ef.m_low;
+#ifdef EFLOAT_DEBUG
+    r.m_preciseV = -ef.m_preciseV;
+    r.Check();
+#endif // EFLOAT_DEBUG
+    return r;
+}
+
+EFloat abs(const EFloat & ef)
+{
+    EFloat r;
+
+    if (ef.m_low > 0.0f)
+    {
+        // the number (include the error bound) is all positive,
+        // just return itself.
+        return ef;
+    }
+    else if (ef.m_high < 0.0f)
+    {
+        // flip all the sign
+        r.m_v        = -ef.m_v;
+        r.m_low      = -ef.m_high;
+        r.m_high     = -ef.m_low;
+#ifdef EFLOAT_DEBUG
+        r.m_preciseV = -ef.m_preciseV;
+#endif // EFLOAT_DEBUG
+    }
+    else
+    {
+        // error bound straddles zero, so the lower bound will be cut to zero,
+        // upper bound will be the max magnitude in (low and high)
+        r.m_v        = std::abs(ef.m_v);
+        r.m_low      = 0.0f;
+        r.m_high     = std::max(-ef.m_low, ef.m_high); // this equal to high = max(abs(ef.low), abs(ef.high))
+#ifdef EFLOAT_DEBUG
+        r.m_preciseV = std::abs(ef.m_preciseV);
+#endif // EFLOAT_DEBUG
+    }
+
+#ifdef EFLOAT_DEBUG
+    r.Check();
+#endif // EFLOAT_DEBUG
+    return r;
+}
+
+EFloat sqrt(const EFloat & ef)
+{
+    EFloat r;
+    r.m_v = std::sqrt(ef.m_v);
+    r.m_low = NextFloatDown(std::sqrt(ef.m_low));
+    r.m_high = NextFloatUp(std::sqrt(ef.m_high));
+#ifdef EFLOAT_DEBUG
+    r.m_preciseV = std::sqrt(ef.m_preciseV);
+#endif // EFLOAT_DEBUG
+    return r;
+}
+
 std::ostream & operator<<(std::ostream & out, const EFloat & ef)
 {
     out << string_format("v = %f (%a) - [%f, %f]", ef.m_v, ef.m_v, ef.m_low, ef.m_high);;

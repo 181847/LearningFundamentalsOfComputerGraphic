@@ -108,6 +108,9 @@ public:
     friend EFloat operator - (const EFloat& ef1, const EFloat& ef2);
     friend EFloat operator * (const EFloat& ef1, const EFloat& ef2);
     friend EFloat operator / (const EFloat& ef1, const EFloat& ef2);
+    friend EFloat operator - (const EFloat& ef);
+    friend EFloat abs        (const EFloat& ef1);
+    friend EFloat sqrt       (const EFloat& ef);
     friend std::ostream& operator << (std::ostream& out, const EFloat& ef);
 };
 
@@ -134,6 +137,24 @@ EFloat operator * (const EFloat& ef1, const EFloat& ef2);
     \param ef1, ef2 operate numbers
 */
 EFloat operator / (const EFloat& ef1, const EFloat& ef2);
+
+/*!
+    \brief negative of the error float
+*/
+EFloat operator - (const EFloat& ef);
+
+/*!
+    \brief absolute operation
+    \param ef the error float
+    note: if ef = { 0.004 -> [ -0.005, 0.0043] }
+          will return {0.004 -> [0, 0.005]}
+*/
+EFloat abs(const EFloat& ef);
+
+/*!
+    \brief square root of the error float
+*/
+EFloat sqrt(const EFloat& ef);
 
 /*!
     \brief output the EFloat number to console.
