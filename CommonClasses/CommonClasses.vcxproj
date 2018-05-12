@@ -155,6 +155,7 @@
     <ClInclude Include="Film.h" />
     <ClInclude Include="DebugHelpers.h" />
     <ClInclude Include="FixPointNumber.h" />
+    <ClInclude Include="Helpers.h" />
     <ClInclude Include="HitRecord.h" />
     <ClInclude Include="hvector.h" />
     <ClInclude Include="Image.h" />

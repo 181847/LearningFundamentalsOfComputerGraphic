@@ -107,6 +107,9 @@
     <ClInclude Include="EFloat.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="Helpers.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
