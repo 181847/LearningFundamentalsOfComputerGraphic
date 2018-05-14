@@ -31,6 +31,7 @@
 #include "../CommonClasses/CoordinateFrame.h"
 #include "../CommonClasses/FixPointNumber.h"
 #include "../CommonClasses/EFloat.h"
+#include "../CommonClasses/DebugConfigs.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 using namespace CommonClass;
@@ -40,19 +41,6 @@ RandomTool::MTRandom globalMtr;
 const unsigned int G_MAX_INT = 1000;
 
 
-/*!
-    \brief the machine epsilon, should be 2^(-23) for float(4byte, IEEE754).
-*/
-constexpr float MachineEpsilon = std::numeric_limits<float>::epsilon() * 0.5f;
-
-/*!
-    \brief the gamma value used in float round error bound detection.
-    Comming from the <<Pysical Based Rendering Third>>:: chaper[3.9], page[217].
-*/
-constexpr float gamma(const int n)
-{
-    return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
-}
 
 /*!
     \brief this function is for floating point number round error analysist.
@@ -143,6 +131,16 @@ RGB GetRandomRGB()
 {
     return RGB(globalMtr.Random(), globalMtr.Random(), globalMtr.Random());
 }
+
+/*!
+    \brief this struct is for unit test of DebugClient.
+*/
+struct TestDebugConf
+{
+    static bool Active;
+    enum { ENABLE_CLIENT = 1};
+};
+bool TestDebugConf::Active = false;
 
 /*!
     \brief let user to check the local image file, this function can be disabled by the constant UserConfig::LET_USER_CHECK_IMG.
@@ -1490,7 +1488,7 @@ TEST_UNIT_END;
 #pragma endregion
 
 #pragma region EFloat operator test
-TEST_UNIT_START("EFloat operator test: plus")
+TEST_UNIT_START("EFloat operator test")
     RandomTool::MTRandom mtr;
     const int MAX_INT = 300;
     const int MAX_NUM = 7;
@@ -1577,6 +1575,48 @@ TEST_UNIT_START("EFloat operator test: plus")
         }// end for operation tests
 
     }// end for numLoop
+
+TEST_UNIT_END;
+#pragma endregion
+
+#pragma region DebugClient test
+TEST_UNIT_START("DebugClient test")
+
+    TEST_ASSERT(false == DebugClient<TestDebugConf>());
+
+    TestDebugConf::Active = true;
+
+    // you should have encounter a assertion here.
+    TEST_ASSERT(true == DebugClient<TestDebugConf>());
+
+    // disable it again,
+    TestDebugConf::Active = false;
+    TEST_ASSERT(false == DebugClient<TestDebugConf>());
+
+    // using DebugGuard to assist DebugClient
+    {
+        // inside this scope
+        // the TestDebugConf::Active will be set to true
+        DebugGuard<TestDebugConf> guard;
+
+        // you should have encounter a assertion here.
+        TEST_ASSERT(true == DebugClient<TestDebugConf>());
+
+    }// out side that scop TestDebugConf will be set to false.
+    TEST_ASSERT(false == DebugClient<TestDebugConf>());
+
+
+    // test that the additional condition can control DebugClient
+    {
+        DebugGuard<TestDebugConf> guard;
+        
+        // event the TestDebugConf::Active is setted to true,
+        // we pass the condition false to disable that.
+        TEST_ASSERT(false == DebugClient<TestDebugConf>(false));
+
+        // you should have encounter a assertion here.
+        TEST_ASSERT(true  == DebugClient<TestDebugConf>(true));
+    }
 
 TEST_UNIT_END;
 #pragma endregion

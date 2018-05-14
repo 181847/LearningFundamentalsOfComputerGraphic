@@ -13,6 +13,20 @@
 
 namespace CommonClass
 {
+
+/*!
+    \brief the machine epsilon, should be 2^(-23) for float(4byte, IEEE754).
+*/
+constexpr float MachineEpsilon = std::numeric_limits<float>::epsilon() * 0.5f;
+
+/*!
+    \brief the gamma value used in float round error bound detection.
+    Comming from the <<Pysical Based Rendering Third>>:: chaper[3.9], page[217].
+*/
+constexpr float gamma(const int n)
+{
+    return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
+}
    
 /*!
     \brief copy bits data from float to bits
@@ -85,7 +99,7 @@ public:
         v + err <= high
         Warning!! Here we don't handle the situation when error bound get overflow or underflow.
     */
-    EFloat(Types::F32 v, Types::F32 err = 0.0f);
+    explicit EFloat(Types::F32 v, Types::F32 err = 0.0f);
 
     /*!
         \brief copy assignment.
