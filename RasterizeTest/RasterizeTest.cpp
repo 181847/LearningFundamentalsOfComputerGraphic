@@ -28,6 +28,7 @@
 #include "../CommonClasses/RasterizeImage.h"
 #include "../CommonClasses/Pipline.h"
 #include "../CommonClasses/CoordinateFrame.h"
+#include "../CommonClasses/DebugConfigs.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 RandomTool::MTRandom globalMtr;
@@ -121,7 +122,7 @@ CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
     \param numRounds how many rounds to draw.
 */
 void SphereRay(
-    std::function<void(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1)>
+    std::function<void(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const unsigned int roundIndex, const unsigned int lineIndex)>
     drawLine,
     const Types::F32 centerLocationX,
     const Types::F32 centerLocationY,
@@ -146,14 +147,14 @@ void SphereRay(
                 x1 = centerLocationX + rOut * std::cos(theta);
                 y1 = centerLocationY + rOut * std::sin(theta);
 
-                drawLine(x0, y0, x1, y1);
+                drawLine(x0, y0, x1, y1, i, j);
             }
             rIn = rOut;
             rOut += segmentLength;
         } // end outer for loop
 }
 
-#define HELP_SPHERE_RAY_LAMBDA_PARAMETERS const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1
+#define HELP_SPHERE_RAY_LAMBDA_PARAMETERS const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const unsigned int roundIndex, const unsigned int lineIndex
 
 TEST_MODULE_START
 
@@ -187,7 +188,7 @@ TEST_MODULE_START
         {
             TIME_GUARD;
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void {
                 defaultImg.DrawWuXiaolinLine(x0, y0, x1, y1);
             }, CENTER_X, CENTER_Y);
         }// end time counter
@@ -220,7 +221,7 @@ TEST_MODULE_START
         {
             TIME_GUARD;
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void{
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void{
                 defaultImg.DrawBresenhamLine(
 
                     static_cast<Types::U32>(x0),
@@ -259,7 +260,7 @@ TEST_MODULE_START
         {
             TIME_GUARD;
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void {
                 defaultImg.DrawBresenhamLine_inOneCall(
                     static_cast<Types::U32>(x0),
                     static_cast<Types::U32>(y0),
@@ -296,7 +297,7 @@ TEST_MODULE_START
         {
             TIME_GUARD;
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void{
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void{
                 defaultImg.DrawBresenhamLine(
 
                     static_cast<Types::U32>(x0),
@@ -335,7 +336,7 @@ TEST_MODULE_START
         {
             TIME_GUARD;
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void {
                 defaultImg.DrawBresenhamLine_inOneCall(
                     static_cast<Types::U32>(x0),
                     static_cast<Types::U32>(y0),
@@ -363,21 +364,21 @@ TEST_MODULE_START
 
             defaultImg.SetScissor(ScissorRect(  0, 300, 300, 511));
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void {
                 defaultImg.DrawLine(x0, y0, x1, y1, RGB::GREEN);
             }, CENTER_X, CENTER_Y, 0.1f, 0.1f, 6);
 
 
             defaultImg.SetScissor(ScissorRect(300, 511,   0, 511));
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void {
                 defaultImg.DrawLine(x0, y0, x1, y1, RGB::RED);
             }, CENTER_X, CENTER_Y, 0.3f, 0.2f, 6);
 
 
             defaultImg.SetScissor(ScissorRect(  0, 300,   0, 300));
 
-            SphereRay([&defaultImg](const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1) -> void {
+            SphereRay([&defaultImg](HELP_SPHERE_RAY_LAMBDA_PARAMETERS) -> void {
                 defaultImg.DrawLine(x0, y0, x1, y1, RGB::BLUE);
             }, CENTER_X, CENTER_Y, 0.05f, 0.1f, 8);
         }// end time counter
@@ -909,9 +910,11 @@ TEST_MODULE_START
         auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * 4 * sizeof(Types::F32));
         memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
 
+
         {
             TIME_GUARD;
-            //PUT_BREAK_POINT;
+
+            //DebugGuard<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS> guard;
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
@@ -1000,11 +1003,114 @@ TEST_MODULE_START
 
         {
             TIME_GUARD;
+            //DebugGuard<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS> guard;
             //PUT_BREAK_POINT;
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
         pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\perspectiveSingleLineShowInvisible.png");
+        
+    TEST_UNIT_END;
+#pragma endregion
+
+#pragma region line clipping error analysis
+    TEST_UNIT_START("line clipping error analysis")
+
+        // skip this test due to the bug of clipping line function.
+        //return 0;
+
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
+        // create and config pipline state object
+        auto pso = std::make_unique<PiplineStateObject>();
+        pso->m_primitiveType = PrimitiveType::LINE_LIST;
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
+        pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+        
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            const Types::F32 depth = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
+            RGBA color(depth, depth, depth, 1.0f);
+            return color;
+        };
+
+        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-4.0f);
+
+        // rotate the line a little.
+        Transform rotateY = Transform::RotationY(Types::Constant::PI_F / 3.0f);
+        Transform rotateZ = Transform::RotationZ(Types::Constant::PI_F / 3.0f);
+
+        Transform moveIntoScree = Transform::Translation(0.0f, 0.0f, -2.0f);
+
+        // perspective tranformation
+        Transform perTrans = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+        
+        Transform pushInto = Transform::Translation(0.0f, 0.0f, -2.0f);
+
+        Transform mat = perTrans * pushInto * rotateZ * rotateY;
+
+        pso->m_vertexShader = [&mat](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
+            hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+            
+            *pDestH = mat * (*pSrcH);
+        };
+
+        Viewport viewport;
+        viewport.left = 0;
+        viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+        viewport.bottom = 0;
+        viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+        pso->SetViewport(viewport);
+
+        // create and set a pipline.
+        Pipline pipline;
+        pipline.SetPSO(std::move(pso));
+
+        // set a backbuffer
+        pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+            UserConfig::COMMON_PIXEL_WIDTH, 
+            UserConfig::COMMON_PIXEL_HEIGHT, 
+            RGBA::WHITE));
+
+        std::vector<SimplePoint> points;
+        std::vector<unsigned int> indices;
+        unsigned int numIndices = 0;
+
+        // create line segments in sphere ray.
+        SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
+
+            // add start vertex and its index
+            points.push_back(SimplePoint(hvector(x0, y0, 0.0f)));
+            indices.push_back(numIndices++);
+
+            // add end vertex and its index
+            points.push_back(SimplePoint(hvector(x1, y1, 0.0f)));
+            indices.push_back(numIndices++);
+        }, 
+            0.0f, 0.0f, // center location
+            0.3f,       // segment length
+            0.1f,       // start radius
+            12);         // num rounds
+
+        auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * 4 * sizeof(Types::F32));
+        memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
+
+        {
+            TIME_GUARD;
+            //DebugGuard<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS> guard;
+            pipline.DrawInstance(indices, vertexBuffer.get());
+        }
+
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineClippingErrAnalysis.png");
         
     TEST_UNIT_END;
 #pragma endregion
