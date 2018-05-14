@@ -1028,21 +1028,39 @@ TEST_MODULE_START
         {
         public:
             hvector m_position;
-            SimplePoint(const hvector& pos)
+            /*!
+                \brief used to store the sphere ray location information
+                x - round index
+                y - line index in the round
+                z = 0 means it's start point
+                z = 1 means it's end point
+            */
+            hvector m_rayIndex;
+            explicit SimplePoint(const hvector& pos)
                 :m_position(pos)
             {
                 // empty
             }
         };
+
+        static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
         // create and config pipline state object
         auto pso = std::make_unique<PiplineStateObject>();
         pso->m_primitiveType = PrimitiveType::LINE_LIST;
-        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
-        pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
+        pso->m_vertexLayout.pixelShaderInputSize  = sizeof(SimplePoint);
         
         pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-            const Types::F32 depth = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
-            RGBA color(depth, depth, depth, 1.0f);
+            const Types::F32   depth      = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
+            const SimplePoint* pPoint     = reinterpret_cast<const SimplePoint*>(pVertex);
+            const Types::F32   red        = pPoint->m_rayIndex.m_z;
+
+            const Types::U32   lineIndex  = static_cast<const Types::U32>(pPoint->m_rayIndex.m_y);
+            const Types::F32   isTheOne   = 43 < lineIndex && lineIndex < 48 ? 1.0f : 0.0f;
+
+            BREAK_POINT_IF(pPoint->m_rayIndex.m_y == 32.0f);
+
+            RGBA               color     (isTheOne, 0.0f, 0.0f, 1.0f);
             return color;
         };
 
@@ -1062,10 +1080,11 @@ TEST_MODULE_START
         Transform mat = perTrans * pushInto * rotateZ * rotateY;
 
         pso->m_vertexShader = [&mat](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-            const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
-            hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
+            SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
             
-            *pDestH = mat * (*pSrcH);
+            pDestH->m_position = mat * (pSrcH->m_position);
+            pDestH->m_rayIndex = pSrcH->m_rayIndex;
         };
 
         Viewport viewport;
@@ -1091,21 +1110,28 @@ TEST_MODULE_START
 
         // create line segments in sphere ray.
         SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
-
             // add start vertex and its index
-            points.push_back(SimplePoint(hvector(x0, y0, 0.0f)));
+            SimplePoint start(hvector(x0, y0, 0.0f));
+            start.m_rayIndex.m_x = roundIndex;
+            start.m_rayIndex.m_y = lineIndex;
+            start.m_rayIndex.m_z = 0;
+            points.push_back(start);
             indices.push_back(numIndices++);
 
             // add end vertex and its index
-            points.push_back(SimplePoint(hvector(x1, y1, 0.0f)));
+            SimplePoint end(hvector(x1, y1, 0.0f));
+            end.m_rayIndex.m_x = roundIndex;
+            end.m_rayIndex.m_y = lineIndex;
+            end.m_rayIndex.m_z = 1;
+            points.push_back(end);
             indices.push_back(numIndices++);
         }, 
             0.0f, 0.0f, // center location
             0.3f,       // segment length
-            0.1f,       // start radius
-            12);         // num rounds
+            1.9f,       // start radius
+            1);         // num rounds
 
-        auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * 4 * sizeof(Types::F32));
+        auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
         memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
 
         {
@@ -1114,7 +1140,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineClippingErrAnalysis.png");
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineClippingErrAnalysis_gt_43_lt_48.png");
         
     TEST_UNIT_END;
 #pragma endregion
