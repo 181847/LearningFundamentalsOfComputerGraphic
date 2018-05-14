@@ -1,6 +1,7 @@
 #include "Pipline.h"
 #include <array>
-#include "DebugHelpers.h"
+#include "DebugConfigs.h"
+#include "EFloat.h"
 
 namespace CommonClass
 {
@@ -119,7 +120,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     x1 = static_cast<Types::I32>(pv2->m_posH.m_x);
     y1 = static_cast<Types::I32>(pv2->m_posH.m_y);
 
-    bool steep = std::abs(y1 - y0) > abs(x1 - x0);
+    bool steep = std::abs(y1 - y0) > std::abs(x1 - x0);
     if (steep)
     {
         std::swap(x0, y0);
@@ -190,6 +191,8 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     ScreenSpaceVertexTemplate* pOutV2, 
     const unsigned int realVertexSize)
 {
+    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>();
+
     assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
     assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
 
@@ -198,7 +201,12 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     // but still represent the same point.
 #define FLIP_SIGN_WHEN_W_LT_ZERO
 
-#define USING_DOUBLE_FOR_TEMP_VALUE
+    // uing error analysis to correct the clip result,
+    // because in some situation, the interpolation result of t end up with some value exceed the frustum,
+    // so we use error analysis to find the t that make the clipped line as short as possible.
+//#define CLIP_WITH_ERROR_ANALYSIS
+
+//#define USING_DOUBLE_FOR_TEMP_VALUE
 #ifdef USING_DOUBLE_FOR_TEMP_VALUE
     using FloatPointNumberType = double;
 #else
@@ -270,6 +278,47 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     q[5] = pv1->m_posH.m_w - pv1->m_posH.m_z;
 #endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
+#ifdef CLIP_WITH_ERROR_ANALYSIS
+    /*!
+        \brief compute absolute error of p[i] and q[i]
+    */
+
+    /*!
+        \brief absolute error for p elements
+        notice that 'absErr of p[0]' == 'absErr of p[1]'
+        'absErr of p[2]' == 'absErr of p[3]'
+        'absErr of p[4]' == 'absErr of p[5]'
+        so here we only store three absErr
+    */
+    std::array<FloatPointNumberType, 3> absErrP;
+
+    /*!
+        \brief absolute error for q elements
+        notice that 'absErr of q[0]' == 'absErr of q[1]'
+        'absErr of q[2]' == 'absErr of q[3]'
+        'absErr of q[4]' == 'absErr of q[5]'
+        so here we only store three absErr
+    */
+    std::array<FloatPointNumberType, 3> absErrQ; // absolute error for q elements
+    
+    /*!
+        \brief absolute value for hv1 and hv2
+    */
+    hvector absHv1 = hvector(std::abs(hv1.m_x), std::abs(hv1.m_y), std::abs(hv1.m_z), std::abs(hv1.m_w));
+    hvector absHv2 = hvector(std::abs(hv2.m_x), std::abs(hv2.m_y), std::abs(hv2.m_z), std::abs(hv2.m_w));
+
+    FloatPointNumberType gamma_2 = gamma(2), gamma_1 = gamma(1);
+
+    absErrP[0] = gamma_2 * (absHv1.m_x + absHv2.m_x + absHv1.m_w + absHv2.m_w);
+    absErrP[1] = gamma_2 * (absHv1.m_y + absHv2.m_y + absHv1.m_w + absHv2.m_w);
+    absErrP[2] = gamma_2 * (absHv1.m_z + absHv2.m_z + absHv1.m_w + absHv2.m_w);
+
+    absErrQ[0] = gamma_1 * (absHv1.m_x + absHv1.m_w);
+    absErrQ[1] = gamma_1 * (absHv1.m_y + absHv1.m_w);
+    absErrQ[2] = gamma_1 * (absHv1.m_z + absHv1.m_w);
+#endif // CLIP_WITH_ERROR_ANALYSIS
+    
+
 #ifdef FLIP_SIGN_WHEN_W_LT_ZERO
     for (unsigned int i = 0; i < 6; ++i)
     {
@@ -282,6 +331,21 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         }
         else if (p[i] > 0.0f)
         {
+
+#ifdef CLIP_WITH_ERROR_ANALYSIS
+            EFloat errT = EFloat(q[i], absErrP[i / 2]) / EFloat(p[i], absErrQ[i / 2]);
+
+            // this if branch is targeted to minimize t1, so we mainly use its lower bound.
+            tempT = errT.LowerBound();
+            if (errT.m_v < t0)
+            {
+                return false;
+            }
+            else if (tempT < t1)
+            {
+                t1 = tempT;
+            }
+#else
             tempT = q[i] / p[i];
             if (tempT < t0)
             {
@@ -294,9 +358,26 @@ bool Pipline::ClipLineInHomogenousClipSpace(
                 // update t1, new end point
                 t1 = tempT;
             }
+#endif // CLIP_WITH_ERROR_ANALYSIS
+
+            
         }
         else // p[i] < 0.0f
         {
+#ifdef CLIP_WITH_ERROR_ANALYSIS
+            EFloat errT = EFloat(q[i], absErrP[i / 2]) / EFloat(p[i], absErrQ[i / 2]);
+
+            // this if branch is targeted to maxmize t0, so we mainly use its upper bound.
+            tempT = errT.UpperBound();
+            if (errT.m_v > t1)
+            {
+                return false;
+            }
+            else if (tempT > t0)
+            {
+                t0 = tempT;
+            }
+#else
             tempT = q[i] / p[i];
             if (tempT > t1)
             {
@@ -309,6 +390,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
                 // update t1, new start point
                 t0 = tempT;
             }
+#endif
         } // end else if p[i] > 0.0f
     }// end else for
 #else  // FLIP_SING_WHEN_W_LT_ZERO is not defined
