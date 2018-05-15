@@ -7,7 +7,7 @@
     in which the sign of the elements is a little different.
     Reference from: <Fundemantals Of Compute Graphics, 3rd> page.155 
 */
-#define USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+//#define USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
 
 namespace CommonClass
 {
