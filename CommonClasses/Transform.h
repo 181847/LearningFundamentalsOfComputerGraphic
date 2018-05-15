@@ -2,6 +2,13 @@
 #include "CommonTypes.h"
 #include "hvector.h"
 
+/*!
+    \brief whether to use the special version opengl perspective matrix,
+    in which the sign of the elements is a little different.
+    Reference from: <Fundemantals Of Compute Graphics, 3rd> page.155 
+*/
+#define USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+
 namespace CommonClass
 {
 
