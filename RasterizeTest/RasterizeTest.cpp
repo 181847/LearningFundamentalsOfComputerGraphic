@@ -503,11 +503,11 @@ TEST_MODULE_START
         SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
             // add start vertex and its index
-            points.push_back(SimplePoint(hvector(x0, y0)));
+            points.push_back(SimplePoint(hvector(x0, y0, 0.0f, -1.0f)));
             indices.push_back(numIndices++);
 
             // add end vertex and its index
-            points.push_back(SimplePoint(hvector(x1, y1)));
+            points.push_back(SimplePoint(hvector(x1, y1, 0.0f, -1.0f)));
             indices.push_back(numIndices++);
         }, 
             0.0f, 0.0f, // center location
@@ -1056,9 +1056,10 @@ TEST_MODULE_START
             const SimplePoint* pPoint     = reinterpret_cast<const SimplePoint*>(pVertex);
             const Types::F32   red        = pPoint->m_rayIndex.m_z;
 
+            const Types::U32   roundIndex = static_cast<const Types::U32>(pPoint->m_rayIndex.m_x);
             const Types::U32   lineIndex  = static_cast<const Types::U32>(pPoint->m_rayIndex.m_y);
             //const Types::F32   isTheOne   = 22 < lineIndex && lineIndex < 34 ? 1.0f : 0.0f;
-            const Types::F32   isTheOne = lineIndex == 33 ? 1.0f : 0.0f;
+            const Types::F32   isTheOne = roundIndex == 3 && lineIndex == 33 ? 1.0f : 0.0f;
 
             RGBA               color     (isTheOne, 0.0f, 0.0f, 1.0f);
             return color;
@@ -1079,11 +1080,19 @@ TEST_MODULE_START
 
         Transform mat = perTrans * pushInto * rotateZ * rotateY;
 
-        pso->m_vertexShader = [&mat](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+        Transform toView = pushInto * rotateZ * rotateY;
+
+        Transform perspect = perTrans;
+
+        pso->m_vertexShader = [&mat, &toView, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
             SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
+
+            DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 3.0f && pSrcH->m_rayIndex.m_y == 33.0f);
             
-            pDestH->m_position = mat * (pSrcH->m_position);
+            hvector inViewPos = toView * pSrcH->m_position;
+
+            pDestH->m_position = perspect * inViewPos;
             pDestH->m_rayIndex = pSrcH->m_rayIndex;
         };
 
@@ -1111,10 +1120,10 @@ TEST_MODULE_START
         // create line segments in sphere ray.
         SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
-            const unsigned int theIndexOfOneLine = 33;
+            const unsigned int theIndexOfOneLine = 64;
             // only get one line for convience of debuging
-            if (lineIndex == theIndexOfOneLine)
-            {
+            //if (lineIndex == theIndexOfOneLine)
+            //{
                 // add start vertex and its index
                 SimplePoint start(hvector(x0, y0, 0.0f));
                 start.m_rayIndex.m_x = roundIndex;
@@ -1130,13 +1139,13 @@ TEST_MODULE_START
                 end.m_rayIndex.m_z = 1;
                 points.push_back(end);
                 indices.push_back(numIndices++);
-            }
+            //}
         }, 
             0.0f, 0.0f,                     // center location
             0.3f,                           // segment length
-            2.2f,                           // start radius
-            1,                              // num rounds
-            2.0f * MathTool::PI_F / 64.0f / 2.0f); // radio offset
+            0.1f,                           // start radius
+            12                              // num rounds
+            ); // radio offset
 
         auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
         memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
@@ -1147,7 +1156,9 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineClippingErrAnalysis_fixed_10.png");
+        // the index of output picture.
+        std::string pictureIndex = "011";
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\PiplineClippingLines\\lineClippingErrAnalysis_fixed_" + pictureIndex + ".png");
         
     TEST_UNIT_END;
 #pragma endregion
