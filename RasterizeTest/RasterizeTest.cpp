@@ -1059,13 +1059,13 @@ TEST_MODULE_START
             const Types::U32   roundIndex = static_cast<const Types::U32>(pPoint->m_rayIndex.m_x);
             const Types::U32   lineIndex  = static_cast<const Types::U32>(pPoint->m_rayIndex.m_y);
             //const Types::F32   isTheOne   = 22 < lineIndex && lineIndex < 34 ? 1.0f : 0.0f;
-            const Types::F32   isTheOne = roundIndex == 3 && lineIndex == 33 ? 1.0f : 0.0f;
+            const Types::F32   isTheOne = roundIndex == 5 && lineIndex == 33 ? 1.0f : 0.0f;
 
             RGBA               color     (isTheOne, 0.0f, 0.0f, 1.0f);
             return color;
         };
 
-        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-4.0f);
+        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-0.5f), FAR(-4.0f);
 
         // rotate the line a little.
         Transform rotateY = Transform::RotationY(Types::Constant::PI_F / 3.0f);
@@ -1088,7 +1088,7 @@ TEST_MODULE_START
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
             SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-            DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 3.0f && pSrcH->m_rayIndex.m_y == 33.0f);
+            DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 5.0f && pSrcH->m_rayIndex.m_y == 33.0f);
             
             hvector inViewPos = toView * pSrcH->m_position;
 
@@ -1157,7 +1157,7 @@ TEST_MODULE_START
         }
 
         // the index of output picture.
-        std::string pictureIndex = "011";
+        std::string pictureIndex = "012";
         pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\PiplineClippingLines\\lineClippingErrAnalysis_fixed_" + pictureIndex + ".png");
         
     TEST_UNIT_END;
