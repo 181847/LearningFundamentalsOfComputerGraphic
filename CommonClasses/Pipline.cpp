@@ -186,6 +186,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
 
 bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, ScreenSpaceVertexTemplate * pOutV1, ScreenSpaceVertexTemplate * pOutV2, const unsigned int realVertexSize)
 {
+    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pv2->m_restDates[0] == 7.0f && pv2->m_restDates[1] == 34.0f);
 #ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
     std::array<bool, 2> isWPositive = { pv1->m_posH.m_w >= 0.0f, pv2->m_posH.m_w >= 0.0f };
 #else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
@@ -222,11 +223,13 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         // so here we flip the position of pv1 and pv2.
         Interpolate2(pv2, pv1, pOutV2, t, realVertexSize);
 
-        // ensure the w components of interpolate result is not too close to zero
-        if (pOutV2->m_posH.m_w < 1e-20f)
-        {
-            pOutV2->m_posH.m_w = 1e-20f;
-        }
+        // make pOutV2.m_posH.m_w close to zero, if the perspective matrix is special , then close from positive side
+        // else close from negative side.
+#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+        pOutV2->m_posH.m_w = 1e-20f;
+#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+        pOutV2->m_posH.m_w = -1e-20f;
+#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
     }
     else
     {
@@ -245,11 +248,13 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         // so here we flip the position of pv1 and pv2.
         Interpolate2(pv1, pv2, pOutV1, t, realVertexSize);
 
-        // ensure the w components of interpolate result is not too close to zero
-        if (pOutV1->m_posH.m_w < 1e-20f)
-        {
-            pOutV1->m_posH.m_w = 1e-20f;
-        }
+        // make pOutV2.m_posH.m_w close to zero, if the perspective matrix is special , then close from positive side
+        // else close from negative side.
+#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+        pOutV1->m_posH.m_w = 1e-20f;
+#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+        pOutV1->m_posH.m_w = -1e-20f;
+#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
     }
 
     //static_assert(false, "function not completed");
@@ -264,7 +269,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     const unsigned int realVertexSize)
 {
     // find the line that may be clipped
-    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pv2->m_restDates[0] == 0.0f && pv2->m_restDates[1] == 33.0f && pv2->m_restDates[2] == 1.0f);
+    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pv2->m_restDates[0] == 7.0f && pv2->m_restDates[1] == 34.0f);
     //DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(false);
 
     assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
@@ -712,7 +717,6 @@ void Pipline::ClipLineList(
     unsigned int    numClippedVertex        = 0;   // how many vertex is added to clippedStream
 
     bool canDrawThisSegment = false;    // for each clipping test, is this line can be draw,(or the line is rejected).
-    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>();
     for (unsigned int i = 0; i < numLineSegment; ++i)
     {
         // find source vertices of line segment
