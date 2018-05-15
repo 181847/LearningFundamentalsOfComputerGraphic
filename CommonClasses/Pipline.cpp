@@ -186,7 +186,11 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
 
 bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, ScreenSpaceVertexTemplate * pOutV1, ScreenSpaceVertexTemplate * pOutV2, const unsigned int realVertexSize)
 {
+#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+    std::array<bool, 2> isWPositive = { pv1->m_posH.m_w >= 0.0f, pv2->m_posH.m_w >= 0.0f };
+#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
     std::array<bool, 2> isWPositive = { pv1->m_posH.m_w <= 0.0f, pv2->m_posH.m_w <= 0.0f };
+#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
 
     // if both w is positive, then just copy the vertex data and return true.
     if (isWPositive[0] && isWPositive[1])
@@ -195,7 +199,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         memcpy(pOutV2, pv2, realVertexSize);
         return true;
     }
-    // if both w is negative
+    // if both w is postive
     else if ( ! (isWPositive[0] || isWPositive[1]))
     {
         // reject the line
@@ -203,7 +207,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
     }
     else if (isWPositive[0])
     {
-        // w1 is positive and w0 is negative
+        // w1 is negative and w2 is positive
         const Types::F32 deltaW = pv1->m_posH.m_w - pv2->m_posH.m_w;
         const Types::F32 t = pv1->m_posH.m_w / deltaW;
 
@@ -212,7 +216,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
 
         // Interpolate to get end vertex data, (pv1 <0>---> t >------<1> pv2)
         // interpolate between start and end input vertex ----> output end vertex
-        // not the interpolation coefficence is oppsited to t value,
+        // notice that the interpolation coefficence is oppsited to t value,
         // when t = 1, the pOutV2 should equal to pv2,
         // but in the interpolation when u = 1, the result will equal to pv1 (if we call by Interpolate2(pv1, pv2, pOutV2, t, ...))
         // so here we flip the position of pv1 and pv2.
@@ -226,9 +230,9 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
     }
     else
     {
-        // w1 is negative and w2 is positive
+        // w1 is positive and w2 is negative
         const Types::F32 deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
-        const Types::F32 t = pv2->m_posH.m_w / deltaW;
+        const Types::F32 t = pv2->m_posH.m_w / deltaW;  // negative divide negative result in positive
 
         // copy end vertex data.
         memcpy(pOutV2, pv2, realVertexSize);
