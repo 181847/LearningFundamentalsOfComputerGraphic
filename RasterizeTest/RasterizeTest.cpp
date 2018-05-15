@@ -503,11 +503,11 @@ TEST_MODULE_START
         SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
             // add start vertex and its index
-            points.push_back(SimplePoint(hvector(x0, y0, 0.0f, -1.0f)));
+            points.push_back(SimplePoint(hvector(x0, y0)));
             indices.push_back(numIndices++);
 
             // add end vertex and its index
-            points.push_back(SimplePoint(hvector(x1, y1, 0.0f, -1.0f)));
+            points.push_back(SimplePoint(hvector(x1, y1)));
             indices.push_back(numIndices++);
         }, 
             0.0f, 0.0f, // center location
@@ -1059,7 +1059,7 @@ TEST_MODULE_START
             const Types::U32   roundIndex = static_cast<const Types::U32>(pPoint->m_rayIndex.m_x);
             const Types::U32   lineIndex  = static_cast<const Types::U32>(pPoint->m_rayIndex.m_y);
             //const Types::F32   isTheOne   = 22 < lineIndex && lineIndex < 34 ? 1.0f : 0.0f;
-            const Types::F32   isTheOne = roundIndex == 5 && lineIndex == 33 ? 1.0f : 0.0f;
+            const Types::F32   isTheOne = roundIndex == 7 && 34 <= lineIndex && lineIndex <= 34  ? 1.0f : 0.0f;
 
             RGBA               color     (isTheOne, 0.0f, 0.0f, 1.0f);
             return color;
@@ -1088,7 +1088,7 @@ TEST_MODULE_START
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
             SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-            DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 5.0f && pSrcH->m_rayIndex.m_y == 33.0f);
+            DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 7.0f && pSrcH->m_rayIndex.m_y == 34.0f);
             
             hvector inViewPos = toView * pSrcH->m_position;
 
@@ -1157,7 +1157,11 @@ TEST_MODULE_START
         }
 
         // the index of output picture.
+#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
         std::string pictureIndex = "012";
+#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+        std::string pictureIndex = "013";
+#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
         pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\PiplineClippingLines\\lineClippingErrAnalysis_fixed_" + pictureIndex + ".png");
         
     TEST_UNIT_END;
