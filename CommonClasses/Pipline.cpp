@@ -184,6 +184,74 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     }
 }
 
+bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, ScreenSpaceVertexTemplate * pOutV1, ScreenSpaceVertexTemplate * pOutV2, const unsigned int realVertexSize)
+{
+    std::array<bool, 2> isWPositive = { pv1->m_posH.m_w <= 0.0f, pv2->m_posH.m_w <= 0.0f };
+
+    // if both w is positive, then just copy the vertex data and return true.
+    if (isWPositive[0] && isWPositive[1])
+    {
+        memcpy(pOutV1, pv1, realVertexSize);
+        memcpy(pOutV2, pv2, realVertexSize);
+        return true;
+    }
+    // if both w is negative
+    else if ( ! (isWPositive[0] || isWPositive[1]))
+    {
+        // reject the line
+        return false;
+    }
+    else if (isWPositive[0])
+    {
+        // w1 is positive and w0 is negative
+        const Types::F32 deltaW = pv1->m_posH.m_w - pv2->m_posH.m_w;
+        const Types::F32 t = pv1->m_posH.m_w / deltaW;
+
+        // copy start vertex data.
+        memcpy(pOutV1, pv1, realVertexSize);
+
+        // Interpolate to get end vertex data, (pv1 <0>---> t >------<1> pv2)
+        // interpolate between start and end input vertex ----> output end vertex
+        // not the interpolation coefficence is oppsited to t value,
+        // when t = 1, the pOutV2 should equal to pv2,
+        // but in the interpolation when u = 1, the result will equal to pv1 (if we call by Interpolate2(pv1, pv2, pOutV2, t, ...))
+        // so here we flip the position of pv1 and pv2.
+        Interpolate2(pv2, pv1, pOutV2, t, realVertexSize);
+
+        // ensure the w components of interpolate result is not too close to zero
+        if (pOutV2->m_posH.m_w < 1e-20f)
+        {
+            pOutV2->m_posH.m_w = 1e-20f;
+        }
+    }
+    else
+    {
+        // w1 is negative and w2 is positive
+        const Types::F32 deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
+        const Types::F32 t = pv2->m_posH.m_w / deltaW;
+
+        // copy end vertex data.
+        memcpy(pOutV2, pv2, realVertexSize);
+
+        // Interpolate to get start vertex data, (pv2 <0>---> t >------<1> pv1)
+        // interpolate between start and end input vertex ----> output end vertex
+        // not the interpolation coefficence is oppsited to t value,
+        // when t = 1, the pOutV1 should equal to pv1,
+        // but in the interpolation when u = 1, the result will equal to pv2 (if we call by Interpolate2(pv2, pv1, pOutV1, t, ...))
+        // so here we flip the position of pv1 and pv2.
+        Interpolate2(pv1, pv2, pOutV1, t, realVertexSize);
+
+        // ensure the w components of interpolate result is not too close to zero
+        if (pOutV1->m_posH.m_w < 1e-20f)
+        {
+            pOutV1->m_posH.m_w = 1e-20f;
+        }
+    }
+
+    //static_assert(false, "function not completed");
+    return true;
+}
+
 bool Pipline::ClipLineInHomogenousClipSpace(
     const ScreenSpaceVertexTemplate* pv1,
     const ScreenSpaceVertexTemplate* pv2,
@@ -398,94 +466,46 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         } // end else if p[i] > 0.0f
     }// end else for
 #else  // FLIP_SING_WHEN_W_LT_ZERO is not defined
-    const bool haveNegativeW = pv1->m_posH.m_w < 0 || pv2->m_posH.m_w < 0;
-
-    if (haveNegativeW)
-    {// if have any netative w component, then flip inequality direction.
-        for (unsigned int i = 0; i < 6; ++i)
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
         {
-            if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
+            if (q[i] * pv1->m_posH.m_w < 0.0f)
             {
-                if (q[i] * pv1->m_posH.m_w < 0.0f)
-                {
-                    return false;
-                }
-            }
-            else if (p[i] < 0.0f)   // NOTICE: Here is different
-            {
-                tempT = q[i] / p[i];
-                if (tempT < t0)
-                {
-                    // new end point is after start point.
-                    // early reject
-                    return false;
-                }
-                else if (tempT < t1)
-                {
-                    // update t1, new end point
-                    t1 = tempT;
-                }
-            }
-            else // p[i] > 0.0f
-            {
-                tempT = q[i] / p[i];
-                if (tempT > t1)
-                {
-                    // new start point is beyond end point.
-                    // early reject
-                    return false;
-                }
-                else if (tempT > t0)
-                {
-                    // update t1, new start point
-                    t0 = tempT;
-                }
+                return false;
             }
         }
-    }
-    else
-    {
-        for (unsigned int i = 0; i < 6; ++i)
+        else if (p[i] > 0.0f)
         {
-            if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
+            tempT = q[i] / p[i];
+            if (tempT < t0)
             {
-                if (q[i] * pv1->m_posH.m_w < 0.0f)
-                {
-                    return false;
-                }
+                // new end point is after start point.
+                // early reject
+                return false;
             }
-            else if (p[i] > 0.0f)
+            else if (tempT < t1)
             {
-                tempT = q[i] / p[i];
-                if (tempT < t0)
-                {
-                    // new end point is after start point.
-                    // early reject
-                    return false;
-                }
-                else if (tempT < t1)
-                {
-                    // update t1, new end point
-                    t1 = tempT;
-                }
+                // update t1, new end point
+                t1 = tempT;
             }
-            else // p[i] < 0.0f
+        }
+        else // p[i] < 0.0f
+        {
+            tempT = q[i] / p[i];
+            if (tempT > t1)
             {
-                tempT = q[i] / p[i];
-                if (tempT > t1)
-                {
-                    // new start point is beyond end point.
-                    // early reject
-                    return false;
-                }
-                else if (tempT > t0)
-                {
-                    // update t1, new start point
-                    t0 = tempT;
-                }
-            } // end else if p[i] > 0.0f
-        }// end else for
-    }// end else
+                // new start point is beyond end point.
+                // early reject
+                return false;
+            }
+            else if (tempT > t0)
+            {
+                // update t1, new start point
+                t0 = tempT;
+            }
+        } // end else if p[i] > 0.0f
+    }// end else for
 #endif // FLIP_SING_WHEN_W_LT_ZERO
     
     
@@ -571,12 +591,21 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
+#ifdef FLIP_SING_WHEN_W_LT_ZERO
         Interpolate2(
             reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv2),
-            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1), 
-            pOutV1, 
-            static_cast<Types::F32>(t0), 
+            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1),
+            pOutV1,
+            static_cast<Types::F32>(t0),
             realVertexSize);
+
+#else // FLIP_SING_WHEN_W_LT_ZERO is not defined
+        Interpolate2(
+            pv2, pv1,
+            pOutV1,
+            static_cast<Types::F32>(t0),
+            realVertexSize);
+#endif // FLIP_SING_WHEN_W_LT_ZERO
         CutHvector(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
     
@@ -595,12 +624,22 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
+#ifdef FLIP_SING_WHEN_W_LT_ZERO
         Interpolate2(
-            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv2), 
-            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1), 
-            pOutV2, 
-            static_cast<Types::F32>(t1), 
+            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv2),
+            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1),
+            pOutV2,
+            static_cast<Types::F32>(t1),
             realVertexSize);
+
+#else // FLIP_SING_WHEN_W_LT_ZERO is not defined
+        Interpolate2(
+            pv2, pv1,
+            pOutV2,
+            static_cast<Types::F32>(t1),
+            realVertexSize);
+
+#endif // FLIP_SING_WHEN_W_LT_ZERO
         CutHvector(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
 
@@ -654,26 +693,45 @@ void Pipline::ClipLineList(
     unsigned char * pSrcVerticesAddr    = vertices->GetBuffer();                    // source vertex start address
 
     unsigned char * pStartSrcVertex     = nullptr;                              // src start vertex location
-    unsigned char * pEndSrcVertex       = nullptr;                              // src end vertex location 
+    unsigned char * pEndSrcVertex       = nullptr;                              // src end vertex location
     unsigned char * pStartClippedVertex = clippedStream->GetBuffer();           // output clipped start vertex
     unsigned char * pEndClippedVertex   = pStartClippedVertex + realVertexSize; // output clipped end vertex
+
+    // before clipping in homogenous space, let's first clip the vertex data into w > 0
+    // create a temp buffer for that result, which will only contain two vertex.
+    auto wClipBuffer = std::make_unique<F32Buffer>(2 * realVertexSize);
+    unsigned char * pWClipStartVertex   = wClipBuffer->GetBuffer();               // temp buffer for start vertex of the w clipping
+    unsigned char * pWClipEndVertex     = pWClipStartVertex + realVertexSize;     // temp buffer for end vertex of the w clipping
 
     unsigned int    startClippedVertexIndex = 0;
     unsigned int    endClippedVertexIndex   = 1;
     unsigned int    numClippedVertex        = 0;   // how many vertex is added to clippedStream
 
     bool canDrawThisSegment = false;    // for each clipping test, is this line can be draw,(or the line is rejected).
-
+    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>();
     for (unsigned int i = 0; i < numLineSegment; ++i)
     {
         // find source vertices of line segment
         pStartSrcVertex = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 ],     realVertexSize);
         pEndSrcVertex   = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 + 1 ], realVertexSize);
 
+        canDrawThisSegment = WClipLineInHomogenousClipSpace(
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pStartSrcVertex),
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pEndSrcVertex),
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipStartVertex),
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipEndVertex),
+            realVertexSize);
+
+        if ( ! canDrawThisSegment)
+        {
+            // the line's two end point all have negative w, reject them.
+            continue;
+        }
+
         // clipping test
         canDrawThisSegment = ClipLineInHomogenousClipSpace(
-            reinterpret_cast<ScreenSpaceVertexTemplate *>(pStartSrcVertex), 
-            reinterpret_cast<ScreenSpaceVertexTemplate *>(pEndSrcVertex), 
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipStartVertex),
+            reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipEndVertex),
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pStartClippedVertex), 
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pEndClippedVertex), 
             realVertexSize);

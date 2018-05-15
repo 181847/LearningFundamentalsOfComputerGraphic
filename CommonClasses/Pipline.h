@@ -95,6 +95,21 @@ private:
         const unsigned int                  realVertexSizeBytes);
 
     /*!
+        \brief clip line in homogenous clipping space by the plane w = 0,
+        \param pv1 input start vertex
+        \param pv2 input end vertex
+        \param pOutV1 output start vertex data
+        \param pOutV2 output end vertex data
+        \return whether this line is not visible which means that both w <= 0.
+    */
+    static bool WClipLineInHomogenousClipSpace(
+        const ScreenSpaceVertexTemplate*    pv1,
+        const ScreenSpaceVertexTemplate*    pv2,
+        ScreenSpaceVertexTemplate*          pOutV1,
+        ScreenSpaceVertexTemplate*          pOutV2,
+        const unsigned int                  realVertexSize);
+
+    /*!
         \brief clipping the line in homogenous clip space
         \param pv1 start point of the line
         \param pv2 end point of the line
