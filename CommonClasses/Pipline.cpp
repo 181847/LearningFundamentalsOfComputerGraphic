@@ -191,7 +191,9 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     ScreenSpaceVertexTemplate* pOutV2, 
     const unsigned int realVertexSize)
 {
-    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>();
+    // find the line that may be clipped
+    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pv2->m_restDates[0] == 0.0f && pv2->m_restDates[1] == 33.0f && pv2->m_restDates[2] == 1.0f);
+    //DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(false);
 
     assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
     assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
@@ -333,6 +335,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         {
 
 #ifdef CLIP_WITH_ERROR_ANALYSIS
+            Types::F32 compareT = q[i] / p[i];
             EFloat errT = EFloat(q[i], absErrP[i / 2]) / EFloat(p[i], absErrQ[i / 2]);
 
             // this if branch is targeted to minimize t1, so we mainly use its lower bound.
@@ -365,6 +368,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         else // p[i] < 0.0f
         {
 #ifdef CLIP_WITH_ERROR_ANALYSIS
+            Types::F32 compareT = q[i] / p[i];
             EFloat errT = EFloat(q[i], absErrP[i / 2]) / EFloat(p[i], absErrQ[i / 2]);
 
             // this if branch is targeted to maxmize t0, so we mainly use its upper bound.
@@ -519,7 +523,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             {
                 vec.m_z = vec.m_w;
             }
-        }
+        } // end if vec.m_w > 0.0f
         else
         {
             if (vec.m_x > -vec.m_w)     // positive greater -> -1 in NDC
@@ -548,7 +552,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             {
                 vec.m_z = vec.m_w;
             }
-        }
+        } // end else if vec.m_w > 0.0f
 
     };
 
@@ -567,7 +571,12 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
-        Interpolate2(pv2, pv1, pOutV1, static_cast<Types::F32>(t0), realVertexSize);
+        Interpolate2(
+            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv2),
+            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1), 
+            pOutV1, 
+            static_cast<Types::F32>(t0), 
+            realVertexSize);
         CutHvector(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
     
@@ -586,7 +595,12 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
-        Interpolate2(pv2, pv1, pOutV2, static_cast<Types::F32>(t1), realVertexSize);
+        Interpolate2(
+            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv2), 
+            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1), 
+            pOutV2, 
+            static_cast<Types::F32>(t1), 
+            realVertexSize);
         CutHvector(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
 
@@ -761,6 +775,7 @@ std::unique_ptr<F32Buffer> Pipline::VertexShaderTransform(const F32Buffer * pVer
     unsigned char * pVSOutput = vertexOutputStream->GetBuffer();
 
     auto vertexShader = m_pso->m_vertexShader;
+
     for (unsigned int i = 0; i < numVertex; ++i)
     {
         vertexShader(pVSInput, reinterpret_cast<ScreenSpaceVertexTemplate*>(pVSOutput));
