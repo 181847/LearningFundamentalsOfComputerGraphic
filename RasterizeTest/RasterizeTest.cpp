@@ -532,8 +532,8 @@ TEST_MODULE_START
     TEST_UNIT_START("line clipping in pipline")
 
         // skip this test due to the bug of clipping line function.
-        std::cout << "next test will be skipped." << std::endl;
-        return 0;
+        //std::cout << "next test will be skipped." << std::endl;
+        //return 0;
         
 
         // temp struct for line drawing.
@@ -620,8 +620,8 @@ TEST_MODULE_START
     TEST_UNIT_START("line vertex transformation")
 
         // skip this test due to the bug of clipping line function.
-        std::cout << "next test will be skipped." << std::endl;
-        return 0;
+        //std::cout << "next test will be skipped." << std::endl;
+        //return 0;
 
         // temp struct for line drawing.
         struct SimplePoint
@@ -724,8 +724,8 @@ TEST_MODULE_START
     TEST_UNIT_START("orthographic view transformation")
 
         // skip this test due to the bug of clipping line function.
-        std::cout << "next test will be skipped." << std::endl;
-        return 0;
+        //std::cout << "next test will be skipped." << std::endl;
+        //return 0;
 
         // temp struct for line drawing.
         struct SimplePoint
@@ -827,8 +827,8 @@ TEST_MODULE_START
     TEST_UNIT_START("perspective view transformation")
 
         // skip this test due to the bug of clipping line function.
-        std::cout << "next test will be skipped." << std::endl;
-        return 0;
+        //std::cout << "next test will be skipped." << std::endl;
+        //return 0;
 
         // temp struct for line drawing.
         struct SimplePoint
@@ -998,7 +998,7 @@ TEST_MODULE_START
         indices.push_back(0);
         indices.push_back(1);
 
-        SimplePoint p1(hvector(0.5f, 0.5f, -7.0f, 1.0f));
+        SimplePoint p1(hvector(0.5f, 0.5f, -0.5f, 1.0f));
         SimplePoint p2(hvector(-0.5f, -0.5f, -6.0f, 1.0f));
         points.push_back(p1);
         points.push_back(p2);
