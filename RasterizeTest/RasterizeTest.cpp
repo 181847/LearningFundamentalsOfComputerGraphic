@@ -1088,7 +1088,7 @@ TEST_MODULE_START
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
             SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-            DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 7.0f && pSrcH->m_rayIndex.m_y == 34.0f);
+            //DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 7.0f && pSrcH->m_rayIndex.m_y == 34.0f);
             
             hvector inViewPos = toView * pSrcH->m_position;
 
@@ -1156,12 +1156,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        // the index of output picture.
-#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
-        std::string pictureIndex = "012";
-#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
         std::string pictureIndex = "013";
-#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
         pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\PiplineClippingLines\\lineClippingErrAnalysis_fixed_" + pictureIndex + ".png");
         
     TEST_UNIT_END;
