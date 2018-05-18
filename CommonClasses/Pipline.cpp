@@ -271,6 +271,10 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     // when some number error resist in the last cutting result.
 //#define MANUALLY_CUT_HVECTOR
 
+     // whether to reinforce the checks on xyz component in the last step of the cuttin
+//#define MANUALLY_CHECK_XYZ_BOUNDg.
+
+
     std::array<Types::F32, 6> p;
     std::array<Types::F32, 6> q;
 
@@ -467,6 +471,9 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 
     // an ensurance that all the components should be limited in [-1, +1].
 
+    
+#ifdef MANUALLY_CHECK_XYZ_BOUND
+
     const Types::F32 
         x0(pOutV1->m_posH.m_x / pOutV1->m_posH.m_w), 
         y0(pOutV1->m_posH.m_y / pOutV1->m_posH.m_w),
@@ -484,6 +491,8 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         || OUT_RANGE_1(x1)
         || OUT_RANGE_1(y1)
         || OUT_RANGE_1(z1));
+
+#endif // MANUALLY_CHECK_XYZ_BOUND
 
     return true;
 }
