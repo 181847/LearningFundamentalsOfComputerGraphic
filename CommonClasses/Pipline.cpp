@@ -187,11 +187,14 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
 bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, ScreenSpaceVertexTemplate * pOutV1, ScreenSpaceVertexTemplate * pOutV2, const unsigned int realVertexSize)
 {
     DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pv2->m_restDates[0] == 7.0f && pv2->m_restDates[1] == 34.0f);
-#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+
+    // is the w of two vertex position is greater or equal to zero?
     std::array<bool, 2> isWPositive = { pv1->m_posH.m_w >= 0.0f, pv2->m_posH.m_w >= 0.0f };
-#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
-    std::array<bool, 2> isWPositive = { pv1->m_posH.m_w <= 0.0f, pv2->m_posH.m_w <= 0.0f };
-#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+
+    // When cut w to zero, we will keep w little far from 0.0 to avoid
+    // divided by zero, and you must notice that here we must use a positive small number,
+    // to keep all the W to be positive.
+    const Types::F32 EPSILON_TO_ZERO = 1e-20f;
 
     // if both w is positive, then just copy the vertex data and return true.
     if (isWPositive[0] && isWPositive[1])
@@ -223,13 +226,8 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         // so here we flip the position of pv1 and pv2.
         Interpolate2(pv2, pv1, pOutV2, t, realVertexSize);
 
-        // make pOutV2.m_posH.m_w close to zero, if the perspective matrix is special , then close from positive side
-        // else close from negative side.
-#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
-        pOutV2->m_posH.m_w = 1e-20f;
-#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
-        pOutV2->m_posH.m_w = -1e-20f;
-#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+        // manually prevent w to be exactlly zero.
+        pOutV2->m_posH.m_w = EPSILON_TO_ZERO;
     }
     else
     {
@@ -248,16 +246,10 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         // so here we flip the position of pv1 and pv2.
         Interpolate2(pv1, pv2, pOutV1, t, realVertexSize);
 
-        // make pOutV2.m_posH.m_w close to zero, if the perspective matrix is special , then close from positive side
-        // else close from negative side.
-#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
-        pOutV1->m_posH.m_w = 1e-20f;
-#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
-        pOutV1->m_posH.m_w = -1e-20f;
-#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+        // manually prevent w to be exactlly zero.
+        pOutV1->m_posH.m_w = EPSILON_TO_ZERO;
     }
 
-    //static_assert(false, "function not completed");
     return true;
 }
 
