@@ -267,6 +267,10 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
     assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
 
+    // whether to cut the vector to be in the exact visible region
+    // when some number error resist in the last cutting result.
+//#define MANUALLY_CUT_HVECTOR
+
 //#define USING_DOUBLE_FOR_TEMP_VALUE
 #ifdef USING_DOUBLE_FOR_TEMP_VALUE
     using FloatPointNumberType = double;
@@ -341,13 +345,14 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         } // end else if p[i] > 0.0f
     }// end else for
     
-    
+#ifdef MANUALLY_CUT_HVECTOR
     // the function is a temporary solution for the clipped point will outside of the boundary
     // prefix the hvector for homogenous clip
     // for example, if w == -2.3, and x == -2.4,
     // after the perspective divide, the x will be 1.04... which is greater than one,
     // to prevent this overflowing error, just make x = equal to w.
     auto CutHvector = [](hvector & vec)->void {
+
         if (vec.m_w > 0.0f) 
         {
             if (vec.m_x < -vec.m_w)
@@ -407,7 +412,9 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             }
         } // end else if vec.m_w > 0.0f
 
-    };
+    }; // lambda CutHvector
+
+#endif // MANUALLY_CUT_HVECTOR
 
     if (t0 == 0.0f)
     {
@@ -430,7 +437,11 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             pOutV1,
             static_cast<Types::F32>(t0),
             realVertexSize);
+
+#ifdef MANUALLY_CUT_HVECTOR
         CutHvector(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
+#endif // MANUALLY_CUT_HVECTOR
+
     }
     
     if (t1 == 1.0f)
@@ -455,7 +466,10 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             static_cast<Types::F32>(t1),
             realVertexSize);
 
+#ifdef MANUALLY_CUT_HVECTOR
         CutHvector(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
+#endif // MANUALLY_CUT_HVECTOR
+
     }
 
     // an ensurance that all the components should be limited in [-1, +1].
