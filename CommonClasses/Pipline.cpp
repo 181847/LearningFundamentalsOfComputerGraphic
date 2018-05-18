@@ -270,7 +270,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     // using a macro to choose implementation code.
     // If w less than zero, filp the sign of the homogenous coordinate,
     // but still represent the same point.
-#define FLIP_SIGN_WHEN_W_LT_ZERO
+//#define FLIP_SIGN_WHEN_W_LT_ZERO
 
     // uing error analysis to correct the clip result,
     // because in some situation, the interpolation result of t end up with some value exceed the frustum,
@@ -291,40 +291,10 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     FloatPointNumberType t1 = 1.0f;       // end point, one means the pv2
     FloatPointNumberType tempT = 0.0f;    // temp interpolate coefficience
 
-#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
-    // retrive the homogenous position
-    hvector hv1 = pv1->m_posH;
-    hvector hv2 = pv2->m_posH;
-
-    // ensure the w component is positive
-    // WARNING!! (hvector * scalar) or (scalar * hvector) will not affect w component, so here we must do it manually.
-    if (hv1.m_w < 0)
-    {
-        hv1.m_x = - hv1.m_x;
-        hv1.m_y = - hv1.m_y;
-        hv1.m_z = - hv1.m_z;
-        hv1.m_w = - hv1.m_w;
-    }
-    if (hv2.m_w < 0)
-    {
-        hv2.m_x = - hv2.m_x;
-        hv2.m_y = - hv2.m_y;
-        hv2.m_z = - hv2.m_z;
-        hv2.m_w = - hv2.m_w;
-    }
-#endif // FLIP_SIGN_WHEN_W_LT_ZERO
-
-#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
-    const FloatPointNumberType deltaX = hv2.m_x - hv1.m_x;
-    const FloatPointNumberType deltaY = hv2.m_y - hv1.m_y;
-    const FloatPointNumberType deltaZ = hv2.m_z - hv1.m_z;
-    const FloatPointNumberType deltaW = hv2.m_w - hv1.m_w;
-#else
     const FloatPointNumberType deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
     const FloatPointNumberType deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
     const FloatPointNumberType deltaZ = pv2->m_posH.m_z - pv1->m_posH.m_z;
     const FloatPointNumberType deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
-#endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
     p[0] = -(deltaX + deltaW);
     p[1] = deltaX - deltaW;
@@ -332,22 +302,13 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     p[3] = deltaY - deltaW;
     p[4] = -(deltaZ + deltaW);
     p[5] = deltaZ - deltaW;
-    
-#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
-    q[0] = hv1.m_x + hv1.m_w;
-    q[1] = hv1.m_w - hv1.m_x;
-    q[2] = hv1.m_y + hv1.m_w;
-    q[3] = hv1.m_w - hv1.m_y;
-    q[4] = hv1.m_z + hv1.m_w;
-    q[5] = hv1.m_w - hv1.m_z;
-#else
+
     q[0] = pv1->m_posH.m_x + pv1->m_posH.m_w;
     q[1] = pv1->m_posH.m_w - pv1->m_posH.m_x;
     q[2] = pv1->m_posH.m_y + pv1->m_posH.m_w;
     q[3] = pv1->m_posH.m_w - pv1->m_posH.m_y;
     q[4] = pv1->m_posH.m_z + pv1->m_posH.m_w;
     q[5] = pv1->m_posH.m_w - pv1->m_posH.m_z;
-#endif // FLIP_SIGN_WHEN_W_LT_ZERO
 
 #ifdef CLIP_WITH_ERROR_ANALYSIS
     /*!
@@ -390,83 +351,6 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 #endif // CLIP_WITH_ERROR_ANALYSIS
     
 
-#ifdef FLIP_SIGN_WHEN_W_LT_ZERO
-    for (unsigned int i = 0; i < 6; ++i)
-    {
-        if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
-        {
-            if (q[i] * hv1.m_w < 0.0f)
-            {
-                return false;
-            }
-        }
-        else if (p[i] > 0.0f)
-        {
-
-#ifdef CLIP_WITH_ERROR_ANALYSIS
-            Types::F32 compareT = q[i] / p[i];
-            EFloat errT = EFloat(q[i], absErrP[i / 2]) / EFloat(p[i], absErrQ[i / 2]);
-
-            // this if branch is targeted to minimize t1, so we mainly use its lower bound.
-            tempT = errT.LowerBound();
-            if (errT.m_v < t0)
-            {
-                return false;
-            }
-            else if (tempT < t1)
-            {
-                t1 = tempT;
-            }
-#else
-            tempT = q[i] / p[i];
-            if (tempT < t0)
-            {
-                // new end point is after start point.
-                // early reject
-                return false;
-            }
-            else if (tempT < t1)
-            {
-                // update t1, new end point
-                t1 = tempT;
-            }
-#endif // CLIP_WITH_ERROR_ANALYSIS
-
-            
-        }
-        else // p[i] < 0.0f
-        {
-#ifdef CLIP_WITH_ERROR_ANALYSIS
-            Types::F32 compareT = q[i] / p[i];
-            EFloat errT = EFloat(q[i], absErrP[i / 2]) / EFloat(p[i], absErrQ[i / 2]);
-
-            // this if branch is targeted to maxmize t0, so we mainly use its upper bound.
-            tempT = errT.UpperBound();
-            if (errT.m_v > t1)
-            {
-                return false;
-            }
-            else if (tempT > t0)
-            {
-                t0 = tempT;
-            }
-#else
-            tempT = q[i] / p[i];
-            if (tempT > t1)
-            {
-                // new start point is beyond end point.
-                // early reject
-                return false;
-            }
-            else if (tempT > t0)
-            {
-                // update t1, new start point
-                t0 = tempT;
-            }
-#endif
-        } // end else if p[i] > 0.0f
-    }// end else for
-#else  // FLIP_SING_WHEN_W_LT_ZERO is not defined
     for (unsigned int i = 0; i < 6; ++i)
     {
         if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
@@ -507,7 +391,6 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             }
         } // end else if p[i] > 0.0f
     }// end else for
-#endif // FLIP_SING_WHEN_W_LT_ZERO
     
     
     // the function is a temporary solution for the clipped point will outside of the boundary
@@ -592,21 +475,12 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
-#ifdef FLIP_SING_WHEN_W_LT_ZERO
-        Interpolate2(
-            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv2),
-            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1),
-            pOutV1,
-            static_cast<Types::F32>(t0),
-            realVertexSize);
 
-#else // FLIP_SING_WHEN_W_LT_ZERO is not defined
         Interpolate2(
             pv2, pv1,
             pOutV1,
             static_cast<Types::F32>(t0),
             realVertexSize);
-#endif // FLIP_SING_WHEN_W_LT_ZERO
         CutHvector(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
     
@@ -625,22 +499,13 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         //      where if u == 1, then pOutV1 = pv1
         //            if u == 0, then pOutV1 = pv2
         // so here we flip the vertex order, to get correct interpolation result.
-#ifdef FLIP_SING_WHEN_W_LT_ZERO
-        Interpolate2(
-            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv2),
-            reinterpret_cast<const ScreenSpaceVertexTemplate * >(&hv1),
-            pOutV2,
-            static_cast<Types::F32>(t1),
-            realVertexSize);
 
-#else // FLIP_SING_WHEN_W_LT_ZERO is not defined
         Interpolate2(
             pv2, pv1,
             pOutV2,
             static_cast<Types::F32>(t1),
             realVertexSize);
 
-#endif // FLIP_SING_WHEN_W_LT_ZERO
         CutHvector(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
     }
 
