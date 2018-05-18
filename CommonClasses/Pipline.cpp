@@ -186,8 +186,6 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
 
 bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, ScreenSpaceVertexTemplate * pOutV1, ScreenSpaceVertexTemplate * pOutV2, const unsigned int realVertexSize)
 {
-    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pv2->m_restDates[0] == 7.0f && pv2->m_restDates[1] == 34.0f);
-
     // is the w of two vertex position is greater or equal to zero?
     std::array<bool, 2> isWPositive = { pv1->m_posH.m_w >= 0.0f, pv2->m_posH.m_w >= 0.0f };
 
@@ -260,10 +258,6 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     ScreenSpaceVertexTemplate* pOutV2, 
     const unsigned int realVertexSize)
 {
-    // find the line that may be clipped
-    DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pv2->m_restDates[0] == 7.0f && pv2->m_restDates[1] == 34.0f);
-    //DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(false);
-
     assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
     assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
 
