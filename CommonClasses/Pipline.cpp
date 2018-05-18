@@ -271,24 +271,17 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     // when some number error resist in the last cutting result.
 //#define MANUALLY_CUT_HVECTOR
 
-//#define USING_DOUBLE_FOR_TEMP_VALUE
-#ifdef USING_DOUBLE_FOR_TEMP_VALUE
-    using FloatPointNumberType = double;
-#else
-    using FloatPointNumberType = Types::F32;
-#endif
+    std::array<Types::F32, 6> p;
+    std::array<Types::F32, 6> q;
 
-    std::array<FloatPointNumberType, 6> p;
-    std::array<FloatPointNumberType, 6> q;
+    Types::F32 t0 = 0.0f;       // start point, zero means the pv1
+    Types::F32 t1 = 1.0f;       // end point, one means the pv2
+    Types::F32 tempT = 0.0f;    // temp interpolate coefficience
 
-    FloatPointNumberType t0 = 0.0f;       // start point, zero means the pv1
-    FloatPointNumberType t1 = 1.0f;       // end point, one means the pv2
-    FloatPointNumberType tempT = 0.0f;    // temp interpolate coefficience
-
-    const FloatPointNumberType deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
-    const FloatPointNumberType deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
-    const FloatPointNumberType deltaZ = pv2->m_posH.m_z - pv1->m_posH.m_z;
-    const FloatPointNumberType deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
+    const Types::F32 deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
+    const Types::F32 deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
+    const Types::F32 deltaZ = pv2->m_posH.m_z - pv1->m_posH.m_z;
+    const Types::F32 deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
 
     p[0] = -(deltaX + deltaW);
     p[1] = deltaX - deltaW;
