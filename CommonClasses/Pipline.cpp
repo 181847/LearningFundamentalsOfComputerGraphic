@@ -310,47 +310,6 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     q[4] = pv1->m_posH.m_z + pv1->m_posH.m_w;
     q[5] = pv1->m_posH.m_w - pv1->m_posH.m_z;
 
-#ifdef CLIP_WITH_ERROR_ANALYSIS
-    /*!
-        \brief compute absolute error of p[i] and q[i]
-    */
-
-    /*!
-        \brief absolute error for p elements
-        notice that 'absErr of p[0]' == 'absErr of p[1]'
-        'absErr of p[2]' == 'absErr of p[3]'
-        'absErr of p[4]' == 'absErr of p[5]'
-        so here we only store three absErr
-    */
-    std::array<FloatPointNumberType, 3> absErrP;
-
-    /*!
-        \brief absolute error for q elements
-        notice that 'absErr of q[0]' == 'absErr of q[1]'
-        'absErr of q[2]' == 'absErr of q[3]'
-        'absErr of q[4]' == 'absErr of q[5]'
-        so here we only store three absErr
-    */
-    std::array<FloatPointNumberType, 3> absErrQ; // absolute error for q elements
-    
-    /*!
-        \brief absolute value for hv1 and hv2
-    */
-    hvector absHv1 = hvector(std::abs(hv1.m_x), std::abs(hv1.m_y), std::abs(hv1.m_z), std::abs(hv1.m_w));
-    hvector absHv2 = hvector(std::abs(hv2.m_x), std::abs(hv2.m_y), std::abs(hv2.m_z), std::abs(hv2.m_w));
-
-    FloatPointNumberType gamma_2 = gamma(2), gamma_1 = gamma(1);
-
-    absErrP[0] = gamma_2 * (absHv1.m_x + absHv2.m_x + absHv1.m_w + absHv2.m_w);
-    absErrP[1] = gamma_2 * (absHv1.m_y + absHv2.m_y + absHv1.m_w + absHv2.m_w);
-    absErrP[2] = gamma_2 * (absHv1.m_z + absHv2.m_z + absHv1.m_w + absHv2.m_w);
-
-    absErrQ[0] = gamma_1 * (absHv1.m_x + absHv1.m_w);
-    absErrQ[1] = gamma_1 * (absHv1.m_y + absHv1.m_w);
-    absErrQ[2] = gamma_1 * (absHv1.m_z + absHv1.m_w);
-#endif // CLIP_WITH_ERROR_ANALYSIS
-    
-
     for (unsigned int i = 0; i < 6; ++i)
     {
         if (std::abs(p[i] - 0.0f) < Types::Constant::EPSILON_F32)
