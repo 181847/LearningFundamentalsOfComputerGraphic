@@ -133,35 +133,30 @@ Transform Transform::OrthographicTransOG(const Types::F32 left, const Types::F32
 
 Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top, const Types::F32 near, const Types::F32 far)
 {
-    //throw std::exception("function PerspectiveOG not implemented.");
-
     // bigger one minus small one, should result in a positive number.
     const Types::F32 
         RECIPO_WIDTH (1.0f / (right - left)),
         RECIPO_HEIGHT(1.0f / (top - bottom)),
         RECIPO_DIST  (1.0f / (near - far));
 
-#ifdef USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
     const Types::F32 absNear = std::abs(near), absFar = std::abs(far);
 
     // a special version of perspective view transformation matrix.
     //Reference from : <Fundemantals Of Compute Graphics, 3rd> page.155
+    // I have modify the matrix a little bit in the thrid row, in which if flip the sign of last two elemnts.
     return Transform(
-        2.0f * absNear * RECIPO_WIDTH, 0.0f,                           (left + right) * RECIPO_WIDTH,     0.0f,
-        0.0f,                       2.0f * absNear * RECIPO_HEIGHT,    (bottom + top) * RECIPO_HEIGHT,    0.0f,
-        0.0f,                       0.0f,                           -(absNear + absFar) / (absNear - absFar),         -2.0f * absFar * absNear / (absNear - absFar),
+        - 2.0f * near * RECIPO_WIDTH, 0.0f,                           (left + right) * RECIPO_WIDTH,     0.0f,
+        0.0f,                       - 2.0f * near * RECIPO_HEIGHT,    (bottom + top) * RECIPO_HEIGHT,    0.0f,
+        0.0f,                       0.0f,                           -(far + near) * RECIPO_DIST,         2.0f * far * near * RECIPO_DIST,
         0.0f,                       0.0f,                           -1.0f,                               0.0f
     );
 
-#else // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
-    return Transform(
+    /*return Transform(
         2.0f * near * RECIPO_WIDTH, 0.0f,                           (left + right) * -RECIPO_WIDTH,     0.0f,
         0.0f,                       2.0f * near * RECIPO_HEIGHT,    (bottom + top) * -RECIPO_HEIGHT,    0.0f,
         0.0f,                       0.0f,                           (far + near) * RECIPO_DIST,         2.0f * far * near * -RECIPO_DIST,
         0.0f,                       0.0f,                           1.0f,                               0.0f
-    );
-
-#endif // USING_SPECIAL_OPENGL_PERSPECTIVE_MATRIX
+    );*/
 
 
 
