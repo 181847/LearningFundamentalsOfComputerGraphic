@@ -267,16 +267,6 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     assert(pv1 != nullptr && pv2 != nullptr && pOutV1 != nullptr && pOutV2 != nullptr && "null pointer error");
     assert(pv1 != pOutV1 && pv2 != pOutV2 && pv1 != pOutV2 && pv2 != pOutV1 && "pointer address conflict error, the data will be wrong");
 
-    // using a macro to choose implementation code.
-    // If w less than zero, filp the sign of the homogenous coordinate,
-    // but still represent the same point.
-//#define FLIP_SIGN_WHEN_W_LT_ZERO
-
-    // uing error analysis to correct the clip result,
-    // because in some situation, the interpolation result of t end up with some value exceed the frustum,
-    // so we use error analysis to find the t that make the clipped line as short as possible.
-//#define CLIP_WITH_ERROR_ANALYSIS
-
 //#define USING_DOUBLE_FOR_TEMP_VALUE
 #ifdef USING_DOUBLE_FOR_TEMP_VALUE
     using FloatPointNumberType = double;
