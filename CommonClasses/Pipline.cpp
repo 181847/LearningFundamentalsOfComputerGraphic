@@ -60,14 +60,14 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     // clip all the line
     ClipLineList(indices, vsOutputStream.get(), psInputStride, &clippedIndices, &clippedLineData);
 
+#ifdef _DEBUG
     // all line has been clipped. return
     if (clippedIndices.size() == 0)
     {
-#ifdef _DEBUG
         printf("clipped all line, no line rests\n");
-#endif
         return;
     }
+#endif
 
     // indices after clipping
     const unsigned int numIndices = clippedIndices.size();
@@ -88,6 +88,7 @@ void Pipline::DrawLineList(
     const std::unique_ptr<F32Buffer> lineEndPointList,
     const unsigned int vertexSizeInBytes)
 {
+    // Get index count, ensure they are even
     const unsigned int numIndices = indices.size();
     if (numIndices % 2 != 0)
     {
@@ -103,39 +104,49 @@ void Pipline::DrawLineList(
     {
         throw std::exception("DrawLineList get no index.");
     }
+
+    // loop throung all indices, each loop will pass two indices.
     for (unsigned int i = 0; i < numIndices - 1; i += 2)
     {
         const ScreenSpaceVertexTemplate* pv1 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i    ] * vertexSizeInBytes);
         const ScreenSpaceVertexTemplate* pv2 = reinterpret_cast<const ScreenSpaceVertexTemplate *>(pDataStart + indices[i + 1] * vertexSizeInBytes);
 
-       DrawBresenhamLine(pv1, pv2, vertexSizeInBytes);
+        // handle the vertex data to single line drawing function,
+        // in which will draw them with pixel shader.
+        DrawBresenhamLine(pv1, pv2, vertexSizeInBytes);
     }
 }
 
 void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2, const unsigned int realVertexSizeBytes)
 {
+    // get screen space location.
     Types::I32 x0, y0, x1, y1;
     x0 = static_cast<Types::I32>(pv1->m_posH.m_x);
     y0 = static_cast<Types::I32>(pv1->m_posH.m_y);
     x1 = static_cast<Types::I32>(pv2->m_posH.m_x);
     y1 = static_cast<Types::I32>(pv2->m_posH.m_y);
 
+    
     bool steep = std::abs(y1 - y0) > std::abs(x1 - x0);
+    // ensure the absolute value of slope of the line is less than one.
     if (steep)
     {
         std::swap(x0, y0);
         std::swap(x1, y1);
     }
+
+    // ensure we draw line from left to right
     if (x0 > x1)
     {
         std::swap(x0, x1);
         std::swap(y0, y1);
 
         // if we swap (x0, y0) with (x1, y1)
-        // we should also swap two vertex inorder to get the correct interplotion between.
+        // we should also swap two vertex to get the correct interplotion order.
         std::swap(pv1, pv2);
     }
 
+    // bresenham algorithm coefficients.
     Types::I32 dx = x1 - x0;
     Types::I32 twoDy = std::abs(2 * (y1 - y0));
     Types::I32 yi = y1 > y0 ? 1 : -1;
@@ -153,7 +164,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     // reinterpret it as ScreenSpaceVertexTemplate.
     ScreenSpaceVertexTemplate* pPSVInput = reinterpret_cast<ScreenSpaceVertexTemplate *>(pixelShaderInputBuffer.GetBuffer());
 
-    // prepare interpolation coefficience.
+    // prepare interpolation coefficience, for pixel interpolation.
     Types::F32 u = 1.0f, du = 1.0f / dx;    // "u" is used to interpolate between (x0, y0) and (x1, y1);
     for (auto x = x0; x <= x1; ++x)
     {
@@ -506,16 +517,16 @@ void Pipline::ClipLineList(
     assert(indices.size() % 2 == 0                                      && "line indices is not pairs");
 
     // empty the output indice buffer.
-    pClippedIndices->clear();   
-    unsigned int numLineSegment = indices.size() / 2; // number of all line segments
+    pClippedIndices->clear();
+    unsigned int numLineSegment = indices.size() / 2;                           // number of all line segments
 
-    // create a buffer stream which can hold every individual vertex for each line segment.
+    // create a buffer stream which is big enough to hold every individual vertex for each line segment.
     // each end point will have its own vertex.
     auto clippedStream = std::make_unique<F32Buffer>(realVertexSize * 2 * numLineSegment); // allocate buffer for clipped data
 
     const unsigned int twoRealVertexSizeBytes = 2 * realVertexSize;
 
-    unsigned char * pSrcVerticesAddr    = vertices->GetBuffer();                    // source vertex start address
+    unsigned char * pSrcVerticesAddr    = vertices->GetBuffer();                // source vertex start address
 
     unsigned char * pStartSrcVertex     = nullptr;                              // src start vertex location
     unsigned char * pEndSrcVertex       = nullptr;                              // src end vertex location
@@ -523,22 +534,23 @@ void Pipline::ClipLineList(
     unsigned char * pEndClippedVertex   = pStartClippedVertex + realVertexSize; // output clipped end vertex
 
     // before clipping in homogenous space, let's first clip the vertex data into w > 0
-    // create a temp buffer for that result, which will only contain two vertex.
-    auto wClipBuffer = std::make_unique<F32Buffer>(2 * realVertexSize);
+    // create a temp buffer for that result, which will contain only two vertex.
+    auto            wClipBuffer         = std::make_unique<F32Buffer>(2 * realVertexSize);
     unsigned char * pWClipStartVertex   = wClipBuffer->GetBuffer();               // temp buffer for start vertex of the w clipping
     unsigned char * pWClipEndVertex     = pWClipStartVertex + realVertexSize;     // temp buffer for end vertex of the w clipping
 
     unsigned int    startClippedVertexIndex = 0;
     unsigned int    endClippedVertexIndex   = 1;
-    unsigned int    numClippedVertex        = 0;   // how many vertex is added to clippedStream
+    unsigned int    numClippedVertex        = 0;                                  // how many vertex is added to clippedStream
 
-    bool canDrawThisSegment = false;    // for each clipping test, is this line can be draw,(or the line is rejected).
+    bool canDrawThisSegment = false;                                              // for each clipping test, is this line can be draw,(or the line is rejected).
     for (unsigned int i = 0; i < numLineSegment; ++i)
     {
         // find source vertices of line segment
         pStartSrcVertex = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 ],     realVertexSize);
         pEndSrcVertex   = GetVertexPtrAt(pSrcVerticesAddr, indices[ i * 2 + 1 ], realVertexSize);
 
+        // proceed w=0 plane clipping.
         canDrawThisSegment = WClipLineInHomogenousClipSpace(
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pStartSrcVertex),
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pEndSrcVertex),
@@ -552,7 +564,7 @@ void Pipline::ClipLineList(
             continue;
         }
 
-        // clipping test
+        // homogenous space clipping test
         canDrawThisSegment = ClipLineInHomogenousClipSpace(
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipStartVertex),
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipEndVertex),
@@ -560,22 +572,26 @@ void Pipline::ClipLineList(
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pEndClippedVertex), 
             realVertexSize);
 
-        if (canDrawThisSegment)
+        if (!canDrawThisSegment)
         {
-            // output vertex address move on
-            pStartClippedVertex += twoRealVertexSizeBytes;
-            pEndClippedVertex   += twoRealVertexSizeBytes;
+            // line is rejected, skip it.
+            continue;
+        }
 
-            // push vertex index
-            pClippedIndices->push_back(startClippedVertexIndex);
-            pClippedIndices->push_back(endClippedVertexIndex);
+        // output vertex address move on
+        pStartClippedVertex += twoRealVertexSizeBytes;
+        pEndClippedVertex   += twoRealVertexSizeBytes;
 
-            // increase vertexIndex to next
-            startClippedVertexIndex += 2;
-            endClippedVertexIndex   += 2;
+        // push vertex index
+        pClippedIndices->push_back(startClippedVertexIndex);
+        pClippedIndices->push_back(endClippedVertexIndex);
 
-            numClippedVertex += 2;
-        } // end if canDrawThisSegment
+        // increase vertexIndex to next
+        startClippedVertexIndex += 2;
+        endClippedVertexIndex   += 2;
+
+        numClippedVertex += 2;
+
     }// end for line segments
 
     // after clipping, is the clipped vertices cost same space as we allocated?
@@ -585,6 +601,7 @@ void Pipline::ClipLineList(
         // if the vertices of visible line segment use less space than clippedStream stream
         // creat another buffer stream which will only contain the useable data.
         auto shrinkClippedStream = std::make_unique<F32Buffer>(realClippedStreamSize);
+
         memcpy(shrinkClippedStream->GetBuffer(), clippedStream->GetBuffer(), shrinkClippedStream->GetSizeOfByte());
         
         // return vertex data
@@ -602,24 +619,22 @@ void Pipline::ClipLineList(
 
 std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_ptr<F32Buffer> verticesToBeTransformed, const unsigned int realVertexSizeBytes)
 {
-    // compute the number of vertex.
-    const unsigned int numVertices = verticesToBeTransformed->GetSizeOfByte() / realVertexSizeBytes;
-    // create transfered data buffer.
-    auto viewportTransData = std::make_unique<F32Buffer>(numVertices * realVertexSizeBytes);
+    
+    const unsigned int  numVertices             = verticesToBeTransformed->GetSizeOfByte() / realVertexSizeBytes;   // compute the number of vertex.
+    auto                viewportTransData       = std::make_unique<F32Buffer>(numVertices * realVertexSizeBytes);   // create transfered data buffer.
 
-    // point to the vertex data before viewport transformation, a address in clippedLineData.
-    unsigned char * pSrcFloat = verticesToBeTransformed->GetBuffer();
-    // point to the vertex data after viewport transformation, address in viewportTransData.
-    unsigned char * pDestFloat = viewportTransData->GetBuffer();
+    unsigned char *     pSrcFloat               = verticesToBeTransformed->GetBuffer();                             // point to the vertex data before viewport transformation, a address in clippedLineData.
+    unsigned char *     pDestFloat              = viewportTransData->GetBuffer();                                   // point to the vertex data after viewport transformation, address in viewportTransData.
 
-    Transform& viewportTransformMat = m_pso->m_viewportTransform;
+    Transform&          viewportTransformMat    = m_pso->m_viewportTransform;
+
+    // loop through all vertices.
     for (unsigned int i = 0; i < numVertices; ++i)
     {
-        ScreenSpaceVertexTemplate* pSrcVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pSrcFloat);
+        ScreenSpaceVertexTemplate* pSrcVertex  = reinterpret_cast<ScreenSpaceVertexTemplate * >(pSrcFloat);     // source data
+        ScreenSpaceVertexTemplate* pDestVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pDestFloat);    // transformed to
 
-        ScreenSpaceVertexTemplate* pDestVertex = reinterpret_cast<ScreenSpaceVertexTemplate * >(pDestFloat);
-
-        // copy all the memory for one vertex.
+        // copy the memory of the vertex, ensure the data (except the location) is same.
         memcpy(pDestVertex, pSrcVertex, realVertexSizeBytes);
 
         if (pDestVertex->m_posH.m_w != 1.0f)
@@ -632,12 +647,13 @@ std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_pt
             pDestVertex->m_posH.m_w = 1.0f;
         }
 
+        // transfrom
         pDestVertex->m_posH = viewportTransformMat * pDestVertex->m_posH;
 
         // move to next data.
         pSrcFloat += realVertexSizeBytes;
         pDestFloat += realVertexSizeBytes;
-    }
+    } // end for vertices.
 
     return viewportTransData;
 }
@@ -646,23 +662,23 @@ std::unique_ptr<F32Buffer> Pipline::VertexShaderTransform(const F32Buffer * pVer
 {
     assert(pVertexStream != nullptr);
 
-    const unsigned int sizeOfInputStream = pVertexStream->GetSizeOfByte();
+    const unsigned int  sizeOfInputStream   = pVertexStream->GetSizeOfByte();
     assert(sizeOfInputStream % vsInputStride == 0 && "vertexShader stream input error, the size is not complete.");
 
-    const unsigned int numVertex = sizeOfInputStream / vsInputStride;
+    const unsigned int  numVertex           = sizeOfInputStream / vsInputStride;
 
-    auto vertexOutputStream = std::make_unique<F32Buffer>(numVertex * vsOutputStride);
+    auto                vertexOutputStream  = std::make_unique<F32Buffer>(numVertex * vsOutputStride);
 
-    unsigned char * pVSInput = pVertexStream->GetBuffer();
-    unsigned char * pVSOutput = vertexOutputStream->GetBuffer();
+    unsigned char *     pVSInput            = pVertexStream->GetBuffer();
+    unsigned char *     pVSOutput           = vertexOutputStream->GetBuffer();
 
-    auto vertexShader = m_pso->m_vertexShader;
+    auto                vertexShader = m_pso->m_vertexShader;
 
     for (unsigned int i = 0; i < numVertex; ++i)
     {
         vertexShader(pVSInput, reinterpret_cast<ScreenSpaceVertexTemplate*>(pVSOutput));
 
-        pVSInput += vsInputStride;
+        pVSInput  += vsInputStride;
         pVSOutput += vsOutputStride;
     }
 

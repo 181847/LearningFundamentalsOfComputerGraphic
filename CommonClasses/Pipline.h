@@ -10,15 +10,6 @@ namespace CommonClass
 {
 
 /*!
-    \brief store the pipline light data, such as the VSVertexStrid,
-    the count of index, the count of vertex.
-*/
-struct InstanceParameter
-{
-
-};
-
-/*!
     \brief abstraction of graphic pipline
 */
 class Pipline
@@ -62,9 +53,11 @@ public:
         const std::vector<unsigned int>& indices, 
         const F32Buffer*                 vertices);
 
+private:
+
     /*!
         \brief draw line lists with out shader processing.
-        \param indices indices of the line segments, length of it should be even
+        \param indices indices of the line segments, whose length should be even
         \param vertices endpoints of line segments. they should have been transfered to screen space.
         \param vertexSizeInBytes the vertex size in bytes
         we assum the four float in front of the vertex is the screen space vertex location.
@@ -78,13 +71,8 @@ public:
         const std::unique_ptr<F32Buffer> lineEndPointList,
         const unsigned int vertexSizeInBytes);
 
-#ifdef _DEBUG
-public:
-#else
-private:
-#endif
     /*!
-        \brief draw bresenhamLine.
+        \brief draw one bresenhamLine.
         \param (x0, y0) start point location in screen space
         \param (x1, y1) ens point location in screen space
         \param realVertexSizeBytes the real vertex size in bytes.
@@ -95,12 +83,14 @@ private:
         const unsigned int                  realVertexSizeBytes);
 
     /*!
-        \brief clip line in homogenous clipping space by the plane w = 0,
+        \brief clip line in homogenous clipping space by the plane w = 0
         \param pv1 input start vertex
         \param pv2 input end vertex
         \param pOutV1 output start vertex data
         \param pOutV2 output end vertex data
         \return whether this line is not visible which means that both w <= 0.
+        This function will ensure the fourth component of homogenous location (or so-called 'w') will be Greater than ZERO,
+        even the w is excactly zero, we will cut that to a epsilon(maybe +1e-20) to avoid dividing by zero in perspective dividing.
     */
     static bool WClipLineInHomogenousClipSpace(
         const ScreenSpaceVertexTemplate*    pv1,
@@ -110,15 +100,16 @@ private:
         const unsigned int                  realVertexSize);
 
     /*!
-        \brief clipping the line in homogenous clip space
+        \brief clipping the line in homogenous clip space, ensure after perspective divided, x,y,z in [-1, +1], w = 1.
         \param pv1 start point of the line
         \param pv2 end point of the line
         \param pOutV1 where to write clipped start point ( or not clipped ), address should't be the same as pv1
         \param pOutV2 where to write clipped end point ( or not clipped ), address should't be the same as pv2
         \return if the line can be drawn.(if the line is rejected, return false)
-        warning! the 'pOutV' address shouldn't equal the address of 'pv'
-        we assum the NDC space is in [-1, +1]^3,
-        yes, z is mapped to -1 (near plane), +1 (far plane).
+        Warnings:
+        1. the 'pOutV' address shouldn't equal the address of 'pv'
+        2. we assum the NDC space is in [-1, +1]^3, and z should be mapped to -1 (near plane), +1 (far plane).
+        3. all the those homogenous location MUST have a positive W component (NOT even zero).
         reference from: ¡¶Some Improvements to a Parametric Line Clipping Algorithm¡·Liang-Barsky
     */
     static bool ClipLineInHomogenousClipSpace(
@@ -142,8 +133,6 @@ private:
         const unsigned int                  realVertexSize,
         std::vector<unsigned int> *         pClippedIndices, 
         std::unique_ptr<F32Buffer> *        pClippedVertices);
-
-private:
 
     /*!
         \brief first perspective divided, and then do the viewport transformation for the vertex stream.
