@@ -977,74 +977,6 @@ TEST_MODULE_START
     TEST_UNIT_END;
 #pragma endregion
 
-#pragma region homogenous space clipping function test
-    TEST_UNIT_START("homogenous space clipping function test")
-        hvector clippedV0, clippedV1;
-
-        RandomTool::MTRandom mtr;
-        const unsigned int SCALE_COMPONENTS_TO = 2;
-
-        /*!
-            \brief scale float in [0.0, 1.0] to [-SCALE_COMPONENTS_TO, +SCALE_COMPONENTS_TO]
-        */
-        auto RemapFloat = [&](const Types::F32 f)->Types::F32 {
-            return (f * 2.0f - 1.0f) * SCALE_COMPONENTS_TO;
-        };
-
-        /*!
-            \brief is the vector's x/y/z in range [-1, +1].
-        */
-        auto InCube = [](const hvector& v)->bool {
-            const Types::F32 epsilon = 1e-5f;
-            if ((-1.0f - epsilon) <= v.m_x && v.m_x <= (+1.0f + epsilon)
-                && (-1.0f - epsilon) <= v.m_y && v.m_y <= (+1.0f + epsilon)
-                && ( -1.0f - epsilon ) <= v.m_z && v.m_z <= ( +1.0f + epsilon))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        };
-
-        unsigned out = 0, in = 0;
-        for (int i = 0; i < 100; ++i)
-        {
-            std::array<Types::F32, 6> randFloat;
-            for (auto & f : randFloat)
-            {
-                f = RemapFloat(mtr.Random());
-            }
-            hvector v0(randFloat[0], randFloat[1], randFloat[2], 1.0f);
-            hvector v1(randFloat[3], randFloat[4], randFloat[5], 1.0f);
-
-            //PUT_BREAK_POINT;
-            bool canDrawThisLine = Pipline::ClipLineInHomogenousClipSpace(
-                reinterpret_cast<ScreenSpaceVertexTemplate*>(&v0),
-                reinterpret_cast<ScreenSpaceVertexTemplate*>(&v1),
-                reinterpret_cast<ScreenSpaceVertexTemplate*>(&clippedV0),
-                reinterpret_cast<ScreenSpaceVertexTemplate*>(&clippedV1),
-                16);
-
-            if (canDrawThisLine)
-            {
-                // clipped point must be inside the visible area
-                TEST_ASSERT(InCube(clippedV0) && InCube(clippedV1));
-                ++in;
-            }
-            else
-            {
-                // one of the point must be outside the visible area.
-                TEST_ASSERT( (!InCube(v0)) || (!InCube(v1)));
-                ++out;
-            }// end else
-        }// end for
-
-        testConfig.m_testName += " out: " + std::to_string(out) + ", in: " + std::to_string(in);
-    TEST_UNIT_END;
-#pragma endregion
-
 #pragma region coordinate frame construct
     TEST_UNIT_START("coordinate frame construct")
         
@@ -1312,6 +1244,7 @@ TEST_MODULE_START
 
         // the fixed point number is not completed, so this test will always failed, 
         // until you fix all the bugs.
+        std::cout << "the fixed point number is not completed, so this test will always failed, until you fix all the bugs.\n";
         errorLogger++;
 
     TEST_UNIT_END;
@@ -1402,14 +1335,14 @@ TEST_UNIT_START("EFloat tool test")
         // float down
         std::array<float, farr.size()> fdownarr;
 
-        for (int i = 0; i < farr.size(); ++i)
+        for (unsigned int i = 0; i < farr.size(); ++i)
         {
             //BREAK_POINT_IF(i == 4);
             fuparr[i] = NextFloatUp(farr[i]);
             fdownarr[i] = NextFloatDown(farr[i]);
         }
 
-        for (int i = 0; i < farr.size(); ++i)
+        for (unsigned int i = 0; i < farr.size(); ++i)
         {
             if (i == POSITIVE_INF)
             {
@@ -1449,7 +1382,7 @@ TEST_UNIT_END;
 #pragma region EFloat construct test
 TEST_UNIT_START("EFloat construct")
     RandomTool::MTRandom mtr;
-    const int MAX_INT = 300;
+    const int MAX_INT = 2;
     const int MAX_NUM = 7;
 
     for (int numLoop = 0; numLoop < 20; ++numLoop)
@@ -1490,8 +1423,10 @@ TEST_UNIT_END;
 #pragma region EFloat operator test
 TEST_UNIT_START("EFloat operator test")
     RandomTool::MTRandom mtr;
-    const int MAX_INT = 300;
+    const int MAX_INT = 2;
     const int MAX_NUM = 7;
+
+    const bool OUTPUT_RESUTL_TO_CONSOLE = false;
 
     for (int numLoop = 0; numLoop < 30; ++numLoop)
     {
@@ -1518,29 +1453,41 @@ TEST_UNIT_START("EFloat operator test")
             efResult = efarr[0][i] + efarr[1][i];
             floatResult = farr[0][i] + farr[1][i];
             TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-            std::cout << farr[0][i] << " + " << farr[1][i] << " = \n"
-                      << efResult << "\n\n";
+            if (OUTPUT_RESUTL_TO_CONSOLE)
+            {
+                std::cout << farr[0][i] << " + " << farr[1][i] << " = \n"
+                          << efResult << "\n\n";
+            }
 
             // operator -
             efResult = efarr[0][i] - efarr[1][i];
             floatResult = farr[0][i] - farr[1][i];
             TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-            std::cout << farr[0][i] << " - " << farr[1][i] << " = \n"
-                << efResult << "\n\n";
+            if (OUTPUT_RESUTL_TO_CONSOLE)
+            {
+                std::cout << farr[0][i] << " - " << farr[1][i] << " = \n"
+                    << efResult << "\n\n";
+            }
 
             // operator *
             efResult = efarr[0][i] * efarr[1][i];
             floatResult = farr[0][i] * farr[1][i];
             TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-            std::cout << farr[0][i] << " * " << farr[1][i] << " = \n"
-                << efResult << "\n\n";
+            if (OUTPUT_RESUTL_TO_CONSOLE)
+            {
+                std::cout << farr[0][i] << " * " << farr[1][i] << " = \n"
+                    << efResult << "\n\n";
+            }
 
             // operator /
             efResult = efarr[0][i] / efarr[1][i];
             floatResult = farr[0][i] / farr[1][i];
             TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-            std::cout << farr[0][i] << " / " << farr[1][i] << " = \n"
-                << efResult << "\n\n";
+            if (OUTPUT_RESUTL_TO_CONSOLE)
+            {
+                std::cout << farr[0][i] << " / " << farr[1][i] << " = \n"
+                    << efResult << "\n\n";
+            }
 
             // abs
             // using the EFloat from previous divided result, which will have some error bound.
@@ -1550,14 +1497,20 @@ TEST_UNIT_START("EFloat operator test")
             TEST_ASSERT(efResult.UpperBound() >= 0.0f);
             TEST_ASSERT(static_cast<Types::F32>(efResult) >= 0.0f);
             TEST_ASSERT(std::abs(static_cast<Types::F32>(efWithBound)) == static_cast<Types::F32>(efResult));
-            std::cout << "original = " << efWithBound << std::endl
-                      << "absolute = " << efResult << std::endl;
+            if (OUTPUT_RESUTL_TO_CONSOLE)
+            {
+                std::cout << "original = " << efWithBound << std::endl
+                          << "absolute = " << efResult << std::endl;
+            }
 
             // square root just use the absolute value from the abs(efWithBound)
             const EFloat absWithBound = efResult;
             efResult = sqrt(absWithBound);
             TEST_ASSERT(static_cast<Types::F32>(efResult) == std::sqrt(static_cast<Types::F32>(absWithBound)));
-            std::cout << "square root = " << efResult << std::endl;
+            if (OUTPUT_RESUTL_TO_CONSOLE)
+            {
+                std::cout << "square root = " << efResult << std::endl;
+            }
 
             // negative
             efResult = -efWithBound;
@@ -1570,8 +1523,11 @@ TEST_UNIT_START("EFloat operator test")
             TEST_ASSERT(
                 -efWithBound.UpperBound()
                 == efResult.LowerBound());
-            std::cout << "original = " << efWithBound << std::endl
-                      << "negative = " << efResult << std::endl;
+            if (OUTPUT_RESUTL_TO_CONSOLE)
+            {
+                std::cout << "original = " << efWithBound << std::endl
+                          << "negative = " << efResult << std::endl;
+            }
         }// end for operation tests
 
     }// end for numLoop
@@ -1581,6 +1537,17 @@ TEST_UNIT_END;
 
 #pragma region DebugClient test
 TEST_UNIT_START("DebugClient test")
+
+    // if you have ensure the DebugClient is working,
+    // and don't want to be borthered by the interruption of the test inside.
+    // set next ENABLE_THIS_TEST to false, and the interruption will be ignored inside.
+    const bool ENABLE_THIS_TEST = false;
+
+    if ( ! ENABLE_THIS_TEST)
+    {
+        std::cout << "DebugClient test has been skipped, this test will always failed.\n" ;
+        return 1; // return 1 for empethis that there is some unexpected situation.
+    }
 
     TEST_ASSERT(false == DebugClient<TestDebugConf>());
 
