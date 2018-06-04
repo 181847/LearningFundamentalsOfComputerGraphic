@@ -1156,8 +1156,8 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        std::string pictureIndex = "013";
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\PiplineClippingLines\\lineClippingErrAnalysis_fixed_" + pictureIndex + ".png");
+        std::string pictureIndex = "final";
+        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineClippingErrAnalysis_fixed_" + pictureIndex + ".png");
         
     TEST_UNIT_END;
 #pragma endregion
