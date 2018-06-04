@@ -29,14 +29,14 @@ static_assert(sizeof(ScreenSpaceVertexTemplate) == (4 + 1) * sizeof(Types::F32),
     \param pv1 the first vertex
     \param pv2 the second vertex
     \param result the interpolation result
-    \param u the interpolation coefficience (should be [0, 1])
+    \param t the interpolation coefficience (pv1-<0>---------<1>-pv2)
     \param realVertexSizeInBytes the real size of the vertex, all the vertex attributes are the float type.
 */
 void Interpolate2(
     const ScreenSpaceVertexTemplate* pv1, 
     const ScreenSpaceVertexTemplate* pv2, 
     ScreenSpaceVertexTemplate* pResult, 
-    const Types::F32 u, 
+    const Types::F32 t, 
     const unsigned int realVertexSizeInBytes);
 
 } // namespace CommonClass
