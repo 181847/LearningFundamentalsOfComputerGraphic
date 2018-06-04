@@ -55,7 +55,7 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     std::unique_ptr<F32Buffer> vsOutputStream = VertexShaderTransform(vertices, vsInputStride, psInputStride);
 
     std::vector<unsigned int>  clippedIndices;   // the index data that has been clipped.
-    std::unique_ptr<F32Buffer> clippedLineData; // the vertex data that has been clipped.
+    std::unique_ptr<F32Buffer> clippedLineData;  // the vertex data that has been clipped.
 
     // clip all the line
     ClipLineList(indices, vsOutputStream.get(), psInputStride, &clippedIndices, &clippedLineData);
@@ -74,7 +74,7 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     // the byte size of vertex data after clipping
     const unsigned int numBytes = clippedLineData->GetSizeOfByte();
 
-    // now the pipline is not complete, so for the simplification, we assume all the vertex is in the same size.
+    // now the pipline is not complete, so for the simplification, we assume all the vertex for each shader is in the same size.
     assert(vsInputStride == psInputStride);
     assert(numBytes % vsInputStride == 0 && "vertics data error, cannot ensure every vertex data is complete.");
 
@@ -165,10 +165,10 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     ScreenSpaceVertexTemplate* pPSVInput = reinterpret_cast<ScreenSpaceVertexTemplate *>(pixelShaderInputBuffer.GetBuffer());
 
     // prepare interpolation coefficience, for pixel interpolation.
-    Types::F32 u = 1.0f, du = 1.0f / dx;    // "u" is used to interpolate between (x0, y0) and (x1, y1);
+    Types::F32 t = 0.0f, dt = 1.0f / dx;    // "t" is used to interpolate between (x0, y0) and (x1, y1);
     for (auto x = x0; x <= x1; ++x)
     {
-        Interpolate2(pv1, pv2, pPSVInput, u, realVertexSizeBytes);
+        Interpolate2(pv1, pv2, pPSVInput, t, realVertexSizeBytes);
         if (steep)
         {
             //m_backBuffer->SetPixel(y, x, RGB::BLACK);
@@ -181,7 +181,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
         }
 
         // update interpolation coefficience.
-        u -= du;
+        t += dt;
 
         if (error > 0)
         {
@@ -227,13 +227,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         // copy start vertex data.
         memcpy(pOutV1, pv1, realVertexSize);
 
-        // Interpolate to get end vertex data, (pv1 <0>---> t >------<1> pv2)
-        // interpolate between start and end input vertex ----> output end vertex
-        // notice that the interpolation coefficence is oppsited to t value,
-        // when t = 1, the pOutV2 should equal to pv2,
-        // but in the interpolation when u = 1, the result will equal to pv1 (if we call by Interpolate2(pv1, pv2, pOutV2, t, ...))
-        // so here we flip the position of pv1 and pv2.
-        Interpolate2(pv2, pv1, pOutV2, t, realVertexSize);
+        Interpolate2(pv1, pv2, pOutV2, t, realVertexSize);
 
         // manually prevent w to be exactlly zero.
         pOutV2->m_posH.m_w = EPSILON_TO_ZERO;
@@ -247,13 +241,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         // copy end vertex data.
         memcpy(pOutV2, pv2, realVertexSize);
 
-        // Interpolate to get start vertex data, (pv2 <0>---> t >------<1> pv1)
-        // interpolate between start and end input vertex ----> output end vertex
-        // not the interpolation coefficence is oppsited to t value,
-        // when t = 1, the pOutV1 should equal to pv1,
-        // but in the interpolation when u = 1, the result will equal to pv2 (if we call by Interpolate2(pv2, pv1, pOutV1, t, ...))
-        // so here we flip the position of pv1 and pv2.
-        Interpolate2(pv1, pv2, pOutV1, t, realVertexSize);
+        Interpolate2(pv2, pv1, pOutV1, t, realVertexSize);
 
         // manually prevent w to be exactlly zero.
         pOutV1->m_posH.m_w = EPSILON_TO_ZERO;
@@ -425,17 +413,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     }
     else
     {
-        // warning, pOutV1 = (1 - t0) * pv1 + t0 * pv2
-        // this means:
-        // if t0 == 0, then pOutV1 = pv1
-        // if t0 == 1, then pOutV1 = pv2
-        // but this is opposited to interpolation between two value,
-        //      where if u == 1, then pOutV1 = pv1
-        //            if u == 0, then pOutV1 = pv2
-        // so here we flip the vertex order, to get correct interpolation result.
-
-        Interpolate2(
-            pv2, pv1,
+        Interpolate2( pv1, pv2, 
             pOutV1,
             static_cast<Types::F32>(t0),
             realVertexSize);
@@ -453,17 +431,8 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     }
     else
     {
-        // warning, pOutV1 = (1 - t0) * pv1 + t0 * pv2
-        // this means:
-        // if t0 == 0, then pOutV1 = pv1
-        // if t0 == 1, then pOutV1 = pv2
-        // but this is opposited to interpolation between two value,
-        //      where if u == 1, then pOutV1 = pv1
-        //            if u == 0, then pOutV1 = pv2
-        // so here we flip the vertex order, to get correct interpolation result.
-
         Interpolate2(
-            pv2, pv1,
+            pv1, pv2, 
             pOutV2,
             static_cast<Types::F32>(t1),
             realVertexSize);
