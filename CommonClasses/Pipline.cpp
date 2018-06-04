@@ -195,15 +195,109 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     }
 }
 
+void Pipline::DrawScanTriangle(
+    const ScreenSpaceVertexTemplate * pv1,
+    const ScreenSpaceVertexTemplate * pv2, 
+    const ScreenSpaceVertexTemplate * pv3, 
+    const unsigned int realVertexSizeBytes)
+{
+    // reorder the vertices, ensure:
+    // pv1.y >= pv2.y >= pv3.y
+    if (pv1->m_posH.m_y < pv2->m_posH.m_y)
+    {
+        std::swap(pv1, pv2);
+    }
+    if (pv2->m_posH.m_y < pv3->m_posH.m_y)
+    {
+        std::swap(pv2, pv3);
+    }
+    if (pv1->m_posH.m_y < pv2->m_posH.m_y)
+    {
+        std::swap(pv1, pv2);
+    }
+
+    const int FLOAT_COMPARE_ULP = 8; // the metric used to measure the simularity of two float, lower for more accurate.
+
+    if (MathTool::almost_equal(pv1->m_posH.m_y, pv2->m_posH.m_y, FLOAT_COMPARE_ULP))
+    // triangle like:
+    // 1--------2
+    // \        /
+    //  \      / 
+    //   \    /  
+    //    \  /   
+    //     \/3   
+    {
+        // ensure pv1.x < pv2.x
+        if (pv1->m_posH.m_x > pv2->m_posH.m_x)
+        {
+            std::swap(pv1, pv2);
+        }
+        DrawScanTriangle_flat_top(pv1, pv2, pv3, realVertexSizeBytes);
+    }
+    else if (MathTool::almost_equal(pv2->m_posH.m_y, pv3->m_posH.m_y, FLOAT_COMPARE_ULP))
+    // triangle like: 
+    //     /\1  
+    //    /  \   
+    //   /    \  
+    //  /      \ 
+    // /        \
+    // 2--------3
+    {
+        // ensure pv2.x < pv3.x
+        if (pv2->m_posH.m_x > pv3->m_posH.m_x)
+        {
+            std::swap(pv2, pv3);
+        }
+        DrawScanTriangle_flat_bottom(pv1, pv2, pv3, realVertexSizeBytes);
+    }
+    else
+    {
+        // the coefficient to get flat triangle
+        const Types::F32 cutLongEdge_t = (pv2->m_posH.m_y - pv1->m_posH.m_y) / (pv3->m_posH.m_y - pv1->m_posH.m_y);
+
+        // store the cut vertex
+        auto cutVertexBuf = std::make_unique<F32Buffer>(realVertexSizeBytes);
+        
+        // notice that the pointer still point to the memory in cutVertexBuf
+        Interpolate2(pv1, pv3, 
+            reinterpret_cast<ScreenSpaceVertexTemplate * >(cutVertexBuf->GetBuffer()), // get buffer pointer
+            cutLongEdge_t, realVertexSizeBytes);
+
+        auto pCutVertex = reinterpret_cast<const ScreenSpaceVertexTemplate * >(cutVertexBuf->GetBuffer());
+        // ensure the pCutVertex.x < pv2.x
+        // notice the pCutVertex may will not point to the memory in cutVertexBuf,
+        //   but you don't have to worry about the memory leak of cutVertexBuf for whose type is std::unique_ptr.
+        if (pCutVertex->m_posH.m_x > pv2->m_posH.m_x)
+        {
+            std::swap(pCutVertex, pv2);
+        }
+
+        // triangle like (just for illustration, not accurate): 
+        //     /\1  
+        //    /  \   
+        //   /    \  
+        //  /      \ 
+        // /        \
+        //cut------- 2
+        // \        /
+        //  \      / 
+        //   \    /  
+        //    \  /   
+        //     \/3  
+        DrawScanTriangle_flat_bottom(pv1, pCutVertex, pv2, realVertexSizeBytes);
+        DrawScanTriangle_flat_top   (pCutVertex, pv2, pv3, realVertexSizeBytes);
+    }
+}
+
 bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, ScreenSpaceVertexTemplate * pOutV1, ScreenSpaceVertexTemplate * pOutV2, const unsigned int realVertexSize)
 {
     // is the w of two vertex position is greater or equal to zero?
-    std::array<bool, 2> isWPositive = { pv1->m_posH.m_w >= 0.0f, pv2->m_posH.m_w >= 0.0f };
+    std::array<bool, 2> isWPositive     = { pv1->m_posH.m_w >= 0.0f, pv2->m_posH.m_w >= 0.0f };
 
     // When cut w to zero, we will keep w little far from 0.0 to avoid
     // divided by zero, and you must notice that here we must use a positive small number,
     // to keep all the W to be positive.
-    const Types::F32 EPSILON_TO_ZERO = 1e-20f;
+    const Types::F32    EPSILON_TO_ZERO = 1e-20f;
 
     // if both w is positive, then just copy the vertex data and return true.
     if (isWPositive[0] && isWPositive[1])
@@ -222,7 +316,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
     {
         // w1 is negative and w2 is positive
         const Types::F32 deltaW = pv1->m_posH.m_w - pv2->m_posH.m_w;
-        const Types::F32 t = pv1->m_posH.m_w / deltaW;
+        const Types::F32 t      = pv1->m_posH.m_w / deltaW;
 
         // copy start vertex data.
         memcpy(pOutV1, pv1, realVertexSize);
@@ -236,7 +330,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
     {
         // w1 is positive and w2 is negative
         const Types::F32 deltaW = pv2->m_posH.m_w - pv1->m_posH.m_w;
-        const Types::F32 t = pv2->m_posH.m_w / deltaW;  // negative divide negative result in positive
+        const Types::F32 t      = pv2->m_posH.m_w / deltaW;  // negative divide negative  result in positive
 
         // copy end vertex data.
         memcpy(pOutV2, pv2, realVertexSize);
@@ -264,16 +358,15 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     // when some number error resist in the last cutting result.
 //#define MANUALLY_CUT_HVECTOR
 
-     // whether to reinforce the checks on xyz component in the last step of the cuttin
+     // whether to reinforce the checks on xyz component in the last step of this function
 //#define MANUALLY_CHECK_XYZ_BOUNDg.
-
 
     std::array<Types::F32, 6> p;
     std::array<Types::F32, 6> q;
 
     Types::F32 t0 = 0.0f;       // start point, zero means the pv1
     Types::F32 t1 = 1.0f;       // end point, one means the pv2
-    Types::F32 tempT = 0.0f;    // temp interpolate coefficience
+    Types::F32 tempT = 0.0f;    // temp interpolate coefficient
 
     const Types::F32 deltaX = pv2->m_posH.m_x - pv1->m_posH.m_x;
     const Types::F32 deltaY = pv2->m_posH.m_y - pv1->m_posH.m_y;
@@ -443,9 +536,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 
     }
 
-    // an ensurance that all the components should be limited in [-1, +1].
-
-    
+    // an ensurance that all the components should be limited in [-1, +1] after perspective divided.
 #ifdef MANUALLY_CHECK_XYZ_BOUND
 
     const Types::F32 
@@ -505,14 +596,15 @@ void Pipline::ClipLineList(
     // before clipping in homogenous space, let's first clip the vertex data into w > 0
     // create a temp buffer for that result, which will contain only two vertex.
     auto            wClipBuffer         = std::make_unique<F32Buffer>(2 * realVertexSize);
-    unsigned char * pWClipStartVertex   = wClipBuffer->GetBuffer();               // temp buffer for start vertex of the w clipping
-    unsigned char * pWClipEndVertex     = pWClipStartVertex + realVertexSize;     // temp buffer for end vertex of the w clipping
+    unsigned char * pWClipStartVertex   = wClipBuffer->GetBuffer();               // temp buffer for start vertex in the w clipping
+    unsigned char * pWClipEndVertex     = pWClipStartVertex + realVertexSize;     // temp buffer for end vertex in the w clipping
 
     unsigned int    startClippedVertexIndex = 0;
     unsigned int    endClippedVertexIndex   = 1;
     unsigned int    numClippedVertex        = 0;                                  // how many vertex is added to clippedStream
 
-    bool canDrawThisSegment = false;                                              // for each clipping test, is this line can be draw,(or the line is rejected).
+    bool            canDrawThisSegment      = false;                              // for each clipping test, is this line can be draw,(or the line is rejected).
+
     for (unsigned int i = 0; i < numLineSegment; ++i)
     {
         // find source vertices of line segment
@@ -568,7 +660,7 @@ void Pipline::ClipLineList(
     if (realClippedStreamSize < clippedStream->GetSizeOfByte())
     {
         // if the vertices of visible line segment use less space than clippedStream stream
-        // creat another buffer stream which will only contain the useable data.
+        // creat another buffer stream which will only contain the avaliable data.
         auto shrinkClippedStream = std::make_unique<F32Buffer>(realClippedStreamSize);
 
         memcpy(shrinkClippedStream->GetBuffer(), clippedStream->GetBuffer(), shrinkClippedStream->GetSizeOfByte());
