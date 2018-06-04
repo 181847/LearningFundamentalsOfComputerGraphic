@@ -53,6 +53,23 @@ public:
         const std::vector<unsigned int>& indices, 
         const F32Buffer*                 vertices);
 
+    // next function will be used in the development phase, which will be pulic in the debug mode and private in the release mode.
+#ifdef _DEBUG
+public:
+#else
+private:
+#endif
+    /*!
+        \brief draw one triangle
+        \param pv1~3 three vertex of the triangle, in the screen space(x/y in pixel unit)
+        \param realVertexSizeBytes the vertex size of the vertices, in byte unit.
+    */
+    void DrawScanTriangle(
+        const ScreenSpaceVertexTemplate*    pv1,
+        const ScreenSpaceVertexTemplate*    pv2,
+        const ScreenSpaceVertexTemplate*    pv3,
+        const unsigned int                  realVertexSizeBytes);
+
 private:
 
     /*!
@@ -60,7 +77,7 @@ private:
         \param indices indices of the line segments, whose length should be even
         \param vertices endpoints of line segments. they should have been transfered to screen space.
         \param vertexSizeInBytes the vertex size in bytes
-        we assum the four float in front of the vertex is the screen space vertex location.
+        we assum the four float in front of the vertex is the screen space vertex location (x/y in pixel location).
         -0.5 <= x <= pixelWidth - 0.5
         -0.5 <= y <= pixelHeight - 0.5
         -1 <= z <= 1
