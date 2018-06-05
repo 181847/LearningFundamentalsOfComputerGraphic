@@ -20,7 +20,7 @@ public:
     */
     static unsigned int NumRestFloat(const unsigned int realVertexSizeInBytes);
 };
-// ensurance
+// insurance
 static_assert(sizeof(ScreenSpaceVertexTemplate) == (4 + 1) * sizeof(Types::F32), "size of template Vertex is wrong.");
 
 
