@@ -2,6 +2,7 @@
 #include <array>
 #include "DebugConfigs.h"
 #include "EFloat.h"
+#include "EdgeEquation2D.h"
 
 namespace CommonClass
 {
@@ -201,7 +202,10 @@ void Pipline::DrawTriangle(
     const ScreenSpaceVertexTemplate * pv3, 
     const unsigned int realVertexSizeBytes)
 {
-    EdgeEquation2D f12(pv1, pv2), f23(pv2, pv3), f31(pv3, pv1);
+    EdgeEquation2D 
+        f12(pv1->m_posH, pv2->m_posH), 
+        f23(pv2->m_posH, pv3->m_posH),
+        f31(pv3->m_posH, pv1->m_posH);
 
     std::array<Types::U32, 2> minBoundU, maxBoundU; // xxxbound[0] is for x, xxxbound[1] is for y
     FindTriangleBoundary(pv1, pv2, pv3, &minBoundU, &maxBoundU);
@@ -212,8 +216,8 @@ void Pipline::DrawTriangle(
     {
         for (; x < maxBoundU[0]; ++x)
         {
-            const float alpha = f23.eval(x, y) / f23(pv1->m_posH.m_x, pv1->m_posH.m_y);
-            const float beta  = f31.eval(x, y) / f31(pv2->m_posH.m_x, pv2->m_posH.m_y);
+            const float alpha = f23.eval(x, y) / f23.eval(pv1->m_posH.m_x, pv1->m_posH.m_y);
+            const float beta  = f31.eval(x, y) / f31.eval(pv2->m_posH.m_x, pv2->m_posH.m_y);
             const float gamma = 1.0f - alpha - beta;
 
             if (alpha > 0.0f && beta > 0.0f && gamma > 0.0f)
