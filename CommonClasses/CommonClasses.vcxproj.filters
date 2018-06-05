@@ -113,6 +113,9 @@
     <ClInclude Include="DebugConfigs.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="EdgeEquation2D.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -203,6 +206,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="DebugConfigs.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="EdgeEquation2D.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
