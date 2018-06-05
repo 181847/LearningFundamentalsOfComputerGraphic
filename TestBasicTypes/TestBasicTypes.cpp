@@ -1588,5 +1588,111 @@ TEST_UNIT_START("DebugClient test")
 TEST_UNIT_END;
 #pragma endregion
 
+#ifdef _DEBUG
+#pragma region triangle region boundary in pipeline
+TEST_UNIT_START("triangle region boundary in pipeline")
+    // skip this test due to the bug of clipping line function.
+    //std::cout << "next test will be skipped." << std::endl;
+    //return 0;
+
+    // temp struct for line drawing.
+    struct SimplePoint
+    {
+    public:
+        hvector m_position;
+        SimplePoint(const hvector& pos)
+            :m_position(pos)
+        {
+            // empty
+        }
+    };
+    // create and config pipeline state object
+    auto pso = std::make_unique<PiplineStateObject>();
+    pso->m_primitiveType = PrimitiveType::LINE_LIST;
+    pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
+    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+        
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        return RGBA::RED;
+    };
+
+    vector3 localU(1.0f, 0.0f, 1.0f);
+    vector3 localV(0.0f, 1.0f, 0.0f);
+    vector3 coordPos(0.0f, 0.0f, 0.0f);
+    CoordinateFrame coordFrm(localU, localV, coordPos);
+    Transform toWorld = coordFrm.GetTransformLocalToWorld();
+
+    pso->m_vertexShader = [&toWorld](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+        memcpy(pDestV, pSrcVertex, sizeof(SimplePoint));
+    };
+
+    Viewport viewport;
+    viewport.left = 0;
+    viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+    viewport.bottom = 0;
+    viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+    pso->SetViewport(viewport);
+
+    // create and set a pipeline.
+    Pipline pipline;
+    pipline.SetPSO(std::move(pso));
+
+    // set a backbuffer
+    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+        UserConfig::COMMON_PIXEL_WIDTH, 
+        UserConfig::COMMON_PIXEL_HEIGHT, 
+        RGBA::WHITE));
+
+    RandomTool::MTRandom mtr;
+
+    const float scaleRandomRange = 3.0f;
+    auto RandomScale = [&scaleRandomRange, &mtr]()->float {
+        return scaleRandomRange * 2.0f * (mtr.Random() - 1.0f);
+    };
+
+    for (int numLoop = 0; numLoop < 200; ++numLoop)
+    {
+        // make three vertex that shock around the boundary
+        // -----------------
+        // X               X
+        // |               |
+        // |               |
+        // |               |
+        // X               |
+        // -----------------
+        hvector 
+            v1( viewport.left   + RandomScale(),
+                viewport.top    + RandomScale()),
+            v2( viewport.right  + RandomScale(),
+                viewport.top    + RandomScale()),
+            v3( viewport.left   + RandomScale(),
+                viewport.bottom + RandomScale());
+        std::array<const ScreenSpaceVertexTemplate*, 3> pv = {
+            reinterpret_cast<const ScreenSpaceVertexTemplate*>(&v1),
+            reinterpret_cast<const ScreenSpaceVertexTemplate*>(&v2),
+            reinterpret_cast<const ScreenSpaceVertexTemplate*>(&v3)
+        };
+
+        std::array<Types::U32, 2> minBound, maxBound;
+
+        {
+            TIME_GUARD;
+            pipline.FindTriangleBoundary(pv[0], pv[1], pv[2], &minBound, &maxBound);
+        }
+
+        const int x = 0, y = 1;
+        TEST_ASSERT(minBound[x] >= viewport.left);
+        TEST_ASSERT(minBound[y] >= viewport.bottom);
+        TEST_ASSERT(maxBound[x] <= viewport.right);
+        TEST_ASSERT(maxBound[y] <= viewport.top);
+
+        TEST_ASSERT(minBound[x] < maxBound[x]);
+        TEST_ASSERT(minBound[y] < maxBound[y]);
+    }// end for numLoop
+    
+TEST_UNIT_END;
+#pragma endregion
+#endif // _DEBUG
+
 TEST_MODULE_END
 
