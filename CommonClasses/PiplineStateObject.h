@@ -38,6 +38,10 @@ enum PrimitiveType
 /*!
     \brief a viewport struct to describe how 
     to project normalized device coordinate into pixel space.
+    the viewport is defined by the pixel index starting from Zero.
+    e.g.
+        a image with 320x128,
+        the max viewport should be left(0), right(319), bottom(0), top(127)
 */
 struct Viewport
 {
@@ -62,8 +66,8 @@ public:
     PrimitiveType m_primitiveType = PrimitiveType::UNKNOWN;
 
     /*!
-        \brief the vertex size of different of stage in the pipline.
-        the pipline will using the destination vertex size to create vertices.
+        \brief the vertex size of different of stage in the pipeline.
+        the pipeline will using the destination vertex size to create vertices.
     */
     VertexLayout m_vertexLayout;
     
@@ -93,7 +97,7 @@ public:
     ~PiplineStateObject();
 
     /*!
-        \brief set a view port to the pipline state.
+        \brief set a view port to the pipeline state.
         the pso will compute a viewport transformation and store it.
     */
     void SetViewport(Viewport viewport);
