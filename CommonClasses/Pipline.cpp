@@ -142,11 +142,11 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
         std::swap(y0, y1);
 
         // if we swap (x0, y0) with (x1, y1)
-        // we should also swap two vertex to get the correct interplotion order.
+        // we should also swap two vertex to get the correct interpolation order.
         std::swap(pv1, pv2);
     }
 
-    // bresenham algorithm coefficients.
+    // Bresenham algorithm coefficients.
     Types::I32 dx = x1 - x0;
     Types::I32 twoDy = std::abs(2 * (y1 - y0));
     Types::I32 yi = y1 > y0 ? 1 : -1;
@@ -164,7 +164,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     // reinterpret it as ScreenSpaceVertexTemplate.
     ScreenSpaceVertexTemplate* pPSVInput = reinterpret_cast<ScreenSpaceVertexTemplate *>(pixelShaderInputBuffer.GetBuffer());
 
-    // prepare interpolation coefficience, for pixel interpolation.
+    // prepare interpolation coefficient, for pixel interpolation.
     Types::F32 t = 0.0f, dt = 1.0f / dx;    // "t" is used to interpolate between (x0, y0) and (x1, y1);
     for (auto x = x0; x <= x1; ++x)
     {
@@ -180,7 +180,7 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
             m_backBuffer->SetPixel(x, y, pixelShader(pPSVInput));
         }
 
-        // update interpolation coefficience.
+        // update interpolation coefficient.
         t += dt;
 
         if (error > 0)
@@ -195,97 +195,117 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     }
 }
 
-void Pipline::DrawScanTriangle(
+void Pipline::DrawTriangle(
     const ScreenSpaceVertexTemplate * pv1,
     const ScreenSpaceVertexTemplate * pv2, 
     const ScreenSpaceVertexTemplate * pv3, 
     const unsigned int realVertexSizeBytes)
 {
-    // reorder the vertices, ensure:
-    // pv1.y >= pv2.y >= pv3.y
-    if (pv1->m_posH.m_y < pv2->m_posH.m_y)
+    EdgeEquation2D f12(pv1, pv2), f23(pv2, pv3), f31(pv3, pv1);
+
+    std::array<Types::U32, 2> minBoundU, maxBoundU; // xxxbound[0] is for x, xxxbound[1] is for y
+    FindTriangleBoundary(pv1, pv2, pv3, &minBoundU, &maxBoundU);
+
+    unsigned int x = minBoundU[0], y = minBoundU[1];
+
+    for (; y < maxBoundU[1]; ++y)
     {
-        std::swap(pv1, pv2);
-    }
-    if (pv2->m_posH.m_y < pv3->m_posH.m_y)
+        for (; x < maxBoundU[0]; ++x)
+        {
+            const float alpha = f23.eval(x, y) / f23(pv1->m_posH.m_x, pv1->m_posH.m_y);
+            const float beta  = f31.eval(x, y) / f31(pv2->m_posH.m_x, pv2->m_posH.m_y);
+            const float gamma = 1.0f - alpha - beta;
+
+            if (alpha > 0.0f && beta > 0.0f && gamma > 0.0f)
+            {
+                m_backBuffer->SetPixel(x, y, RGBA::BLACK);
+            }
+        }// end for x, columns
+    }// end for y, raws
+}
+
+void Pipline::FindTriangleBoundary(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, const ScreenSpaceVertexTemplate * pv3, std::array<Types::U32, 2>* minBound, std::array<Types::U32, 2>* maxBound)
+{
+    assert(minBound != nullptr && maxBound != nullptr && "argument nullptr error");
+
+    // find the boundary of the triangle region
+    std::array<Types::F32, 2> minBoundF, maxBoundF; // xxxbound[0] is for x, xxxbound[1] is for y
+    
+    // check of each x, y
+    const int x = 0, y = 1;
+    for (int i = x; i <= y; ++i)
     {
-        std::swap(pv2, pv3);
-    }
-    if (pv1->m_posH.m_y < pv2->m_posH.m_y)
-    {
-        std::swap(pv1, pv2);
+        // compare first two vertex
+        if (pv1->m_posH.m_arr[i] < pv2->m_posH.m_arr[i])
+        {
+            minBoundF[i] = pv1->m_posH.m_arr[i];
+            maxBoundF[i] = pv2->m_posH.m_arr[i];
+        }
+        else
+        {
+            maxBoundF[i] = pv1->m_posH.m_arr[i];
+            minBoundF[i] = pv2->m_posH.m_arr[i];
+        }
+
+        // compare min bound with third vertex
+        if (pv3->m_posH.m_arr[i] < minBoundF[i])
+        {
+            minBoundF[i] = pv3->m_posH.m_arr[i];
+        }
+        // compare max bound with third vertex
+        else if (pv3->m_posH.m_arr[i] > maxBoundF[i])
+        {
+            maxBoundF[i] = pv3->m_posH.m_arr[i];
+        }
     }
 
-    const int FLOAT_COMPARE_ULP = 8; // the metric used to measure the simularity of two float, lower for more accurate.
-
-    if (MathTool::almost_equal(pv1->m_posH.m_y, pv2->m_posH.m_y, FLOAT_COMPARE_ULP))
-    // triangle like:
-    // 1--------2
-    // \        /
-    //  \      / 
-    //   \    /  
-    //    \  /   
-    //     \/3   
+    // minX <-------|
+    if (minBoundF[x] < m_pso->m_viewport.left)
     {
-        // ensure pv1.x < pv2.x
-        if (pv1->m_posH.m_x > pv2->m_posH.m_x)
-        {
-            std::swap(pv1, pv2);
-        }
-        DrawScanTriangle_flat_top(pv1, pv2, pv3, realVertexSizeBytes);
-    }
-    else if (MathTool::almost_equal(pv2->m_posH.m_y, pv3->m_posH.m_y, FLOAT_COMPARE_ULP))
-    // triangle like: 
-    //     /\1  
-    //    /  \   
-    //   /    \  
-    //  /      \ 
-    // /        \
-    // 2--------3
-    {
-        // ensure pv2.x < pv3.x
-        if (pv2->m_posH.m_x > pv3->m_posH.m_x)
-        {
-            std::swap(pv2, pv3);
-        }
-        DrawScanTriangle_flat_bottom(pv1, pv2, pv3, realVertexSizeBytes);
+        (*minBound)[x] = static_cast<Types::U32>(m_pso->m_viewport.left);
     }
     else
     {
-        // the coefficient to get flat triangle
-        const Types::F32 cutLongEdge_t = (pv2->m_posH.m_y - pv1->m_posH.m_y) / (pv3->m_posH.m_y - pv1->m_posH.m_y);
+        (*minBound)[x] = static_cast<Types::U32>(std::floor(minBoundF[x]));
+    }
 
-        // store the cut vertex
-        auto cutVertexBuf = std::make_unique<F32Buffer>(realVertexSizeBytes);
-        
-        // notice that the pointer still point to the memory in cutVertexBuf
-        Interpolate2(pv1, pv3, 
-            reinterpret_cast<ScreenSpaceVertexTemplate * >(cutVertexBuf->GetBuffer()), // get buffer pointer
-            cutLongEdge_t, realVertexSizeBytes);
+    // |--------> maxX
+    if (maxBoundF[x] > m_pso->m_viewport.right)
+    {
+        (*maxBound)[x] = static_cast<Types::U32>(m_pso->m_viewport.right);
+    }
+    else
+    {
+        (*maxBound)[x] = static_cast<Types::U32>(std::ceil(maxBoundF[x]));
+    }
 
-        auto pCutVertex = reinterpret_cast<const ScreenSpaceVertexTemplate * >(cutVertexBuf->GetBuffer());
-        // ensure the pCutVertex.x < pv2.x
-        // notice the pCutVertex may will not point to the memory in cutVertexBuf,
-        //   but you don't have to worry about the memory leak of cutVertexBuf for whose type is std::unique_ptr.
-        if (pCutVertex->m_posH.m_x > pv2->m_posH.m_x)
-        {
-            std::swap(pCutVertex, pv2);
-        }
+    // -----
+    //   |
+    //   |
+    //   V
+    //  minY
+    if (minBoundF[y] < m_pso->m_viewport.bottom)
+    {
+        (*minBound)[y] = static_cast<Types::U32>(m_pso->m_viewport.bottom);
+    }
+    else
+    {
+        (*minBound)[y] = static_cast<Types::U32>(std::floor(minBoundF[y]));
+    }
 
-        // triangle like (just for illustration, not accurate): 
-        //     /\1  
-        //    /  \   
-        //   /    \  
-        //  /      \ 
-        // /        \
-        //cut------- 2
-        // \        /
-        //  \      / 
-        //   \    /  
-        //    \  /   
-        //     \/3  
-        DrawScanTriangle_flat_bottom(pv1, pCutVertex, pv2, realVertexSizeBytes);
-        DrawScanTriangle_flat_top   (pCutVertex, pv2, pv3, realVertexSizeBytes);
+
+    //  maxY
+    //   A
+    //   |
+    //   |
+    // -----
+    if (maxBoundF[y] > m_pso->m_viewport.top)
+    {
+        (*maxBound)[y] = static_cast<Types::U32>(m_pso->m_viewport.top);
+    }
+    else
+    {
+        (*maxBound)[y] = static_cast<Types::U32>(std::ceil(maxBoundF[y]));
     }
 }
 
@@ -306,7 +326,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
         memcpy(pOutV2, pv2, realVertexSize);
         return true;
     }
-    // if both w is postive
+    // if both w is positive
     else if ( ! (isWPositive[0] || isWPositive[1]))
     {
         // reject the line
@@ -323,7 +343,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
 
         Interpolate2(pv1, pv2, pOutV2, t, realVertexSize);
 
-        // manually prevent w to be exactlly zero.
+        // manually prevent w to be exactly zero.
         pOutV2->m_posH.m_w = EPSILON_TO_ZERO;
     }
     else
@@ -337,7 +357,7 @@ bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * p
 
         Interpolate2(pv2, pv1, pOutV1, t, realVertexSize);
 
-        // manually prevent w to be exactlly zero.
+        // manually prevent w to be exactly zero.
         pOutV1->m_posH.m_w = EPSILON_TO_ZERO;
     }
 

@@ -64,11 +64,18 @@ private:
         \param pv1~3 three vertex of the triangle, in the screen space(x/y in pixel unit)
         \param realVertexSizeBytes the vertex size of the vertices, in byte unit.
     */
-    void DrawScanTriangle(
+    void DrawTriangle(
         const ScreenSpaceVertexTemplate*    pv1,
         const ScreenSpaceVertexTemplate*    pv2,
         const ScreenSpaceVertexTemplate*    pv3,
         const unsigned int                  realVertexSizeBytes);
+
+    void FindTriangleBoundary(
+        const ScreenSpaceVertexTemplate*    pv1,
+        const ScreenSpaceVertexTemplate*    pv2,
+        const ScreenSpaceVertexTemplate*    pv3,
+        std::array<Types::U32, 2> *         minBound,
+        std::array<Types::U32, 2> *         maxBound);
 
 private:
 
