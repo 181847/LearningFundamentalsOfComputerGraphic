@@ -60,16 +60,16 @@ public:
 
     /*!
         \brief set scissor for the rasterize.
-        this scissor is avaliable for specific function (DrawLine...).
+        this scissor is available for specific function (DrawLine...).
     */
     void SetScissor(const ScissorRect& rect);
 
     /*!
-        \brief draw line (Bresenham Algorithm) with normalized coordinates, climp the portions out of range.
+        \brief draw line (Bresenham Algorithm) with normalized coordinates, clip the portions out of range.
         \param (x0, y0) start point
         \param (x1, y1) end point
         \param color the color of the line
-        the viewed space is setted by the m_normalizedScissor.
+        the viewed space is set by the m_normalizedScissor.
     */
     void DrawLine(
         const Types::F32 x0, const Types::F32 y0, 
@@ -106,9 +106,9 @@ public:
         \param (x2, y2) end point
         \param foreColor the color of the line
         \param backColor background color
-        beware of that the boundry of the points, this line algorithm use floating point number as location,
-        so the boundry is not exactly the [0, 'width/height' - 1]£¬
-        with my simple experiments, it should be in [0, 'width/height' - 2]£¬
+        beware of that the boundary of the points, this line algorithm use floating point number as location,
+        so the boundary is not exactly the [0, 'width/height' - 1],
+        with my simple experiments, it should be in [0, 'width/height' - 2],
         reference from: https://en.wikipedia.org/wiki/Xiaolin_Wu%27s_line_algorithm
     */
     void DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, const RGB& foreColor = RGB::BLACK, const RGB& backgroundColor = RGB::WHITE);
