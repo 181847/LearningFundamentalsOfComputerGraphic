@@ -29,6 +29,7 @@
 #include "../CommonClasses/Pipline.h"
 #include "../CommonClasses/CoordinateFrame.h"
 #include "../CommonClasses/DebugConfigs.h"
+#include "../CommonClasses/Helpers.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 RandomTool::MTRandom globalMtr;
@@ -110,49 +111,6 @@ CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 	
 
 	return randVec;
-}
-
-/*!
-    \brief help to generate sphere ray lines to be drawn.
-    \param drawLine the function to recieve the line start and end points.
-    \param centerLocationX the center x location of the sphere.
-    \param centerLocationY the center y location of the sphere.
-    \param segmentLength the length of each segment
-    \param startInnerRadius the minimum radius of the spheres
-    \param numRounds how many rounds to draw.
-*/
-void SphereRay(
-    std::function<void(const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const unsigned int roundIndex, const unsigned int lineIndex)>
-    drawLine,
-    const Types::F32 centerLocationX,
-    const Types::F32 centerLocationY,
-    const Types::F32 segmentLength = 35.0f,
-    const Types::F32 startInnerRadius = 30.0f,
-    const Types::U32 numRounds = 5,
-    const Types::F32 radioOffset = 0.0f)
-{
-        Types::F32 deltaTheta = 2.0f * MathTool::PI_F / 64.0f;
-        Types::F32 theta = 0.0f;
-        Types::F32 rIn = startInnerRadius;
-        Types::F32 rOut = rIn + segmentLength;
-
-        Types::F32 x0, y0, x1, y1;
-        for (unsigned int i = 0; i < numRounds; ++i)
-        {
-            for (unsigned int j = 0; j < 64; ++j)
-            {
-                //BREAK_POINT_IF(i == 3 && j == 0 && centerLocationX == 0.5f);
-                theta = radioOffset + deltaTheta * j + (i % 2) * deltaTheta * 0.5f;
-                x0 = centerLocationX + rIn  * std::cos(theta);
-                y0 = centerLocationY + rIn  * std::sin(theta);
-                x1 = centerLocationX + rOut * std::cos(theta);
-                y1 = centerLocationY + rOut * std::sin(theta);
-
-                drawLine(x0, y0, x1, y1, i, j);
-            }
-            rIn = rOut;
-            rOut += segmentLength;
-        } // end outer for loop
 }
 
 #define HELP_SPHERE_RAY_LAMBDA_PARAMETERS const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const unsigned int roundIndex, const unsigned int lineIndex
@@ -1121,7 +1079,7 @@ TEST_MODULE_START
         SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
             const unsigned int theIndexOfOneLine = 64;
-            // only get one line for convience of debuging
+            // only get one line for convenience of debugging
             //if (lineIndex == theIndexOfOneLine)
             //{
                 // add start vertex and its index
