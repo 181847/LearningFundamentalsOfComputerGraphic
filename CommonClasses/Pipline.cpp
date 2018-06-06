@@ -216,12 +216,17 @@ void Pipline::DrawTriangle(
     {
         for (; x < maxBoundU[0]; ++x)
         {
-            const float alpha = f23.eval(x, y) / f23.eval(pv1->m_posH.m_x, pv1->m_posH.m_y);
-            const float beta  = f31.eval(x, y) / f31.eval(pv2->m_posH.m_x, pv2->m_posH.m_y);
+            const float alpha = 
+                  f23.eval(static_cast<Types::F32>(x),  static_cast<Types::F32>(y)) 
+                / f23.eval(pv1->m_posH.m_x,             pv1->m_posH.m_y);
+            const float beta  = 
+                  f31.eval(static_cast<Types::F32>(x),  static_cast<Types::F32>(y)) 
+                / f31.eval(pv2->m_posH.m_x,             pv2->m_posH.m_y);
             const float gamma = 1.0f - alpha - beta;
 
             if (alpha > 0.0f && beta > 0.0f && gamma > 0.0f)
             {
+                // now for simplification, draw all triangle in black color.
                 m_backBuffer->SetPixel(x, y, RGBA::BLACK);
             }
         }// end for x, columns
