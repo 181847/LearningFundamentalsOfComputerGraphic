@@ -32,6 +32,7 @@
 #include "../CommonClasses/FixPointNumber.h"
 #include "../CommonClasses/EFloat.h"
 #include "../CommonClasses/DebugConfigs.h"
+#include "../CommonClasses/EdgeEquation2D.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 using namespace CommonClass;
@@ -43,7 +44,7 @@ const unsigned int G_MAX_INT = 1000;
 
 
 /*!
-    \brief this function is for floating point number round error analysist.
+    \brief this function is for floating point number round error analysis.
 */
 template<typename RESULT_T, typename LONG_RESULT_T, typename BOUND_T>
 void ShowNumberInBound(const RESULT_T value, const RESULT_T errorBound, const LONG_RESULT_T preciseValue, const BOUND_T low, const BOUND_T high)
@@ -1693,6 +1694,54 @@ TEST_UNIT_START("triangle region boundary in pipeline")
 TEST_UNIT_END;
 #pragma endregion
 #endif // _DEBUG
+
+#pragma region EdgeEquation test
+TEST_UNIT_START("EdgeEquation test")
+
+    RandomTool::MTRandom mtr;
+
+    const int SCALE_XY = 200;
+    const int numPoints = 40;
+
+    auto RandomXY = [&SCALE_XY, &mtr]()->float {
+        return 2.0f * (mtr.Random() - 0.5f) * SCALE_XY;
+    };
+
+    for (int numLoop = 0; numLoop < 40; ++numLoop)
+    {
+        hvector p1(RandomXY(), RandomXY()), p2(RandomXY(), RandomXY());
+        EdgeEquation2D f12(p1, p2);
+
+        // get the left side point, and right side point.
+        hvector direction = p2 - p1;
+        hvector perpendicular = direction;
+        std::swap(perpendicular.m_x, perpendicular.m_y);
+
+        std::array<hvector, 2> LRPerp = { perpendicular, perpendicular };
+        const int left = 0, right = 1;
+        LRPerp[left].m_x *= -1.0f;
+        LRPerp[right].m_y *= -1.0f;
+
+        for (int chooseSide = left; chooseSide <= right; ++chooseSide)
+        {
+            for (int i = 0; i < numPoints; ++i)
+            {
+                const float along((mtr.Random() - 0.5f) * 4.0f), side(4.0f * mtr.Random() + 0.001f);
+                hvector point = p1 + along * direction + side * LRPerp[chooseSide];
+                if (chooseSide == left)
+                {
+                    TEST_ASSERT(f12.eval(point.m_x, point.m_y) > 0.0f);
+                }
+                else // choose right
+                {
+                    TEST_ASSERT(f12.eval(point.m_x, point.m_y) < 0.0f);
+                }
+            }// end for numPoints
+        }// end for chooseSide from left to right
+    }// end for numLoop
+    
+TEST_UNIT_END;
+#pragma endregion
 
 TEST_MODULE_END
 
