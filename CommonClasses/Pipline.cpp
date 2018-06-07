@@ -214,6 +214,7 @@ void Pipline::DrawTriangle(
 
     for (; y < maxBoundU[1]; ++y)
     {
+        x = minBoundU[0]; // restore x to min
         for (; x < maxBoundU[0]; ++x)
         {
             const float alpha = 
