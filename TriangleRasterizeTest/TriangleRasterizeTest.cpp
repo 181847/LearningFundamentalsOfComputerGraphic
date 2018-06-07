@@ -106,8 +106,35 @@ TEST_UNIT_START("directly draw triangle in screen space")
         UserConfig::COMMON_PIXEL_HEIGHT, 
         RGBA::GREEN));
 
+    // create and config pipeline state object
+    auto pso = std::make_unique<PiplineStateObject>();
+
+    // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
+    Viewport viewport;
+    viewport.left = 0;
+    viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+    viewport.bottom = 0;
+    viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+    pso->SetViewport(viewport);
+    
+    pipline.SetPSO(std::move(pso));
+
+    std::array<hvector, 3> triv = {
+        hvector(  2.0f, 400.0f),
+        hvector(200.0f,  10.0f),
+        hvector(400.0f, 300.0f)
+    };
+
+    std::array<ScreenSpaceVertexTemplate*, 3> vInScreen;
+    for (size_t i = 0; i < vInScreen.size(); ++i)
+    {
+        vInScreen[i] = reinterpret_cast<ScreenSpaceVertexTemplate*>(&triv[i]);
+    }
+
+    pipline.DrawTriangle(vInScreen[0], vInScreen[1], vInScreen[2], sizeof(hvector));
+
     std::string pictureIndex = "000";
-    pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\\TriangleTest\\screenSpaceTriangle_" + pictureIndex + ".png");
+    pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\TriangleTest\\screenSpaceTriangle_" + pictureIndex + ".png");
         
 TEST_UNIT_END;
 #pragma endregion
