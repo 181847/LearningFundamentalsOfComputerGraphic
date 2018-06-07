@@ -93,10 +93,26 @@ private:
         std::array<Types::U32, 2> *         minBound,
         std::array<Types::U32, 2> *         maxBound);
 
+    /*!
+        \brief draw triangle lists with out shader processing.
+        \param indices indices of the triangle, whose length should be the times of three
+        \param vertices vertices of triangles. they should have been transfered to screen space.
+        \param vertexSizeInBytes the vertex size in bytes
+        we assume the four float in front of the vertex is the screen space vertex location (x/y in pixel location).
+        -0.5 <= x <= pixelWidth - 0.5
+        -0.5 <= y <= pixelHeight - 0.5
+        -1 <= z <= 1
+        w == 1
+    */
+    void DrawTriangleList(
+        const std::vector<unsigned int>&    indices, 
+        std::unique_ptr<F32Buffer>          vertices, 
+        const unsigned int                  psInputStride);
+
 private:
 
     /*!
-        \brief draw line lists with out shader processing.
+        \brief draw line lists in screen space
         \param indices indices of the line segments, whose length should be even
         \param vertices endpoints of line segments. they should have been transfered to screen space.
         \param vertexSizeInBytes the vertex size in bytes
@@ -107,9 +123,9 @@ private:
         w == 1
     */
     void DrawLineList(
-        const std::vector<unsigned int>& indices, 
-        const std::unique_ptr<F32Buffer> lineEndPointList,
-        const unsigned int vertexSizeInBytes);
+        const std::vector<unsigned int>&    indices, 
+        const std::unique_ptr<F32Buffer>    lineEndPointList,
+        const unsigned int                  vertexSizeInBytes);
 
     /*!
         \brief draw one bresenhamLine.
@@ -180,16 +196,20 @@ private:
         and all the vertex have been clipped, and we don't concern about the point out of range.
     */
     std::unique_ptr<F32Buffer> ViewportTransformVertexStream(
-        std::unique_ptr<F32Buffer> verticesToBeTransformed, const unsigned int realVertexSizeBytes);
+        std::unique_ptr<F32Buffer>          verticesToBeTransformed, 
+        const unsigned int                  realVertexSizeBytes);
 
     /*!
         \brief for each vertex data, process it with vertex shader which is defined in the pipline state object
         \param pVertexStream the input vertex buffer stream
         \param vsInputStride the size(byte) of one vertex which will be passed into the vertexShader.
         \param vsOutputStrid the size(byte) of one vertex which will be returned by the vertexShader.
+        return a new block of memory for the result of the transform.
     */
     std::unique_ptr<F32Buffer> VertexShaderTransform(
-        const F32Buffer* pVertexStream, const unsigned int vsInputStride, const unsigned int vsOutputStride);
+        const F32Buffer*                    pVertexStream, 
+        const unsigned int                  vsInputStride, 
+        const unsigned int                  vsOutputStride);
 };
 
 } // namespace CommonClass

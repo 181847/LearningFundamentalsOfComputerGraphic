@@ -32,7 +32,8 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
         throw std::exception("lack of pipline state object");
     }
 
-    if (m_pso->m_primitiveType != PrimitiveType::LINE_LIST)
+    if ( ! (m_pso->m_primitiveType == PrimitiveType::LINE_LIST
+            || m_pso->m_primitiveType == PrimitiveType::TRIANGLE_LIST))
     {
         throw std::exception("unsupported primitive type");
     }
@@ -58,30 +59,45 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     std::vector<unsigned int>  clippedIndices;   // the index data that has been clipped.
     std::unique_ptr<F32Buffer> clippedLineData;  // the vertex data that has been clipped.
 
-    // clip all the line
-    ClipLineList(indices, vsOutputStream.get(), psInputStride, &clippedIndices, &clippedLineData);
+    if (m_pso->m_primitiveType == PrimitiveType::LINE_LIST)
+    {
+        // clip all the line
+        ClipLineList(indices, vsOutputStream.get(), psInputStride, &clippedIndices, &clippedLineData);
 
 #ifdef _DEBUG
-    // all line has been clipped. return
-    if (clippedIndices.size() == 0)
-    {
-        printf("clipped all line, no line rests\n");
-        return;
-    }
+        // all line has been clipped. return
+        if (clippedIndices.size() == 0)
+        {
+            printf("clipped all line, no line rests\n");
+            return;
+        }
 #endif
 
-    // indices after clipping
-    const unsigned int numIndices = clippedIndices.size();
-    // the byte size of vertex data after clipping
-    const unsigned int numBytes = clippedLineData->GetSizeOfByte();
+        // indices after clipping
+        const unsigned int numIndices = clippedIndices.size();
+        // the byte size of vertex data after clipping
+        const unsigned int numBytes = clippedLineData->GetSizeOfByte();
 
-    // now the pipline is not complete, so for the simplification, we assume all the vertex for each shader is in the same size.
-    assert(vsInputStride == psInputStride);
-    assert(numBytes % vsInputStride == 0 && "vertics data error, cannot ensure every vertex data is complete.");
+        // now the pipline is not complete, so for the simplification, we assume all the vertex for each shader is in the same size.
+        assert(vsInputStride == psInputStride);
+        assert(numBytes % vsInputStride == 0 && "vertics data error, cannot ensure every vertex data is complete.");
 
-    auto viewportTransData = ViewportTransformVertexStream(std::move(clippedLineData), psInputStride);
+        auto viewportTransData = ViewportTransformVertexStream(std::move(clippedLineData), psInputStride);
 
-    DrawLineList(clippedIndices, std::move(viewportTransData), psInputStride);
+        DrawLineList(clippedIndices, std::move(viewportTransData), psInputStride);
+    } // end if is LINE_LIST
+    else if (m_pso->m_primitiveType == PrimitiveType::TRIANGLE_LIST)
+    {
+        // TODO: triangle clipping is not completed,
+        // here we just copy the vertices' data.
+        auto clippendData = std::make_unique<F32Buffer>(vertices->GetSizeOfByte());
+        memcpy(clippendData->GetBuffer(), vertices->GetBuffer(), clippendData->GetSizeOfByte());
+
+        auto viewportTransData = ViewportTransformVertexStream(std::move(clippendData), psInputStride);
+        
+        DrawTriangleList(indices, std::move(viewportTransData), psInputStride);
+        //DrawTriangleList()
+    }// end else if is TRIANGLE_LIST
 }
 
 void Pipline::DrawLineList(
@@ -773,6 +789,11 @@ std::unique_ptr<F32Buffer> Pipline::VertexShaderTransform(const F32Buffer * pVer
     }
 
     return vertexOutputStream;
+}
+
+void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::unique_ptr<F32Buffer> vertices, const unsigned int psInputStride)
+{
+    throw std::logic_error("The method or operation is not implemented.");
 }
 
 } // namespace CommonClass
