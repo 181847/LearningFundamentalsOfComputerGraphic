@@ -113,7 +113,6 @@ CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 	return randVec;
 }
 
-#define HELP_SPHERE_RAY_LAMBDA_PARAMETERS const Types::F32 x0, const Types::F32 y0, const Types::F32 x1, const Types::F32 y1, const unsigned int roundIndex, const unsigned int lineIndex
 
 TEST_MODULE_START
 
