@@ -793,7 +793,23 @@ std::unique_ptr<F32Buffer> Pipline::VertexShaderTransform(const F32Buffer * pVer
 
 void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::unique_ptr<F32Buffer> vertices, const unsigned int psInputStride)
 {
-    throw std::logic_error("The method or operation is not implemented.");
+    const size_t numIndex = indices.size();
+    
+    assert(numIndex % 3 == 0 && "error the, number of index is not times of three, cannot comprise all completed triangle");
+
+    const ScreenSpaceVertexTemplate *pv1(nullptr), *pv2(nullptr), *pv3(nullptr);
+    unsigned char* pVertexAddress = vertices->GetBuffer();
+
+    for (size_t i = 0; i < numIndex; i += 3)
+    {
+        DebugClient<DEBUG_CLIENT_CONF_TRIANGL>(i > 64);
+
+        pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i,     psInputStride);
+        pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i + 1, psInputStride);
+        pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i + 2, psInputStride);
+
+        DrawTriangle(pv1, pv2, pv3, psInputStride);
+    }
 }
 
 } // namespace CommonClass
