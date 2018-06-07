@@ -53,7 +53,7 @@ public:
         const std::vector<unsigned int>& indices, 
         const F32Buffer*                 vertices);
 
-    // next function will be used in the development phase, which will be pulic in the debug mode and private in the release mode.
+    // next function will be used in the development phase, which will be public in the debug mode and private in the release mode.
 #ifdef _DEBUG
 public:
 #else
@@ -70,6 +70,22 @@ private:
         const ScreenSpaceVertexTemplate*    pv3,
         const unsigned int                  realVertexSizeBytes);
 
+    /*!
+        \brief find the pixel boundary of the triangle in the screen space
+        \param pv1~3 three vertex and the function only care about the first two Float32 in each vertex which mean the {x,y} in screen space
+        \param minBound return the min boundary of x/y, 0 -> x, 1 -> y.
+        \param maxBound return the max boundary of x/y, 0 -> x, 1 -> y.
+        the boundary depends on the viewport of current pipline to avoid out of the region of the backbuffer,
+        for example, the image has the size of 512*128,
+        then the pixel index should be in the region of [0,511]*[0,127],
+        but during the viewport transformation stage, the NDC coordinate may exceed the index range,
+          e.g. (-1,-1) in NDC space will be transformed to (-0.5,  -0.5 ) in the screen space,
+               (+1,+1) in NDC space will be transformed to (511.5, 127.5) in the screen space
+        But in the triangle rasterization stage, we will floor(minBound), ceil(maxBound) to cover the pixels as much as possible,
+        which will result in the 'out of range' ERROR in the four edge of the backbuffer,
+        As mentioned above, (-0.5, -0.5) will be floored to (-1, -1) which is out of range, and the same applies to (511.5, 127.5),
+        so the solution is to check with viewport (which should have a boundary of [0,511]*[0,127] or even smaller) before we return the boundary result.
+    */
     void FindTriangleBoundary(
         const ScreenSpaceVertexTemplate*    pv1,
         const ScreenSpaceVertexTemplate*    pv2,
@@ -84,7 +100,7 @@ private:
         \param indices indices of the line segments, whose length should be even
         \param vertices endpoints of line segments. they should have been transfered to screen space.
         \param vertexSizeInBytes the vertex size in bytes
-        we assum the four float in front of the vertex is the screen space vertex location (x/y in pixel location).
+        we assume the four float in front of the vertex is the screen space vertex location (x/y in pixel location).
         -0.5 <= x <= pixelWidth - 0.5
         -0.5 <= y <= pixelHeight - 0.5
         -1 <= z <= 1
@@ -107,14 +123,14 @@ private:
         const unsigned int                  realVertexSizeBytes);
 
     /*!
-        \brief clip line in homogenous clipping space by the plane w = 0
+        \brief clip line in homogeneous clipping space by the plane w = 0
         \param pv1 input start vertex
         \param pv2 input end vertex
         \param pOutV1 output start vertex data
         \param pOutV2 output end vertex data
         \return whether this line is not visible which means that both w <= 0.
-        This function will ensure the fourth component of homogenous location (or so-called 'w') will be Greater than ZERO,
-        even the w is excactly zero, we will cut that to a epsilon(maybe +1e-20) to avoid dividing by zero in perspective dividing.
+        This function will ensure the fourth component of homogeneous location (or so-called 'w') will be Greater than ZERO,
+        even the w is exactly zero, we will cut that to a epsilon(maybe +1e-20) to avoid dividing by zero in perspective dividing.
     */
     static bool WClipLineInHomogenousClipSpace(
         const ScreenSpaceVertexTemplate*    pv1,

@@ -202,6 +202,8 @@ void Pipline::DrawTriangle(
     const ScreenSpaceVertexTemplate * pv3, 
     const unsigned int realVertexSizeBytes)
 {
+    // Notice: the edge equation will estimate the right side to be positive,
+    //     so the count-clockwise of the triangle is the front side.
     EdgeEquation2D 
         f12(pv1->m_posH, pv2->m_posH), 
         f23(pv2->m_posH, pv3->m_posH),
@@ -210,19 +212,16 @@ void Pipline::DrawTriangle(
     std::array<Types::U32, 2> minBoundU, maxBoundU; // xxxbound[0] is for x, xxxbound[1] is for y
     FindTriangleBoundary(pv1, pv2, pv3, &minBoundU, &maxBoundU);
 
-    unsigned int x = minBoundU[0], y = minBoundU[1];
-
-    for (; y < maxBoundU[1]; ++y)
+    for (unsigned int y = minBoundU[1]; y < maxBoundU[1]; ++y)
     {
-        x = minBoundU[0]; // restore x to min
-        for (; x < maxBoundU[0]; ++x)
+        for (unsigned int x = minBoundU[0]; x < maxBoundU[0]; ++x)
         {
             const float alpha = 
-                  f23.eval(static_cast<Types::F32>(x),  static_cast<Types::F32>(y)) 
-                / f23.eval(pv1->m_posH.m_x,             pv1->m_posH.m_y);
+                  f23.eval(static_cast<Types::F32>( x ),  static_cast<Types::F32>( y )) 
+                / f23.eval(pv1->m_posH.            m_x,   pv1->m_posH.            m_y);
             const float beta  = 
-                  f31.eval(static_cast<Types::F32>(x),  static_cast<Types::F32>(y)) 
-                / f31.eval(pv2->m_posH.m_x,             pv2->m_posH.m_y);
+                  f31.eval(static_cast<Types::F32>( x ),  static_cast<Types::F32>( y )) 
+                / f31.eval(pv2->m_posH.            m_x,   pv2->m_posH.            m_y);
             const float gamma = 1.0f - alpha - beta;
 
             if (alpha > 0.0f && beta > 0.0f && gamma > 0.0f)
