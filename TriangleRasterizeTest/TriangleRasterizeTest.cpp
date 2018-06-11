@@ -134,7 +134,7 @@ TEST_UNIT_START("directly draw triangle in screen space")
 
     pipline.DrawTriangle(vInScreen[0], vInScreen[1], vInScreen[2], sizeof(hvector));
 
-    std::string pictureIndex = "000";
+    std::string pictureIndex = "001";
     pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\TriangleTest\\screenSpaceTriangle_" + pictureIndex + ".png");
         
 TEST_UNIT_END;
@@ -354,22 +354,22 @@ TEST_UNIT_START("triangle cut test")
     case 1:
     case 3:
         pipline.DrawTriangle(
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(0)),
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(1)),
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(2)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::ONE_TRI_1)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::ONE_TRI_2)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::ONE_TRI_3)),
             VERTEX_SIZE);
         break;
 
     case 2:
+        /*pipline.DrawTriangle(
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::TWO_TRI_1_1)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::TWO_TRI_1_2)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::TWO_TRI_1_3)),
+            VERTEX_SIZE);*/
         pipline.DrawTriangle(
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(0)),
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(1)),
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(2)),
-            VERTEX_SIZE);
-        pipline.DrawTriangle(
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(1)),
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(2)),
-            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(3)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::TWO_TRI_2_1)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::TWO_TRI_2_2)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(TrianglePair::Index::TWO_TRI_2_3)),
             VERTEX_SIZE);
         break;
     }
