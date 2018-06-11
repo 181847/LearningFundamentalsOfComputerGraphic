@@ -31,6 +31,7 @@
 #include "../CommonClasses/CoordinateFrame.h"
 #include "../CommonClasses/DebugConfigs.h"
 #include "../CommonClasses/Helpers.h"
+#include "../CommonClasses/HPlaneEquation.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 using namespace CommonClass;
@@ -91,7 +92,6 @@ TEST_UNIT_START("a test always success")
 TEST_UNIT_END;
 #pragma endregion
 
-
 #pragma region directly draw triangle in screen space
 TEST_UNIT_START("directly draw triangle in screen space")
 
@@ -139,7 +139,6 @@ TEST_UNIT_START("directly draw triangle in screen space")
         
 TEST_UNIT_END;
 #pragma endregion
-
 
 #pragma region basic sphereRayTri test
 TEST_UNIT_START("basic sphereRayTri test")
@@ -282,5 +281,103 @@ TEST_UNIT_START("basic sphereRayTri test")
 TEST_UNIT_END;
 #pragma endregion
 
+#pragma region triangle cut test
+TEST_UNIT_START("triangle cut test")
+
+    // skip this test due to the bug of clipping line function.
+    //return 0;
+
+    // create and set a pipline.
+    Pipline pipline;
+
+    // set a backbuffer
+    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+        UserConfig::COMMON_PIXEL_WIDTH, 
+        UserConfig::COMMON_PIXEL_HEIGHT, 
+        RGBA::GREEN));
+
+    // create and config pipeline state object
+    auto pso = std::make_unique<PiplineStateObject>();
+
+    // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
+    Viewport viewport;
+    viewport.left = 0;
+    viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+    viewport.bottom = 0;
+    viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+    pso->SetViewport(viewport);
+    
+    pipline.SetPSO(std::move(pso));
+
+    std::array<hvector, 3> triv = {
+        hvector(  2.0f, 400.0f, 1.0f),
+        hvector(200.0f,  10.0f, 2.0f),
+        hvector(400.0f, 300.0f, -1.0f)
+    };
+    const size_t VERTEX_SIZE = sizeof(hvector);
+
+    std::array<ScreenSpaceVertexTemplate*, 3> vInScreen;
+    for (size_t i = 0; i < vInScreen.size(); ++i)
+    {
+        vInScreen[i] = reinterpret_cast<ScreenSpaceVertexTemplate*>(&triv[i]);
+    }
+    
+    // define the plane equation to cut triangle
+    class PositiveZPlane : public HPlaneEquation
+    {
+    public:
+        Types::F32 eval(const hvector& pointH) override
+        {
+            return pointH.m_z;
+        }
+
+        Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override
+        {
+            return (0.0f - point1.m_z) / (point2.m_z - point1.m_z);
+        }
+    };
+
+    PositiveZPlane posZPlane;
+    TrianglePair cutResult(TrianglePair::ZERO, VERTEX_SIZE);
+    {
+        TIME_GUARD;
+        TrianglePair cutResutlInTimer(posZPlane.CutTriangle(vInScreen[0], vInScreen[1], vInScreen[2], VERTEX_SIZE));
+        cutResult = std::move(cutResutlInTimer);
+    }
+
+    switch (cutResult.m_count)
+    {
+    case 0:
+        std::cout << "triangle reject" << std::endl;
+        break;
+
+    case 1:
+    case 3:
+        pipline.DrawTriangle(
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(0)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(1)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(2)),
+            VERTEX_SIZE);
+        break;
+
+    case 2:
+        pipline.DrawTriangle(
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(0)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(1)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(2)),
+            VERTEX_SIZE);
+        pipline.DrawTriangle(
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(1)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(2)),
+            reinterpret_cast<ScreenSpaceVertexTemplate*>(cutResult.GetVertexPointer(3)),
+            VERTEX_SIZE);
+        break;
+    }
+
+    std::string pictureIndex = "001";
+    pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\TriangleTest\\triangleCut_" + pictureIndex + ".png");
+        
+TEST_UNIT_END;
+#pragma endregion
 
 TEST_MODULE_END
