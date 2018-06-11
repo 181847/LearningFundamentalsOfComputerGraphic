@@ -80,7 +80,7 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
 
         // now the pipline is not complete, so for the simplification, we assume all the vertex for each shader is in the same size.
         assert(vsInputStride == psInputStride);
-        assert(numBytes % vsInputStride == 0 && "vertics data error, cannot ensure every vertex data is complete.");
+        assert(numBytes % vsInputStride == 0 && "vertices data error, cannot ensure every vertex data is complete.");
 
         auto viewportTransData = ViewportTransformVertexStream(std::move(clippedLineData), psInputStride);
 
@@ -228,9 +228,9 @@ void Pipline::DrawTriangle(
     std::array<Types::U32, 2> minBoundU, maxBoundU; // xxxbound[0] is for x, xxxbound[1] is for y
     FindTriangleBoundary(pv1, pv2, pv3, &minBoundU, &maxBoundU);
 
-    for (unsigned int y = minBoundU[1]; y < maxBoundU[1]; ++y)
+    for (unsigned int y = minBoundU[1]; y <= maxBoundU[1]; ++y)
     {
-        for (unsigned int x = minBoundU[0]; x < maxBoundU[0]; ++x)
+        for (unsigned int x = minBoundU[0]; x <= maxBoundU[0]; ++x)
         {
             const float alpha = 
                   f23.eval(static_cast<Types::F32>( x ),  static_cast<Types::F32>( y )) 
@@ -475,7 +475,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     
 #ifdef MANUALLY_CUT_HVECTOR
     // the function is a temporary solution for the clipped point will outside of the boundary
-    // prefix the hvector for homogenous clip
+    // prefix the hvector for homogeneous clip
     // for example, if w == -2.3, and x == -2.4,
     // after the perspective divide, the x will be 1.04... which is greater than one,
     // to prevent this overflowing error, just make x = equal to w.
@@ -581,7 +581,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 
     }
 
-    // an ensurance that all the components should be limited in [-1, +1] after perspective divided.
+    // an insurance that all the components should be limited in [-1, +1] after perspective divided.
 #ifdef MANUALLY_CHECK_XYZ_BOUND
 
     const Types::F32 
@@ -621,7 +621,7 @@ void Pipline::ClipLineList(
     assert(pClippedIndices != nullptr && pClippedVertices != nullptr    && "argument nullptr error");
     assert(indices.size() % 2 == 0                                      && "line indices is not pairs");
 
-    // empty the output indice buffer.
+    // empty the output indices buffer.
     pClippedIndices->clear();
     unsigned int numLineSegment = indices.size() / 2;                           // number of all line segments
 
@@ -638,7 +638,7 @@ void Pipline::ClipLineList(
     unsigned char * pStartClippedVertex = clippedStream->GetBuffer();           // output clipped start vertex
     unsigned char * pEndClippedVertex   = pStartClippedVertex + realVertexSize; // output clipped end vertex
 
-    // before clipping in homogenous space, let's first clip the vertex data into w > 0
+    // before clipping in homogeneous space, let's first clip the vertex data into w > 0
     // create a temp buffer for that result, which will contain only two vertex.
     auto            wClipBuffer         = std::make_unique<F32Buffer>(2 * realVertexSize);
     unsigned char * pWClipStartVertex   = wClipBuffer->GetBuffer();               // temp buffer for start vertex in the w clipping
@@ -670,7 +670,7 @@ void Pipline::ClipLineList(
             continue;
         }
 
-        // homogenous space clipping test
+        // homogeneous space clipping test
         canDrawThisSegment = ClipLineInHomogenousClipSpace(
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipStartVertex),
             reinterpret_cast<ScreenSpaceVertexTemplate *>(pWClipEndVertex),
@@ -705,7 +705,7 @@ void Pipline::ClipLineList(
     if (realClippedStreamSize < clippedStream->GetSizeOfByte())
     {
         // if the vertices of visible line segment use less space than clippedStream stream
-        // creat another buffer stream which will only contain the avaliable data.
+        // creat another buffer stream which will only contain the available data.
         auto shrinkClippedStream = std::make_unique<F32Buffer>(realClippedStreamSize);
 
         memcpy(shrinkClippedStream->GetBuffer(), clippedStream->GetBuffer(), shrinkClippedStream->GetSizeOfByte());
@@ -753,7 +753,7 @@ std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_pt
             pDestVertex->m_posH.m_w = 1.0f;
         }
 
-        // transfrom
+        // transform
         pDestVertex->m_posH = viewportTransformMat * pDestVertex->m_posH;
 
         // move to next data.
