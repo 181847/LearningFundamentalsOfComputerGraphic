@@ -116,6 +116,9 @@
     <ClInclude Include="EdgeEquation2D.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="HPlaneEquation.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -209,6 +212,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="EdgeEquation2D.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="HPlaneEquation.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

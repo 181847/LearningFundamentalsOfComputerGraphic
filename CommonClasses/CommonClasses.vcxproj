@@ -159,6 +159,7 @@
     <ClInclude Include="FixPointNumber.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="HitRecord.h" />
+    <ClInclude Include="HPlaneEquation.h" />
     <ClInclude Include="hvector.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Light.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="FixPointNumber.cpp" />
     <ClCompile Include="HitRecord.cpp" />
+    <ClCompile Include="HPlaneEquation.cpp" />
     <ClCompile Include="hvector.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Light.cpp" />
