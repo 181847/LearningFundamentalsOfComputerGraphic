@@ -37,7 +37,6 @@ TrianglePair& TrianglePair::operator=(TrianglePair && other)
 {
     m_count             = other.m_count;
     m_vertexSizeInByte  = other.m_vertexSizeInByte;
-    m_indices           = std::move(other.m_indices);
     m_vertices          = std::move(other.m_vertices);
     return *this;
 }

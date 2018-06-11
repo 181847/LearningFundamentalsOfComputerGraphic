@@ -25,6 +25,24 @@ public:
         TWO         // two triangle exist
     };
 
+    /*!
+       \brief the fixed index to access vertex data.
+       ONE_TRI_X is for TrianglePair that only have one triangle.
+       TWO_TRI_X_X is for TrianglePair that have two triangle, TWO_TRI_1_X is for the first triangle.
+    */
+    enum Index
+    {
+        ONE_TRI_1 = 0,
+        ONE_TRI_2 = 1,
+        ONE_TRI_3 = 2,
+        TWO_TRI_1_1 = 0,
+        TWO_TRI_1_2 = 1,
+        TWO_TRI_1_3 = 2,
+        TWO_TRI_2_1 = 1,
+        TWO_TRI_2_2 = 3,
+        TWO_TRI_2_3 = 2
+    };
+
 public:
     /*!
         \brief construct the pairs
@@ -71,11 +89,6 @@ public:
         \brief the buffer store triangle vertex.
     */
     std::unique_ptr<F32Buffer> m_vertices;
-
-    /*!
-        \brief store the vertex indices
-    */
-    std::array<unsigned short, 6> m_indices;
 };
 
 class HPlaneEquation
