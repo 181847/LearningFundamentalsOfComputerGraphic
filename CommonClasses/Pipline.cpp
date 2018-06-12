@@ -812,5 +812,75 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
     }
 }
 
+void Pipline::FrustumCutTriangle(
+    const ScreenSpaceVertexTemplate *   pv1, 
+    const ScreenSpaceVertexTemplate *   pv2, 
+    const ScreenSpaceVertexTemplate *   pv3, 
+    const unsigned int                  realVertexSizeBytes, 
+    std::vector<TrianglePair>*          outputStream, 
+    const std::vector<HPlaneEquation*>& cutPlanes,
+    const size_t                        fromPlane)
+{
+    assert(fromPlane < cutPlanes.size());
+
+    TrianglePair cutResult = cutPlanes[fromPlane]->CutTriangle(pv1, pv2, pv3, realVertexSizeBytes);
+
+    // have we reached the last plane?
+    if (fromPlane == cutPlanes.size() - 1)
+    {// yes
+        // append cutResult to outputStream
+        if (cutResult.m_count > 0)
+        {
+            outputStream->push_back(std::move(cutResult));
+        }
+        return; // cutting process terminate.
+    }// end if is last plane
+
+    switch(cutResult.m_count)
+    {
+    case TrianglePair::ZERO:
+        // result is zero, no triangle remain.
+        // return immediately.
+        return;
+        break; // case ZERO triangle
+
+    case TrianglePair::ONE:
+        FrustumCutTriangle(
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::ONE_TRI_1),
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::ONE_TRI_2),
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::ONE_TRI_3),
+            realVertexSizeBytes,
+            outputStream,
+            cutPlanes,
+            fromPlane + 1   // move to next plane
+        );
+        break; // case ONE triangle;
+
+    case TrianglePair::TWO:
+        FrustumCutTriangle(
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::TWO_TRI_1_1),
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::TWO_TRI_1_2),
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::TWO_TRI_1_3),
+            realVertexSizeBytes,
+            outputStream,
+            cutPlanes,
+            fromPlane + 1   // move to next plane
+        );
+        FrustumCutTriangle(
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::TWO_TRI_2_1),
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::TWO_TRI_2_2),
+            cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::TWO_TRI_2_3),
+            realVertexSizeBytes,
+            outputStream,
+            cutPlanes,
+            fromPlane + 1   // move to next plane
+        );
+        break; // case TWO triangle;
+
+    default:
+        assert(false && "unexpected branch");
+    }
+}
+
 } // namespace CommonClass
 

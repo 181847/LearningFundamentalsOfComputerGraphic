@@ -5,6 +5,7 @@
 #include "PiplineStateObject.h"
 #include "ScreenSpaceVertexTemplate.h"
 #include "F32Buffer.h"
+#include "HPlaneEquation.h"
 
 namespace CommonClass
 {
@@ -108,6 +109,22 @@ private:
         const std::vector<unsigned int>&    indices, 
         std::unique_ptr<F32Buffer>          vertices, 
         const unsigned int                  psInputStride);
+
+    /*!
+        \brief 1 + 6 plane cut triangle, 
+        \param pv1~3 three vertex for triangle
+        \param realVertexSizeBytes the byte size of one single vertex
+        \param outputStream return the cut result, each result is a TrianglePair that have one or two triangle,(zero is forbidden).
+        \param fromPlane the plane index to start cutting(default to be zero: first plane in cutPlanes and to the last one in it), it's unnecessary for normal user to concern about this parameter.
+    */
+    void FrustumCutTriangle(
+        const ScreenSpaceVertexTemplate*    pv1,
+        const ScreenSpaceVertexTemplate*    pv2,
+        const ScreenSpaceVertexTemplate*    pv3,
+        const unsigned int                  realVertexSizeBytes,
+        std::vector<TrianglePair> *         outputStream, 
+        const std::vector<HPlaneEquation*>& cutPlanes,
+        const size_t                        fromPlane = 0);
 
 private:
 
