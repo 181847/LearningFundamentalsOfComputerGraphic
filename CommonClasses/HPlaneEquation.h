@@ -3,6 +3,7 @@
 #include "F32Buffer.h"
 #include <memory>
 #include <array>
+#include <assert.h>
 
 namespace CommonClass
 {
@@ -69,10 +70,19 @@ public:
     /*!
         \brief get raw vertex address, in the buffer
         \param index the index of the vertex in the buffer, start from zero.
+        \templateParam POINTER_T the pointer type, e.g. void => void * , int => int *
         if the TrianglePair have ONE triangle, index can be {0, 1, 2}.
         if the TrianglePair have TWO triangle, index can be {0, 1, 2, 3}.
     */
-    unsigned char * GetVertexPointer(const unsigned short index);
+    template<typename POINTER_T = unsigned char>
+    POINTER_T * GetVertexPointer(const unsigned short index)
+    {
+        // 1. m_count MUST NOT be zero, or no vertex exist
+        // 2. if m_count = ONE(1), index <= 2
+        // 3. if m_count = TWO(2), index <= 3
+        assert(m_count > 0 && index < (2 + m_count));
+        return GetVertexPtrAt<POINTER_T>(m_vertices->GetBuffer(), index, m_vertexSizeInByte);
+    }
 
 public:
     /*!
@@ -100,6 +110,7 @@ public:
         const ScreenSpaceVertexTemplate*    pv3,
         const unsigned int                  realVertexSizeBytes);
 
+private:
     /*!
         \brief evaluate the homogeneous point is whether inside the 4D homogeneous plane
         \param pointH the position in the homogeneous coordinate
@@ -110,6 +121,9 @@ public:
     /*!
         \brief calculate the interpolate coefficient
         \param point1~2 two point in homogeneous coordinate
+        the function don't have to consider the situation where no real solution exist,
+        because the coefficient should be calculated only by that the segment is acrossing the plane.
+
     */
     virtual Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) = 0;
 };

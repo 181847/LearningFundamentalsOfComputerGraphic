@@ -41,15 +41,6 @@ TrianglePair& TrianglePair::operator=(TrianglePair && other)
     return *this;
 }
 
-unsigned char * TrianglePair::GetVertexPointer(const unsigned short index)
-{
-    // 1. m_count MUST NOT be zero, or no vertex exist
-    // 2. if m_count = ONE(1), index <= 2
-    // 3. if m_count = TWO(2), index <= 3
-    assert(m_count > 0 && index < (2 + m_count));
-    return GetVertexPtrAt(m_vertices->GetBuffer(), index, m_vertexSizeInByte);
-}
-
 TrianglePair HPlaneEquation::CutTriangle(
     const ScreenSpaceVertexTemplate * pv1, 
     const ScreenSpaceVertexTemplate * pv2, 
@@ -100,9 +91,8 @@ TrianglePair HPlaneEquation::CutTriangle(
                 (insideIndex + 2) % 3
             };
 
-            const int indexStoreFirstV = 0;
             // first Vertex
-            memcpy(tp.GetVertexPointer(indexStoreFirstV), pVertices[insideIndex], realVertexSizeBytes);
+            memcpy(tp.GetVertexPointer(0), pVertices[insideIndex], realVertexSizeBytes);
 
             // rest two Vertex
             Types::F32 interpolateCoefficient;
@@ -111,7 +101,7 @@ TrianglePair HPlaneEquation::CutTriangle(
                 interpolateCoefficient = cutCoefficient(pVertices[insideIndex]->m_posH, pVertices[outsideIndices[i]]->m_posH);
                 Interpolate2(
                     pVertices[insideIndex], pVertices[outsideIndices[i]],
-                    reinterpret_cast<ScreenSpaceVertexTemplate*>(tp.GetVertexPointer(indexStoreFirstV + i)), // 
+                    reinterpret_cast<ScreenSpaceVertexTemplate*>(tp.GetVertexPointer(1 + i)), // 
                     interpolateCoefficient,
                     realVertexSizeBytes);
             }
