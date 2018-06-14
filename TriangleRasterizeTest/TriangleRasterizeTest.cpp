@@ -512,4 +512,102 @@ TEST_UNIT_START("multiple planes cut triangle")
 TEST_UNIT_END;
 #pragma endregion
 
+#pragma region abstract frustrum plane test
+TEST_UNIT_START("abstract frustrum plane test")
+
+    // skip this test due to the bug of clipping line function.
+    //return 0;
+
+    // create and set a pipline.
+    Pipline pipline;
+
+    // set a backbuffer
+    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+        UserConfig::COMMON_PIXEL_WIDTH, 
+        UserConfig::COMMON_PIXEL_HEIGHT, 
+        RGBA::GREEN));
+
+    // create and config pipeline state object
+    auto pso = std::make_unique<PiplineStateObject>();
+
+    // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
+    Viewport viewport;
+    viewport.left = 0;
+    viewport.right = UserConfig::COMMON_PIXEL_WIDTH - 1;
+    viewport.bottom = 0;
+    viewport.top = UserConfig::COMMON_PIXEL_HEIGHT - 1;
+    pso->SetViewport(viewport);
+    
+    pipline.SetPSO(std::move(pso));
+
+    std::array<hvector, 3> triv = {
+        hvector(  2.0f, 400.0f,  2.0f, 1.0f),
+        hvector(200.0f,  10.0f,  1.0f, 1.0f),
+        hvector(400.0f, 300.0f, -3.0f, -1.0f)
+    };
+    const size_t VERTEX_SIZE = sizeof(hvector);
+
+    std::array<ScreenSpaceVertexTemplate*, 3> vInScreen;
+    for (size_t i = 0; i < vInScreen.size(); ++i)
+    {
+        vInScreen[i] = reinterpret_cast<ScreenSpaceVertexTemplate*>(&triv[i]);
+    }
+
+    //using PlaneType = FrustumHPlaneEquation<2, false>;
+
+    using PlaneType = WZeroHPlaneEquation;
+
+    PlaneType cutPlane;
+    
+    TrianglePair cutResult(TrianglePair::ZERO, VERTEX_SIZE);
+
+    std::vector<TrianglePair> cutResults;
+    {
+        TIME_GUARD;
+        DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        cutResult = cutPlane.CutTriangle(vInScreen[0], vInScreen[1], vInScreen[2], VERTEX_SIZE);
+    }
+
+    // lambda function to draw one TrianglePair.
+    auto drawCutResult = [&pipline, &VERTEX_SIZE](TrianglePair& tp)->void {
+        switch (tp.m_count)
+        {
+        case 0:
+            std::cout << "triangle reject" << std::endl;
+            break;// case 0
+
+        case 1:
+        case 3:
+            pipline.DrawTriangle(
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::ONE_TRI_1),
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::ONE_TRI_2),
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::ONE_TRI_3),
+                VERTEX_SIZE);
+            break;// case 1 and 3
+
+        case 2:
+            pipline.DrawTriangle(
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::TWO_TRI_1_1),
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::TWO_TRI_1_2),
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::TWO_TRI_1_3),
+                VERTEX_SIZE);
+            pipline.DrawTriangle(
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::TWO_TRI_2_1),
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::TWO_TRI_2_2),
+                tp.GetVertexPointer<ScreenSpaceVertexTemplate>(TrianglePair::Index::TWO_TRI_2_3),
+                VERTEX_SIZE);
+            break;// case 2
+        }// end switch tp.m_count
+    };// end lambda drawCutResult
+
+    //drawCutResult(cutResults[5]);
+
+    drawCutResult(cutResult);
+
+    std::string pictureIndex = "001";
+    pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\TriangleTest\\frustumPlaneCut_" + pictureIndex + ".png");
+        
+TEST_UNIT_END;
+#pragma endregion
+
 TEST_MODULE_END
