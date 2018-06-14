@@ -128,4 +128,81 @@ private:
     virtual Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) = 0;
 };
 
+/*!
+    \brief this class is used to cut triangle by W = 0 plane.
+    and ensure all the homogenouse have a Negative W.
+*/
+class WZeroHPlaneEquation : public HPlaneEquation
+{
+public:
+    Types::F32 eval(const hvector& pointH) override;
+    
+    Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override;
+};
+
+/*!
+    \brief ChooseSign is used for compile time sign choose.
+    for example:
+        ChooseSign<true>::Sign() will return +1.0f in compile time.
+        ChooseSign<false>::Sign() will return -1.0f.
+*/
+template<bool CHOOSE_POSITIVE>
+class ChooseSign
+{
+public:
+    static constexpr Types::F32 Sign()
+    {
+        return +1.0f;
+    }
+};
+template<>
+class ChooseSign<false>
+{
+public:
+    static constexpr Types::F32 Sign()
+    {
+        return -1.0f;
+    }
+};
+
+/*!
+    \brief each plane of the frustum in the homogeneous space.
+    \templateParam XYZ, choose the plane is perpendicular to which axis.X(0), Y(1), Z(2)
+    \templateParam B_LEFT_BOTTOM_FAR is the plane left/bottom/far plane?
+*/
+template<unsigned short XYZ, bool B_LEFT_BOTTOM_FAR>
+class FrustumHPlaneEquation : public HPlaneEquation
+{
+public:
+    /*
+        \brief if the plane is the higher bound, return 
+    */
+    const float SIGN = ChooseSign<B_LEFT_BOTTOM_FAR>::Sign();
+
+    /*!
+        \brief which axis is choose in the plane,
+        if XYZ = 0, the axis means X, so we will get the value of pointX.m_x, whose index inside the hvector is 0.
+        and so on.
+    */
+    const unsigned short CHOOSE_AXIS = XYZ;
+
+    Types::F32 eval(const hvector& pointH) override
+    {
+        const Types::F32 axis(pointH.m_arr[CHOOSE_AXIS]);
+        return pointH.m_w + SIGN * axis;
+    }
+
+    Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override
+    {
+        Types::F32 w1(point1.m_w),                  w2(point2.m_w);
+
+        Types::F32 axis1(point1.m_arr[CHOOSE_AXIS]),    axis2(point2.m_arr[CHOOSE_AXIS]);
+
+        Types::F32 numerator   = ( - SIGN) * axis1 - w1;
+        Types::F32 denominator = w2 - w1 + SIGN * (axis2 - axis1);
+
+        return numerator / denominator;
+    }
+};
+
 }// namespace CommonClass

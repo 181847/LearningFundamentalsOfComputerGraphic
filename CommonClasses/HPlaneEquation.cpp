@@ -1,5 +1,7 @@
 #include "HPlaneEquation.h"
 #include <assert.h>
+#include "DebugHelpers.h"
+#include "DebugConfigs.h"
 
 namespace CommonClass
 {
@@ -48,15 +50,16 @@ TrianglePair HPlaneEquation::CutTriangle(
     const unsigned int realVertexSizeBytes)
 {
     std::array<const ScreenSpaceVertexTemplate *, 3> pVertices={ pv1, pv2, pv3 };
-
     std::array<bool, 3> bInsides = { false, false, false };
+
+    DebugClient<DEBUG_CLIENT_CONF_TRIANGL>();
 
     // record inside state and count
     unsigned short insideCount = 0;
     for (unsigned int i = 0; i < pVertices.size(); ++i)
     {
         if (
-            bInsides[i] = ( eval(pVertices[i]->m_posH) > 0.0f )
+            bInsides[i] = ( eval(pVertices[i]->m_posH) >= 0.0f )
            )
         {
             ++insideCount;
@@ -145,6 +148,8 @@ TrianglePair HPlaneEquation::CutTriangle(
             Types::F32 interpolateCoefficient;
             for (unsigned int i = 0; i < insideIndices.size(); ++i)
             {
+                //DebugClient<DEBUG_CLIENT_CONF_TRIANGL>( i == 1 );
+
                 interpolateCoefficient = cutCoefficient(pVertices[insideIndices[i]]->m_posH, pVertices[outsideIndex]->m_posH);
                 Interpolate2(
                     pVertices[insideIndices[i]], pVertices[outsideIndex],
@@ -172,6 +177,18 @@ TrianglePair HPlaneEquation::CutTriangle(
 
     assert(false && "error, should NOT reach here");
     return TrianglePair(TrianglePair::ZERO, realVertexSizeBytes);
+}
+
+Types::F32 WZeroHPlaneEquation::eval(const hvector & pointH)
+{
+    return pointH.m_w;
+}
+
+Types::F32 WZeroHPlaneEquation::cutCoefficient(const hvector & point1, const hvector & point2)
+{
+    Types::F32 w1(point1.m_w), w2(point2.m_w);
+
+    return - w1 / (w2 - w1);
 }
 
 }// namespace CommonClass
