@@ -110,6 +110,10 @@ TEST_UNIT_START("directly draw triangle in screen space")
     // create and config pipeline state object
     auto pso = std::make_unique<PiplineStateObject>();
 
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        return RGBA::BLACK;
+    };
+
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
     Viewport viewport;
     viewport.left = 0;
@@ -178,8 +182,15 @@ TEST_UNIT_START("basic sphereRayTri test")
 
             const Types::U32   roundIndex = static_cast<const Types::U32>(pPoint->m_rayIndex.m_x);
             const Types::U32   lineIndex  = static_cast<const Types::U32>(pPoint->m_rayIndex.m_y);
-            //const Types::F32   isTheOne   = 22 < lineIndex && lineIndex < 34 ? 1.0f : 0.0f;
-            const Types::F32   isTheOne = roundIndex == 7 && 34 <= lineIndex && lineIndex <= 34  ? 1.0f : 0.0f;
+            Types::F32   isTheOne;
+            if (lineIndex > 22)
+            {
+                isTheOne = 1.0f;
+            }
+            else
+            {
+                isTheOne = 0.0f;
+            }
 
             RGBA               color     (isTheOne, 0.0f, 0.0f, 1.0f);
             return color;
@@ -208,10 +219,10 @@ TEST_UNIT_START("basic sphereRayTri test")
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
             SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-            //hvector inViewPos = toView * pSrcH->m_position;
+            hvector inViewPos = toView * pSrcH->m_position;
 
-            //pDestH->m_position = perspect * inViewPos;
-            pDestH->m_position = pSrcH->m_position;
+            pDestH->m_position = perspect * inViewPos;
+            //pDestH->m_position = pSrcH->m_position;
             pDestH->m_rayIndex = pSrcH->m_rayIndex;
         };
 
@@ -261,9 +272,9 @@ TEST_UNIT_START("basic sphereRayTri test")
             indices.push_back(numIndices++);
         }, 
             0.0f, 0.0f,                     // center location
-            0.2f,                           // segment length
-            0.1f,                           // start radius
-            5                               // num rounds
+            0.8f,                           // segment length
+            1.3f,                           // start radius
+            1                               // num rounds
             ); // radio offset
 
         auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -271,11 +282,11 @@ TEST_UNIT_START("basic sphereRayTri test")
 
         {
             TIME_GUARD;
-            //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> guard;
+            DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        std::string pictureIndex = "000";
+        std::string pictureIndex = "002";
         pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\TriangleTest\\sphereTri_" + pictureIndex + ".png");
 
 TEST_UNIT_END;
@@ -298,6 +309,10 @@ TEST_UNIT_START("triangle cut test")
 
     // create and config pipeline state object
     auto pso = std::make_unique<PiplineStateObject>();
+
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        return RGBA::BLACK;
+    };
 
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
     Viewport viewport;
@@ -398,6 +413,10 @@ TEST_UNIT_START("multiple planes cut triangle")
     // create and config pipeline state object
     auto pso = std::make_unique<PiplineStateObject>();
 
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        return RGBA::BLACK;
+    };
+
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
     Viewport viewport;
     viewport.left = 0;
@@ -448,23 +467,17 @@ TEST_UNIT_START("multiple planes cut triangle")
         }
     };
 
-    std::array<XYCutPlane, 4> cutPlanes = {
-        XYCutPlane( 248.0f,  -57.0f,   -3893.0f),
-        XYCutPlane( 247.0f,  248.0f,  -67192.0f),
-        XYCutPlane(-185.0f,  293.0f,   14290.0f),
-        XYCutPlane(-282.0f, -353.0f,  151912.0f)};
-
-    std::vector<HPlaneEquation*> cutPlanePointers;
-    for (auto& plane : cutPlanes)
-    {
-        cutPlanePointers.push_back(&plane);
-    }
+    std::vector<std::unique_ptr<HPlaneEquation>> cutPlanes;
+    cutPlanes.push_back(std::make_unique<XYCutPlane>( 248.0f,  -57.0f,   -3893.0f));
+    cutPlanes.push_back(std::make_unique<XYCutPlane>( 247.0f,  248.0f,  -67192.0f));
+    cutPlanes.push_back(std::make_unique<XYCutPlane>(-185.0f,  293.0f,   14290.0f));
+    cutPlanes.push_back(std::make_unique<XYCutPlane>(-282.0f, -353.0f,  151912.0f));
 
     std::vector<TrianglePair> cutResults;
     {
         TIME_GUARD;
         pipline.FrustumCutTriangle(vInScreen[0], vInScreen[1], vInScreen[2], VERTEX_SIZE,
-            &cutResults, cutPlanePointers);
+            &cutResults, cutPlanes);
     }
 
     // lambda function to draw one TrianglePair.
@@ -530,6 +543,10 @@ TEST_UNIT_START("abstract frustrum plane test")
     // create and config pipeline state object
     auto pso = std::make_unique<PiplineStateObject>();
 
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        return RGBA::BLACK;
+    };
+
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
     Viewport viewport;
     viewport.left = 0;
@@ -564,7 +581,7 @@ TEST_UNIT_START("abstract frustrum plane test")
     std::vector<TrianglePair> cutResults;
     {
         TIME_GUARD;
-        DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
         cutResult = cutPlane.CutTriangle(vInScreen[0], vInScreen[1], vInScreen[2], VERTEX_SIZE);
     }
 
