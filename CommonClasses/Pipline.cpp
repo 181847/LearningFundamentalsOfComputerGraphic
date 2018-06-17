@@ -11,12 +11,14 @@ Pipline::Pipline()
 {
     // prepare triangle cutting planes
     m_frustumCutPlanes.push_back(std::make_unique<WZeroHPlaneEquation>());
-    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<0, true >>());
-    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, true >>());
-    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, true >>());
-    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<0, false>>());
-    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, false>>());
-    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, false>>());
+
+
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<NEAR_FRUSTUM_PLANE>>());
+    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, true >>());
+    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, true >>());
+    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<0, false>>());
+    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, false>>());
+    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, false>>());
 }
 
 Pipline::~Pipline()
@@ -303,54 +305,44 @@ void Pipline::FindTriangleBoundary(const ScreenSpaceVertexTemplate * pv1, const 
         }
     }
 
-    // minX <-------|
-    if (minBoundF[x] < m_pso->m_viewport.left)
+    const Types::F32 
+        LEFT    (m_pso->m_viewport.left), 
+        RIGHT   (m_pso->m_viewport.right),
+        BOTTOM  (m_pso->m_viewport.bottom), 
+        TOP     (m_pso->m_viewport.top);
+        
+    /*!
+        \brief help to choose boundary
+        |min......target<--(if bMinimize == true)---src----(bMinimize == false)-->target......max|
+    */
+    auto BoundaryJudge = [](const Types::F32& src, Types::U32 & target, const Types::F32& min, const Types::F32& max, const bool bMinimize)->void
     {
-        (*minBound)[x] = static_cast<Types::U32>(m_pso->m_viewport.left);
-    }
-    else
-    {
-        (*minBound)[x] = static_cast<Types::U32>(std::floor(minBoundF[x]));
-    }
+        if (src < min)
+        {
+            target = static_cast<Types::U32>(min);
+        }
+        else if (src > max)
+        {
+            target = static_cast<Types::U32>(max);
+        }
+        else
+        {
+            if (bMinimize)
+            {
+                target = static_cast<Types::U32>(std::floor(src));
+            }
+            else
+            {
+                target = static_cast<Types::U32>(std::ceil(src));
+            }
+        }// end if else
+    };// end BoundaryJudge
 
-    // |--------> maxX
-    if (maxBoundF[x] > m_pso->m_viewport.right)
-    {
-        (*maxBound)[x] = static_cast<Types::U32>(m_pso->m_viewport.right);
-    }
-    else
-    {
-        (*maxBound)[x] = static_cast<Types::U32>(std::ceil(maxBoundF[x]));
-    }
-
-    // -----
-    //   |
-    //   |
-    //   V
-    //  minY
-    if (minBoundF[y] < m_pso->m_viewport.bottom)
-    {
-        (*minBound)[y] = static_cast<Types::U32>(m_pso->m_viewport.bottom);
-    }
-    else
-    {
-        (*minBound)[y] = static_cast<Types::U32>(std::floor(minBoundF[y]));
-    }
-
-
-    //  maxY
-    //   A
-    //   |
-    //   |
-    // -----
-    if (maxBoundF[y] > m_pso->m_viewport.top)
-    {
-        (*maxBound)[y] = static_cast<Types::U32>(m_pso->m_viewport.top);
-    }
-    else
-    {
-        (*maxBound)[y] = static_cast<Types::U32>(std::ceil(maxBoundF[y]));
-    }
+    bool minimize = true, maxmize = false;
+    BoundaryJudge(minBoundF[x], (*minBound)[x], LEFT, RIGHT, minimize);
+    BoundaryJudge(minBoundF[y], (*minBound)[y], BOTTOM, TOP, minimize);
+    BoundaryJudge(maxBoundF[x], (*maxBound)[x], LEFT, RIGHT, maxmize);
+    BoundaryJudge(maxBoundF[y], (*maxBound)[y], BOTTOM, TOP, maxmize);
 }
 
 bool Pipline::WClipLineInHomogenousClipSpace(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertexTemplate * pv2, ScreenSpaceVertexTemplate * pOutV1, ScreenSpaceVertexTemplate * pOutV2, const unsigned int realVertexSize)
@@ -774,14 +766,17 @@ void Pipline::ClipTriangleList(
         FrustumCutTriangle(pv1, pv2, pv3, realVertexSize, &cutResults, cutPlanes);
     }// end for countIndex
 
-    int countTriangle = 0;
+    DebugClient<DEBUG_CLIENT_CONF_TRIANGL>();
+
+    int sumVertex = 0;
     for (auto & tri : cutResults)
     {
-        countTriangle += tri.m_count;
+        assert(tri.m_count > 0);
+        sumVertex += (2 + tri.m_count);
     }// end for cutResults
 
     // prepare vertex memory.
-    *pClippedVertices = std::make_unique<F32Buffer>(countTriangle * 3 * realVertexSize);
+    *pClippedVertices = std::make_unique<F32Buffer>(sumVertex * realVertexSize);
 
     int countVertex = 0; // record number of vertices that have been stored.
     const int STEP_3_VERTEX = 3 * realVertexSize;
@@ -905,10 +900,12 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
 
     for (size_t i = 0; i < numIndex; i += 3)
     {
-        pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i,     psInputStride);
-        pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i + 1, psInputStride);
-        pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i + 2, psInputStride);
+        pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i],     psInputStride);
+        pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 1], psInputStride);
+        pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 2], psInputStride);
 
+        std::printf("DrawTriangleList:Loop:i: %d\n", i);
+        DebugClient<DEBUG_CLIENT_CONF_TRIANGL>(i == 492);
         DrawTriangle(pv1, pv2, pv3, psInputStride);
     }
 }
@@ -923,6 +920,8 @@ void Pipline::FrustumCutTriangle(
     const size_t                                        fromPlane)
 {
     assert(fromPlane < cutPlanes.size());
+
+    //DebugClient<DEBUG_CLIENT_CONF_TRIANGL>();
 
     TrianglePair cutResult = cutPlanes[fromPlane]->CutTriangle(pv1, pv2, pv3, realVertexSizeBytes);
 
