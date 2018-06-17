@@ -178,21 +178,20 @@ TEST_UNIT_START("basic sphereRayTri test")
         pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
             const Types::F32   depth      = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
             const SimplePoint* pPoint     = reinterpret_cast<const SimplePoint*>(pVertex);
-            const Types::F32   red        = pPoint->m_rayIndex.m_z;
 
             const Types::U32   roundIndex = static_cast<const Types::U32>(pPoint->m_rayIndex.m_x);
-            const Types::U32   lineIndex  = static_cast<const Types::U32>(pPoint->m_rayIndex.m_y);
-            Types::F32   isTheOne;
-            if (lineIndex == 32)
+            const Types::F32   lineIndex  = pPoint->m_rayIndex.m_y;
+            Types::F32   red;
+            if (31.9 < lineIndex && lineIndex < 32.1)
             {
-                isTheOne = 1.0f;
+                red = 1.0f;
             }
             else
             {
-                isTheOne = 0.0f;
+                red = 0.0f;
             }
 
-            RGBA               color     (isTheOne, 0.0f, 0.0f, 1.0f);
+            RGBA               color     (red, 0.0f, 0.0f, 1.0f);
             return color;
         };
 
@@ -289,7 +288,7 @@ TEST_UNIT_START("basic sphereRayTri test")
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        std::string pictureIndex = "006";
+        std::string pictureIndex = "007";
         pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\TriangleTest\\sphereTri_" + pictureIndex + ".png");
 
 TEST_UNIT_END;
