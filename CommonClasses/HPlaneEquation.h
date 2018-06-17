@@ -167,6 +167,16 @@ public:
     }
 };
 
+
+/*!
+    \brief help marcos for FrustumHPlaneEquation
+*/
+#define LEFT_FRUSTUM_PLANE    0, true
+#define RIGHT_FRUSTUM_PLANE   0, false
+#define BOTTOM_FRUSTUM_PLANE  1, true
+#define TOP_FRUSTUM_PLANE     1, false
+#define FAR_FRUSTUM_PLANE     2, true
+#define NEAR_FRUSTUM_PLANE    2, false
 /*!
     \brief each plane of the frustum in the homogeneous space.
     \templateParam XYZ, choose the plane is perpendicular to which axis.X(0), Y(1), Z(2)
