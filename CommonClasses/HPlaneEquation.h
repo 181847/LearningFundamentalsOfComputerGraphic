@@ -110,6 +110,8 @@ public:
         const ScreenSpaceVertexTemplate*    pv3,
         const unsigned int                  realVertexSizeBytes);
 
+    virtual ~HPlaneEquation() {}
+
 private:
     /*!
         \brief evaluate the homogeneous point is whether inside the 4D homogeneous plane

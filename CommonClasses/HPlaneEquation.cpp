@@ -52,8 +52,6 @@ TrianglePair HPlaneEquation::CutTriangle(
     std::array<const ScreenSpaceVertexTemplate *, 3> pVertices={ pv1, pv2, pv3 };
     std::array<bool, 3> bInsides = { false, false, false };
 
-    DebugClient<DEBUG_CLIENT_CONF_TRIANGL>();
-
     // record inside state and count
     unsigned short insideCount = 0;
     for (unsigned int i = 0; i < pVertices.size(); ++i)
