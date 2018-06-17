@@ -183,7 +183,7 @@ TEST_UNIT_START("basic sphereRayTri test")
             const Types::U32   roundIndex = static_cast<const Types::U32>(pPoint->m_rayIndex.m_x);
             const Types::U32   lineIndex  = static_cast<const Types::U32>(pPoint->m_rayIndex.m_y);
             Types::F32   isTheOne;
-            if (lineIndex > 22)
+            if (lineIndex == 32)
             {
                 isTheOne = 1.0f;
             }
@@ -249,32 +249,35 @@ TEST_UNIT_START("basic sphereRayTri test")
 
         // create line segments in sphere ray.
         SphereRayTri([&numIndices, &points, &indices](HELP_SPHERE_RAY_TRI_LAMBDA_PARAMETERS)->void {
-            
-            SimplePoint p0(hvector(x0, y0, 0.0f));
-            p0.m_rayIndex.m_x = roundIndex;
-            p0.m_rayIndex.m_y = lineIndex;
-            p0.m_rayIndex.m_z = 0;
-            points.push_back(p0);
-            indices.push_back(numIndices++);
 
-            SimplePoint p1(hvector(x1, y1, 0.0f));
-            p1.m_rayIndex.m_x = roundIndex;
-            p1.m_rayIndex.m_y = lineIndex;
-            p1.m_rayIndex.m_z = 1;
-            points.push_back(p1);
-            indices.push_back(numIndices++);
+            //if (lineIndex == 32)
+            {
+                SimplePoint p0(hvector(x0, y0, 0.0f));
+                p0.m_rayIndex.m_x = roundIndex;
+                p0.m_rayIndex.m_y = lineIndex;
+                p0.m_rayIndex.m_z = 0;
+                points.push_back(p0);
+                indices.push_back(numIndices++);
 
-            SimplePoint p2(hvector(x2, y2, 0.0f));
-            p2.m_rayIndex.m_x = roundIndex;
-            p2.m_rayIndex.m_y = lineIndex;
-            p2.m_rayIndex.m_z = 1;
-            points.push_back(p2);
-            indices.push_back(numIndices++);
+                SimplePoint p1(hvector(x1, y1, 0.0f));
+                p1.m_rayIndex.m_x = roundIndex;
+                p1.m_rayIndex.m_y = lineIndex;
+                p1.m_rayIndex.m_z = 1;
+                points.push_back(p1);
+                indices.push_back(numIndices++);
+
+                SimplePoint p2(hvector(x2, y2, 0.0f));
+                p2.m_rayIndex.m_x = roundIndex;
+                p2.m_rayIndex.m_y = lineIndex;
+                p2.m_rayIndex.m_z = 1;
+                points.push_back(p2);
+                indices.push_back(numIndices++);
+            } // end if lineIndex
         }, 
             0.0f, 0.0f,                     // center location
             0.8f,                           // segment length
-            1.3f,                           // start radius
-            1                               // num rounds
+            0.5f,                           // start radius
+            12                               // num rounds
             ); // radio offset
 
         auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -286,7 +289,7 @@ TEST_UNIT_START("basic sphereRayTri test")
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        std::string pictureIndex = "002";
+        std::string pictureIndex = "006";
         pipline.m_backBuffer->SaveTo("..\\RasterizeTest\\OutputTestImage\\PiplineTest\\TriangleTest\\sphereTri_" + pictureIndex + ".png");
 
 TEST_UNIT_END;
