@@ -31,6 +31,8 @@ protected:
     */
     std::shared_ptr<PiplineStateObject> m_pso;
 
+    std::vector<std::unique_ptr<HPlaneEquation>> m_frustumCutPlanes;
+
 public:
     Pipline();
     ~Pipline();
@@ -117,14 +119,14 @@ private:
         \param outputStream return the cut result, each result is a TrianglePair that have one or two triangle,(zero is forbidden).
         \param fromPlane the plane index to start cutting(default to be zero: first plane in cutPlanes and to the last one in it), it's unnecessary for normal user to concern about this parameter.
     */
-    void FrustumCutTriangle(
-        const ScreenSpaceVertexTemplate*    pv1,
-        const ScreenSpaceVertexTemplate*    pv2,
-        const ScreenSpaceVertexTemplate*    pv3,
-        const unsigned int                  realVertexSizeBytes,
-        std::vector<TrianglePair> *         outputStream, 
-        const std::vector<HPlaneEquation*>& cutPlanes,
-        const size_t                        fromPlane = 0);
+    static void FrustumCutTriangle(
+        const ScreenSpaceVertexTemplate*                    pv1,
+        const ScreenSpaceVertexTemplate*                    pv2,
+        const ScreenSpaceVertexTemplate*                    pv3,
+        const unsigned int                                  realVertexSizeBytes,
+        std::vector<TrianglePair> *                         outputStream, 
+        const std::vector<std::unique_ptr<HPlaneEquation>>& cutPlanes,
+        const size_t                                        fromPlane = 0);
 
 private:
 
@@ -202,10 +204,27 @@ private:
     */
     static void ClipLineList(
         const std::vector<unsigned int>&    indices, 
-        const F32Buffer*                    vertices,
+        std::unique_ptr<F32Buffer>          vertices,
         const unsigned int                  realVertexSize,
         std::vector<unsigned int> *         pClippedIndices, 
         std::unique_ptr<F32Buffer> *        pClippedVertices);
+
+    /*!
+        \brief clipe triangle list in homogenous clip space, where the perspective divide haven't been done.
+        \param indices input triangle list indices
+        \param vertices input vertex data
+        \param realVertexSize the vertes size of the input vertices in Bytes
+        \param pClippedIndices the index data afther clipping
+        \param pClippedVertices the vertex data afther clipping.
+        \param cutPlanes the planes used to perform cutting
+    */
+    static void ClipTriangleList(
+        const std::vector<unsigned int>&                    indices,
+        std::unique_ptr<F32Buffer>                          vertices,
+        const unsigned int                                  realVertexSize,
+        std::vector<unsigned int> *                         pClippedIndices,
+        std::unique_ptr<F32Buffer> *                        pClippedVertices,
+        const std::vector<std::unique_ptr<HPlaneEquation>>& cutPlanes);
 
     /*!
         \brief first perspective divided, and then do the viewport transformation for the vertex stream.

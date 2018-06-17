@@ -9,6 +9,14 @@ namespace CommonClass
 
 Pipline::Pipline()
 {
+    // prepare triangle cutting planes
+    m_frustumCutPlanes.push_back(std::make_unique<WZeroHPlaneEquation>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<0, true >>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, true >>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, true >>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<0, false>>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, false>>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, false>>());
 }
 
 Pipline::~Pipline()
@@ -52,17 +60,17 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     const unsigned int vsInputStride = m_pso->m_vertexLayout.vertexShaderInputSize;
     // the vertex size which will be passed to pixelShader
     const unsigned int psInputStride = m_pso->m_vertexLayout.pixelShaderInputSize;
+
+    std::vector<unsigned int>  clippedIndices;   // the index data that has been clipped.
+    std::unique_ptr<F32Buffer> clippedLineData;  // the vertex data that has been clipped.
     
     // process each vertex with vertexShader
     std::unique_ptr<F32Buffer> vsOutputStream = VertexShaderTransform(vertices, vsInputStride, psInputStride);
 
-    std::vector<unsigned int>  clippedIndices;   // the index data that has been clipped.
-    std::unique_ptr<F32Buffer> clippedLineData;  // the vertex data that has been clipped.
-
     if (m_pso->m_primitiveType == PrimitiveType::LINE_LIST)
     {
         // clip all the line
-        ClipLineList(indices, vsOutputStream.get(), psInputStride, &clippedIndices, &clippedLineData);
+        ClipLineList(indices, std::move(vsOutputStream), psInputStride, &clippedIndices, &clippedLineData);
 
 #ifdef _DEBUG
         // all line has been clipped. return
@@ -90,13 +98,16 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     {
         // TODO: triangle clipping is not completed,
         // here we just copy the vertices' data.
-        auto clippendData = std::make_unique<F32Buffer>(vertices->GetSizeOfByte());
-        memcpy(clippendData->GetBuffer(), vertices->GetBuffer(), clippendData->GetSizeOfByte());
+        //auto clippendData = std::make_unique<F32Buffer>(vertices->GetSizeOfByte());
+        //memcpy(clippendData->GetBuffer(), vertices->GetBuffer(), clippendData->GetSizeOfByte());
 
-        auto viewportTransData = ViewportTransformVertexStream(std::move(clippendData), psInputStride);
+        std::unique_ptr<F32Buffer> clippedData;
+        ClipTriangleList(indices, std::move(vsOutputStream), psInputStride, &clippedIndices, &clippedData, m_frustumCutPlanes);
+
+        auto viewportTransData = ViewportTransformVertexStream(std::move(clippedData), psInputStride);
         
-        DrawTriangleList(indices, std::move(viewportTransData), psInputStride);
-        //DrawTriangleList()
+        DrawTriangleList(clippedIndices, std::move(viewportTransData), psInputStride);
+
     }// end else if is TRIANGLE_LIST
 }
 
@@ -225,6 +236,11 @@ void Pipline::DrawTriangle(
         f23(pv2->m_posH, pv3->m_posH),
         f31(pv3->m_posH, pv1->m_posH);
 
+    // pixel shader prepare
+    auto& pixelShader = m_pso->m_pixelShader;
+    auto  vertexBuf   = std::make_unique<F32Buffer>(realVertexSizeBytes);
+    auto  vertexPtr   = reinterpret_cast<ScreenSpaceVertexTemplate*>(vertexBuf->GetBuffer());
+
     std::array<Types::U32, 2> minBoundU, maxBoundU; // xxxbound[0] is for x, xxxbound[1] is for y
     FindTriangleBoundary(pv1, pv2, pv3, &minBoundU, &maxBoundU);
 
@@ -242,8 +258,11 @@ void Pipline::DrawTriangle(
 
             if (alpha > 0.0f && beta > 0.0f && gamma > 0.0f)
             {
+                Interpolate3(   pv1,    pv2,    pv3,    vertexPtr,
+                                alpha,  beta,   gamma,  realVertexSizeBytes);
+
                 // now for simplification, draw all triangle in black color.
-                m_backBuffer->SetPixel(x, y, RGBA::BLACK);
+                m_backBuffer->SetPixel(x, y, pixelShader(vertexPtr));
             }
         }// end for x, columns
     }// end for y, raws
@@ -608,8 +627,8 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 }
 
 void Pipline::ClipLineList(
-    const std::vector<unsigned int>&    indices, 
-    const F32Buffer *                   vertices,
+    const std::vector<unsigned int>&    indices,
+    std::unique_ptr<F32Buffer>          vertices,
     const unsigned int                  realVertexSize, 
     std::vector<unsigned int> *         pClippedIndices, 
     std::unique_ptr<F32Buffer> *        pClippedVertices)
@@ -723,6 +742,90 @@ void Pipline::ClipLineList(
     }
 }
 
+void Pipline::ClipTriangleList(
+    const std::vector<unsigned int>&                    indices,
+    std::unique_ptr<F32Buffer>                          vertices,
+    const unsigned int                                  realVertexSize,
+    std::vector<unsigned int> *                         pClippedIndices,
+    std::unique_ptr<F32Buffer> *                        pClippedVertices,
+    const std::vector<std::unique_ptr<HPlaneEquation>>& cutPlanes)
+{
+    assert(indices.size() % 3 == 0 && "indices is not the times of three, have incompleted triangle");
+    const int NUM_TRIANGLE = indices.size() / 3;
+
+    pClippedIndices->clear();// force clear.
+
+    std::vector<TrianglePair> cutResults;
+
+    unsigned char * pSrcVertexStart = vertices->GetBuffer();
+
+    for (int countIndex = 0; countIndex < NUM_TRIANGLE; ++countIndex)
+    {
+        const int indexStart = countIndex * 3;
+
+        int index1 = indices[indexStart    ], 
+            index2 = indices[indexStart + 1], 
+            index3 = indices[indexStart + 2];
+
+        auto pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pSrcVertexStart, index1, realVertexSize);
+        auto pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pSrcVertexStart, index2, realVertexSize);
+        auto pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pSrcVertexStart, index3, realVertexSize);
+
+        FrustumCutTriangle(pv1, pv2, pv3, realVertexSize, &cutResults, cutPlanes);
+    }// end for countIndex
+
+    int countTriangle = 0;
+    for (auto & tri : cutResults)
+    {
+        countTriangle += tri.m_count;
+    }// end for cutResults
+
+    // prepare vertex memory.
+    *pClippedVertices = std::make_unique<F32Buffer>(countTriangle * 3 * realVertexSize);
+
+    int countVertex = 0; // record number of vertices that have been stored.
+    const int STEP_3_VERTEX = 3 * realVertexSize;
+    const int STEP_4_VERTEX = 4 * realVertexSize;
+
+    unsigned char * pDestVertexStart = (*pClippedVertices)->GetBuffer();
+    for (auto & tri : cutResults)
+    {
+        // copy vertex data
+        memcpy(pDestVertexStart, tri.m_vertices->GetBuffer(), tri.m_vertices->GetSizeOfByte());
+
+        switch (tri.m_count)
+        {
+        case 1:
+            // push three vertex index
+            pClippedIndices->push_back(countVertex + TrianglePair::ONE_TRI_1);
+            pClippedIndices->push_back(countVertex + TrianglePair::ONE_TRI_2);
+            pClippedIndices->push_back(countVertex + TrianglePair::ONE_TRI_3);
+            pDestVertexStart += STEP_3_VERTEX;
+            countVertex += 3;
+            break;
+
+        case 2:
+            // push three vertex index
+            pClippedIndices->push_back(countVertex + TrianglePair::TWO_TRI_1_1);
+            pClippedIndices->push_back(countVertex + TrianglePair::TWO_TRI_1_2);
+            pClippedIndices->push_back(countVertex + TrianglePair::TWO_TRI_1_3);
+            pClippedIndices->push_back(countVertex + TrianglePair::TWO_TRI_2_1);
+            pClippedIndices->push_back(countVertex + TrianglePair::TWO_TRI_2_2);
+            pClippedIndices->push_back(countVertex + TrianglePair::TWO_TRI_2_3);
+            pDestVertexStart += STEP_4_VERTEX;
+            countVertex += 4;
+            break;
+
+        case 0:
+        default:
+            assert(false && "unexpected branch");
+            break;
+        }// end switch tri.m_count
+    }// end for cutResults
+    
+    
+}
+
 std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_ptr<F32Buffer> verticesToBeTransformed, const unsigned int realVertexSizeBytes)
 {
     
@@ -802,8 +905,6 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
 
     for (size_t i = 0; i < numIndex; i += 3)
     {
-        DebugClient<DEBUG_CLIENT_CONF_TRIANGL>(i > 64);
-
         pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i,     psInputStride);
         pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i + 1, psInputStride);
         pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, i + 2, psInputStride);
@@ -813,17 +914,40 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
 }
 
 void Pipline::FrustumCutTriangle(
-    const ScreenSpaceVertexTemplate *   pv1, 
-    const ScreenSpaceVertexTemplate *   pv2, 
-    const ScreenSpaceVertexTemplate *   pv3, 
-    const unsigned int                  realVertexSizeBytes, 
-    std::vector<TrianglePair>*          outputStream, 
-    const std::vector<HPlaneEquation*>& cutPlanes,
-    const size_t                        fromPlane)
+    const ScreenSpaceVertexTemplate*                    pv1,
+    const ScreenSpaceVertexTemplate*                    pv2,
+    const ScreenSpaceVertexTemplate*                    pv3,
+    const unsigned int                                  realVertexSizeBytes,
+    std::vector<TrianglePair> *                         outputStream,
+    const std::vector<std::unique_ptr<HPlaneEquation>>& cutPlanes,
+    const size_t                                        fromPlane)
 {
     assert(fromPlane < cutPlanes.size());
 
     TrianglePair cutResult = cutPlanes[fromPlane]->CutTriangle(pv1, pv2, pv3, realVertexSizeBytes);
+
+    // we assume the first cut plane is the w = 0 plane,
+    // which will make sure all the homogeneous coordinate have a positive W,
+    // and next few codes performed when w almost equal to zero
+    if (fromPlane == 0 && cutResult.m_count > 0)    // ensure cutting result have triangle.
+    {
+        // if the cutting result is one triangle, (2 + cutResult.m_count) == 3
+        // if the cutting result is two triangle, (2 + cutResult.m_count) == 4
+        for (int i = 0; i < 2 + cutResult.m_count; ++i)
+        {
+            // get each vertex data.
+            auto * pVertex = cutResult.GetVertexPointer<ScreenSpaceVertexTemplate>(i);
+            
+            const Types::F32 epsilon = 1e-20f;  // the positive value (close to zero) used to correct w which equals or almost equals to zero
+
+            // Is w almost equal to zero ?
+            // - epsilon < W < + epsilon
+            if (- epsilon < pVertex->m_posH.m_w && pVertex->m_posH.m_w < epsilon)
+            {
+                pVertex->m_posH.m_w = epsilon; // correct to positive
+            }
+        }// end for vertex in cutResult
+    }// end if from plane == 0
 
     // have we reached the last plane?
     if (fromPlane == cutPlanes.size() - 1)
