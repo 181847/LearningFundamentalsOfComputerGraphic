@@ -60,34 +60,41 @@ public:
 
     /*!
         \brief set one pixel with RGBA
-		\param x column of the pixel, from top to bottom
-		\param y row of the pixel, from left to right
+		\param x column of the pixel, from left to right
+		\param y row of the pixel, from bottom to top
 		\param pixel the pixel value
     */
     void SetPixel(const Types::U32 x, const Types::U32 y, const RGBA& pixel);
 
     /*!
         \brief set one pixel with RGB
-		\param x column of the pixel, from top to bottom
-		\param y row of the pixel, from left to right
+		\param x column of the pixel, from left to right
+		\param y row of the pixel, from bottom to top
 		\param pixel the pixel value, only rgb is setted
     */
     void SetPixel(const Types::U32 x, const Types::U32 y, const RGB& pixel);
 
     /*!
         \brief set alpha of one pixel with single value.
-		\param x column of the pixel, from top to bottom
-		\param y row of the pixel, from left to right
+		\param x column of the pixel, from left to right
+		\param y row of the pixel, from bottom to top
 		\param alpha the new value of the alpha channel.
     */
     void SetAlpha(const Types::U32 x, const Types::U32 y, const Types::F32& alpha);
 
 	/*!
 		\brief get one pixel value
-		\param x column of the pixel, from top to bottom
-		\param y row of the pixel, from left to right
+		\param x column of the pixel, from left to right
+		\param y row of the pixel, from bottom to top
 	*/
 	RGBA GetPixel(const Types::U32 x, const Types::U32 y) const;
+
+    /*!
+        \brief get the raw pixel value, whose channel is stored in one byte
+		\param x column of the pixel, from left to right
+		\param y row of the pixel, from bottom to top
+    */
+    const Pixel& GetRawPixel(const Types::U32 x, const Types::U32 y) const;
 
 protected:
 	/*!
