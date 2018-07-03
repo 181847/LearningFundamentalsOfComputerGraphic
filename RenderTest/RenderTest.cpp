@@ -24,6 +24,7 @@
 #include "../CommonClasses/ColorTemplate.h"
 #include "../CommonClasses/Light.h"
 #include "../CommonClasses/Material.h"
+#include "../CommonClasses/ImageWindow.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 RandomTool::MTRandom globalMtr;
@@ -574,7 +575,7 @@ TEST_MODULE_START
 		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
 
 		camera.SetFilm(std::make_unique<Film>(
-			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+			UserConfig::COMMON_PIXEL_WIDTH * 2, UserConfig::COMMON_PIXEL_HEIGHT * 2,
 			-0.5f, +0.5f,
 			-0.5f, +0.5f));
 
@@ -608,6 +609,9 @@ TEST_MODULE_START
 		}
 
 		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox29.png");
+
+        ImageWindow imgWnd(camera.m_film.get(), L"InsideBox29.png");
+        imgWnd.BlockShow();
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\RenderInsideBox\\....png\"\n"
