@@ -1,18 +1,19 @@
 #include "ImageWindow.h"
 #include <Windows.h>
+#include <functional>
+#include <CommCtrl.h>
 
 namespace CommonClass
 {
 
-ImageWindow::ImageWindow(const Image * img)
-    :pImg(img)
+ImageWindow::ImageWindow(const Image * img, const std::wstring& title)
+    :m_pImg(img), m_title(title)
 {
 }
 
 ImageWindow::~ImageWindow()
 {
 }
-
 
 // the message proccesing function of the ImageWindow
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -22,7 +23,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     switch (uMsg)
     {
     case WM_LBUTTONDOWN:
-        printf("you have pressed left button.\n");
         return 0;
 
     case WM_DESTROY:            // window is destoried
@@ -38,10 +38,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         PAINTSTRUCT ps = { 0 };
         HDC hdc = BeginPaint(hwnd, &ps);
 
+        auto * pImgWnd = reinterpret_cast<ImageWindow*>(lParam);
+        if (pImgWnd) pImgWnd->PaintToWindow();
 
         EndPaint(hwnd, &ps);
         return 0;
     }
+
     }// end switch
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }// end WndProc
@@ -128,7 +131,7 @@ void ImageWindow::BlockShow()
         return;
     }
 
-    const int WIDTH = pImg->m_width, HEIGHT = pImg->m_height;
+    const int WIDTH = m_pImg->m_width, HEIGHT = m_pImg->m_height;
     RECT rect;
     rect.left = 0;
     rect.right = WIDTH;     // desired window width
@@ -142,11 +145,13 @@ void ImageWindow::BlockShow()
         false,              // no menu
         0);                 // extend style
 
+    const DWORD windowStyle = WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME;
+
     HWND hWnd = CreateWindowEx(
         0,                      // extend style
         L"my_windowClass",
-        L"这是窗口标题",
-        WS_OVERLAPPEDWINDOW,    // window style
+        m_title.c_str(),
+        windowStyle,    // window style
         CW_USEDEFAULT,          // init position x(to be default)
         CW_USEDEFAULT,          // init position y(to be default)
         rect.right - rect.left, // the width after adjusting.
@@ -162,43 +167,15 @@ void ImageWindow::BlockShow()
         MessageBox(NULL, L"CreateWindowEx Failed!", NULL, MB_OK);
         return;
     }
+    this->m_hWnd = reinterpret_cast<unsigned long>(hWnd);
 
 
     UpdateWindow(hWnd);
     ShowWindow(hWnd, true);
-    {
-        HDC hdc = GetDC(hWnd);
-        const int PIXEL_BYTES = 3;
 
-        BITMAPINFO bmpInfo;                                     // bmp infomation, define the pixel bits/RGB/width/hegith/...
 
-        bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);    // size of the information, here we just set it to be default.
-        bmpInfo.bmiHeader.biWidth = WIDTH;                      // width
-        bmpInfo.bmiHeader.biHeight = HEIGHT;                    // height
-        bmpInfo.bmiHeader.biPlanes = 1;
-        bmpInfo.bmiHeader.biBitCount = PIXEL_BYTES * 8;         // bits per pixel
-        bmpInfo.bmiHeader.biCompression = BI_RGB;               // compression as RGB, Warning, the real channel data is arranged as BGR.
 
-        const int numBytes = WIDTH * HEIGHT * PIXEL_BYTES;
 
-        // create BitMap and get its memory address
-        void * pMem;// memory address of the BitMap
-        HBITMAP hbmp = CreateDIBSection(NULL, &bmpInfo, DIB_RGB_COLORS, &pMem, NULL, 0);
-        assert(hbmp != NULL);
-
-        FillInBMP(pMem);
-
-        // copy BitMap to window.
-        HDC bmpHdc = CreateCompatibleDC(hdc);
-        SelectObject(bmpHdc, hbmp);
-        BitBlt      (hdc, 0, 0, WIDTH, HEIGHT, bmpHdc, 0, 0, SRCCOPY);
-        DeleteDC    (bmpHdc);
-
-        printf("memset done.\n");
-
-        DeleteObject(hbmp);
-        DeleteObject(bmpHdc);
-    }
 
     MSG msg;
     BOOL bRet;
@@ -211,31 +188,56 @@ void ImageWindow::BlockShow()
         }
 
         TranslateMessage(&msg); //翻译消息
+        msg.lParam = reinterpret_cast<DWORD>(this);
         DispatchMessage(&msg);  //分发消息
     }
     //return msg.wParam;          //WinMain函数结束, 整个程序退出
 }
 
+void ImageWindow::PaintToWindow()
+{
+    const int   WIDTH       = m_pImg->m_width, HEIGHT = m_pImg->m_height;
+    HDC         paintHdc    = GetDC(reinterpret_cast<HWND>(m_hWnd));
+    const int   PIXEL_BYTES = 3;
+
+    BITMAPINFO bmpInfo; // bmp infomation, define the pixel bits/RGB/width/hegith/...
+
+    bmpInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);     // size of the information, here we just set it to be default.
+    bmpInfo.bmiHeader.biWidth       = WIDTH;                        // width
+    bmpInfo.bmiHeader.biHeight      = HEIGHT;                       // height
+    bmpInfo.bmiHeader.biPlanes      = 1;
+    bmpInfo.bmiHeader.biBitCount    = PIXEL_BYTES * 8;              // bits per pixel
+    bmpInfo.bmiHeader.biCompression = BI_RGB;                       // compression as RGB, Warning, the real channel data is arranged as BGR.
+
+    const int numBytes = WIDTH * HEIGHT * PIXEL_BYTES;
+
+    // create BitMap and get its memory address
+    void * pMem;// memory address of the BitMap
+    HBITMAP hbmp = CreateDIBSection(NULL, &bmpInfo, DIB_RGB_COLORS, &pMem, NULL, 0);
+    assert(hbmp != NULL);
+
+    FillInBMP(pMem);
+
+    // copy BitMap to window.
+    HDC bmpHdc = CreateCompatibleDC(paintHdc);
+    SelectObject(bmpHdc, hbmp);
+    BitBlt      (paintHdc, 0, 0, WIDTH, HEIGHT, bmpHdc, 0, 0, SRCCOPY);
+    DeleteDC    (bmpHdc);
+
+    DeleteObject(hbmp);
+    DeleteObject(bmpHdc);
+}
+
 void ImageWindow::FillInBMP(void * pBitMapMemory)
 {
-    const int WIDTH = pImg->m_width, HEIGHT = pImg->m_height;
+    const int WIDTH = m_pImg->m_width, HEIGHT = m_pImg->m_height;
     BMPSetterAgent bmp(pBitMapMemory, WIDTH, HEIGHT);
-
-    //unsigned char * pMem = reinterpret_cast<unsigned char *>(pBitMapMemory);
-    //for (int index = 0; index < WIDTH * HEIGHT; ++index)
-    //{
-    //    auto pixel = pImg->m_canvas[index];
-    //    // remember the rgb channel in the bit map is arranged by the order of [Blue -> Green -> Red]
-    //    pMem[index * 3 + BMPSetterAgent::B] = pixel.m_b;
-    //    pMem[index * 3 + BMPSetterAgent::G] = pixel.m_g;
-    //    pMem[index * 3 + BMPSetterAgent::R] = pixel.m_r;
-    //}
 
     for (int y = 0; y < HEIGHT; ++y)
     {
         for (int x = 0; x < WIDTH; ++x)
         {
-            auto const & pixel = pImg->GetRawPixel(x, y);
+            auto const & pixel = m_pImg->GetRawPixel(x, y);
             bmp.SetChannel<BMPSetterAgent::B>(x, y, pixel.m_b);
             bmp.SetChannel<BMPSetterAgent::G>(x, y, pixel.m_g);
             bmp.SetChannel<BMPSetterAgent::R>(x, y, pixel.m_r);
