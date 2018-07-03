@@ -119,6 +119,9 @@
     <ClInclude Include="HPlaneEquation.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="ImageWindow.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -215,6 +218,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="HPlaneEquation.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageWindow.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
