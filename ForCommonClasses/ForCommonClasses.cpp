@@ -1159,13 +1159,20 @@ TEST_MODULE_START
 
 		HitRecord hitRec, shadowHitRec;
 		Ray viewRay;
-		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+
+        const int WIDTH = camera.m_film->m_width, HEIGHT = camera.m_film->m_height;
+		for (unsigned int i = 0; i < WIDTH; ++i)
 		{
-			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+			for (unsigned int j = 0; j < HEIGHT; ++j)
 			{
 				viewRay = camera.GetRay(i, j);
 
                 camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
+
+                if (j % 10 == 0)
+                {
+                    ShowProgress((i * HEIGHT + j) * 1.0f / (WIDTH * HEIGHT));
+                }
 			}
 		}
 
