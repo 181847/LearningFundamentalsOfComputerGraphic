@@ -25,6 +25,7 @@
 #include "../CommonClasses/Light.h"
 #include "../CommonClasses/Material.h"
 #include "../CommonClasses/hvector.h"
+#include "../CommonClasses/ImageWindow.h"
 #pragma comment(lib, "CommonClasses.lib")
 
 
@@ -411,7 +412,7 @@ TEST_MODULE_START
 			{
 				Ray ray = orthoCamera.GetRay(i, j);
 				
-				errorLogger.LogIfFalse(AlmostPerpendicular(ray.m_origin - orthoCamera.m_origin, ray.m_direction, -1e-4f, +1e-4f));
+				errorLogger.LogIfFalse(AlmostPerpendicular(ray.m_origin - orthoCamera.m_origin, ray.m_direction, +1e-4f));
 				errorLogger.LogIfFalse(AlmostEqual(ray.m_direction, -orthoCamera.m_w));
 			}
 		}
@@ -1169,6 +1170,9 @@ TEST_MODULE_START
 		}
 
 		camera.m_film->SaveTo("OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
+
+        ImageWindow imgWindow(camera.m_film.get());
+        imgWindow.BlockShow();
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor01.png\"\n"
