@@ -49,6 +49,21 @@ const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) con
 	assert((0 <= x && x < m_width) && (0 <= y && y < m_height)
 		&& "pixel index out of range.");
 
+    // Note, the layout of pixels in m_canvas is:
+    // as the index of m_canvas increase
+    //   |--pMem starts from here
+    //   |
+    //   |
+    //  |V-----------------------|
+    // 0|P >===[column first]==>>|
+    // 1|                        |
+    // 2|                        |
+    // 3|       m_canvas         |
+    // 4|                        |
+    //  |------------------------|
+
+    // but our parameter y is from bottom to top,
+    // so we must flip the y.
 	return (m_height - 1 - y) * m_width + x;
 }
 
@@ -86,6 +101,11 @@ RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 					 floatAlpha(returnedPixel.m_g * reciprocal8BitsOne);
 
 	return RGBA(floatRed, floatGreen, floatBlue, floatAlpha);
+}
+
+const Image::Pixel & Image::GetRawPixel(const Types::U32 x, const Types::U32 y) const
+{
+    return m_canvas[To1DArrIndex(x, y)];
 }
 
 Image::Pixel::Pixel(Types::U8 r, Types::U8 g, Types::U8 b, Types::U8 a)
