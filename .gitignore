@@ -243,4 +243,4 @@ ModelManifest.xml
 
 # ignore all image files end with png which is the output image file type of this project.
 *.png
-
+OutputTestImage/
