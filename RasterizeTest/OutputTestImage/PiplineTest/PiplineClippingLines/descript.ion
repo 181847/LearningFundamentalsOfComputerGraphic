@@ -1,2 +1,0 @@
-﻿
-lineClippingErrAnalysis_fixed_011.png 0.0f, 0.0f,                     // center location\n0.3f,                           // segment length\n0.1f,                           // start radius\n12                              // num rounds\n绘制过程无在下方出现意料之外的线段Â
