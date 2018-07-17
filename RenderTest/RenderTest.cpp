@@ -575,7 +575,7 @@ TEST_MODULE_START
 		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
 
 		camera.SetFilm(std::make_unique<Film>(
-			UserConfig::COMMON_PIXEL_WIDTH * 2, UserConfig::COMMON_PIXEL_HEIGHT * 2,
+			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
 			-0.5f, +0.5f,
 			-0.5f, +0.5f));
 

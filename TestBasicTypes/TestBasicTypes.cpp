@@ -7,7 +7,7 @@
 #include <array>
 #include <ctime>
 #include <iomanip>
-#pragma comment(lib, "MyTools\\lib\\MyTool.lib")
+#pragma comment(lib, "MyTools\\MyTool.lib")
 
 #include "../CommonClasses/DebugHelpers.h"
 
