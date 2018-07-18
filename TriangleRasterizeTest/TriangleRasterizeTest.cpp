@@ -632,7 +632,7 @@ TEST_UNIT_END;
 
 #pragma region basic sphereRayTri test
 TEST_UNIT_START("basic sphereRayTri test")
-	// temp struct for line drawing.
+    // temp struct for line drawing.
     struct SimplePoint
     {
     public:
@@ -654,7 +654,7 @@ TEST_UNIT_START("basic sphereRayTri test")
 
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
     // create and config pipline state object
-	auto pso = std::make_shared<PiplineStateObject>();
+    auto pso = std::make_shared<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     pso->m_vertexLayout.pixelShaderInputSize  = sizeof(SimplePoint);
@@ -776,10 +776,10 @@ TEST_UNIT_START("basic sphereRayTri test")
 
 
     std::wstring pictureIndex = L"001";
-	std::wstring pictureName = L"z - Buffer_" + pictureIndex + L".png";
+    std::wstring pictureName = L"z - Buffer_" + pictureIndex + L".png";
 
-	ImageWindow imgWnd(pipline.m_backBuffer.get(), pictureName);
-	imgWnd.BlockShow();
+    ImageWindow imgWnd(pipline.m_backBuffer.get(), pictureName);
+    imgWnd.BlockShow();
 
     pipline.m_backBuffer->SaveTo(L"..\\RasterizeTest\\OutputTestImage\\PiplineTest\\z-Buffer\\" + pictureName);
 
