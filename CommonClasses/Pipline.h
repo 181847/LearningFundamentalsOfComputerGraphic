@@ -45,7 +45,7 @@ public:
     /*!
         \brief set a pipline state object.
     */
-    void SetPSO(std::unique_ptr<PiplineStateObject> pso);
+    void SetPSO(std::shared_ptr<PiplineStateObject> pso);
 
     /*!
         \brief draw all the vertices with next data.

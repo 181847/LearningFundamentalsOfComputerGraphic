@@ -129,10 +129,10 @@ TEST_MODULE_START
         RasterizeImage redImg       (UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::RED);
         RasterizeImage greenImg     (UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::GREEN);
         RasterizeImage blueImg      (UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT, RGBA::BLUE);
-        defaultImg. SaveTo(".\\OutputTestImage\\BaseRasterizeImage\\default_color.png");
-        redImg.     SaveTo(".\\OutputTestImage\\BaseRasterizeImage\\red_color.png");
-        greenImg.   SaveTo(".\\OutputTestImage\\BaseRasterizeImage\\green_color.png");
-        blueImg.    SaveTo(".\\OutputTestImage\\BaseRasterizeImage\\blue_color.png");
+        defaultImg. SaveTo(L".\\OutputTestImage\\BaseRasterizeImage\\default_color.png");
+        redImg.     SaveTo(L".\\OutputTestImage\\BaseRasterizeImage\\red_color.png");
+        greenImg.   SaveTo(L".\\OutputTestImage\\BaseRasterizeImage\\green_color.png");
+        blueImg.    SaveTo(L".\\OutputTestImage\\BaseRasterizeImage\\blue_color.png");
     TEST_UNIT_END;
 #pragma endregion
 
@@ -151,7 +151,7 @@ TEST_MODULE_START
             }, CENTER_X, CENTER_Y);
         }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawWuXiaolinLine\\sphere_ray.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawWuXiaolinLine\\sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -190,7 +190,7 @@ TEST_MODULE_START
         }// end time counter
         
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -227,7 +227,7 @@ TEST_MODULE_START
             }, CENTER_X, CENTER_Y);
         }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -266,7 +266,7 @@ TEST_MODULE_START
         }// end time counter
         
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawBresenhamLine\\sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -303,7 +303,7 @@ TEST_MODULE_START
             }, CENTER_X, CENTER_Y);
         }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawBresenhamLine\\default_color_in_one_call_sphere_ray.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -341,7 +341,7 @@ TEST_MODULE_START
             }, CENTER_X, CENTER_Y, 0.05f, 0.1f, 8);
         }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\2d_line_clipping.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawBresenhamLine\\2d_line_clipping.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -370,7 +370,7 @@ TEST_MODULE_START
 
         }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\triangleFlatBottom.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawBresenhamLine\\triangleFlatBottom.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -393,7 +393,7 @@ TEST_MODULE_START
 
         }// end time counter
         
-        defaultImg.SaveTo(".\\OutputTestImage\\DrawBresenhamLine\\generalTriangle.png");
+        defaultImg.SaveTo(L".\\OutputTestImage\\DrawBresenhamLine\\generalTriangle.png");
 
     TEST_UNIT_END;
 #pragma endregion
@@ -480,7 +480,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\drawLines.png");
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\drawLines.png");
         
     TEST_UNIT_END;
 #pragma endregion
@@ -568,7 +568,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineClippingTest.png");
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\lineClippingTest.png");
         
     TEST_UNIT_END;
 #pragma endregion
@@ -672,7 +672,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineVertexShaderProcess06.png");
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\lineVertexShaderProcess06.png");
         
     TEST_UNIT_END;
 #pragma endregion
@@ -772,9 +772,9 @@ TEST_MODULE_START
         }
 
 #ifdef BEFORE
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\orthographicViewTransformationBefore.png");
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\orthographicViewTransformationBefore.png");
 #else
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\orthographicViewTransformationAfter.png");
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\orthographicViewTransformationAfter.png");
 #endif
         
     TEST_UNIT_END;
@@ -880,7 +880,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\perspectiveViewTransformation.png");
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\perspectiveViewTransformation.png");
         
     TEST_UNIT_END;
 #pragma endregion
@@ -970,7 +970,7 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\perspectiveSingleLineShowInvisible.png");
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\perspectiveSingleLineShowInvisible.png");
         
     TEST_UNIT_END;
 #pragma endregion
@@ -1113,8 +1113,8 @@ TEST_MODULE_START
             pipline.DrawInstance(indices, vertexBuffer.get());
         }
 
-        std::string pictureIndex = "final";
-        pipline.m_backBuffer->SaveTo(".\\OutputTestImage\\PiplineTest\\lineClippingErrAnalysis_fixed_" + pictureIndex + ".png");
+        std::wstring pictureIndex = L"final";
+        pipline.m_backBuffer->SaveTo(L".\\OutputTestImage\\PiplineTest\\lineClippingErrAnalysis_fixed_" + pictureIndex + L".png");
         
     TEST_UNIT_END;
 #pragma endregion

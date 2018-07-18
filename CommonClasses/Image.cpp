@@ -23,11 +23,12 @@ Image::~Image()
 	// empty
 }
 
-void Image::SaveTo(const std::string & filePath) const
+void Image::SaveTo(const std::wstring & filePath) const
 {
 	FILE * outputFile;
 	// Warning!! Must open the file with the Binary mode, or the image will be broken.
-	errno_t error = fopen_s(&outputFile, filePath.c_str(), "wb");
+	//errno_t error = fopen_s(&outputFile, filePath.c_str(), "wb");
+	errno_t error = _wfopen_s(&outputFile, filePath.c_str(), L"wb");
 	if (error != 0)
 	{
 		// some error happend.

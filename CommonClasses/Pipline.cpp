@@ -30,9 +30,9 @@ void Pipline::SetBackBuffer(std::unique_ptr<RasterizeImage> backBuffer)
     m_backBuffer = std::move(backBuffer);
 }
 
-void Pipline::SetPSO(std::unique_ptr<PiplineStateObject> pso)
+void Pipline::SetPSO(std::shared_ptr<PiplineStateObject> pso)
 {
-    m_pso = std::move(pso);
+    m_pso = pso;
 }
 
 void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Buffer * vertices)
@@ -902,10 +902,8 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
     {
         pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i],     psInputStride);
         pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 1], psInputStride);
-        pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 2], psInputStride);
+		pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 2], psInputStride);
 
-        std::printf("DrawTriangleList:Loop:i: %d\n", i);
-        DebugClient<DEBUG_CLIENT_CONF_TRIANGL>(i == 492);
         DrawTriangle(pv1, pv2, pv3, psInputStride);
     }
 }

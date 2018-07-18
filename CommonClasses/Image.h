@@ -56,7 +56,7 @@ public:
 		\param filePath the file path to save the image
 		this function will overwrite the file with same name.
 	*/
-	void SaveTo(const std::string& filePath) const;
+	void SaveTo(const std::wstring& filePath) const;
 
     /*!
         \brief set one pixel with RGBA

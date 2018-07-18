@@ -165,7 +165,7 @@ TEST_MODULE_START
 			}
 		}
 
-		testImage.SaveTo("OutputTestImage\\ThisImageIsForTest.png");
+		testImage.SaveTo(L"OutputTestImage\\ThisImageIsForTest.png");
 
 		errorLogger += LetUserCheckJudge(
 				"check \".\\OutputTestImage\\ThisImageIsForTest.png\"\n"
@@ -201,7 +201,7 @@ TEST_MODULE_START
 			}
 		}
 
-		testImage.SaveTo("OutputTestImage\\ThisImageIsForWriteRGB_alpha.png");
+		testImage.SaveTo(L"OutputTestImage\\ThisImageIsForWriteRGB_alpha.png");
 
 		errorLogger += LetUserCheckJudge(
 				"check \".\\OutputTestImage\\ThisImageIsForWriteRGB_alpha.png\"\n"
@@ -234,7 +234,7 @@ TEST_MODULE_START
 		}
 
 
-		tfilm.SaveTo("OutputTestImage\\ThisImageIsForFilm.png");
+		tfilm.SaveTo(L"OutputTestImage\\ThisImageIsForFilm.png");
 
 
 		errorLogger += LetUserCheckJudge(
@@ -368,7 +368,7 @@ TEST_MODULE_START
 			}
 		}
 
-		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCamera.png");
+		orthoCamera.m_film->SaveTo(L"OutputTestImage\\ThisImageIsForOrthoCamera.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForOrthoCamera_RGBA_RGB_Alpha.png\"\n"
@@ -461,7 +461,7 @@ TEST_MODULE_START
 		orthoCamera.IncomeLight(WIDTH - 1,	0,			greenT);
 		orthoCamera.IncomeLight(0,			0,			blueT);
 
-		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraPixelLoc.png");
+		orthoCamera.m_film->SaveTo(L"OutputTestImage\\ThisImageIsForOrthoCameraPixelLoc.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
@@ -533,7 +533,7 @@ TEST_MODULE_START
 			}
 		}
 
-		orthoCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraRenderSphere.png");
+		orthoCamera.m_film->SaveTo(L"OutputTestImage\\ThisImageIsForOrthoCameraRenderSphere.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForOrthoCamera.png\"\n"
@@ -595,7 +595,7 @@ TEST_MODULE_START
             ++colorIndex;
 		}
 
-		img.SaveTo("OutputTestImage\\ConstantColorCheck.png");
+		img.SaveTo(L"OutputTestImage\\ConstantColorCheck.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check OutputTestImage\\ConstantColorCheck.png\n"
@@ -663,7 +663,7 @@ TEST_MODULE_START
 			}
 		}
 
-		perspectCamera.m_film->SaveTo("OutputTestImage\\ThisImageIsForPerspectiveCameraRenderSphere.png");
+		perspectCamera.m_film->SaveTo(L"OutputTestImage\\ThisImageIsForPerspectiveCameraRenderSphere.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForPerspectiveCameraRenderSphere.png\"\n"
@@ -765,7 +765,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForOrthoCameraRenderTriangle.png");
+		camera.m_film->SaveTo(L"OutputTestImage\\ThisImageIsForOrthoCameraRenderTriangle.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForOrthoCameraRenderTriangle.png\"\n"
@@ -842,7 +842,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForSceneHit.png");
+		camera.m_film->SaveTo(L"OutputTestImage\\ThisImageIsForSceneHit.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForSceneHit.png\"\n"
@@ -914,7 +914,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\ThisImageIsForHitPolygon.png");
+		camera.m_film->SaveTo(L"OutputTestImage\\ThisImageIsForHitPolygon.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForHitPolygon.png\"\n"
@@ -1055,7 +1055,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderMaterial\\ThisImageIsForTempPointLight15.png");
+		camera.m_film->SaveTo(L"OutputTestImage\\RenderMaterial\\ThisImageIsForTempPointLight15.png");
 
 		errorLogger += LetUserCheckJudge(
 			"check \".\\OutputTestImage\\ThisImageIsForTempPointLight.png\"\n"
@@ -1176,14 +1176,10 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
+		camera.m_film->SaveTo(L"OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
 
         ImageWindow imgWindow(camera.m_film.get());
         imgWindow.BlockShow();
-
-		errorLogger += LetUserCheckJudge(
-			"check \".\\OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor01.png\"\n"
-			"you should have seen a sphere with some color, the background is dark green.");
 
 	TEST_UNIT_END;
 #pragma endregion
@@ -1267,11 +1263,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox01.png");
-
-		errorLogger += LetUserCheckJudge(
-			"check \".\\OutputTestImage\\RenderInsideBox\\....png\"\n"
-			"you should have seen a sphere with some color, the background is dark green.");
+		camera.m_film->SaveTo(L"OutputTestImage\\RenderInsideBox\\InsideBox01.png");
 
 	TEST_UNIT_END;
 #pragma endregion

@@ -137,18 +137,20 @@ Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right
     const Types::F32 
         RECIPO_WIDTH (1.0f / (right - left)),
         RECIPO_HEIGHT(1.0f / (top - bottom)),
-        RECIPO_DIST  (1.0f / (near - far));
+        RECIPO_DIST  (1.0f / (near - far));		// notice that current coordinate system is right hand system, the Z axis point out the screen, and [ far < near < 0 ]
 
     const Types::F32 absNear = std::abs(near), absFar = std::abs(far);
 
     // a special version of perspective view transformation matrix.
     //Reference from : <Fundemantals Of Compute Graphics, 3rd> page.155
-    // I have modify the matrix a little bit in the thrid row, in which if flip the sign of last two elemnts.
+    // I have modify the matrix a little bit in the third row, in which I flip the sign of last two elements.
+	// when you perform perspective divide, the relative position of x/y will remains,
+	// but z will be flipped, and the relationship between near and far is [ 0 < near < far ]
     return Transform(
-        - 2.0f * near * RECIPO_WIDTH, 0.0f,                           (left + right) * RECIPO_WIDTH,     0.0f,
-        0.0f,                       - 2.0f * near * RECIPO_HEIGHT,    (bottom + top) * RECIPO_HEIGHT,    0.0f,
-        0.0f,                       0.0f,                           -(far + near) * RECIPO_DIST,         2.0f * far * near * RECIPO_DIST,
-        0.0f,                       0.0f,                           -1.0f,                               0.0f
+        - 2.0f * near * RECIPO_WIDTH,   0.0f,                           (left + right) * RECIPO_WIDTH,       0.0f,
+        0.0f,                          -2.0f * near * RECIPO_HEIGHT,    (bottom + top) * RECIPO_HEIGHT,      0.0f,
+        0.0f,                           0.0f,                           -(far + near)  * RECIPO_DIST,        2.0f * far * near * RECIPO_DIST,
+        0.0f,                           0.0f,                           -1.0f,                               0.0f
     );
 
     /*return Transform(
@@ -157,11 +159,6 @@ Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right
         0.0f,                       0.0f,                           (far + near) * RECIPO_DIST,         2.0f * far * near * -RECIPO_DIST,
         0.0f,                       0.0f,                           1.0f,                               0.0f
     );*/
-
-
-
-
-    return Transform();
 }
 
 bool operator==(const Transform & m1, const Transform & m2)

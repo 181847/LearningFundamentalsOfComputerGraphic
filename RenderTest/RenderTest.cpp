@@ -356,11 +356,7 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
-
-		errorLogger += LetUserCheckJudge(
-			"check \".\\OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor01.png\"\n"
-			"you should have seen a sphere with some color, the background is dark green.");
+		camera.m_film->SaveTo(L"OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
 
 	TEST_UNIT_END;
 #pragma endregion
@@ -608,14 +604,10 @@ TEST_MODULE_START
 			}
 		}
 
-		camera.m_film->SaveTo("OutputTestImage\\RenderInsideBox\\InsideBox29.png");
+		camera.m_film->SaveTo(L"OutputTestImage\\RenderInsideBox\\InsideBox29.png");
 
         ImageWindow imgWnd(camera.m_film.get(), L"InsideBox29.png");
         imgWnd.BlockShow();
-
-		errorLogger += LetUserCheckJudge(
-			"check \".\\OutputTestImage\\RenderInsideBox\\....png\"\n"
-			"you should have seen a sphere with some color, the background is dark green.");
 
 	TEST_UNIT_END;
 #pragma endregion
