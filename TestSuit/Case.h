@@ -12,18 +12,18 @@ namespace TestSuit
 */
 class Case
 {
-private:
+protected:
     /*!
         \brief a programable timecounter to be used int Run() function.
     */
     TimeCounter* m_pProgramableTimeCounter;
 
     /*!
-        \brief a helpful marco to count time elapsed inside a field,
+        \brief a helpful macro to count time elapsed inside a field,
         which is stored in m_pDetailTimeCounter.
     */
 #define COUNT_DETAIL_TIME assert(nullptr != this->m_pProgramableTimeCounter && "The programable time counter has not been set!");\
-TimeGuard LOCAL_DETAIL_TIME_COUNTER_GUARD(*(this->m_pProgramableTimeCounter));
+TestSuit::TimeGuard LOCAL_DETAIL_TIME_COUNTER_GUARD(*(this->m_pProgramableTimeCounter))
 
     /*!
         \brief name of this Case.
