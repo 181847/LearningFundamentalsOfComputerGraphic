@@ -3,13 +3,10 @@
 #include <string>
 
 /*!
-	\brief useful tool for test, for example the time counter, OR the assertion function.
+    \brief useful tool for test, for example the time counter, OR the assertion function.
 */
-
 namespace TestSuit
 {
-
-
 
 /*!
     \brief TimeCounter used to record time for the test.
@@ -30,15 +27,15 @@ namespace TestSuit
 class TimeCounter
 {
 public:
-	/*!
-		\brief which unit to measure time elapsed.
-	*/
-	using DurationType = std::chrono::microseconds;
+    /*!
+        \brief which unit to measure time elapsed.
+    */
+    using DurationType = std::chrono::microseconds;
 
-	/*!
-		\brief give the time unit a name to be printed in the output, e.g. "ms" and the out put may look like '... 45654 ms ...'
-	*/
-	const std::string DURATION_TYPE_NAME = "us";
+    /*!
+        \brief give the time unit a name to be printed in the output, e.g. "ms" and the out put may look like '... 45654 ms ...'
+    */
+    const std::string DURATION_TYPE_NAME = "us";
 
     /*!
         \brief the sum of the time that have been recorded.
@@ -46,8 +43,9 @@ public:
     DurationType m_sumDuration = DurationType::zero();
 
 public:
-	TimeCounter(const TimeCounter&) = delete;
-	TimeCounter& operator = (const TimeCounter&) = delete;
+    TimeCounter() {}
+    TimeCounter(const TimeCounter&) = delete;
+    TimeCounter& operator = (const TimeCounter&) = delete;
 };
 
 /*!
@@ -56,15 +54,15 @@ public:
 struct TimeGuard
 {
 private:
-    TimeCounter& m_tarteTimeCounter;
+    TimeCounter& m_timeCounter;
     std::chrono::system_clock::time_point m_startTimePoint;
 
 public:
-	/*!
-		\brief start counting and the time elapsed will store in 'addTo'
-	*/
+    /*!
+        \brief start counting and the time elapsed will store in 'addTo'
+    */
     TimeGuard(TimeCounter& addTo)
-        :m_tarteTimeCounter(addTo)
+        :m_timeCounter(addTo)
     {
         m_startTimePoint = std::chrono::system_clock::now();
     }
@@ -73,11 +71,11 @@ public:
     {
         auto endTimePoint = std::chrono::system_clock::now();
 
-        m_tarteTimeCounter.m_sumDuration += std::chrono::duration_cast<TimeCounter::DurationType>(endTimePoint - m_startTimePoint);
+        m_timeCounter.m_sumDuration += std::chrono::duration_cast<TimeCounter::DurationType>(endTimePoint - m_startTimePoint);
     }
 
-	TimeGuard(const TimeGuard&) = delete;
-	TimeGuard& operator = (const TimeGuard&) = delete;
+    TimeGuard(const TimeGuard&) = delete;
+    TimeGuard& operator = (const TimeGuard&) = delete;
 };
 
 }// namespace TestSuit
