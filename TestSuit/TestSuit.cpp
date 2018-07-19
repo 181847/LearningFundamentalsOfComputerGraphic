@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Suit.h"
+#include <Windows.h>
 
 class TestCase : public TestSuit::Case
 {
@@ -11,6 +12,12 @@ public:
 
     virtual void Run() override
     {
+        {
+
+            COUNT_DETAIL_TIME;
+            Sleep(83);
+        }
+        Sleep(5);
         printf("one method run.\n");
     }
 };
@@ -22,6 +29,8 @@ public:
 
     virtual void Run() override
     {
+        COUNT_DETAIL_TIME;
+        Sleep(69);
         printf("second method run.\n");
     }
 };
@@ -33,6 +42,8 @@ public:
 
     virtual void Run() override
     {
+        COUNT_DETAIL_TIME;
+        Sleep(3);
         printf("third method run.\n");
     }
 };
