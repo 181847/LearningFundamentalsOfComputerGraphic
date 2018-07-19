@@ -58,6 +58,9 @@ public:
 
     virtual void Run() = 0;
 
+    /*!
+        \brief get the name of this case.        
+    */
     std::string GetName()
     {
         return m_name;
