@@ -10,6 +10,18 @@ namespace TestSuit
 /*!
     \brief a Suit will create multiple Case instance and run their test code.
     your job is to wrap the desired Case object into the Suit, and called Start();
+
+    the routine of Suit is running like this:
+    Start()
+    {
+        PrepareTotal();
+            foreach case:
+                environment = PrepareBeforeEachCase(case);
+                case.SetEnvironment(environment);
+                // .... running ...
+                FinishEachCase(case, environment);
+        FinishAllCases();
+    }
 */
 template<typename ...CASE_TYPE_LIST>
 class Suit
@@ -19,7 +31,7 @@ public:
 
 public:
     /*!
-        \brief construct the cast list with all the types listed in the template parameters.
+        \brief construct the case list with all the types listed in the template parameters.
     */
     Suit()
     {
@@ -86,7 +98,7 @@ public:
                 outer.m_sumDuration.count(), outer.DURATION_TYPE_NAME.c_str(),
                 inner.m_sumDuration.count(), inner.DURATION_TYPE_NAME.c_str());
             
-            FinishEachCase(theCase.get());
+            FinishEachCase(theCase.get(), pEnvironment);
         }// end for each case
         FinishAllCases();
     }// end Start()
@@ -104,10 +116,12 @@ public:
     virtual void * PrepareBeforeEachCase(Case * pTheCase) { return nullptr; }
 
     /*!
-        \brief finish codes when one Case::Run() finished.        
+        \brief finish codes when one Case::Run() finished (Even a exception happened.).        
         \param pTheCase the latest Case that had run.
+        \param pEnvironment the environment pointer, PLZ DONT leak any memory of this pointer.
+               You can clean up the environment here of memory safety.
     */
-    virtual void FinishEachCase(Case * pTheCase) {}
+    virtual void FinishEachCase(Case * pTheCase, void * pEnvironment) {}
 
     /*!
         \brief finish codes when all cases run over.        
