@@ -93,7 +93,7 @@ public:
             }
 
             // print running time.
-            printf("Case terminate: %s \nCost %lld %s for total.\nCost %lld %s for detail.\n", 
+            printf("Case terminate: %s \n<%8lld %s <-- %8lld %s --> >.\n", 
                 theCase->GetName().c_str(),
                 outer.m_sumDuration.count(), outer.DURATION_TYPE_NAME.c_str(),
                 inner.m_sumDuration.count(), inner.DURATION_TYPE_NAME.c_str());
