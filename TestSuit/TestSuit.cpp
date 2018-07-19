@@ -4,11 +4,11 @@
 #include "stdafx.h"
 #include "Suit.h"
 
-class TestMethod : public TestSuit::Method
+class TestCase : public TestSuit::Case
 {
 public:
-    TestMethod(){}
-    virtual ~TestMethod() {}
+	TestCase(){}
+    virtual ~TestCase() {}
 
     virtual void Run() override
     {
@@ -19,11 +19,9 @@ public:
 
 int main()
 {
-    printf("hellow\n");
-
     using namespace TestSuit;
 
-    Suit<TestMethod> suit;
+    Suit<TestCase> suit;
     Suit<> suit2;
 
     suit.Start();

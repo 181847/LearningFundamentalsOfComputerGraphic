@@ -149,13 +149,13 @@
     <Text Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Method.h" />
+    <ClInclude Include="Case.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Suit.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Method.cpp" />
+    <ClCompile Include="Case.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Suit.cpp" />
     <ClCompile Include="TestSuit.cpp" />

@@ -4,14 +4,14 @@ namespace TestSuit
 {
 
 /*!
-    \brief one Method instance corresponds to on test case
+    \brief one Case instance corresponds to on test case
     each instance will only have one function to run the test code.
 */
-class Method
+class Case
 {
 public:
-    Method() {}
-    virtual ~Method() {}
+    Case() {}
+    virtual ~Case() {}
 
     virtual void Run() = 0;
 };
