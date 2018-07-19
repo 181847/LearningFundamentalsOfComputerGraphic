@@ -22,16 +22,26 @@ public:
 	*/
     Suit()
     {
+        InitDefaultCases();
+    }
+    virtual ~Suit() {}
+
+private:
+    /*!
+        \brief initialize all the cases in the template parameters.
+    */
+    void InitDefaultCases()
+    {
         std::unique_ptr<Case> list[] = { nullptr /* prevent array has size of ZERO */, std::make_unique<CASE_TYPE_LIST>()... };
         const int num = sizeof...(CASE_TYPE_LIST);
-        
+
         for (int i = 1; i <= num; ++i)
         {
-			m_cases.push_back(std::move(list[i]));
+            m_cases.push_back(std::move(list[i]));
         }
     }
-    ~Suit() {}
 
+public:
     /*!
         \brief add a theCase to run.
         \param case pointer 
@@ -46,11 +56,23 @@ public:
     */
     void Start()
     {
+        PrepareTotal();
         for (auto & theCase : m_cases)
         {
+            PrepareBeforeEachCase();
             theCase->Run();
         }
     }
+
+    /*!
+        \brief prepare options for entire suit.Start()
+    */
+    virtual void PrepareTotal() {}
+
+    /*!
+        \brief preparations before each case start.
+    */
+    virtual void PrepareBeforeEachCase() {}
 };
 
 } // namespace TestSuit
