@@ -38,12 +38,6 @@
     <ClCompile Include="TestSuit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Suit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Case.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.md" />
