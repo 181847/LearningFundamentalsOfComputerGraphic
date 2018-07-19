@@ -153,6 +153,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Suit.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestTools.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Case.cpp" />
