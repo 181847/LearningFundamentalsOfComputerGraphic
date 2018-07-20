@@ -27,7 +27,7 @@
     <ClInclude Include="Case.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestTools.h">
+    <ClInclude Include="Miscellaneous.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
