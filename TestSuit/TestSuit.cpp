@@ -5,16 +5,37 @@
 #include "Suit.h"
 #include <Windows.h>
 
-class TestCase : public TestSuit::Case
+/*!
+    \brief example case
+*/
+class ExampleCase1 : public TestSuit::Case
 {
-public:
-    TestCase() :Case("TestCase") {}
+private:
+    int * pInt; // store temp environment pointer.
 
+public:
+    /*!
+        \brife called the constructor of the Case, to set it's Name
+    */
+    ExampleCase1() :Case("Kratos") {}
+
+    /*!
+        \brief store environtment value passed by the host suit.
+        There is no need to worry about the memory of the suit.
+    */
+    virtual void SetEnvironment(void * pEnvironment) override
+    {
+        pInt = reinterpret_cast<int*>(pEnvironment);
+    }
+
+    /*!
+        \brief main code to be run.
+    */
     virtual void Run() override
     {
         {
-
-            COUNT_DETAIL_TIME;
+            COUNT_DETAIL_TIME;  // this macro will count the time between its construction and deconstruction.
+            printf("The content value is %d.\n", *pInt);
             Sleep(83);
         }
         Sleep(5);
@@ -22,10 +43,10 @@ public:
     }
 };
 
-class TestCase2 : public TestSuit::Case
+class ExampleCase2 : public TestSuit::Case
 {
 public:
-    TestCase2() :Case("TestCase2") {}
+    ExampleCase2() :Case("Rocky") {}
 
     virtual void Run() override
     {
@@ -35,10 +56,10 @@ public:
     }
 };
 
-class TestCase3 : public TestSuit::Case
+class ExampleCase3 : public TestSuit::Case
 {
 public:
-    TestCase3() :Case("TestCase3") {}
+    ExampleCase3() :Case("Boy") {}
 
     virtual void Run() override
     {
@@ -48,35 +69,54 @@ public:
     }
 };
 
-class MySuit : public TestSuit::Suit<TestCase, TestCase2, TestCase3>
+/*!
+    \brief you can fix the Cases that you will run,
+    or just treat them as another template parameters pack.
+*/
+template<typename ...CASE_TYPE_LIST>
+class ExampleSuit : public TestSuit::Suit<CASE_TYPE_LIST...>
 {
 public:
+    /*!
+        \brief run before all start.
+    */
     virtual void PrepareTotal() override
     {
         printf("MySuit called PrepareTotal\n");
     }
 
+    /*!
+        \brief run before each case run.
+        \param pTheCase the case that will be run, don't worry about the memory of pTheCase right now.
+        \return a pointer can point to any thing, this pointer will be passed to the case.
+    */
     virtual void * PrepareBeforeEachCase(TestSuit::Case * pTheCase) override
     {
         printf("MySuit called PrepareBeforeEachCase\n");
-        return nullptr;
-    }
-};
-
-template<typename ...CASE_LIST>
-class MySecondSuit : public TestSuit::Suit<CASE_LIST...>
-{
-
-public:
-    virtual void PrepareTotal() override
-    {
-        printf("**** THIS IS A GENERAL TEST SUIT FOR CAST_LIST.\n");
+        int * pInt = new int(8);
+        return pInt;
     }
 
-    virtual void * PrepareBeforeEachCase(TestSuit::Case * pTheCase) override
+    /*!
+        \brief run after each case
+        \param pTheCase the case stops
+        \param pEnvironment the pointer that be returned by PrepareBeforeEachCase(...), 
+               Please take care of the memory where the pointer points to by yourself.
+    */
+    virtual void FinishEachCase(TestSuit::Case * pTheCase, void * pEnvironment) override
     {
-        printf("****** CASE START WITH: %s\n", pTheCase->GetName().c_str());
-        return nullptr;
+        printf("Finish the case, the number is %d\n", *reinterpret_cast<int*>(pEnvironment));
+
+        // clear environment
+        delete reinterpret_cast<int*>(pEnvironment);
+    }
+
+    /*!
+        \brief run when all case finished.
+    */
+    virtual void FinishAllCases() override
+    {
+        printf("Example suit finished\n");
     }
 };
 
@@ -85,13 +125,13 @@ int main()
 {
     using namespace TestSuit;
 
-    MySuit mySuit;
-    mySuit.Start();
+    // assembly the cases to be run.
+    ExampleSuit<ExampleCase1, ExampleCase1, ExampleCase2, ExampleCase3> suit;
+    
+    auto uniqueCase = std::make_unique<ExampleCase2>();
+    suit.AddCase(std::move(uniqueCase));
 
-
-    printf("\n\n\ntemplate test suit\n\n");
-    MySecondSuit<TestCase, TestCase2, TestCase3> mySuit2;
-    mySuit2.Start();
+    suit.Start();
 
     getchar();
     return 0;
