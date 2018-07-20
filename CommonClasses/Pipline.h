@@ -48,6 +48,11 @@ public:
     void SetPSO(std::shared_ptr<PiplineStateObject> pso);
 
     /*!
+        \brief get current pipline state object.
+    */
+    std::shared_ptr<PiplineStateObject> GetPSO();
+
+    /*!
         \brief draw all the vertices with next data.
         \param indices the indices of all the vertices
         \param vertices the vertex data to be drawn, the data can be line list or triangle list.

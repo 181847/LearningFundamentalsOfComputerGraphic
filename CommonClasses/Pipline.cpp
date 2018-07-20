@@ -35,6 +35,11 @@ void Pipline::SetPSO(std::shared_ptr<PiplineStateObject> pso)
     m_pso = pso;
 }
 
+std::shared_ptr<PiplineStateObject> Pipline::GetPSO()
+{
+    return m_pso;
+}
+
 void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Buffer * vertices)
 {
     if (nullptr == m_pso.get())
