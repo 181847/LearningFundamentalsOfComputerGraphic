@@ -1,11 +1,124 @@
-# ÏîÄ¿¼ò½é
+# é¡¹ç›®ç®€ä»‹
 
-TestSuitÊÇÒ»¸ö¼òµ¥µÄ²âÊÔ¼Ü¹¹£¬°üº¬Á½¸ö¸ÅÄî£º
+TestSuitæ˜¯ä¸€ä¸ªç®€å•çš„æµ‹è¯•æ¶æ„ï¼ŒåŒ…å«ä¸¤ä¸ªæ¦‚å¿µï¼š
 * Suit
-* Method
+* Case
 
-## Method
-Ò»¸ö¼òµ¥µÄÔËĞĞ´úÂë·â×°£¬ÓĞÒ»¸örunº¯ÊıÓÃÓÚÖ´ĞĞ²âÊÔ´úÂë¡£
+## Case
+ä¸€ä¸ªç®€å•çš„è¿è¡Œä»£ç å°è£…ï¼Œæœ‰ä¸€ä¸ª **Run()** å‡½æ•°ç”¨äºæ‰§è¡Œæµ‹è¯•ä»£ç ã€‚
 
 ## Suit
-·â×°¶à¸öMethod¶ÔÏóÊµÀı£¬¿ÉÒÔÔËĞĞ¶à¸öMethod¶ÔÏó£¬±¾Éí¿ÉÒÔ½øĞĞÒ»Ğ©²âÊÔ´úÂëµÄ×¼±¸¹¤×÷£¬±ÈÈç¹¹½¨²âÊÔ²âÊÔ¶ÔÏóµÈ¡£
+å°è£…å¤šä¸ªMethodå¯¹è±¡å®ä¾‹ï¼Œå¯ä»¥è¿è¡Œå¤šä¸ª **Case** å¯¹è±¡ï¼Œæœ¬èº«å¯ä»¥è¿›è¡Œä¸€äº›æµ‹è¯•ä»£ç çš„å‡†å¤‡å·¥ä½œï¼Œæ¯”å¦‚æ„å»ºæµ‹è¯•æµ‹è¯•å¯¹è±¡ç­‰ã€‚
+
+## ä½¿ç”¨æ–¹å¼
+åŒ…å«å¤´æ–‡ä»¶Suit.h
+
+### åˆ›å»ºCase
+```C++
+/*!
+    \brief example case
+*/
+class ExampleCase1 : public TestSuit::Case
+{
+private:
+    int * pInt; // store temp environment pointer.
+
+public:
+    /*!
+        \brife called the constructor of the Case, to set it's Name
+    */
+    ExampleCase1() :Case("Kratos") {}
+
+    /*!
+        \brief store environtment value passed by the host suit.
+        There is no need to worry about the memory of the suit.
+    */
+    virtual void SetEnvironment(void * pEnvironment) override
+    {
+        pInt = reinterpret_cast<int*>(pEnvironment);
+    }
+
+    /*!
+        \brief main code to be run.
+    */
+    virtual void Run() override
+    {
+        {
+            COUNT_DETAIL_TIME;  // this macro will count the time between its construction and deconstruction.
+            printf("The content value is %d.\n", *pInt);
+            Sleep(83);
+        }
+        Sleep(5);
+        printf("one method run.\n");
+    }
+};
+```
+
+### åˆ›å»ºSuit
+```C++
+/*!
+    \brief you can fix the Cases that you will run,
+    or just treat them as another template parameters pack.
+*/
+template<typename ...CASE_TYPE_LIST>
+class ExampleSuit : public TestSuit::Suit<CASE_TYPE_LIST...>
+{
+public:
+    /*!
+        \brief run before all start.
+    */
+    virtual void PrepareTotal() override
+    {
+        printf("MySuit called PrepareTotal\n");
+    }
+
+    /*!
+        \brief run before each case run.
+        \param pTheCase the case that will be run, don't worry about the memory of pTheCase right now.
+        \return a pointer can point to any thing, this pointer will be passed to the case.
+    */
+    virtual void * PrepareBeforeEachCase(TestSuit::Case * pTheCase) override
+    {
+        printf("MySuit called PrepareBeforeEachCase\n");
+        int * pInt = new int(8);
+        return pInt;
+    }
+
+    /*!
+        \brief run after each case
+        \param pTheCase the case stops
+        \param pEnvironment the pointer that be returned by PrepareBeforeEachCase(...), 
+               Please take care of the memory where the pointer points to by yourself.
+    */
+    virtual void FinishEachCase(TestSuit::Case * pTheCase, void * pEnvironment) override
+    {
+        printf("Finish the case, the number is %d\n", *reinterpret_cast<int*>(pEnvironment));
+
+        // clear environment
+        delete reinterpret_cast<int*>(pEnvironment);
+    }
+
+    /*!
+        \brief run when all case finished.
+    */
+    virtual void FinishAllCases() override
+    {
+        printf("Example suit finished\n");
+    }
+};
+```
+
+### ä½¿ç”¨å¹¶è¿è¡Œ
+```C++
+// assembly the cases to be run.
+ExampleSuit<ExampleCase1, ExampleCase1, ExampleCase2, ExampleCase3> suit;
+suit.Start();
+```
+æˆ–è€…æ‰‹åŠ¨æ·»åŠ Case
+```C++
+auto uniqueCase = std::make_unique<ExampleCase2>();
+suit.AddCase(std::move(uniqueCase));
+```
+
+#### æ³¨æ„
+* å¦‚æœä½ çš„Caseæ²¡æœ‰æ— å‚æ„é€ å‡½æ•°ï¼Œåˆ™å¿…é¡»ä½¿ç”¨[æ‰‹åŠ¨æ·»åŠ ](#user-content-ä½¿ç”¨å¹¶è¿è¡Œ)çš„æ–¹å¼æ·»åŠ Caseã€‚
