@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TestTools.h"
+#include "Miscellaneous.h"
 #include <assert.h>
 
 namespace TestSuit
