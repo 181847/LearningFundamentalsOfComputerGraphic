@@ -121,7 +121,7 @@ public:
     /*!
         \brief prepare options for entire suit.Start()
     */
-    virtual void PrepareTotal() { printf("Test Suit Start!"); }
+    virtual void PrepareTotal() { printf("Test Suit Start!\n"); }
 
     /*!
         \brief preparations before each case start.
@@ -141,7 +141,7 @@ public:
     /*!
         \brief finish codes when all cases run over.        
     */
-    virtual void FinishAllCases() { printf("Test suit stop!"); }
+    virtual void FinishAllCases() { printf("Test suit stop!\n"); }
 };
 
 } // namespace TestSuit
