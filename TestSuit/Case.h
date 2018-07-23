@@ -3,6 +3,10 @@
 #include "Miscellaneous.h"
 #include <assert.h>
 
+#ifdef WIN32
+#include <intrin.h>
+#endif // end ifdef WIN32
+
 namespace TestSuit
 {
 
@@ -17,6 +21,12 @@ protected:
         \brief a programable timecounter to be used int Run() function.
     */
     TimeCounter* m_pProgramableTimeCounter;
+
+private:
+    /*!
+        \brief count the errors.
+    */
+    int m_errorCount = 0;
 
     /*!
         \brief a helpful macro to count time elapsed inside a field,
@@ -65,6 +75,35 @@ public:
     {
         return m_name;
     }
+
+protected:
+    /*!
+        \brief count one error.
+    */
+    void CountOneError()
+    {
+        ++m_errorCount;
+    }
+
+#ifdef WIN32
+    // a help macro for assertion
+#define TEST_ASSERT(expr) do {\
+        if (!(expr)){\
+            this->CountOneError();\
+            __debugbreak();\
+        }\
+    } while(0)
+#endif // end ifdef WIN32
+
+public:
+    /*!
+        \brief return the number of errors.
+    */
+    int GetErrorCount()
+    {
+        return m_errorCount;
+    }
+
 };
 
 }// namespace TestSuit

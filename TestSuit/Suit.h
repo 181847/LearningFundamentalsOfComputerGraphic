@@ -92,11 +92,26 @@ public:
                 printf("exception!! Message: %s\n", excep.what());
             }
 
+            const std::string SUCCESS_MARK = "\\/\\/\\/\\/";
+            const std::string FAILURE_MARK = "XXXXXX";
+
+            std::string resultMark;
+
+            if (theCase->GetErrorCount() > 0)
+            {
+                resultMark = FAILURE_MARK;
+            }
+            else
+            {
+                resultMark = SUCCESS_MARK;
+            }// end theCase->GetErrorCoount()
+
             // print running time.
-            printf("case: %32s <%8lld %s <-- %8lld %s --> >.\n", 
+            printf("case: %32s <%8lld %s <-- %8lld %s --> >.\n Result: %s\n\n", 
                 theCase->GetName().c_str(),
                 outer.m_sumDuration.count(), outer.DURATION_TYPE_NAME.c_str(),
-                inner.m_sumDuration.count(), inner.DURATION_TYPE_NAME.c_str());
+                inner.m_sumDuration.count(), inner.DURATION_TYPE_NAME.c_str(),
+                resultMark.c_str());
             
             FinishEachCase(theCase.get(), pEnvironment);
         }// end for each case
