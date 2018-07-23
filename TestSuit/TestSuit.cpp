@@ -39,6 +39,7 @@ public:
             Sleep(83);
         }
         Sleep(5);
+        TEST_ASSERT(1 == 2);
         printf("one method run.\n");
     }
 };
