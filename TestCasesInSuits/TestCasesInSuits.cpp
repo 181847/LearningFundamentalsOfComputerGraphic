@@ -65,9 +65,12 @@ public:
 public:
     CommonEnvironment()
     {
-        
+        // empty
     }
 
+    /*!
+        \brief Build common PiplineStateObject for using.
+    */
     std::unique_ptr<PiplineStateObject> GetCommonPSO()
     {
         auto pso = std::make_unique<PiplineStateObject>();
@@ -79,6 +82,9 @@ public:
         return std::move(pso);
     }
 
+    /*!
+        \brief Build common viewport by the default view size defined in CommonEnvironment.
+    */
     Viewport GetCommonViewport()
     {
         Viewport viewport;
@@ -89,6 +95,11 @@ public:
         return viewport;
     }
 
+    /*!
+        \brief Build common Pipline for drawing, 
+        all you need do is to set PixelShader/VertexShader, 
+        and call drawing function with mesh data.
+    */
     std::unique_ptr<Pipline> GetCommonPipline()
     {
         // create and set a pipline.
@@ -121,6 +132,56 @@ public:
     {
         this->pEnvironment = reinterpret_cast<CommonEnvironment*>(pEnvironment);
     }
+
+    /*!
+        \brief fill in the mesh data with sphere ray line list.
+        \param outVetexData return vertex data
+        \param outIndices return indices in line list.
+    */
+    void BuildSphereRayLineData(std::vector<SimplePoint>& outVertexData, std::vector<unsigned int>& outIndices)
+    {
+        std::vector<SimplePoint> points;
+        std::vector<unsigned int> indices;
+        unsigned int numIndices = 0;
+
+        const float CENTER_X = 0.0f;
+        const float CENTER_Y = 0.0f;
+        const float SEGMENT_LENGTH = 0.3f;
+        const float START_RADIUS = 0.3;
+        const float NUM_ROUNDS = 12;
+        const float RADIO_OFFSET = 0.0f; // Add this offset to every angle inside the sphereRay generating process.
+
+                                         // create line segments in sphere ray.
+        SphereRay([&numIndices, &outVertexData, &outIndices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
+
+            const unsigned int theIndexOfOneLine = 64;
+            // only get one line for convenience of debugging
+            //if (lineIndex == theIndexOfOneLine)
+            //{
+            // add start vertex and its index
+            SimplePoint start(hvector(x0, y0, 0.0f));
+            start.m_rayIndex.m_x = roundIndex;
+            start.m_rayIndex.m_y = lineIndex;
+            start.m_rayIndex.m_z = 0;
+            outVertexData.push_back(start);
+            outIndices.push_back(numIndices++);
+
+            // add end vertex and its index
+            SimplePoint end(hvector(x1, y1, 0.0f));
+            end.m_rayIndex.m_x = roundIndex;
+            end.m_rayIndex.m_y = lineIndex;
+            end.m_rayIndex.m_z = 1;
+            outVertexData.push_back(end);
+            outIndices.push_back(numIndices++);
+            //}
+        },
+            CENTER_X, CENTER_Y, // center location
+            SEGMENT_LENGTH,     // segment length
+            START_RADIUS,       // start radius
+            NUM_ROUNDS,         // num rounds
+            RADIO_OFFSET        // radio offset
+            );// end calling SphereRay()
+    }// end BuildSphereRayTriangleMeshData()
 
     virtual void Run()
     {
@@ -193,53 +254,9 @@ public:
         std::wstring pictureName = L"lineClippingErrAnalysis_fixed_" + pictureIndex + L".png";
         ImageWindow imgWnd(pipline->m_backBuffer.get(), pictureName);
         imgWnd.BlockShow();
+
         pipline->m_backBuffer->SaveTo(L"..\\OutputTestImage\\PiplineTest\\" + pictureName);
     }
-
-    void BuildSphereRayLineData(std::vector<SimplePoint>& outVertexData, std::vector<unsigned int>& outIndices)
-    {
-        std::vector<SimplePoint> points;
-        std::vector<unsigned int> indices;
-        unsigned int numIndices = 0;
-
-        const float CENTER_X        = 0.0f;
-        const float CENTER_Y        = 0.0f;
-        const float SEGMENT_LENGTH  = 0.3f;
-        const float START_RADIUS    = 0.3;
-        const float NUM_ROUNDS      = 12;
-        const float RADIO_OFFSET    = 0.0f; // Add this offset to every angle inside the sphereRay generating process.
-
-        // create line segments in sphere ray.
-        SphereRay([&numIndices, &outVertexData, &outIndices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
-
-            const unsigned int theIndexOfOneLine = 64;
-            // only get one line for convenience of debugging
-            //if (lineIndex == theIndexOfOneLine)
-            //{
-            // add start vertex and its index
-            SimplePoint start(hvector(x0, y0, 0.0f));
-            start.m_rayIndex.m_x = roundIndex;
-            start.m_rayIndex.m_y = lineIndex;
-            start.m_rayIndex.m_z = 0;
-            outVertexData.push_back(start);
-            outIndices.push_back(numIndices++);
-
-            // add end vertex and its index
-            SimplePoint end(hvector(x1, y1, 0.0f));
-            end.m_rayIndex.m_x = roundIndex;
-            end.m_rayIndex.m_y = lineIndex;
-            end.m_rayIndex.m_z = 1;
-            outVertexData.push_back(end);
-            outIndices.push_back(numIndices++);
-            //}
-        },
-            CENTER_X, CENTER_Y, // center location
-            SEGMENT_LENGTH,     // segment length
-            START_RADIUS,       // start radius
-            NUM_ROUNDS,         // num rounds
-            RADIO_OFFSET        // radio offset
-        );// end calling SphereRay()
-    }// end BuildSphereRayTriangleMeshData()
 };
 
 class RasterizeSuit : public TestSuit::Suit<TriangleTransformCase>
