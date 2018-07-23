@@ -105,9 +105,12 @@ public:
     }
 };
 
-
 class TriangleTransformCase : public TestSuit::Case
 {
+public:
+    using SimplePoint = CommonEnvironment::SimplePoint;
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "The size of SimplePoint is not matched for this case.");
+
 private:
     CommonEnvironment * pEnvironment;
 
@@ -122,17 +125,26 @@ public:
     virtual void Run()
     {
         using namespace CommonClass;
-        // skip this test due to the bug of clipping line function.
-        //return 0;
-
-        using SimplePoint = CommonEnvironment::SimplePoint;
-
-
-        static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
 
         assert(pEnvironment);
         auto pipline = pEnvironment->   GetCommonPipline();
         auto pso     = pipline->        GetPSO();
+
+        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-0.5f), FAR(-4.0f);
+
+        // world to camera space
+        Transform pushInto = Transform::Translation(0.0f, 0.0f, -2.0f);
+        Transform rotateY = Transform::RotationY(Types::Constant::PI_F / 3.0f);
+        Transform rotateZ = Transform::RotationZ(Types::Constant::PI_F / 3.0f);
+        Transform toView = pushInto * rotateZ * rotateY;
+
+        // perspective tranformation
+        Transform perTrans = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+        Transform perspect = perTrans;
+
+        // single matrix from world space to NDC space. 
+        // This matrix may not be used currently for debuging.
+        Transform toNDC = perTrans * toView;
 
         pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
             const Types::F32   depth = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
@@ -148,70 +160,25 @@ public:
             return color;
         };
 
-        const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-0.5f), FAR(-4.0f);
-
-        // rotate the line a little.
-        Transform rotateY = Transform::RotationY(Types::Constant::PI_F / 3.0f);
-        Transform rotateZ = Transform::RotationZ(Types::Constant::PI_F / 3.0f);
-
-        Transform moveIntoScree = Transform::Translation(0.0f, 0.0f, -2.0f);
-
-        // perspective tranformation
-        Transform perTrans = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
-
-        Transform pushInto = Transform::Translation(0.0f, 0.0f, -2.0f);
-
-        Transform mat = perTrans * pushInto * rotateZ * rotateY;
-
-        Transform toView = pushInto * rotateZ * rotateY;
-
-        Transform perspect = perTrans;
-
-        pso->m_vertexShader = [&mat, &toView, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+        pso->m_vertexShader = [&toView, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
             SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
             //DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 7.0f && pSrcH->m_rayIndex.m_y == 34.0f);
 
+            // to camera space
             hvector inViewPos = toView * pSrcH->m_position;
 
+            // perspective transform
             pDestH->m_position = perspect * inViewPos;
+
+            // additional information about the ray index for Debuging.
             pDestH->m_rayIndex = pSrcH->m_rayIndex;
         };
 
         std::vector<SimplePoint> points;
         std::vector<unsigned int> indices;
-        unsigned int numIndices = 0;
-
-        // create line segments in sphere ray.
-        SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
-
-            const unsigned int theIndexOfOneLine = 64;
-            // only get one line for convenience of debugging
-            //if (lineIndex == theIndexOfOneLine)
-            //{
-            // add start vertex and its index
-            SimplePoint start(hvector(x0, y0, 0.0f));
-            start.m_rayIndex.m_x = roundIndex;
-            start.m_rayIndex.m_y = lineIndex;
-            start.m_rayIndex.m_z = 0;
-            points.push_back(start);
-            indices.push_back(numIndices++);
-
-            // add end vertex and its index
-            SimplePoint end(hvector(x1, y1, 0.0f));
-            end.m_rayIndex.m_x = roundIndex;
-            end.m_rayIndex.m_y = lineIndex;
-            end.m_rayIndex.m_z = 1;
-            points.push_back(end);
-            indices.push_back(numIndices++);
-            //}
-        },
-            0.0f, 0.0f,                     // center location
-            0.3f,                           // segment length
-            0.1f,                           // start radius
-            12                              // num rounds
-            ); // radio offset
+        BuildSphereRayLineData(points, indices);
 
         auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
         memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
@@ -228,6 +195,51 @@ public:
         imgWnd.BlockShow();
         pipline->m_backBuffer->SaveTo(L"..\\OutputTestImage\\PiplineTest\\" + pictureName);
     }
+
+    void BuildSphereRayLineData(std::vector<SimplePoint>& outVertexData, std::vector<unsigned int>& outIndices)
+    {
+        std::vector<SimplePoint> points;
+        std::vector<unsigned int> indices;
+        unsigned int numIndices = 0;
+
+        const float CENTER_X        = 0.0f;
+        const float CENTER_Y        = 0.0f;
+        const float SEGMENT_LENGTH  = 0.3f;
+        const float START_RADIUS    = 0.3;
+        const float NUM_ROUNDS      = 12;
+        const float RADIO_OFFSET    = 0.0f; // Add this offset to every angle inside the sphereRay generating process.
+
+        // create line segments in sphere ray.
+        SphereRay([&numIndices, &outVertexData, &outIndices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
+
+            const unsigned int theIndexOfOneLine = 64;
+            // only get one line for convenience of debugging
+            //if (lineIndex == theIndexOfOneLine)
+            //{
+            // add start vertex and its index
+            SimplePoint start(hvector(x0, y0, 0.0f));
+            start.m_rayIndex.m_x = roundIndex;
+            start.m_rayIndex.m_y = lineIndex;
+            start.m_rayIndex.m_z = 0;
+            outVertexData.push_back(start);
+            outIndices.push_back(numIndices++);
+
+            // add end vertex and its index
+            SimplePoint end(hvector(x1, y1, 0.0f));
+            end.m_rayIndex.m_x = roundIndex;
+            end.m_rayIndex.m_y = lineIndex;
+            end.m_rayIndex.m_z = 1;
+            outVertexData.push_back(end);
+            outIndices.push_back(numIndices++);
+            //}
+        },
+            CENTER_X, CENTER_Y, // center location
+            SEGMENT_LENGTH,     // segment length
+            START_RADIUS,       // start radius
+            NUM_ROUNDS,         // num rounds
+            RADIO_OFFSET        // radio offset
+        );// end calling SphereRay()
+    }// end BuildSphereRayTriangleMeshData()
 };
 
 class RasterizeSuit : public TestSuit::Suit<TriangleTransformCase>
