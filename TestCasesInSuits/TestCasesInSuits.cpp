@@ -22,14 +22,8 @@
 #include "../CommonClasses/Helpers.h"
 #pragma comment(lib, "CommonClasses.lib")
 
-namespace UserConfig
-{
-    
-}
-
-
-
-using namespace CommonClass;
+// include required suits here
+#include "TestBasicTypesSuit.h"
 
 /*!
     \brief the common environment for pipline, for example: some useful pixel shader, pipline stateObject.
@@ -37,17 +31,17 @@ using namespace CommonClass;
 class CommonEnvironment
 {
 public:
-    // temp struct for line drawing.
+    // temp struct for generous case
     struct SimplePoint
     {
     public:
         hvector m_position;
         /*!
-        \brief used to store the sphere ray location information
-        x - round index
-        y - line index in the round
-        z = 0 means it's start point
-        z = 1 means it's end point
+			\brief used to store the sphere ray location information
+			x - round index
+			y - line index in the round
+			z = 0 means it's start point
+			z = 1 means it's end point
         */
         hvector m_rayIndex;
         explicit SimplePoint(const hvector& pos)
@@ -106,7 +100,7 @@ public:
         auto pipline = std::make_unique<Pipline>();
         pipline->SetPSO(std::move(GetCommonPSO()));
 
-        // set a backbuffer
+        // set a back buffer
         pipline->SetBackBuffer(std::make_unique<RasterizeImage>(
             COMMON_PIXEL_WIDTH,
             COMMON_PIXEL_HEIGHT,
@@ -116,7 +110,7 @@ public:
     }
 };
 
-class TriangleTransformCase : public TestSuit::Case
+class RaySphereLineCase : public TestSuit::Case
 {
 public:
     using SimplePoint = CommonEnvironment::SimplePoint;
@@ -126,7 +120,7 @@ private:
     CommonEnvironment * pEnvironment;
 
 public:
-    TriangleTransformCase() : Case("triangle transform case") {}
+	RaySphereLineCase() : Case("triangle transform case") {}
 
     virtual void SetEnvironment(void * pEnvironment) override
     {
@@ -188,8 +182,8 @@ public:
         using namespace CommonClass;
 
         assert(pEnvironment);
-        auto pipline = pEnvironment->   GetCommonPipline();
-        auto pso     = pipline->        GetPSO();
+        auto pipline = pEnvironment->GetCommonPipline();
+        auto pso = pipline->GetPSO();
 
         const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-0.5f), FAR(-4.0f);
 
@@ -259,7 +253,7 @@ public:
     }
 };
 
-class RasterizeSuit : public TestSuit::Suit<TriangleTransformCase>
+class RasterizeSuit : public TestSuit::Suit<RaySphereLineCase>
 {
 public:
     virtual void * PrepareBeforeEachCase(TestSuit::Case * pTheCase) override
@@ -280,6 +274,9 @@ int main()
     RasterizeSuit firstSuit;
 
     firstSuit.Start();
+
+	BasicTypesTestSuit_Runable bttsRunable;
+	bttsRunable.Start();
 
     getchar();
     return 0;
