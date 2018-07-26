@@ -10,7 +10,7 @@ namespace CommonClass
 {
 
 /*!
-	\brief Scene arrange all the lights and shading object, compute the closest hit point of a ray.
+    \brief Scene arrange all the lights and shading object, compute the closest hit point of a ray.
 */
 class Scene
 {
@@ -27,7 +27,7 @@ public:
     const RGB     m_background = RGB::BLACK;
 
 private:
-	std::vector<std::unique_ptr<Surface>> m_surfaces;
+    std::vector<std::unique_ptr<Surface>> m_surfaces;
 
     /*!
         \brief all the point light in the scene
@@ -35,17 +35,17 @@ private:
     std::vector<std::unique_ptr<Light>> m_lights;
 
 public:
-	Scene();
-	Scene(const Scene&) = delete;
-	Scene& operator = (const Scene&) = delete;
-	~Scene();
+    Scene();
+    Scene(const Scene&) = delete;
+    Scene& operator = (const Scene&) = delete;
+    ~Scene();
 
 public:
-	/*!
-		\brief add a new surface object to the scene, such as a sphere or a triangle.
-		\param surf the new surface
-	*/
-	void Add(std::unique_ptr<Surface> surf);
+    /*!
+        \brief add a new surface object to the scene, such as a sphere or a triangle.
+        \param surf the new surface
+    */
+    void Add(std::unique_ptr<Surface> surf);
 
     /*!
         \brief add a new light to the scene
@@ -53,13 +53,13 @@ public:
     */
     void Add(std::unique_ptr<Light> light);
 
-	/*!
-		\brief find the closest hit point in the scene.
-		\param ray the ray to cast
-		\param t0 minimum distance(include t0, this should be positive, no gaurantee about that the negative value will work properly.).
-		\param t1 maxmum distance(include t1)
-	*/
-	bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const;
+    /*!
+        \brief find the closest hit point in the scene.
+        \param ray the ray to cast
+        \param t0 minimum distance(include t0, this should be positive, no gaurantee about that the negative value will work properly.).
+        \param t1 maxmum distance(include t1)
+    */
+    bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const;
 
     /*!
         \brief evaluate the color of the hit point.

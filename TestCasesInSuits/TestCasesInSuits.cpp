@@ -18,11 +18,11 @@ public:
     public:
         hvector m_position;
         /*!
-			\brief used to store the sphere ray location information
-			x - round index
-			y - line index in the round
-			z = 0 means it's start point
-			z = 1 means it's end point
+            \brief used to store the sphere ray location information
+            x - round index
+            y - line index in the round
+            z = 0 means it's start point
+            z = 1 means it's end point
         */
         hvector m_rayIndex;
         explicit SimplePoint(const hvector& pos)
@@ -101,7 +101,7 @@ private:
     CommonEnvironment * pEnvironment;
 
 public:
-	RaySphereLineCase() : Case("triangle transform case") {}
+    RaySphereLineCase() : Case("triangle transform case") {}
 
     virtual void SetEnvironment(void * pEnvironment) override
     {
@@ -256,8 +256,8 @@ int main()
 
     firstSuit.Start();
 
-	BasicTypesTestSuit_Runable bttsRunable;
-	bttsRunable.Start();
+    BasicTypesTestSuit_Runable bttsRunable;
+    bttsRunable.Start();
 
     getchar();
     return 0;

@@ -124,17 +124,17 @@ Transform Transform::OrthographicTransOG(const Types::F32 left, const Types::F32
     const Types::F32 recipocalDist   = 1.0f / (near  - far);
 
     // map z to [-1(near), 1(far)]
-	/*return Transform(
-		2.0f * recipocalWidth,  0.0f,                       0.0f,                   (right + left) * - recipocalWidth,
-		0.0f,                   2.0f * recipocalHeight,     0.0f,                   (top + bottom) * - recipocalHeight,
-		0.0f,                   0.0f,                       2.0f * recipocalDist,   (near + far) * - recipocalDist,
-		0.0f,                   0.0f,                       0.0f,                   1.0f);*/
+    /*return Transform(
+        2.0f * recipocalWidth,  0.0f,                       0.0f,                   (right + left) * - recipocalWidth,
+        0.0f,                   2.0f * recipocalHeight,     0.0f,                   (top + bottom) * - recipocalHeight,
+        0.0f,                   0.0f,                       2.0f * recipocalDist,   (near + far) * - recipocalDist,
+        0.0f,                   0.0f,                       0.0f,                   1.0f);*/
 
-	// map z to [0(near), 1(far)]
+    // map z to [0(near), 1(far)]
     return Transform(
         2.0f * recipocalWidth,  0.0f,                       0.0f,                   (right + left) * - recipocalWidth,
         0.0f,                   2.0f * recipocalHeight,     0.0f,                   (top + bottom) * - recipocalHeight,
-        0.0f,                   0.0f,                       - recipocalDist,		near * recipocalDist,
+        0.0f,                   0.0f,                       - recipocalDist,        near * recipocalDist,
         0.0f,                   0.0f,                       0.0f,                   1.0f);
 }
 
@@ -144,15 +144,15 @@ Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right
     const Types::F32 
         RECIPO_WIDTH (1.0f / (right - left)),
         RECIPO_HEIGHT(1.0f / (top - bottom)),
-        RECIPO_DIST  (1.0f / (near - far));		// notice that current coordinate system is right hand system, the Z axis point out the screen, and [ far < near < 0 ]
+        RECIPO_DIST  (1.0f / (near - far));        // notice that current coordinate system is right hand system, the Z axis point out the screen, and [ far < near < 0 ]
 
     const Types::F32 absNear = std::abs(near), absFar = std::abs(far);
 
     // a special version of perspective view transformation matrix.
     //Reference from : <Fundemantals Of Compute Graphics, 3rd> page.155
     // I have modify the matrix a little bit in the third row, in which I flip the sign of last two elements.
-	// when you perform perspective divide, the relative position of x/y will remains,
-	// but z will be flipped, and the relationship between near and far is [ 0 < near < far ]
+    // when you perform perspective divide, the relative position of x/y will remains,
+    // but z will be flipped, and the relationship between near and far is [ 0 < near < far ]
     return Transform(
         - 2.0f * near * RECIPO_WIDTH,   0.0f,                           (left + right) * RECIPO_WIDTH,       0.0f,
         0.0f,                          -2.0f * near * RECIPO_HEIGHT,    (bottom + top) * RECIPO_HEIGHT,      0.0f,

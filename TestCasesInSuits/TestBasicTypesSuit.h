@@ -1,9 +1,9 @@
 #pragma once
 /*!
-	\brief
-	In this head file, I'm going to transfer all the tests in Project'TestBasicTypes'
-	into using TestSuit modules.
-	[2018/7/25 9:22]
+    \brief
+    In this head file, I'm going to transfer all the tests in Project'TestBasicTypes'
+    into using TestSuit modules.
+    [2018/7/25 9:22]
 */
 #include "CommonHeaders.h"
 
@@ -12,7 +12,7 @@ using namespace CommonClass;
 template<typename ... CASE_TYPE_LIST>
 class BasicTypesTestSuit_BASE: public TestSuit::Suit<CASE_TYPE_LIST...>
 {
-	const std::string SuitName = "BasicTypes test";
+    const std::string SuitName = "BasicTypes test";
 
 public:
     /*!
@@ -30,7 +30,7 @@ public:
     */
     virtual void * PrepareBeforeEachCase(TestSuit::Case * pTheCase) override
     {
-		return nullptr;
+        return nullptr;
     }
 
     /*!
@@ -47,371 +47,371 @@ public:
         \brief run when all case finished.
     */
     virtual void FinishAllCases() override
-	{
-		printf("%s end.\n", SuitName.c_str());
+    {
+        printf("%s end.\n", SuitName.c_str());
     }
 };
 
 /*!
-	\brief a base class for all cases that need Random number generator.
+    \brief a base class for all cases that need Random number generator.
 */
 class CaseContainRandomTool : public TestSuit::Case
 {
 public:
-	/*!
-		\brief the random number generator.
-	*/
-	RandomTool::MTRandom mtr;
+    /*!
+        \brief the random number generator.
+    */
+    RandomTool::MTRandom mtr;
 
-	CaseContainRandomTool(const std::string& caseName) : Case(caseName) {}
-	
-	/*!
-		\brief clamp the channel to [0.0f, 1.0f]
-		\param ch the channel value to be clamped.
-	*/
-	Types::F32 ClampChannel(Types::F32 ch)
-	{
-		if (ch <= 0.0f)
-		{
-			return 0.0f;
-		}
-		else if (ch >= 1.0f)
-		{
-			return 1.0f;
-		}
-		else
-		{
-			return ch;
-		}
-	}
+    CaseContainRandomTool(const std::string& caseName) : Case(caseName) {}
+    
+    /*!
+        \brief clamp the channel to [0.0f, 1.0f]
+        \param ch the channel value to be clamped.
+    */
+    Types::F32 ClampChannel(Types::F32 ch)
+    {
+        if (ch <= 0.0f)
+        {
+            return 0.0f;
+        }
+        else if (ch >= 1.0f)
+        {
+            return 1.0f;
+        }
+        else
+        {
+            return ch;
+        }
+    }
 
-	/*!
-		\brief get random rgb color.
-	*/
-	RGB GetRandomRGB()
-	{
-		return RGB(mtr.Random(), mtr.Random(), mtr.Random());
-	}
+    /*!
+        \brief get random rgb color.
+    */
+    RGB GetRandomRGB()
+    {
+        return RGB(mtr.Random(), mtr.Random(), mtr.Random());
+    }
 
-	/*!
-		\brief get random vector3.
-		if you want to set the seed, try mtr.SetRandomSeed(...);
-	*/
-	CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true, const int MAX_INT = 200)
-	{
-		CommonClass::vector3 randVec;
-		do
-		{
-			randVec = CommonClass::vector3(
-				(mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
-				(mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
-				(mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1));
+    /*!
+        \brief get random vector3.
+        if you want to set the seed, try mtr.SetRandomSeed(...);
+    */
+    CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true, const int MAX_INT = 200)
+    {
+        CommonClass::vector3 randVec;
+        do
+        {
+            randVec = CommonClass::vector3(
+                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
+                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
+                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1));
 
-			// if allowZeroVector is false, loop until a none zero vector
-		} while (!allowZeroVector && randVec.m_x == 0.0f && randVec.m_y == 0.0f && randVec.m_z == 0.0f);
+            // if allowZeroVector is false, loop until a none zero vector
+        } while (!allowZeroVector && randVec.m_x == 0.0f && randVec.m_y == 0.0f && randVec.m_z == 0.0f);
 
 
-		return randVec;
-	}
+        return randVec;
+    }
 
-	/*!
-		\brief create a random float number between [-MAX_RADIUS, +MAX_RADIUS]
-		\param MAX_RADIUS max absolute value of the float.
-	*/
-	Types::F32 RandomFloat(const Types::F32 MAX_RADIUS = 200.0f)
-	{
-		assert(MAX_RADIUS > 0.0f);
-		return (mtr.Random() - 0.5f) * 2.f * MAX_RADIUS;
-	}
-	
-	/*!
-		\brief create a float number between [-MAX_RADIUS, 0) ^ (0, +MAX_RADIUS]
-		\param MAX_RADIUS max absolute value of the float.
-	*/
-	Types::F32 RandomFloatNotZero(const Types::F32 MAX_RADIUS = 200.0f)
-	{
-		assert(MAX_RADIUS > 0.0f);
-		float ret = 0.0f;
-		do 
-		{
-			ret = RandomFloat(MAX_RADIUS);
-		} while (ret == 0.0f);
-		return ret;
-	}
+    /*!
+        \brief create a random float number between [-MAX_RADIUS, +MAX_RADIUS]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    Types::F32 RandomFloat(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        return (mtr.Random() - 0.5f) * 2.f * MAX_RADIUS;
+    }
+    
+    /*!
+        \brief create a float number between [-MAX_RADIUS, 0) ^ (0, +MAX_RADIUS]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    Types::F32 RandomFloatNotZero(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        float ret = 0.0f;
+        do 
+        {
+            ret = RandomFloat(MAX_RADIUS);
+        } while (ret == 0.0f);
+        return ret;
+    }
 
-	/*!
-		\brief create an array contain random float  [-200.0f, +200.0f]
-		\param MAX_RADIUS max absolute value of the float.
-	*/
-	template<unsigned int COUNT>
-	std::array<Types::F32, COUNT> GetRandomFloatArray(const Types::F32 MAX_RADIUS = 200.0f)
-	{
-		assert(MAX_RADIUS > 0.0f);
-		std::array<Types::F32, COUNT> retArr;
-		for (auto& number : retArr)
-		{
-			number = RandomFloat(MAX_RADIUS);
-		}
-		return retArr;
-	}
-	
-	/*!
-		\brief create a float number between [-200.0f, 0) ^ (0, +200.0f]
-		\param MAX_RADIUS max absolute value of the float.
-	*/
-	template<unsigned int COUNT>
-	std::array<Types::F32, COUNT> GetRandomFloatNotZeroArray(const Types::F32 MAX_RADIUS = 200.0f)
-	{
-		assert(MAX_RADIUS > 0.0f);
-		std::array<Types::F32, COUNT> retArr;
-		for (auto& number : retArr)
-		{
-			number = RandomFloatNotZero(MAX_RADIUS);
-		}
-		return retArr;
-	}
+    /*!
+        \brief create an array contain random float  [-200.0f, +200.0f]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    template<unsigned int COUNT>
+    std::array<Types::F32, COUNT> GetRandomFloatArray(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        std::array<Types::F32, COUNT> retArr;
+        for (auto& number : retArr)
+        {
+            number = RandomFloat(MAX_RADIUS);
+        }
+        return retArr;
+    }
+    
+    /*!
+        \brief create a float number between [-200.0f, 0) ^ (0, +200.0f]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    template<unsigned int COUNT>
+    std::array<Types::F32, COUNT> GetRandomFloatNotZeroArray(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        std::array<Types::F32, COUNT> retArr;
+        for (auto& number : retArr)
+        {
+            number = RandomFloatNotZero(MAX_RADIUS);
+        }
+        return retArr;
+    }
 };
 
 class CaseBasicVector2 :public TestSuit::Case
 {
 public:
-	CaseBasicVector2() : Case("test vector2") {}
+    CaseBasicVector2() : Case("test vector2") {}
 
-	virtual void Run() override
-	{
-		CommonClass::vector2 v2;
+    virtual void Run() override
+    {
+        CommonClass::vector2 v2;
 
-		TEST_ASSERT(v2.m_x == 0.0f);
-		TEST_ASSERT(v2.m_y == 0.0f);
-	}
+        TEST_ASSERT(v2.m_x == 0.0f);
+        TEST_ASSERT(v2.m_y == 0.0f);
+    }
 };
 
 class TestVector2Case :public CaseContainRandomTool
 {
 public:
-	TestVector2Case() : CaseContainRandomTool("test vector2") {}
-	
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 600;
+    TestVector2Case() : CaseContainRandomTool("test vector2") {}
+    
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 600;
 
-		for (int i = 0; i < 200; ++i)
-		{
-			const Types::F32    comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
-				comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
-				comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
-				comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
-			CommonClass::vector2 cmp1(comf1, comf2);
-			CommonClass::vector2 cmp2(comf3, comf4);
+        for (int i = 0; i < 200; ++i)
+        {
+            const Types::F32    comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                comf2(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                comf3(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1)),
+                comf4(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+            CommonClass::vector2 cmp1(comf1, comf2);
+            CommonClass::vector2 cmp2(comf3, comf4);
 
-			TEST_ASSERT(
-				(cmp1 + cmp2)
-				==
-				(CommonClass::vector2(comf1 + comf3, comf2 + comf4)));
+            TEST_ASSERT(
+                (cmp1 + cmp2)
+                ==
+                (CommonClass::vector2(comf1 + comf3, comf2 + comf4)));
 
-			TEST_ASSERT(
-				(cmp1 - cmp2)
-				==
-				(CommonClass::vector2(comf1 - comf3, comf2 - comf4)));
+            TEST_ASSERT(
+                (cmp1 - cmp2)
+                ==
+                (CommonClass::vector2(comf1 - comf3, comf2 - comf4)));
 
-			TEST_ASSERT(
-				(cmp1 * cmp2)
-				==
-				(comf1 * comf3 + comf2 * comf4));
+            TEST_ASSERT(
+                (cmp1 * cmp2)
+                ==
+                (comf1 * comf3 + comf2 * comf4));
 
-			TEST_ASSERT(
-				(CommonClass::dotProd(cmp1, cmp2))
-				==
-				(comf1 * comf3 + comf2 * comf4));
-		}// end for
-	}// end Run
+            TEST_ASSERT(
+                (CommonClass::dotProd(cmp1, cmp2))
+                ==
+                (comf1 * comf3 + comf2 * comf4));
+        }// end for
+    }// end Run
 };
 
 class CaseForVector3 : public CaseContainRandomTool
 {
 public:
-	CaseForVector3():CaseContainRandomTool("test vector3"){}
-	
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 600;
+    CaseForVector3():CaseContainRandomTool("test vector3"){}
+    
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 600;
 
-		for (int i = 0; i < 200; ++i)
-		{
-			std::array<Types::F32, 6> comfArr;
-			for (auto& comf : comfArr)
-			{
-				comf = 1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1);
-			}
+        for (int i = 0; i < 200; ++i)
+        {
+            std::array<Types::F32, 6> comfArr;
+            for (auto& comf : comfArr)
+            {
+                comf = 1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1);
+            }
 
-			CommonClass::vector3 cmp1(comfArr[0], comfArr[1], comfArr[2]);
-			CommonClass::vector3 cmp2(comfArr[3], comfArr[4], comfArr[5]);
+            CommonClass::vector3 cmp1(comfArr[0], comfArr[1], comfArr[2]);
+            CommonClass::vector3 cmp2(comfArr[3], comfArr[4], comfArr[5]);
 
-			// cmp1 + cmp2
-			TEST_ASSERT(
-				(cmp1 + cmp2)
-				==
-				CommonClass::vector3(comfArr[0] + comfArr[3], comfArr[1] + comfArr[4], comfArr[2] + comfArr[5]));
+            // cmp1 + cmp2
+            TEST_ASSERT(
+                (cmp1 + cmp2)
+                ==
+                CommonClass::vector3(comfArr[0] + comfArr[3], comfArr[1] + comfArr[4], comfArr[2] + comfArr[5]));
 
-			// cmp1 - cmp2
-			TEST_ASSERT(
-				(cmp1 - cmp2)
-				==
-				CommonClass::vector3(comfArr[0] - comfArr[3], comfArr[1] - comfArr[4], comfArr[2] - comfArr[5]));
+            // cmp1 - cmp2
+            TEST_ASSERT(
+                (cmp1 - cmp2)
+                ==
+                CommonClass::vector3(comfArr[0] - comfArr[3], comfArr[1] - comfArr[4], comfArr[2] - comfArr[5]));
 
-			// cmp1 * cmp2
-			TEST_ASSERT(
-				(cmp1 * cmp2)
-				==
-				(comfArr[0] * comfArr[3] + comfArr[1] * comfArr[4] + comfArr[2] * comfArr[5]));
+            // cmp1 * cmp2
+            TEST_ASSERT(
+                (cmp1 * cmp2)
+                ==
+                (comfArr[0] * comfArr[3] + comfArr[1] * comfArr[4] + comfArr[2] * comfArr[5]));
 
-			// cmp1 * cmp2
-			TEST_ASSERT(
-				CommonClass::dotProd(cmp1, cmp2)
-				==
-				(comfArr[0] * comfArr[3] + comfArr[1] * comfArr[4] + comfArr[2] * comfArr[5]));
+            // cmp1 * cmp2
+            TEST_ASSERT(
+                CommonClass::dotProd(cmp1, cmp2)
+                ==
+                (comfArr[0] * comfArr[3] + comfArr[1] * comfArr[4] + comfArr[2] * comfArr[5]));
 
-			// cmp1 X cmp2
-			TEST_ASSERT(
-				CommonClass::crossProd(cmp1, cmp2)
-				==
-				CommonClass::vector3(
-					comfArr[1] * comfArr[5] - comfArr[4] * comfArr[2],
-					comfArr[3] * comfArr[2] - comfArr[0] * comfArr[5],
-					comfArr[0] * comfArr[4] - comfArr[3] * comfArr[1]));
+            // cmp1 X cmp2
+            TEST_ASSERT(
+                CommonClass::crossProd(cmp1, cmp2)
+                ==
+                CommonClass::vector3(
+                    comfArr[1] * comfArr[5] - comfArr[4] * comfArr[2],
+                    comfArr[3] * comfArr[2] - comfArr[0] * comfArr[5],
+                    comfArr[0] * comfArr[4] - comfArr[3] * comfArr[1]));
 
-			// vector3 * float
-			Types::F32 randomFloat = mtr.Random();
-			TEST_ASSERT(
-				(cmp1 * randomFloat)
-				==
-				vector3(
-					comfArr[0] * randomFloat,
-					comfArr[1] * randomFloat,
-					comfArr[2] * randomFloat));
-			TEST_ASSERT(
-				(randomFloat * cmp2)
-				==
-				vector3(
-					comfArr[3] * randomFloat,
-					comfArr[4] * randomFloat,
-					comfArr[5] * randomFloat));
+            // vector3 * float
+            Types::F32 randomFloat = mtr.Random();
+            TEST_ASSERT(
+                (cmp1 * randomFloat)
+                ==
+                vector3(
+                    comfArr[0] * randomFloat,
+                    comfArr[1] * randomFloat,
+                    comfArr[2] * randomFloat));
+            TEST_ASSERT(
+                (randomFloat * cmp2)
+                ==
+                vector3(
+                    comfArr[3] * randomFloat,
+                    comfArr[4] * randomFloat,
+                    comfArr[5] * randomFloat));
 
-			// - vector3
-			TEST_ASSERT(
-				(-cmp1)
-				==
-				vector3(-comfArr[0], -comfArr[1], -comfArr[2]));
-		}// end for loop
-	}// end Run
+            // - vector3
+            TEST_ASSERT(
+                (-cmp1)
+                ==
+                vector3(-comfArr[0], -comfArr[1], -comfArr[2]));
+        }// end for loop
+    }// end Run
 };
 
 class CaseForRGBA : public CaseContainRandomTool
 {
 public:
-	CaseForRGBA() :CaseContainRandomTool("test RGBA") {}
+    CaseForRGBA() :CaseContainRandomTool("test RGBA") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 64;
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 64;
 
-		for (int i = 0; i < 200; ++i)
-		{
-			/*!
-				make up the RGBA channel
-			*/
-			std::array<Types::F32, 8> comuArr;
-			for (auto& comu : comuArr)
-			{
-				comu = mtr.Random();
-			}
+        for (int i = 0; i < 200; ++i)
+        {
+            /*!
+                make up the RGBA channel
+            */
+            std::array<Types::F32, 8> comuArr;
+            for (auto& comu : comuArr)
+            {
+                comu = mtr.Random();
+            }
 
-			/*!
-				scale the RGB with float.
-			*/
-			const Types::F32    comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
-								comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
+            /*!
+                scale the RGB with float.
+            */
+            const Types::F32    comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
+                                comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
 
-			RGBA cmp1(comuArr[0], comuArr[1], comuArr[2], comuArr[3]);
-			RGBA cmp2(comuArr[4], comuArr[5], comuArr[6], comuArr[7]);
+            RGBA cmp1(comuArr[0], comuArr[1], comuArr[2], comuArr[3]);
+            RGBA cmp2(comuArr[4], comuArr[5], comuArr[6], comuArr[7]);
 
-			/*!
-				\brief recover the cmp1's value
-			*/
-			auto recoverCMP1 = [&comuArr, &cmp1]()
-			{
-				cmp1 = RGBA(comuArr[0], comuArr[1], comuArr[2], comuArr[3]);
-			};
+            /*!
+                \brief recover the cmp1's value
+            */
+            auto recoverCMP1 = [&comuArr, &cmp1]()
+            {
+                cmp1 = RGBA(comuArr[0], comuArr[1], comuArr[2], comuArr[3]);
+            };
 
-			// default constructor can ignore alpha channel, the alpha of the pixel will be set to max(opaque).
-			TEST_ASSERT(
-				RGBA(comuArr[0], comuArr[1], comuArr[2])
-				==
-				RGBA(comuArr[0], comuArr[1], comuArr[2], RGBA::ALPHA_CHANNEL_OPAQUE));
+            // default constructor can ignore alpha channel, the alpha of the pixel will be set to max(opaque).
+            TEST_ASSERT(
+                RGBA(comuArr[0], comuArr[1], comuArr[2])
+                ==
+                RGBA(comuArr[0], comuArr[1], comuArr[2], RGBA::ALPHA_CHANNEL_OPAQUE));
 
-			// assign
-			cmp1 = cmp2;
-			TEST_ASSERT(
-				cmp1
-				==
-				RGBA(comuArr[4], comuArr[5], comuArr[6], comuArr[7]));
-			recoverCMP1();
+            // assign
+            cmp1 = cmp2;
+            TEST_ASSERT(
+                cmp1
+                ==
+                RGBA(comuArr[4], comuArr[5], comuArr[6], comuArr[7]));
+            recoverCMP1();
 
-			// cmp1 + cmp2
-			//cmp1 = cmp1 + cmp2;
-			TEST_ASSERT(
-				cmp1 + cmp2
-				==
-				RGBA(ClampChannel(comuArr[0] + comuArr[4]), ClampChannel(comuArr[1] + comuArr[5]), ClampChannel(comuArr[2] + comuArr[6]), ClampChannel(comuArr[3] + comuArr[7])));
-			//recoverCMP1();
+            // cmp1 + cmp2
+            //cmp1 = cmp1 + cmp2;
+            TEST_ASSERT(
+                cmp1 + cmp2
+                ==
+                RGBA(ClampChannel(comuArr[0] + comuArr[4]), ClampChannel(comuArr[1] + comuArr[5]), ClampChannel(comuArr[2] + comuArr[6]), ClampChannel(comuArr[3] + comuArr[7])));
+            //recoverCMP1();
 
-			// cmp1 - cmp2
-			//cmp1 = cmp1 - cmp2;
-			TEST_ASSERT(
-				cmp1 - cmp2
-				==
-				RGBA(ClampChannel(comuArr[0] - comuArr[4]), ClampChannel(comuArr[1] - comuArr[5]), ClampChannel(comuArr[2] - comuArr[6]), ClampChannel(comuArr[3] - comuArr[7])));
-			//recoverCMP1();
+            // cmp1 - cmp2
+            //cmp1 = cmp1 - cmp2;
+            TEST_ASSERT(
+                cmp1 - cmp2
+                ==
+                RGBA(ClampChannel(comuArr[0] - comuArr[4]), ClampChannel(comuArr[1] - comuArr[5]), ClampChannel(comuArr[2] - comuArr[6]), ClampChannel(comuArr[3] - comuArr[7])));
+            //recoverCMP1();
 
-			// cmp1 * cmp2
-			//cmp1 = cmp1 * cmp2,
-			TEST_ASSERT(
-				cmp1 * cmp2
-				==
-				RGBA(ClampChannel(comuArr[0] * comuArr[4]), ClampChannel(comuArr[1] * comuArr[5]), ClampChannel(comuArr[2] * comuArr[6]), ClampChannel(comuArr[3] * comuArr[7])));
-			//recoverCMP1();
+            // cmp1 * cmp2
+            //cmp1 = cmp1 * cmp2,
+            TEST_ASSERT(
+                cmp1 * cmp2
+                ==
+                RGBA(ClampChannel(comuArr[0] * comuArr[4]), ClampChannel(comuArr[1] * comuArr[5]), ClampChannel(comuArr[2] * comuArr[6]), ClampChannel(comuArr[3] * comuArr[7])));
+            //recoverCMP1();
 
-			// cmp1 * scalar
-			//cmp1.MulRGB(comf1),
-			TEST_ASSERT(
-				cmp1 * comf1
-				==
-				RGBA(ClampChannel(comuArr[0] * comf1), ClampChannel(comuArr[1] * comf1), ClampChannel(comuArr[2] * comf1), ClampChannel(comuArr[3] * comf1)));
-			TEST_ASSERT(
-				comf1 * cmp1	// switch RGBA and scalar
-				==       
-				RGBA(ClampChannel(comuArr[0] * comf1), ClampChannel(comuArr[1] * comf1), ClampChannel(comuArr[2] * comf1), ClampChannel(comuArr[3] * comf1)));
-			//recoverCMP1();
+            // cmp1 * scalar
+            //cmp1.MulRGB(comf1),
+            TEST_ASSERT(
+                cmp1 * comf1
+                ==
+                RGBA(ClampChannel(comuArr[0] * comf1), ClampChannel(comuArr[1] * comf1), ClampChannel(comuArr[2] * comf1), ClampChannel(comuArr[3] * comf1)));
+            TEST_ASSERT(
+                comf1 * cmp1    // switch RGBA and scalar
+                ==       
+                RGBA(ClampChannel(comuArr[0] * comf1), ClampChannel(comuArr[1] * comf1), ClampChannel(comuArr[2] * comf1), ClampChannel(comuArr[3] * comf1)));
+            //recoverCMP1();
 
-			// cmp1 / scalar
-			//Types::F32 reciprocalComf2 = 1.0f / comf2;
-			//cmp1.DivRGB(comf2),
-			TEST_ASSERT(
-				cmp1 / comf2
-				==
-				RGBA(ClampChannel(comuArr[0] / comf2), ClampChannel(comuArr[1] / comf2), ClampChannel(comuArr[2] / comf2), ClampChannel(comuArr[3] / comf2)));
-			//recoverCMP1();
-		}// end for
-	}// end Run
+            // cmp1 / scalar
+            //Types::F32 reciprocalComf2 = 1.0f / comf2;
+            //cmp1.DivRGB(comf2),
+            TEST_ASSERT(
+                cmp1 / comf2
+                ==
+                RGBA(ClampChannel(comuArr[0] / comf2), ClampChannel(comuArr[1] / comf2), ClampChannel(comuArr[2] / comf2), ClampChannel(comuArr[3] / comf2)));
+            //recoverCMP1();
+        }// end for
+    }// end Run
 };
 
 class CaseForRGB : public CaseContainRandomTool
 {
 public:
-	CaseForRGB() :CaseContainRandomTool("test RGB") {}
+    CaseForRGB() :CaseContainRandomTool("test RGB") {}
 
-	virtual void Run() override
-	{
+    virtual void Run() override
+    {
         const unsigned int MAX_RAND_INT = 64;
 
         /*!
@@ -438,11 +438,11 @@ public:
             /*!
                 make up the RGBA channel
             */
-			std::array<Types::F32, 8> comuArr;
-			for (auto& comu : comuArr)
-			{
-				comu = mtr.Random();
-			}
+            std::array<Types::F32, 8> comuArr;
+            for (auto& comu : comuArr)
+            {
+                comu = mtr.Random();
+            }
 
             /*!
                 scale the RGB with float.
@@ -462,278 +462,278 @@ public:
             };
 
             // assign
-			cmp1 = cmp2;
-			TEST_ASSERT(
+            cmp1 = cmp2;
+            TEST_ASSERT(
                 cmp1
-				==
+                ==
                 RGB(comuArr[4], comuArr[5], comuArr[6]));
             recoverCMP1();
 
             // cmp1 + cmp2
-			//cmp1 = cmp1 + cmp2;
-			TEST_ASSERT(
-				cmp1 + cmp2
-				==
+            //cmp1 = cmp1 + cmp2;
+            TEST_ASSERT(
+                cmp1 + cmp2
+                ==
                 RGB(ClampChannel(comuArr[0] + comuArr[4]), ClampChannel(comuArr[1] + comuArr[5]), ClampChannel(comuArr[2] + comuArr[6])));
             //recoverCMP1();
 
             // cmp1 - cmp2
-			//cmp1 = cmp1 - cmp2;
-			TEST_ASSERT(
-				cmp1 - cmp2
-				==
+            //cmp1 = cmp1 - cmp2;
+            TEST_ASSERT(
+                cmp1 - cmp2
+                ==
                 RGB(ClampChannel(comuArr[0] - comuArr[4]), ClampChannel(comuArr[1] - comuArr[5]), ClampChannel(comuArr[2] - comuArr[6])));
             //recoverCMP1();
             
             // cmp1 * cmp2
-			//cmp1 = cmp1 * cmp2,
-			TEST_ASSERT(
-				cmp1 * cmp2
-				==
+            //cmp1 = cmp1 * cmp2,
+            TEST_ASSERT(
+                cmp1 * cmp2
+                ==
                 RGB(ClampChannel(comuArr[0] * comuArr[4]), ClampChannel(comuArr[1] * comuArr[5]), ClampChannel(comuArr[2] * comuArr[6])));
             //recoverCMP1();
 
             // cmp1 * scalar
-			//cmp1.MulRGB(comf1),
-			TEST_ASSERT(
-				cmp1 * comf1
-				==
-				RGB(ClampChannel(comuArr[0] * comf1), ClampChannel(comuArr[1] * comf1), ClampChannel(comuArr[2] * comf1)));
-			TEST_ASSERT(
-				comf1 * cmp1 // switch RGBA and scalar
-				==       
+            //cmp1.MulRGB(comf1),
+            TEST_ASSERT(
+                cmp1 * comf1
+                ==
+                RGB(ClampChannel(comuArr[0] * comf1), ClampChannel(comuArr[1] * comf1), ClampChannel(comuArr[2] * comf1)));
+            TEST_ASSERT(
+                comf1 * cmp1 // switch RGBA and scalar
+                ==       
                 RGB(ClampChannel(comuArr[0] * comf1), ClampChannel(comuArr[1] * comf1), ClampChannel(comuArr[2] * comf1)));
             //recoverCMP1();
 
             // cmp1 / scalar
             //Types::F32 reciprocalComf2 = 1.0f / comf2;
-			//cmp1.DivRGB(comf2),
-			TEST_ASSERT(
-				cmp1 / comf2
-				==
+            //cmp1.DivRGB(comf2),
+            TEST_ASSERT(
+                cmp1 / comf2
+                ==
                 RGB(ClampChannel(comuArr[0] / comf2), ClampChannel(comuArr[1] / comf2), ClampChannel(comuArr[2] / comf2)));
             //recoverCMP1();
         }// end for
-	}// end Run
+    }// end Run
 };
 
 class CaseForRGBAndRGBA : public CaseContainRandomTool
 {
 public:
-	CaseForRGBAndRGBA() :CaseContainRandomTool("test casting between RGB and RGBA") {}
+    CaseForRGBAndRGBA() :CaseContainRandomTool("test casting between RGB and RGBA") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 64;
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 64;
 
-		for (int i = 0; i < 200; ++i)
-		{
-			/*!
-				make up the RGBA channel
-			*/
-			std::array<Types::F32, 8> comuArr;
-			for (auto& comu : comuArr)
-			{
-				comu = mtr.Random();
-			}
+        for (int i = 0; i < 200; ++i)
+        {
+            /*!
+                make up the RGBA channel
+            */
+            std::array<Types::F32, 8> comuArr;
+            for (auto& comu : comuArr)
+            {
+                comu = mtr.Random();
+            }
 
-			/*!
-				scale the RGB with float.
-			*/
-			const Types::F32    comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
-				comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
+            /*!
+                scale the RGB with float.
+            */
+            const Types::F32    comf1(mtr.Random() * mtr.Random(MAX_RAND_INT)),
+                comf2(mtr.Random() * mtr.Random(MAX_RAND_INT));
 
-			RGBA	color4(comuArr[0], comuArr[1], comuArr[2], comuArr[3]);
-			RGB		color3(comuArr[4], comuArr[5], comuArr[6]);
+            RGBA    color4(comuArr[0], comuArr[1], comuArr[2], comuArr[3]);
+            RGB        color3(comuArr[4], comuArr[5], comuArr[6]);
 
-			TEST_ASSERT(Cast(color4)				== RGB	(comuArr[0], comuArr[1], comuArr[2]));
-			TEST_ASSERT(Cast(color3)				== RGBA	(comuArr[4], comuArr[5], comuArr[6], RGBA::ALPHA_CHANNEL_OPAQUE));
-			TEST_ASSERT(Cast(color3, comuArr[7])	== RGBA	(comuArr[4], comuArr[5], comuArr[6], comuArr[7]));
-		}
-	}
+            TEST_ASSERT(Cast(color4)                == RGB    (comuArr[0], comuArr[1], comuArr[2]));
+            TEST_ASSERT(Cast(color3)                == RGBA    (comuArr[4], comuArr[5], comuArr[6], RGBA::ALPHA_CHANNEL_OPAQUE));
+            TEST_ASSERT(Cast(color3, comuArr[7])    == RGBA    (comuArr[4], comuArr[5], comuArr[6], comuArr[7]));
+        }
+    }
 };
 
 class CaseForMaterialProperty : public CaseContainRandomTool
 {
 public:
-	CaseForMaterialProperty() :CaseContainRandomTool("check material construct properties") {}
+    CaseForMaterialProperty() :CaseContainRandomTool("check material construct properties") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_REFLECT_INDEX = 5;
+    virtual void Run() override
+    {
+        const unsigned int MAX_REFLECT_INDEX = 5;
 
-		for (int i = 0; i < 20; ++i)
-		{
-			RGB color = GetRandomRGB();
-			RGB rFresnel0 = GetRandomRGB();
-			unsigned int randomReflectIndex = 1 + mtr.Random(MAX_REFLECT_INDEX - 1);
+        for (int i = 0; i < 20; ++i)
+        {
+            RGB color = GetRandomRGB();
+            RGB rFresnel0 = GetRandomRGB();
+            unsigned int randomReflectIndex = 1 + mtr.Random(MAX_REFLECT_INDEX - 1);
 
-			Material mat1;                              // default mat, white color, fresnel coefficient is zero
-			Material mat2(color, rFresnel0);            // specific the fresnel coefficient with RGB.
-			Material mat3(color, randomReflectIndex);   // calculate fresnel coefficient using reflect index.
+            Material mat1;                              // default mat, white color, fresnel coefficient is zero
+            Material mat2(color, rFresnel0);            // specific the fresnel coefficient with RGB.
+            Material mat3(color, randomReflectIndex);   // calculate fresnel coefficient using reflect index.
 
-			TEST_ASSERT(mat1.m_kDiffuse			== RGB::WHITE);
-			TEST_ASSERT(mat1.m_rFresnel_0		== RGB::BLACK);
+            TEST_ASSERT(mat1.m_kDiffuse            == RGB::WHITE);
+            TEST_ASSERT(mat1.m_rFresnel_0        == RGB::BLACK);
 
-			TEST_ASSERT(mat2.m_kDiffuse			== color);
-			TEST_ASSERT(mat2.m_rFresnel_0		== rFresnel0);
+            TEST_ASSERT(mat2.m_kDiffuse            == color);
+            TEST_ASSERT(mat2.m_rFresnel_0        == rFresnel0);
 
-			// manully calculate the fresnel coefficient.
-			Types::F32 reflectIndexToFresnel0 = (randomReflectIndex - 1) * 1.0f / (randomReflectIndex + 1);
-			reflectIndexToFresnel0 *= reflectIndexToFresnel0;
+            // manully calculate the fresnel coefficient.
+            Types::F32 reflectIndexToFresnel0 = (randomReflectIndex - 1) * 1.0f / (randomReflectIndex + 1);
+            reflectIndexToFresnel0 *= reflectIndexToFresnel0;
 
-			TEST_ASSERT(mat3.m_kDiffuse			== color);
-			TEST_ASSERT(mat3.m_rFresnel_0		== RGB(reflectIndexToFresnel0, reflectIndexToFresnel0, reflectIndexToFresnel0));
+            TEST_ASSERT(mat3.m_kDiffuse            == color);
+            TEST_ASSERT(mat3.m_rFresnel_0        == RGB(reflectIndexToFresnel0, reflectIndexToFresnel0, reflectIndexToFresnel0));
 
-		}
-	}
+        }
+    }
 };
 
 class CaseForVector3Normalize : public CaseContainRandomTool
 {
 public:
-	CaseForVector3Normalize() : CaseContainRandomTool("test vector3 normalize") {}
+    CaseForVector3Normalize() : CaseContainRandomTool("test vector3 normalize") {}
 
-	virtual void Run() override
-	{
-		using namespace MathTool;
+    virtual void Run() override
+    {
+        using namespace MathTool;
 
-		mtr.SetRandomSeed(5);
+        mtr.SetRandomSeed(5);
 
-		for (int i = 0; i < 20; ++i)
-		{
-			vector3 v1(GetRandomVector3(false));
+        for (int i = 0; i < 20; ++i)
+        {
+            vector3 v1(GetRandomVector3(false));
 
-			v1 = Normalize(v1);
+            v1 = Normalize(v1);
 
-			TEST_ASSERT(almost_equal(Length(v1), 1.0f, 8));
+            TEST_ASSERT(almost_equal(Length(v1), 1.0f, 8));
 
-			v1.m_x *= 2.0f;
-			v1.m_y *= 2.0f;
-			v1.m_z *= 3.0f;
+            v1.m_x *= 2.0f;
+            v1.m_y *= 2.0f;
+            v1.m_z *= 3.0f;
 
-			// insurance, make vector's length not equal to unit.
-			TEST_ASSERT( ! almost_equal(Length(v1), 1.0f, 8));
-		}// end for
-	}// end Run
+            // insurance, make vector's length not equal to unit.
+            TEST_ASSERT( ! almost_equal(Length(v1), 1.0f, 8));
+        }// end for
+    }// end Run
 };
 
 class CaseForHvector : public CaseContainRandomTool
 {
 public:
-	CaseForHvector() :CaseContainRandomTool("hvector operation tests") {}
+    CaseForHvector() :CaseContainRandomTool("hvector operation tests") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 600;
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 600;
 
-		const unsigned int NUM_LOOP = 2000;
-		for (int i = 0; i < NUM_LOOP; ++i)
-		{
-			COUNT_DETAIL_TIME;
+        const unsigned int NUM_LOOP = 2000;
+        for (int i = 0; i < NUM_LOOP; ++i)
+        {
+            COUNT_DETAIL_TIME;
 
-			if (i % 100 == 0)
-			{
-				ShowProgress(i * 1.0f / NUM_LOOP);
-			}
+            if (i % 100 == 0)
+            {
+                ShowProgress(i * 1.0f / NUM_LOOP);
+            }
 
-			// build random numbers
-			std::array<Types::F32, 9> comfArr;
-			for (auto& comf : comfArr)
-			{
-				comf = 1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1);
-			}
+            // build random numbers
+            std::array<Types::F32, 9> comfArr;
+            for (auto& comf : comfArr)
+            {
+                comf = 1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1);
+            }
 
-			// some number will be divide, so next codes ensure they will never be zero.
-			std::array<int, 4> indicesCannotBeZero = { 4, 5, 6, 8 };
-			for (auto index : indicesCannotBeZero)
-			{
-				while (comfArr[index] == 0.0f)
-				{ 
-					comfArr[index] = 1.0f * mtr.Random(MAX_RAND_INT) + 1 / (mtr.Random(MAX_RAND_INT) + 1);
-				}
-			}
+            // some number will be divide, so next codes ensure they will never be zero.
+            std::array<int, 4> indicesCannotBeZero = { 4, 5, 6, 8 };
+            for (auto index : indicesCannotBeZero)
+            {
+                while (comfArr[index] == 0.0f)
+                { 
+                    comfArr[index] = 1.0f * mtr.Random(MAX_RAND_INT) + 1 / (mtr.Random(MAX_RAND_INT) + 1);
+                }
+            }
 
-			hvector cmp1(comfArr[0], comfArr[1], comfArr[2], comfArr[3]);
-			hvector cmp2(comfArr[4], comfArr[5], comfArr[6], comfArr[7]);
+            hvector cmp1(comfArr[0], comfArr[1], comfArr[2], comfArr[3]);
+            hvector cmp2(comfArr[4], comfArr[5], comfArr[6], comfArr[7]);
 
-			// declare some hvector for result comparison
-			hvector 
-				h_plus_h(comfArr[0] + comfArr[4], comfArr[1] + comfArr[5], comfArr[2] + comfArr[6], comfArr[3]),
-				h_minu_h(comfArr[0] - comfArr[4], comfArr[1] - comfArr[5], comfArr[2] - comfArr[6], comfArr[3]),
-				h_mult_h(comfArr[0] * comfArr[4], comfArr[1] * comfArr[5], comfArr[2] * comfArr[6], comfArr[3]),
-				h_dive_h(comfArr[0] / comfArr[4], comfArr[1] / comfArr[5], comfArr[2] / comfArr[6], comfArr[3]),
-				h_mult_s(comfArr[0] * comfArr[8], comfArr[1] * comfArr[8], comfArr[2] * comfArr[8], comfArr[3]),
-				s_mult_h(comfArr[0] * comfArr[8], comfArr[1] * comfArr[8], comfArr[2] * comfArr[8], comfArr[3]),
-				h_dive_s(comfArr[0] / comfArr[8], comfArr[1] / comfArr[8], comfArr[2] / comfArr[8], comfArr[3]);
+            // declare some hvector for result comparison
+            hvector 
+                h_plus_h(comfArr[0] + comfArr[4], comfArr[1] + comfArr[5], comfArr[2] + comfArr[6], comfArr[3]),
+                h_minu_h(comfArr[0] - comfArr[4], comfArr[1] - comfArr[5], comfArr[2] - comfArr[6], comfArr[3]),
+                h_mult_h(comfArr[0] * comfArr[4], comfArr[1] * comfArr[5], comfArr[2] * comfArr[6], comfArr[3]),
+                h_dive_h(comfArr[0] / comfArr[4], comfArr[1] / comfArr[5], comfArr[2] / comfArr[6], comfArr[3]),
+                h_mult_s(comfArr[0] * comfArr[8], comfArr[1] * comfArr[8], comfArr[2] * comfArr[8], comfArr[3]),
+                s_mult_h(comfArr[0] * comfArr[8], comfArr[1] * comfArr[8], comfArr[2] * comfArr[8], comfArr[3]),
+                h_dive_s(comfArr[0] / comfArr[8], comfArr[1] / comfArr[8], comfArr[2] / comfArr[8], comfArr[3]);
 
-			TEST_ASSERT((cmp1 + cmp2) == h_plus_h);
+            TEST_ASSERT((cmp1 + cmp2) == h_plus_h);
 
-			TEST_ASSERT((cmp1 - cmp2) == h_minu_h);
+            TEST_ASSERT((cmp1 - cmp2) == h_minu_h);
 
-			TEST_ASSERT((cmp1 * cmp2) == h_mult_h);
+            TEST_ASSERT((cmp1 * cmp2) == h_mult_h);
 
-			TEST_ASSERT((cmp1 / cmp2) == h_dive_h);
+            TEST_ASSERT((cmp1 / cmp2) == h_dive_h);
 
-			hvector temp = cmp1;
-			temp += cmp2;
-			TEST_ASSERT(temp == h_plus_h);
+            hvector temp = cmp1;
+            temp += cmp2;
+            TEST_ASSERT(temp == h_plus_h);
 
-			temp = cmp1;
-			temp -= cmp2;
-			TEST_ASSERT(temp == h_minu_h);
+            temp = cmp1;
+            temp -= cmp2;
+            TEST_ASSERT(temp == h_minu_h);
 
-			temp = cmp1;
-			temp *= cmp2;
-			TEST_ASSERT(temp == h_mult_h);
+            temp = cmp1;
+            temp *= cmp2;
+            TEST_ASSERT(temp == h_mult_h);
 
-			temp = cmp1;
-			temp /= cmp2;
-			TEST_ASSERT(temp == h_dive_h);
+            temp = cmp1;
+            temp /= cmp2;
+            TEST_ASSERT(temp == h_dive_h);
 
-			// Next codes is about operations between hvector and scalar
-			// hvector * scalar
-			TEST_ASSERT((cmp1 * comfArr[8]) == h_mult_s);
+            // Next codes is about operations between hvector and scalar
+            // hvector * scalar
+            TEST_ASSERT((cmp1 * comfArr[8]) == h_mult_s);
 
-			// scalar * hvector
-			TEST_ASSERT((comfArr[8] * cmp1) == s_mult_h);
+            // scalar * hvector
+            TEST_ASSERT((comfArr[8] * cmp1) == s_mult_h);
 
-			// hvector / scalar
-			TEST_ASSERT((cmp1 / comfArr[8]) == h_dive_s);
+            // hvector / scalar
+            TEST_ASSERT((cmp1 / comfArr[8]) == h_dive_s);
 
-			// hvector *= scalar
-			temp = cmp1;
-			temp *= comfArr[8];
-			TEST_ASSERT(temp == h_mult_s);
+            // hvector *= scalar
+            temp = cmp1;
+            temp *= comfArr[8];
+            TEST_ASSERT(temp == h_mult_s);
 
-			// hvector /= scalar
-			temp = cmp1;
-			temp /= comfArr[8];
-			TEST_ASSERT(temp == h_dive_s);
+            // hvector /= scalar
+            temp = cmp1;
+            temp /= comfArr[8];
+            TEST_ASSERT(temp == h_dive_s);
 
-			// Next codes ensure that the comparison is not always return true.
-			// next comparison will all return false.
-			TEST_ASSERT(!(h_mult_h == h_dive_h));
-			TEST_ASSERT(!(h_plus_h == h_minu_h));
+            // Next codes ensure that the comparison is not always return true.
+            // next comparison will all return false.
+            TEST_ASSERT(!(h_mult_h == h_dive_h));
+            TEST_ASSERT(!(h_plus_h == h_minu_h));
 
-		}// end for
-	}// end Run
+        }// end for
+    }// end Run
 };
 
 class CaseForTransformConstruct : public CaseContainRandomTool
 {
 public:
-	CaseForTransformConstruct() :CaseContainRandomTool("transform construct tests") {}
+    CaseForTransformConstruct() :CaseContainRandomTool("transform construct tests") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 600;
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 600;
         
         for (int i = 0; i < 200; ++i)
         {
-			COUNT_DETAIL_TIME;
+            COUNT_DETAIL_TIME;
 
-			auto comfArr = GetRandomFloatArray<9>(MAX_RAND_INT);
+            auto comfArr = GetRandomFloatArray<9>(MAX_RAND_INT);
 
             // Translation 
             Transform trl = Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);
@@ -824,194 +824,194 @@ public:
                 TEST_ASSERT(AlmostEqual(screenPos[i], convertToViewport));
             }// end for int
         }// end for big loop test
-	}// end Run()
+    }// end Run()
 };
 
 class CaseForTranslateAndRotateHvector : public CaseContainRandomTool
 {
 public:
-	CaseForTranslateAndRotateHvector() : CaseContainRandomTool("translate and rotate hvector") {}
-	
-	virtual void Run() override 
-	{
-		const unsigned int MAX_RAND_INT = 600;
+    CaseForTranslateAndRotateHvector() : CaseContainRandomTool("translate and rotate hvector") {}
+    
+    virtual void Run() override 
+    {
+        const unsigned int MAX_RAND_INT = 600;
 
-		for (int i = 0; i < 200; ++i)
-		{
-			COUNT_DETAIL_TIME;
+        for (int i = 0; i < 200; ++i)
+        {
+            COUNT_DETAIL_TIME;
 
-			auto comfArr = GetRandomFloatArray<9>(MAX_RAND_INT);
+            auto comfArr = GetRandomFloatArray<9>(MAX_RAND_INT);
 
-			Transform trl = Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);    // translation matrix
+            Transform trl = Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);    // translation matrix
 
-			hvector vt(comfArr[4], comfArr[5], comfArr[6]);    // the vector used to test translation matrix 
+            hvector vt(comfArr[4], comfArr[5], comfArr[6]);    // the vector used to test translation matrix 
 
-			TEST_ASSERT(
-				hvector(comfArr[4] + comfArr[0], comfArr[5] + comfArr[1], comfArr[6] + comfArr[2])
-				== (trl * vt));
+            TEST_ASSERT(
+                hvector(comfArr[4] + comfArr[0], comfArr[5] + comfArr[1], comfArr[6] + comfArr[2])
+                == (trl * vt));
 
-			const Types::F32 pi_div_2 = Types::Constant::PI_F * 0.5f;
+            const Types::F32 pi_div_2 = Types::Constant::PI_F * 0.5f;
 
-			// build rotations about axis of x/y/z
-			const Transform
-				rotX = Transform::RotationX(pi_div_2),
-				rotY = Transform::RotationY(pi_div_2),
-				rotZ = Transform::RotationZ(pi_div_2);
-			std::array<Transform, 3> rotations = { rotX, rotY, rotZ }; // each one rotate pi/2 about x,y,z
-
-
-			std::array<hvector, 8> midVs;   // eight vector point at eight quadrants of the space.
-			for (unsigned int i = 0; i < midVs.size(); ++i)
-			{
-				Types::F32 cx, cy, cz;
-
-				cx = (i & 4) ? +1.0f : -1.0f;
-				cy = (i & 2) ? +1.0f : -1.0f;
-				cz = (i & 1) ? +1.0f : -1.0f;
-
-				midVs[i] = hvector(cx, cy, cz, 1.0f);
-			}
+            // build rotations about axis of x/y/z
+            const Transform
+                rotX = Transform::RotationX(pi_div_2),
+                rotY = Transform::RotationY(pi_div_2),
+                rotZ = Transform::RotationZ(pi_div_2);
+            std::array<Transform, 3> rotations = { rotX, rotY, rotZ }; // each one rotate pi/2 about x,y,z
 
 
-			/*!
-				\brief preRotOrder (previous rotation order)
-				assist rotation check, used with array "midVs" and "rotations"
-				For example:
-				preRotOrder[0][0] = 2 means that rotating vector "midVs[0]" with "rotations[0]" will end up with "midVs[2]"
-				preRotOrder[2][1] = 3 means that rotating vector "midVs[2]" with "rotations[1]" will end up with "midVs[3]"
-			*/
-			const unsigned preRotOrder[8][3] = {
-				{ 2, 1, 4 },
-				{ 0, 5, 5 },
-				{ 3, 3, 0 },
-				{ 1, 7, 1 },
-				{ 6, 0, 6 },
-				{ 4, 4, 7 },
-				{ 7, 2, 2 },
-				{ 5, 6, 3 }
-			};
+            std::array<hvector, 8> midVs;   // eight vector point at eight quadrants of the space.
+            for (unsigned int i = 0; i < midVs.size(); ++i)
+            {
+                Types::F32 cx, cy, cz;
 
-			/*!
-				\brief for each vector of "midVs", rotate them with matrixes in "rotations"
-			*/
-			for (unsigned int i = 0; i < midVs.size(); ++i)
-			{
-				for (unsigned int j = 0; j < rotations.size(); ++j)
-				{
-					TEST_ASSERT(AlmostEqual(rotations[j] * midVs[i], midVs[preRotOrder[i][j]], 1e-7f));
+                cx = (i & 4) ? +1.0f : -1.0f;
+                cy = (i & 2) ? +1.0f : -1.0f;
+                cz = (i & 1) ? +1.0f : -1.0f;
 
-					// ensure the test not always return true;
-					TEST_ASSERT(!AlmostEqual(rotations[j] * midVs[i] + hvector(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
-				}
-			}
+                midVs[i] = hvector(cx, cy, cz, 1.0f);
+            }
 
-			// old rotations tests, just rotate axis x/y/z and get the results of x -> y -> z -> x...
-			hvector axisx(1.0f, 0.0f, 0.0f, 1.0f);
-			hvector axisy(0.0f, 1.0f, 0.0f, 1.0f);
-			hvector axisz(0.0f, 0.0f, 1.0f, 1.0f);
-			hvector axisx_compare = rotY * axisz;
-			hvector axisy_compare = rotZ * axisx;
-			hvector axisz_compare = rotX * axisy;
 
-			TEST_ASSERT(AlmostEqual(axisx, axisx_compare, 1e-7f));
-			TEST_ASSERT(AlmostEqual(axisy, axisy_compare, 1e-7f));
-			TEST_ASSERT(AlmostEqual(axisz, axisz_compare, 1e-7f));
+            /*!
+                \brief preRotOrder (previous rotation order)
+                assist rotation check, used with array "midVs" and "rotations"
+                For example:
+                preRotOrder[0][0] = 2 means that rotating vector "midVs[0]" with "rotations[0]" will end up with "midVs[2]"
+                preRotOrder[2][1] = 3 means that rotating vector "midVs[2]" with "rotations[1]" will end up with "midVs[3]"
+            */
+            const unsigned preRotOrder[8][3] = {
+                { 2, 1, 4 },
+                { 0, 5, 5 },
+                { 3, 3, 0 },
+                { 1, 7, 1 },
+                { 6, 0, 6 },
+                { 4, 4, 7 },
+                { 7, 2, 2 },
+                { 5, 6, 3 }
+            };
 
-			// next few check ensure that test is not always return true.
-			TEST_ASSERT(!AlmostEqual(axisx, axisy_compare, 1e-7f));
-			TEST_ASSERT(!AlmostEqual(axisy, axisz_compare, 1e-7f));
-			TEST_ASSERT(!AlmostEqual(axisz, axisx_compare, 1e-7f));
+            /*!
+                \brief for each vector of "midVs", rotate them with matrixes in "rotations"
+            */
+            for (unsigned int i = 0; i < midVs.size(); ++i)
+            {
+                for (unsigned int j = 0; j < rotations.size(); ++j)
+                {
+                    TEST_ASSERT(AlmostEqual(rotations[j] * midVs[i], midVs[preRotOrder[i][j]], 1e-7f));
 
-		}// end for loop
-	}// end Run()
+                    // ensure the test not always return true;
+                    TEST_ASSERT(!AlmostEqual(rotations[j] * midVs[i] + hvector(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
+                }
+            }
+
+            // old rotations tests, just rotate axis x/y/z and get the results of x -> y -> z -> x...
+            hvector axisx(1.0f, 0.0f, 0.0f, 1.0f);
+            hvector axisy(0.0f, 1.0f, 0.0f, 1.0f);
+            hvector axisz(0.0f, 0.0f, 1.0f, 1.0f);
+            hvector axisx_compare = rotY * axisz;
+            hvector axisy_compare = rotZ * axisx;
+            hvector axisz_compare = rotX * axisy;
+
+            TEST_ASSERT(AlmostEqual(axisx, axisx_compare, 1e-7f));
+            TEST_ASSERT(AlmostEqual(axisy, axisy_compare, 1e-7f));
+            TEST_ASSERT(AlmostEqual(axisz, axisz_compare, 1e-7f));
+
+            // next few check ensure that test is not always return true.
+            TEST_ASSERT(!AlmostEqual(axisx, axisy_compare, 1e-7f));
+            TEST_ASSERT(!AlmostEqual(axisy, axisz_compare, 1e-7f));
+            TEST_ASSERT(!AlmostEqual(axisz, axisx_compare, 1e-7f));
+
+        }// end for loop
+    }// end Run()
 };
 
 class CaseForF32Buffer : public CaseContainRandomTool
 {
 public:
-	CaseForF32Buffer() : CaseContainRandomTool("translate and rotate hvector") {}
+    CaseForF32Buffer() : CaseContainRandomTool("translate and rotate hvector") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 100;
-		const unsigned int SIZE_OF_FLOAT = sizeof(Types::F32);
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 100;
+        const unsigned int SIZE_OF_FLOAT = sizeof(Types::F32);
 
-		std::vector<Types::F32> storeF32s;
+        std::vector<Types::F32> storeF32s;
 
-		auto checkWithStdVector = [this, &storeF32s, &SIZE_OF_FLOAT](std::unique_ptr<F32Buffer> buffer)->void {
-			TEST_ASSERT(storeF32s.size() * SIZE_OF_FLOAT == buffer->GetSizeOfByte());
-			const unsigned int NUM_CHECKED_FLOATS = buffer->GetSizeOfByte() / SIZE_OF_FLOAT;
-			Types::F32 * pBuffer = reinterpret_cast<Types::F32*>(buffer->GetBuffer());
+        auto checkWithStdVector = [this, &storeF32s, &SIZE_OF_FLOAT](std::unique_ptr<F32Buffer> buffer)->void {
+            TEST_ASSERT(storeF32s.size() * SIZE_OF_FLOAT == buffer->GetSizeOfByte());
+            const unsigned int NUM_CHECKED_FLOATS = buffer->GetSizeOfByte() / SIZE_OF_FLOAT;
+            Types::F32 * pBuffer = reinterpret_cast<Types::F32*>(buffer->GetBuffer());
 
 
-			for (unsigned int i = 0; i < NUM_CHECKED_FLOATS; ++i)
-			{
-				TEST_ASSERT(storeF32s[i] == pBuffer[i]);
-			}
-		};
+            for (unsigned int i = 0; i < NUM_CHECKED_FLOATS; ++i)
+            {
+                TEST_ASSERT(storeF32s[i] == pBuffer[i]);
+            }
+        };
 
-		for (int i = 0; i < 30; ++i)
-		{
-			const unsigned int NUM_FLOATS = mtr.Random(MAX_RAND_INT);
+        for (int i = 0; i < 30; ++i)
+        {
+            const unsigned int NUM_FLOATS = mtr.Random(MAX_RAND_INT);
 
-			storeF32s.resize(NUM_FLOATS);
-			auto floatBuffer = std::make_unique<F32Buffer>(NUM_FLOATS * SIZE_OF_FLOAT);
+            storeF32s.resize(NUM_FLOATS);
+            auto floatBuffer = std::make_unique<F32Buffer>(NUM_FLOATS * SIZE_OF_FLOAT);
 
-			Types::F32 * pBuffer = reinterpret_cast<Types::F32*>(floatBuffer->GetBuffer());
-			for (unsigned int i = 0; i < NUM_FLOATS; ++i)
-			{
-				Types::F32 comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
-				pBuffer[i] = comf1;
-				storeF32s[i] = comf1;
-			}// end for i < NUM_FLOATS
+            Types::F32 * pBuffer = reinterpret_cast<Types::F32*>(floatBuffer->GetBuffer());
+            for (unsigned int i = 0; i < NUM_FLOATS; ++i)
+            {
+                Types::F32 comf1(1.0f * mtr.Random(MAX_RAND_INT) / (mtr.Random(MAX_RAND_INT) + 1));
+                pBuffer[i] = comf1;
+                storeF32s[i] = comf1;
+            }// end for i < NUM_FLOATS
 
-			checkWithStdVector(std::move(floatBuffer));
-		}// end for i < 30
-	}// end Run()
+            checkWithStdVector(std::move(floatBuffer));
+        }// end for i < 30
+    }// end Run()
 };
 
 class CaseForCoordinateFrameConstruct : public CaseContainRandomTool
 {
 public:
-	CaseForCoordinateFrameConstruct() : CaseContainRandomTool("coordinate frame construct") {}
+    CaseForCoordinateFrameConstruct() : CaseContainRandomTool("coordinate frame construct") {}
 
-	virtual void Run() override
-	{
+    virtual void Run() override
+    {
 
-		const unsigned int SCALE_FLOAT = 2;
+        const unsigned int SCALE_FLOAT = 2;
 
-		std::array<Types::F32, 9> rfarr;
+        std::array<Types::F32, 9> rfarr;
 
-		for (int i = 0; i < 20; ++i)
-		{
-			for (auto & randFloat : rfarr)
-			{
-				randFloat = SCALE_FLOAT * (mtr.Random() * 2.0f - 1.0f);
-			}
+        for (int i = 0; i < 20; ++i)
+        {
+            for (auto & randFloat : rfarr)
+            {
+                randFloat = SCALE_FLOAT * (mtr.Random() * 2.0f - 1.0f);
+            }
 
-			vector3 tu(rfarr[0], rfarr[1], rfarr[2]);
-			vector3 tv(rfarr[3], rfarr[4], rfarr[5]);
-			vector3 te(rfarr[6], rfarr[7], rfarr[8]);
+            vector3 tu(rfarr[0], rfarr[1], rfarr[2]);
+            vector3 tv(rfarr[3], rfarr[4], rfarr[5]);
+            vector3 te(rfarr[6], rfarr[7], rfarr[8]);
 
-			CoordinateFrame tcf(tu, tv, te);
+            CoordinateFrame tcf(tu, tv, te);
 
-			TEST_ASSERT(AlmostPerpendicular(tcf.m_u, tcf.m_v, 1e-6f));
-			TEST_ASSERT(AlmostPerpendicular(tcf.m_u, tcf.m_w, 1e-6f));
-			TEST_ASSERT(AlmostPerpendicular(tcf.m_v, tcf.m_w, 1e-6f));
+            TEST_ASSERT(AlmostPerpendicular(tcf.m_u, tcf.m_v, 1e-6f));
+            TEST_ASSERT(AlmostPerpendicular(tcf.m_u, tcf.m_w, 1e-6f));
+            TEST_ASSERT(AlmostPerpendicular(tcf.m_v, tcf.m_w, 1e-6f));
 
-			TEST_ASSERT(tcf.m_e == te);
-		}// end for
-	}// end Run()
+            TEST_ASSERT(tcf.m_e == te);
+        }// end for
+    }// end Run()
 };
 
 class CaseForOrthographicTransformationTest : public CaseContainRandomTool
 {
 public:
-	CaseForOrthographicTransformationTest() : CaseContainRandomTool("orthographic transformation test") {}
+    CaseForOrthographicTransformationTest() : CaseContainRandomTool("orthographic transformation test") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_INT = 1080;
+    virtual void Run() override
+    {
+        const unsigned int MAX_INT = 1080;
 
         for (int loopCount = 0; loopCount < 20; ++loopCount)
         {
@@ -1068,26 +1068,26 @@ public:
             }// end for testHvectors
 
         }// end for loopCount
-	}
+    }
 };
 
 class CaseForTransformationMatrixConcation : public CaseContainRandomTool
 {
 public:
-	CaseForTransformationMatrixConcation() : CaseContainRandomTool("transformation matrix concation") {}
+    CaseForTransformationMatrixConcation() : CaseContainRandomTool("transformation matrix concation") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_RAND_INT = 600;
+    virtual void Run() override
+    {
+        const unsigned int MAX_RAND_INT = 600;
 
         // the transform is default to be a unit matrix.
         const Transform UNIT_MATRIX;
         
         for (int i = 0; i < 200; ++i)
         {
-			COUNT_DETAIL_TIME;
+            COUNT_DETAIL_TIME;
 
-			auto comfArr = GetRandomFloatArray<9>();
+            auto comfArr = GetRandomFloatArray<9>();
 
             // NOTICE, when build those matrix, multiply them by the unit matrix.
             Transform trl = UNIT_MATRIX * Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);    // translation matrix
@@ -1173,361 +1173,361 @@ public:
             TEST_ASSERT( ! AlmostEqual(axisz, axisx_compare, 1e-7f));
             
         }
-	}
+    }
 };
 
 class CaseForFixPointNumber : public CaseContainRandomTool
 {
 public:
-	CaseForFixPointNumber() : CaseContainRandomTool("Fix Point Number basic test") {}
+    CaseForFixPointNumber() : CaseContainRandomTool("Fix Point Number basic test") {}
 
-	virtual void Run() override
-	{
-		FixPointNumber a(100);
-		FixPointNumber b(100.0f);
+    virtual void Run() override
+    {
+        FixPointNumber a(100);
+        FixPointNumber b(100.0f);
 
-		TEST_ASSERT(a.ToFloat() == 100.0f);
-		TEST_ASSERT(b.ToFloat() == 100.0f);
+        TEST_ASSERT(a.ToFloat() == 100.0f);
+        TEST_ASSERT(b.ToFloat() == 100.0f);
 
-		RandomTool::MTRandom mtr;
+        RandomTool::MTRandom mtr;
 
-		/*!
-		\brief return a random float in a large range.
-		*/
-		auto RandFloat = [&mtr]()->Types::F32 {
-			const int MAX_INT = 180;
-			return (mtr.Random() * 2.0f - 1.0f) * MAX_INT;
-		};
+        /*!
+        \brief return a random float in a large range.
+        */
+        auto RandFloat = [&mtr]()->Types::F32 {
+            const int MAX_INT = 180;
+            return (mtr.Random() * 2.0f - 1.0f) * MAX_INT;
+        };
 
-		const unsigned int NUM_FLOAT_PAIRS = 16;
-		std::array<Types::F32, NUM_FLOAT_PAIRS> farr1;
-		std::array<Types::F32, NUM_FLOAT_PAIRS> farr2;
-		std::array<FixPointNumber, NUM_FLOAT_PAIRS> fparr1;
-		std::array<FixPointNumber, NUM_FLOAT_PAIRS> fparr2;
-		for (int i = 0; i < NUM_FLOAT_PAIRS; ++i)
-		{
-			farr1[i] = RandFloat();
-			farr2[i] = RandFloat();
+        const unsigned int NUM_FLOAT_PAIRS = 16;
+        std::array<Types::F32, NUM_FLOAT_PAIRS> farr1;
+        std::array<Types::F32, NUM_FLOAT_PAIRS> farr2;
+        std::array<FixPointNumber, NUM_FLOAT_PAIRS> fparr1;
+        std::array<FixPointNumber, NUM_FLOAT_PAIRS> fparr2;
+        for (int i = 0; i < NUM_FLOAT_PAIRS; ++i)
+        {
+            farr1[i] = RandFloat();
+            farr2[i] = RandFloat();
 
-			fparr1[i] = FixPointNumber(farr1[i]);
-			fparr2[i] = FixPointNumber(farr2[i]);
-		}
+            fparr1[i] = FixPointNumber(farr1[i]);
+            fparr2[i] = FixPointNumber(farr2[i]);
+        }
 
-		for (int i = 0; i < NUM_FLOAT_PAIRS; ++i)
-		{
-			const Types::F32 correctResult = farr1[i] * farr2[i];
-			const Types::F32 testResult = (fparr1[i] * fparr2[i]).ToFloat();
-			TEST_ASSERT(MathTool::AlmostEqual(correctResult, testResult, 0.01f));
-		}
+        for (int i = 0; i < NUM_FLOAT_PAIRS; ++i)
+        {
+            const Types::F32 correctResult = farr1[i] * farr2[i];
+            const Types::F32 testResult = (fparr1[i] * fparr2[i]).ToFloat();
+            TEST_ASSERT(MathTool::AlmostEqual(correctResult, testResult, 0.01f));
+        }
 
-		// the fixed point number is not completed, so this test will always failed, 
-		// until you fix all the bugs.
-		std::cout << "the fixed point number is not completed, so this test will always failed, until you fix all the bugs.\n";
-		CountOneError();
-	}
+        // the fixed point number is not completed, so this test will always failed, 
+        // until you fix all the bugs.
+        std::cout << "the fixed point number is not completed, so this test will always failed, until you fix all the bugs.\n";
+        CountOneError();
+    }
 };
 
 class CaseForFloatFoundFind : public CaseContainRandomTool
 {
 public:
-	CaseForFloatFoundFind() : CaseContainRandomTool("float bound find") {}
+    CaseForFloatFoundFind() : CaseContainRandomTool("float bound find") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_INT = 100;
+    virtual void Run() override
+    {
+        const unsigned int MAX_INT = 100;
 
-		for (int loopTest = 0; loopTest < 20; ++loopTest)
-		{
+        for (int loopTest = 0; loopTest < 20; ++loopTest)
+        {
 
-			float a = mtr.Random() * MAX_INT;
-			float b = mtr.Random() * MAX_INT;
-			long double la = a, lb = b;
+            float a = mtr.Random() * MAX_INT;
+            float b = mtr.Random() * MAX_INT;
+            long double la = a, lb = b;
 
-			const int sizeofDouble = sizeof(long double);
+            const int sizeofDouble = sizeof(long double);
 
-			float c = a * b;
-			long double lc = la * lb;
+            float c = a * b;
+            long double lc = la * lb;
 
-			float errorBound = std::abs(c) * gamma(1);
+            float errorBound = std::abs(c) * gamma(1);
 
-			float low = c - errorBound, high = c + errorBound;
+            float low = c - errorBound, high = c + errorBound;
 
-			// ensure the bound include the more precise value which is processed by production of double.
-			TEST_ASSERT(low <= lc && lc <= high);
+            // ensure the bound include the more precise value which is processed by production of double.
+            TEST_ASSERT(low <= lc && lc <= high);
 
-			//ShowNumberInBound(c, errorBound, lc, low, high);
+            //ShowNumberInBound(c, errorBound, lc, low, high);
 
-			// next codes will check whether the error bound caculateion still apply to sqrt operation
-			double lSqrtC = std::sqrt(lc);
+            // next codes will check whether the error bound caculateion still apply to sqrt operation
+            double lSqrtC = std::sqrt(lc);
 
-			float sqrtC = std::sqrt(c);
+            float sqrtC = std::sqrt(c);
 
-			float sqrtErrorBound = std::abs(sqrtC) * gamma(2);
+            float sqrtErrorBound = std::abs(sqrtC) * gamma(2);
 
-			float sqrtLow = sqrtC - sqrtErrorBound, sqrtHigh = sqrtC + sqrtErrorBound;
+            float sqrtLow = sqrtC - sqrtErrorBound, sqrtHigh = sqrtC + sqrtErrorBound;
 
-			TEST_ASSERT(sqrtLow <= lSqrtC && lSqrtC <= sqrtHigh);
+            TEST_ASSERT(sqrtLow <= lSqrtC && lSqrtC <= sqrtHigh);
 
-			//ShowNumberInBound(sqrtC, sqrtErrorBound, lSqrtC, sqrtLow, sqrtHigh);
+            //ShowNumberInBound(sqrtC, sqrtErrorBound, lSqrtC, sqrtLow, sqrtHigh);
 
-		} // end for loopTest
-	}
+        } // end for loopTest
+    }
 };
 
 class CaseForEFloat : public CaseContainRandomTool
 {
 public:
-	CaseForEFloat() : CaseContainRandomTool("EFloat tool test") {}
+    CaseForEFloat() : CaseContainRandomTool("EFloat tool test") {}
 
-	virtual void Run() override
-	{
-		const unsigned int MAX_INT = 100;
+    virtual void Run() override
+    {
+        const unsigned int MAX_INT = 100;
 
-		const unsigned int MAX_NUM = 50;
+        const unsigned int MAX_NUM = 50;
     
-		for (int numLoop = 0; numLoop < 20; ++numLoop)
-		{
-			ShowProgress(numLoop * 1.0f / 20);
+        for (int numLoop = 0; numLoop < 20; ++numLoop)
+        {
+            ShowProgress(numLoop * 1.0f / 20);
 
-			// original number array
-			std::array<float, MAX_NUM> farr;
+            // original number array
+            std::array<float, MAX_NUM> farr;
 
-			// assign numbers to the Array "farr".
-			farr[0] = 0.0f;
-			farr[1] = -0.0f;
-			farr[2] = mtr.Random();
+            // assign numbers to the Array "farr".
+            farr[0] = 0.0f;
+            farr[1] = -0.0f;
+            farr[2] = mtr.Random();
 
-			const int POSITIVE_INF = 3;
-			const int NEGATIVE_INF = 4;
-			const int POSITIVE_MAX = 5;
-			const int NEGATIVE_MAX = 6;
-			farr[POSITIVE_INF] = +std::numeric_limits<float>::infinity();
-			farr[NEGATIVE_INF] = -std::numeric_limits<float>::infinity();
-			farr[POSITIVE_MAX] = +std::numeric_limits<float>::max();
-			farr[NEGATIVE_MAX] = -std::numeric_limits<float>::max();
+            const int POSITIVE_INF = 3;
+            const int NEGATIVE_INF = 4;
+            const int POSITIVE_MAX = 5;
+            const int NEGATIVE_MAX = 6;
+            farr[POSITIVE_INF] = +std::numeric_limits<float>::infinity();
+            farr[NEGATIVE_INF] = -std::numeric_limits<float>::infinity();
+            farr[POSITIVE_MAX] = +std::numeric_limits<float>::max();
+            farr[NEGATIVE_MAX] = -std::numeric_limits<float>::max();
 
-			for (unsigned int i = NEGATIVE_MAX + 1; i < farr.size(); ++i)
-			{
-				farr[i] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
-			}
+            for (unsigned int i = NEGATIVE_MAX + 1; i < farr.size(); ++i)
+            {
+                farr[i] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+            }
 
-			// float up
-			std::array<float, farr.size()> fuparr;
+            // float up
+            std::array<float, farr.size()> fuparr;
 
-			// float down
-			std::array<float, farr.size()> fdownarr;
+            // float down
+            std::array<float, farr.size()> fdownarr;
 
-			for (unsigned int i = 0; i < farr.size(); ++i)
-			{
-				//BREAK_POINT_IF(i == 4);
-				fuparr[i] = NextFloatUp(farr[i]);
-				fdownarr[i] = NextFloatDown(farr[i]);
-			}
+            for (unsigned int i = 0; i < farr.size(); ++i)
+            {
+                //BREAK_POINT_IF(i == 4);
+                fuparr[i] = NextFloatUp(farr[i]);
+                fdownarr[i] = NextFloatDown(farr[i]);
+            }
 
-			for (unsigned int i = 0; i < farr.size(); ++i)
-			{
-				if (i == POSITIVE_INF)
-				{
-					TEST_ASSERT(fdownarr[i] < farr[i]);
-					TEST_ASSERT(std::isinf(fuparr[i]));// move +inf up will stay +inf
-				}
-				else if (i == NEGATIVE_INF)
-				{
-					TEST_ASSERT(std::isinf(fdownarr[i]));// move -inf down will stay -inf
-					TEST_ASSERT(fuparr[i] > farr[i]);
-				}
-				else if (i == POSITIVE_MAX)
-				{
-					TEST_ASSERT(fdownarr[i] < farr[i]);
-					TEST_ASSERT(std::isinf(fuparr[i]) && fuparr[i] > 0.);// move +max up will end with +inf
-				}
-				else if (i == NEGATIVE_MAX)
-				{
-					TEST_ASSERT(std::isinf(fdownarr[i]) && fdownarr[i] < 0.);// move -max down will end with -inf
-					TEST_ASSERT(fuparr[i] > farr[i]);
-				}
-				else // normal test
-				{
-					TEST_ASSERT(fuparr[i] > farr[i]);
-					TEST_ASSERT(fdownarr[i] < farr[i]);
-				}// end else normal test
+            for (unsigned int i = 0; i < farr.size(); ++i)
+            {
+                if (i == POSITIVE_INF)
+                {
+                    TEST_ASSERT(fdownarr[i] < farr[i]);
+                    TEST_ASSERT(std::isinf(fuparr[i]));// move +inf up will stay +inf
+                }
+                else if (i == NEGATIVE_INF)
+                {
+                    TEST_ASSERT(std::isinf(fdownarr[i]));// move -inf down will stay -inf
+                    TEST_ASSERT(fuparr[i] > farr[i]);
+                }
+                else if (i == POSITIVE_MAX)
+                {
+                    TEST_ASSERT(fdownarr[i] < farr[i]);
+                    TEST_ASSERT(std::isinf(fuparr[i]) && fuparr[i] > 0.);// move +max up will end with +inf
+                }
+                else if (i == NEGATIVE_MAX)
+                {
+                    TEST_ASSERT(std::isinf(fdownarr[i]) && fdownarr[i] < 0.);// move -max down will end with -inf
+                    TEST_ASSERT(fuparr[i] > farr[i]);
+                }
+                else // normal test
+                {
+                    TEST_ASSERT(fuparr[i] > farr[i]);
+                    TEST_ASSERT(fdownarr[i] < farr[i]);
+                }// end else normal test
 
-			}// end for test farr.
+            }// end for test farr.
 
 
-		}// end for numLoop
-	}
+        }// end for numLoop
+    }
 };
 
 class CaseForEFloatConstructTest : public CaseContainRandomTool
 {
 public:
-	CaseForEFloatConstructTest() : CaseContainRandomTool("EFloat construct") {}
+    CaseForEFloatConstructTest() : CaseContainRandomTool("EFloat construct") {}
 
-	virtual void Run() override
-	{
-		const int MAX_INT = 2;
-		const int MAX_NUM = 7;
+    virtual void Run() override
+    {
+        const int MAX_INT = 2;
+        const int MAX_NUM = 7;
 
-		for (int numLoop = 0; numLoop < 20; ++numLoop)
-		{
-			// original number array
-			std::array<float, MAX_NUM> farr;
-			std::array<EFloat, farr.size()> efarr;
+        for (int numLoop = 0; numLoop < 20; ++numLoop)
+        {
+            // original number array
+            std::array<float, MAX_NUM> farr;
+            std::array<EFloat, farr.size()> efarr;
 
-			// assign numbers to the Array "farr".
-			farr[0] = 0.0f;
-			farr[1] = -0.0f;
-			farr[2] = mtr.Random();
+            // assign numbers to the Array "farr".
+            farr[0] = 0.0f;
+            farr[1] = -0.0f;
+            farr[2] = mtr.Random();
 
-			const int POSITIVE_INF = 3;
-			const int NEGATIVE_INF = 4;
-			const int POSITIVE_MAX = 5;
-			const int NEGATIVE_MAX = 6;
-			farr[POSITIVE_INF] = +std::numeric_limits<float>::infinity();
-			farr[NEGATIVE_INF] = -std::numeric_limits<float>::infinity();
-			farr[POSITIVE_MAX] = +std::numeric_limits<float>::max();
-			farr[NEGATIVE_MAX] = -std::numeric_limits<float>::max();
+            const int POSITIVE_INF = 3;
+            const int NEGATIVE_INF = 4;
+            const int POSITIVE_MAX = 5;
+            const int NEGATIVE_MAX = 6;
+            farr[POSITIVE_INF] = +std::numeric_limits<float>::infinity();
+            farr[NEGATIVE_INF] = -std::numeric_limits<float>::infinity();
+            farr[POSITIVE_MAX] = +std::numeric_limits<float>::max();
+            farr[NEGATIVE_MAX] = -std::numeric_limits<float>::max();
 
-			for (unsigned int i = NEGATIVE_MAX + 1; i < farr.size(); ++i)
-			{
-				farr[i] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
-				efarr[i] = EFloat(farr[i]);
-			}
+            for (unsigned int i = NEGATIVE_MAX + 1; i < farr.size(); ++i)
+            {
+                farr[i] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+                efarr[i] = EFloat(farr[i]);
+            }
 
-			for (auto & ef : efarr)
-			{
-				ef.Check();
-			}
-		}// end for numLoop
-	}
+            for (auto & ef : efarr)
+            {
+                ef.Check();
+            }
+        }// end for numLoop
+    }
 };
 
 class CaseForEFloatOperatorTest : public CaseContainRandomTool
 {
 public:
-	CaseForEFloatOperatorTest() : CaseContainRandomTool("EFloat operator test") {}
+    CaseForEFloatOperatorTest() : CaseContainRandomTool("EFloat operator test") {}
 
-	virtual void Run() override
-	{
-		const int MAX_INT = 2;
-		const int MAX_NUM = 7;
+    virtual void Run() override
+    {
+        const int MAX_INT = 2;
+        const int MAX_NUM = 7;
 
-		const bool OUTPUT_RESUTL_TO_CONSOLE = false;
+        const bool OUTPUT_RESUTL_TO_CONSOLE = false;
 
-		for (int numLoop = 0; numLoop < 30; ++numLoop)
-		{
-			// original number array
-			std::array<std::array<float, MAX_NUM>, 2> farr;
-			std::array<std::array<EFloat, MAX_NUM>, 2> efarr;
+        for (int numLoop = 0; numLoop < 30; ++numLoop)
+        {
+            // original number array
+            std::array<std::array<float, MAX_NUM>, 2> farr;
+            std::array<std::array<EFloat, MAX_NUM>, 2> efarr;
 
-			// start efloat construction
-			for (int i = 0; i < 2; ++i)
-			{
-				for (int j = 0; j < MAX_NUM; ++j)
-				{
-					farr[i][j] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
-					efarr[i][j] = EFloat(farr[i][j]);
-				}
-			}// end for farr[i] construction
+            // start efloat construction
+            for (int i = 0; i < 2; ++i)
+            {
+                for (int j = 0; j < MAX_NUM; ++j)
+                {
+                    farr[i][j] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+                    efarr[i][j] = EFloat(farr[i][j]);
+                }
+            }// end for farr[i] construction
 
-			for (int i = 0; i < MAX_NUM; ++i)
-			{
-				EFloat efResult;
-				float floatResult;
+            for (int i = 0; i < MAX_NUM; ++i)
+            {
+                EFloat efResult;
+                float floatResult;
 
-				// operator +
-				efResult = efarr[0][i] + efarr[1][i];
-				floatResult = farr[0][i] + farr[1][i];
-				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-				if (OUTPUT_RESUTL_TO_CONSOLE)
-				{
-					std::cout << farr[0][i] << " + " << farr[1][i] << " = \n"
-							  << efResult << "\n\n";
-				}
+                // operator +
+                efResult = efarr[0][i] + efarr[1][i];
+                floatResult = farr[0][i] + farr[1][i];
+                TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+                if (OUTPUT_RESUTL_TO_CONSOLE)
+                {
+                    std::cout << farr[0][i] << " + " << farr[1][i] << " = \n"
+                              << efResult << "\n\n";
+                }
 
-				// operator -
-				efResult = efarr[0][i] - efarr[1][i];
-				floatResult = farr[0][i] - farr[1][i];
-				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-				if (OUTPUT_RESUTL_TO_CONSOLE)
-				{
-					std::cout << farr[0][i] << " - " << farr[1][i] << " = \n"
-						<< efResult << "\n\n";
-				}
+                // operator -
+                efResult = efarr[0][i] - efarr[1][i];
+                floatResult = farr[0][i] - farr[1][i];
+                TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+                if (OUTPUT_RESUTL_TO_CONSOLE)
+                {
+                    std::cout << farr[0][i] << " - " << farr[1][i] << " = \n"
+                        << efResult << "\n\n";
+                }
 
-				// operator *
-				efResult = efarr[0][i] * efarr[1][i];
-				floatResult = farr[0][i] * farr[1][i];
-				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-				if (OUTPUT_RESUTL_TO_CONSOLE)
-				{
-					std::cout << farr[0][i] << " * " << farr[1][i] << " = \n"
-						<< efResult << "\n\n";
-				}
+                // operator *
+                efResult = efarr[0][i] * efarr[1][i];
+                floatResult = farr[0][i] * farr[1][i];
+                TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+                if (OUTPUT_RESUTL_TO_CONSOLE)
+                {
+                    std::cout << farr[0][i] << " * " << farr[1][i] << " = \n"
+                        << efResult << "\n\n";
+                }
 
-				// operator /
-				efResult = efarr[0][i] / efarr[1][i];
-				floatResult = farr[0][i] / farr[1][i];
-				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
-				if (OUTPUT_RESUTL_TO_CONSOLE)
-				{
-					std::cout << farr[0][i] << " / " << farr[1][i] << " = \n"
-						<< efResult << "\n\n";
-				}
+                // operator /
+                efResult = efarr[0][i] / efarr[1][i];
+                floatResult = farr[0][i] / farr[1][i];
+                TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+                if (OUTPUT_RESUTL_TO_CONSOLE)
+                {
+                    std::cout << farr[0][i] << " / " << farr[1][i] << " = \n"
+                        << efResult << "\n\n";
+                }
 
-				// abs
-				// using the EFloat from previous divided result, which will have some error bound.
-				const EFloat efWithBound = efResult;
-				efResult = abs(efWithBound);
-				TEST_ASSERT(efResult.LowerBound() >= 0.0f);
-				TEST_ASSERT(efResult.UpperBound() >= 0.0f);
-				TEST_ASSERT(static_cast<Types::F32>(efResult) >= 0.0f);
-				TEST_ASSERT(std::abs(static_cast<Types::F32>(efWithBound)) == static_cast<Types::F32>(efResult));
-				if (OUTPUT_RESUTL_TO_CONSOLE)
-				{
-					std::cout << "original = " << efWithBound << std::endl
-							  << "absolute = " << efResult << std::endl;
-				}
+                // abs
+                // using the EFloat from previous divided result, which will have some error bound.
+                const EFloat efWithBound = efResult;
+                efResult = abs(efWithBound);
+                TEST_ASSERT(efResult.LowerBound() >= 0.0f);
+                TEST_ASSERT(efResult.UpperBound() >= 0.0f);
+                TEST_ASSERT(static_cast<Types::F32>(efResult) >= 0.0f);
+                TEST_ASSERT(std::abs(static_cast<Types::F32>(efWithBound)) == static_cast<Types::F32>(efResult));
+                if (OUTPUT_RESUTL_TO_CONSOLE)
+                {
+                    std::cout << "original = " << efWithBound << std::endl
+                              << "absolute = " << efResult << std::endl;
+                }
 
-				// square root just use the absolute value from the abs(efWithBound)
-				const EFloat absWithBound = efResult;
-				efResult = sqrt(absWithBound);
-				TEST_ASSERT(static_cast<Types::F32>(efResult) == std::sqrt(static_cast<Types::F32>(absWithBound)));
-				if (OUTPUT_RESUTL_TO_CONSOLE)
-				{
-					std::cout << "square root = " << efResult << std::endl;
-				}
+                // square root just use the absolute value from the abs(efWithBound)
+                const EFloat absWithBound = efResult;
+                efResult = sqrt(absWithBound);
+                TEST_ASSERT(static_cast<Types::F32>(efResult) == std::sqrt(static_cast<Types::F32>(absWithBound)));
+                if (OUTPUT_RESUTL_TO_CONSOLE)
+                {
+                    std::cout << "square root = " << efResult << std::endl;
+                }
 
-				// negative
-				efResult = -efWithBound;
-				TEST_ASSERT( 
-					- (static_cast<Types::F32>(efWithBound)) 
-					== static_cast<Types::F32>(efResult));
-				TEST_ASSERT(
-					- efWithBound.LowerBound() 
-					== efResult.UpperBound());
-				TEST_ASSERT(
-					-efWithBound.UpperBound()
-					== efResult.LowerBound());
-				if (OUTPUT_RESUTL_TO_CONSOLE)
-				{
-					std::cout << "original = " << efWithBound << std::endl
-							  << "negative = " << efResult << std::endl;
-				}
-			}// end for operation tests
+                // negative
+                efResult = -efWithBound;
+                TEST_ASSERT( 
+                    - (static_cast<Types::F32>(efWithBound)) 
+                    == static_cast<Types::F32>(efResult));
+                TEST_ASSERT(
+                    - efWithBound.LowerBound() 
+                    == efResult.UpperBound());
+                TEST_ASSERT(
+                    -efWithBound.UpperBound()
+                    == efResult.LowerBound());
+                if (OUTPUT_RESUTL_TO_CONSOLE)
+                {
+                    std::cout << "original = " << efWithBound << std::endl
+                              << "negative = " << efResult << std::endl;
+                }
+            }// end for operation tests
 
-		}// end for numLoop
-	}
+        }// end for numLoop
+    }
 };
 
 /*!
-	\brief this struct is for unit test of DebugClient.
+    \brief this struct is for unit test of DebugClient.
 */
 struct TestDebugConf
 {
-	static bool Active;
-	enum { ENABLE_CLIENT = 1 };
+    static bool Active;
+    enum { ENABLE_CLIENT = 1 };
 };
 
 bool TestDebugConf::Active = false;
@@ -1535,70 +1535,70 @@ bool TestDebugConf::Active = false;
 class CaseForDebugClientTest : public CaseContainRandomTool
 {
 public:
-	CaseForDebugClientTest() : CaseContainRandomTool("DebugClient test") {}
+    CaseForDebugClientTest() : CaseContainRandomTool("DebugClient test") {}
 
-	virtual void Run() override
-	{
-		// if you have ensure the DebugClient is working,
-		// and don't want to be borthered by the interruption of the test inside.
-		// set next ENABLE_THIS_TEST to false, and the interruption will be ignored inside.
-		const bool ENABLE_THIS_TEST = true;
+    virtual void Run() override
+    {
+        // if you have ensure the DebugClient is working,
+        // and don't want to be borthered by the interruption of the test inside.
+        // set next ENABLE_THIS_TEST to false, and the interruption will be ignored inside.
+        const bool ENABLE_THIS_TEST = true;
 
-		if (!ENABLE_THIS_TEST)
-		{
-			std::cout << "DebugClient test has been skipped, this test will always failed.\n";
-			CountOneError();
-			return; // return 1 for empethis that there is some unexpected situation.
-		}
+        if (!ENABLE_THIS_TEST)
+        {
+            std::cout << "DebugClient test has been skipped, this test will always failed.\n";
+            CountOneError();
+            return; // return 1 for empethis that there is some unexpected situation.
+        }
 
-		// not hit
-		DEBUG_CLIENT(TestDebugConf);
+        // not hit
+        DEBUG_CLIENT(TestDebugConf);
 
-		TestDebugConf::Active = true;
+        TestDebugConf::Active = true;
 
-		// you should have encounter a assertion here.
-		DEBUG_CLIENT(TestDebugConf);
+        // you should have encounter a assertion here.
+        DEBUG_CLIENT(TestDebugConf);
 
-		// disable it again,
-		TestDebugConf::Active = false;
-		DEBUG_CLIENT(TestDebugConf);
+        // disable it again,
+        TestDebugConf::Active = false;
+        DEBUG_CLIENT(TestDebugConf);
 
-		// using DebugGuard to assist DebugClient
-		{
-			// inside this scope
-			// the TestDebugConf::Active will be set to true
-			DebugGuard<TestDebugConf> guard;
+        // using DebugGuard to assist DebugClient
+        {
+            // inside this scope
+            // the TestDebugConf::Active will be set to true
+            DebugGuard<TestDebugConf> guard;
 
-			// you should have encounter a assertion here.
-			DEBUG_CLIENT(TestDebugConf);
+            // you should have encounter a assertion here.
+            DEBUG_CLIENT(TestDebugConf);
 
-		}// out side that scop TestDebugConf will be set to false.
-		DEBUG_CLIENT(TestDebugConf);
+        }// out side that scop TestDebugConf will be set to false.
+        DEBUG_CLIENT(TestDebugConf);
 
 
-		// test that the additional condition can control DebugClient
-		{
-			DebugGuard<TestDebugConf> guard;
+        // test that the additional condition can control DebugClient
+        {
+            DebugGuard<TestDebugConf> guard;
 
-			// event the TestDebugConf::Active is setted to true,
-			// we pass the condition false to disable that.
-			DEBUG_CLIENT(TestDebugConf, false);
+            // event the TestDebugConf::Active is setted to true,
+            // we pass the condition false to disable that.
+            DEBUG_CLIENT(TestDebugConf, false);
 
-			// you should have encounter a assertion here.
-			DEBUG_CLIENT(TestDebugConf, true);
-		}
-	}
+            // you should have encounter a assertion here.
+            DEBUG_CLIENT(TestDebugConf, true);
+        }
+    }
 };
 
 class CaseFor : public CaseContainRandomTool
 {
 public:
-	CaseFor() : CaseContainRandomTool("translate and rotate hvector") {}
+    CaseFor() : CaseContainRandomTool("translate and rotate hvector") {}
 
-	virtual void Run() override
-	{
+    virtual void Run() override
+    {
 
-	}
+    }
 };
 
 
@@ -1606,27 +1606,27 @@ public:
 using BasicTypesTestSuit_Runable = 
 BasicTypesTestSuit_BASE
 <
-	CaseBasicVector2, 
-	TestVector2Case, 
-	CaseForVector3, 
-	CaseForRGBA, 
-	CaseForRGB, 
-	CaseForRGBAndRGBA, 
-	CaseForMaterialProperty,
-	CaseForVector3Normalize,
-	CaseForHvector,
-	CaseForTransformConstruct,
-	CaseForTranslateAndRotateHvector,
-	CaseForF32Buffer,
-	CaseForCoordinateFrameConstruct,
-	CaseForOrthographicTransformationTest,
-	CaseForTransformationMatrixConcation,
-	CaseForFixPointNumber,
-	CaseForFloatFoundFind,
-	CaseForEFloat,
-	CaseForEFloatConstructTest,
-	CaseForEFloatOperatorTest,
-	CaseForDebugClientTest
+    CaseBasicVector2, 
+    TestVector2Case, 
+    CaseForVector3, 
+    CaseForRGBA, 
+    CaseForRGB, 
+    CaseForRGBAndRGBA, 
+    CaseForMaterialProperty,
+    CaseForVector3Normalize,
+    CaseForHvector,
+    CaseForTransformConstruct,
+    CaseForTranslateAndRotateHvector,
+    CaseForF32Buffer,
+    CaseForCoordinateFrameConstruct,
+    CaseForOrthographicTransformationTest,
+    CaseForTransformationMatrixConcation,
+    CaseForFixPointNumber,
+    CaseForFloatFoundFind,
+    CaseForEFloat,
+    CaseForEFloatConstructTest,
+    CaseForEFloatOperatorTest,
+    CaseForDebugClientTest
 >;
 
 

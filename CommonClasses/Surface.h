@@ -8,7 +8,7 @@ namespace CommonClass
 {
 
 /*!
-	\brief Surface is a base class for all visible object in the ray tracing program
+    \brief Surface is a base class for all visible object in the ray tracing program
 */
 class Surface
 {
@@ -22,8 +22,8 @@ public:
     */
     static Types::F32 s_offsetHitT;
 public:
-	virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const = 0;
-	virtual AABB BoundingBox() const = 0 ;
+    virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const = 0;
+    virtual AABB BoundingBox() const = 0 ;
 };
 
 } // namespace CommonClass

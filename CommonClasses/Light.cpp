@@ -14,7 +14,7 @@ Light::~Light()
 
 vector3 Light::ToMeFrom(const vector3 & reflectPoint, Types::F32 * const pOutDistance) const
 {
-	return Normalize(m_position - reflectPoint, pOutDistance);
+    return Normalize(m_position - reflectPoint, pOutDistance);
 }
 
 } // namespace CommonClass

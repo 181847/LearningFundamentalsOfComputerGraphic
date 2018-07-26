@@ -2,7 +2,7 @@
 #include <type_traits>
 
 /*
-	\brief define some useful marcos for Debug
+    \brief define some useful marcos for Debug
 */
 
 #ifdef WIN32
@@ -10,7 +10,7 @@
 #include <intrin.h>
 
 /*!
-	\brief put an explicit break point to debug program
+    \brief put an explicit break point to debug program
 */
 #define PUT_BREAK_POINT do { __debugbreak(); } while(0)
 
@@ -70,10 +70,10 @@ DebugClient(bool condition = true)
 #define DEBUG_CLIENT_WIDTH_CONFIG(DEBUG_CONFIG) DEBUG_CLIENT_WIDTH_CONFIG_CONDITION(DEBUG_CONFIG, true)
 
 #define DEBUG_CLIENT_WIDTH_CONFIG_CONDITION(DEBUG_CONFIG, condition) do {\
-	if (DEBUG_CONFIG::Active && (condition))\
-	{\
-		PUT_BREAK_POINT;\
-	}\
+    if (DEBUG_CONFIG::Active && (condition))\
+    {\
+        PUT_BREAK_POINT;\
+    }\
 }while(0)
 
 #define ID_OF_DEBUG_CLIENT(x) x
@@ -81,26 +81,26 @@ DebugClient(bool condition = true)
 #define GET_DEBUG_CLIENT_MACRO(_1, _2, NAME, ...) NAME
 
 /*!
-	\brief how to used these macros:
-	DEBUG_CLIENT(DebugClientStruct);
-	DEBUG_CLIENT(DebugConfStruct, true/false);
+    \brief how to used these macros:
+    DEBUG_CLIENT(DebugClientStruct);
+    DEBUG_CLIENT(DebugConfStruct, true/false);
 
 1. define a struct for configuration, you will need *.h and *.cpp file because the DEBUG_CONF::Active should be a static member
-	which should be implemented in the *.cpp file.
-	||||  a sample of a struct ||||
-	struct DE_CLIENT_SAMPLE
-	{
-	public:
-	static bool Active;
-	enum {ENABLE_CLIENT = 1}; // enable the ability of this configuration.
-	};
-	bool DE_CLIENT_SAMPLE::Active = true; // break on the client location.
-	||||  a sample of a struct ||||
+    which should be implemented in the *.cpp file.
+    ||||  a sample of a struct ||||
+    struct DE_CLIENT_SAMPLE
+    {
+    public:
+    static bool Active;
+    enum {ENABLE_CLIENT = 1}; // enable the ability of this configuration.
+    };
+    bool DE_CLIENT_SAMPLE::Active = true; // break on the client location.
+    ||||  a sample of a struct ||||
 2. use macros to reference to those struct like
-	DEBUG_CLIENT(DE_CLIENT_SAMPLE);				// always hit the break point if DE_CLIENT_SAMPLE::Active is true.
-	DEBUG_CLIENT(DE_CLIENT_SAMPLE, condition); // hit the break point if DE_CLIENT_SAMPLE::Active and condition is both true.
+    DEBUG_CLIENT(DE_CLIENT_SAMPLE);                // always hit the break point if DE_CLIENT_SAMPLE::Active is true.
+    DEBUG_CLIENT(DE_CLIENT_SAMPLE, condition); // hit the break point if DE_CLIENT_SAMPLE::Active and condition is both true.
 PS.
-	you can use DebugGuard<> to help set DE_CLIENT_SAMPLE::Active.
+    you can use DebugGuard<> to help set DE_CLIENT_SAMPLE::Active.
 */
 #define DEBUG_CLIENT(...) ID_OF_DEBUG_CLIENT(GET_DEBUG_CLIENT_MACRO(__VA_ARGS__, DEBUG_CLIENT_WIDTH_CONFIG_CONDITION, DEBUG_CLIENT_WIDTH_CONFIG)(__VA_ARGS__))
 #pragma endregion

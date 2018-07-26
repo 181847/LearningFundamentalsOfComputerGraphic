@@ -4,7 +4,7 @@ namespace CommonClass
 {
 
 PerspectiveCamera::PerspectiveCamera(const Types::F32 focalLength, CommonClass::vector3 & origin, const CommonClass::vector3 & lookAt, const CommonClass::vector3 & lookUp)
-	:Camera(origin, lookAt, lookUp), m_focalLenth(focalLength)
+    :Camera(origin, lookAt, lookUp), m_focalLenth(focalLength)
 {
 }
 
@@ -14,12 +14,12 @@ PerspectiveCamera::~PerspectiveCamera()
 
 Ray PerspectiveCamera::GetRay(const Types::U32 x, const Types::U32 y)
 {
-	Types::F32 outU, outV;
-	m_film->GetPixelUV(x, y, outU, outV);
+    Types::F32 outU, outV;
+    m_film->GetPixelUV(x, y, outU, outV);
 
-	vector3 direction(-m_focalLenth * m_w + outU * m_u + outV * m_v);
+    vector3 direction(-m_focalLenth * m_w + outU * m_u + outV * m_v);
 
-	return Ray(m_origin, direction);
+    return Ray(m_origin, direction);
 }
 
 } // namespace CommonClass

@@ -9,10 +9,10 @@ namespace CommonClass
 
 
 class Triangle
-	:public Surface
+    :public Surface
 {
 public:
-	std::array<vector3, 3> m_points;
+    std::array<vector3, 3> m_points;
 
     /*!
         \brief the material of this triangle.
@@ -25,12 +25,12 @@ public:
         \param p0-2 three point position
         clockwise is front face.
     */
-	Triangle(const vector3& p0, const vector3& p1, const vector3& p2);
-	Triangle(std::array<vector3, 3>& threePoints);
-	~Triangle();
+    Triangle(const vector3& p0, const vector3& p1, const vector3& p2);
+    Triangle(std::array<vector3, 3>& threePoints);
+    ~Triangle();
 
-	virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const override;
-	virtual AABB BoundingBox() const override;
+    virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const override;
+    virtual AABB BoundingBox() const override;
 
 
 };

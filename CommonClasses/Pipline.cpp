@@ -907,7 +907,7 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
     {
         pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i],     psInputStride);
         pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 1], psInputStride);
-		pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 2], psInputStride);
+        pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 2], psInputStride);
 
         DrawTriangle(pv1, pv2, pv3, psInputStride);
     }

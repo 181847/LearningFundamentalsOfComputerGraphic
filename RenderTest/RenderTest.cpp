@@ -33,69 +33,69 @@ const unsigned int G_MAX_INT = 1000;
 using namespace CommonClass;
 
 /*!
-	\brief some common configurations for the test.
+    \brief some common configurations for the test.
 */
 namespace UserConfig
 {
-	/*!
-		\brief whether let user check some output image file is right,
-		if false every check about the Image will be default to be correct.
-	*/
-	const bool LET_USER_CHECK_IMG = false;
+    /*!
+        \brief whether let user check some output image file is right,
+        if false every check about the Image will be default to be correct.
+    */
+    const bool LET_USER_CHECK_IMG = false;
 
-	/*!
-		\brief common image resolution on width
-	*/
-	const Types::U32 COMMON_PIXEL_WIDTH     = 512;
-	
-	/*!
-		\brief common image resolution on height
-	*/
-	const Types::U32 COMMON_PIXEL_HEIGHT    = 512;
-	
-	/*!
-		\brief common render option, left bound location
-	*/
-	const Types::F32 COMMON_RENDER_LEFT     = -3.0f;
+    /*!
+        \brief common image resolution on width
+    */
+    const Types::U32 COMMON_PIXEL_WIDTH     = 512;
+    
+    /*!
+        \brief common image resolution on height
+    */
+    const Types::U32 COMMON_PIXEL_HEIGHT    = 512;
+    
+    /*!
+        \brief common render option, left bound location
+    */
+    const Types::F32 COMMON_RENDER_LEFT     = -3.0f;
 
-	
-	/*!
-		\brief common render option, right bound location
-	*/
-	const Types::F32 COMMON_RENDER_RIGHT    = +3.0f;
+    
+    /*!
+        \brief common render option, right bound location
+    */
+    const Types::F32 COMMON_RENDER_RIGHT    = +3.0f;
 
-	
-	/*!
-		\brief common render option, bottom bound location
-	*/
-	const Types::F32 COMMON_RENDER_BOTTOM   = -3.0f;
+    
+    /*!
+        \brief common render option, bottom bound location
+    */
+    const Types::F32 COMMON_RENDER_BOTTOM   = -3.0f;
 
-	
-	/*!
-		\brief common render option, right bound location
-	*/
-	const Types::F32 COMMON_RENDER_TOP      = +3.0f;
+    
+    /*!
+        \brief common render option, right bound location
+    */
+    const Types::F32 COMMON_RENDER_TOP      = +3.0f;
 }
 
 
 /*!
-	\brief get random vector3.
-	if you want to set the seed, try globalMtr.SetRandomSeed(...);
+    \brief get random vector3.
+    if you want to set the seed, try globalMtr.SetRandomSeed(...);
 */
 CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 {
-	CommonClass::vector3 randVec;
-	do
-	{
-		randVec = CommonClass::vector3((globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
-			(globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
-			(globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1));
+    CommonClass::vector3 randVec;
+    do
+    {
+        randVec = CommonClass::vector3((globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
+            (globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
+            (globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1));
 
-		// if allowZeroVector is false, loop until a none zero vector
-	} while (! allowZeroVector && randVec.m_x == 0.0f && randVec.m_y== 0.0f && randVec.m_z == 0.0f);
-	
+        // if allowZeroVector is false, loop until a none zero vector
+    } while (! allowZeroVector && randVec.m_x == 0.0f && randVec.m_y== 0.0f && randVec.m_z == 0.0f);
+    
 
-	return randVec;
+    return randVec;
 }
 
 /*!
@@ -213,38 +213,38 @@ std::array<std::unique_ptr<Polygon>, 6> CreatBox(const std::array<vector3, 8>& p
 }
 
 /*!
-	\brief let user to check the local image file, this function can be disabled by the constant UserConfig::LET_USER_CHECK_IMG.
-	if the user input some number, then we think this test is passed, and return 0 for no error.
+    \brief let user to check the local image file, this function can be disabled by the constant UserConfig::LET_USER_CHECK_IMG.
+    if the user input some number, then we think this test is passed, and return 0 for no error.
 */
 unsigned int LetUserCheckJudge(const std::string& msg, bool force = UserConfig::LET_USER_CHECK_IMG)
 {
-	if (force)
-	{
-		std::cout << "Please check: " << msg << std::endl
-			<< "Input '0' ~ '9' for test pass." << std::endl
-			<< "Else hit enter for some error: ";
+    if (force)
+    {
+        std::cout << "Please check: " << msg << std::endl
+            << "Input '0' ~ '9' for test pass." << std::endl
+            << "Else hit enter for some error: ";
 
-		char ch = std::cin.get();
+        char ch = std::cin.get();
 
-		// if the character is not number, then the image is wrong.
-		if (ch < '0' || ch > '9')
-		{
-			return 1;
-		}
+        // if the character is not number, then the image is wrong.
+        if (ch < '0' || ch > '9')
+        {
+            return 1;
+        }
 
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
-	}
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<int>::max(), '\n');
+    }
 
-	// no error happend 
-	return 0;
+    // no error happend 
+    return 0;
 }
 
 TEST_MODULE_START
 
 #pragma region render a scene use scene RayColor() function
-	TEST_UNIT_START("render a scene use scene RayColor() function")
-		using namespace CommonClass;
+    TEST_UNIT_START("render a scene use scene RayColor() function")
+        using namespace CommonClass;
 
         const bool SKIP_THIS_TEST = true;
 
@@ -254,9 +254,9 @@ TEST_MODULE_START
             return errorLogger.conclusion();
         }
 
-		/*!
-		`	\brief set scene and light.
-		*/
+        /*!
+        `    \brief set scene and light.
+        */
         Scene scene;
         RGB backgroundColor(RGB::BLACK);
 
@@ -283,10 +283,10 @@ TEST_MODULE_START
 
         scene.Add(std::move(pointLight));
 
-		/*!
-			\brief set a sphere to render.
-		*/
-		auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
+        /*!
+            \brief set a sphere to render.
+        */
+        auto tsph = std::make_unique<Sphere>(vector3(0.0f, 0.0f, 0.0f), 1.0f);
         tsph->m_material = sphereMat;
         auto tsph2 = std::make_unique<Sphere>(vector3(-1.0f, 2.0f, 0.5f), 1.0f);
         tsph2->m_material = sphereMat;
@@ -296,15 +296,15 @@ TEST_MODULE_START
         /*!
             \brief render triangles
         */
-		const Types::F32 borderLength = 20.0f;
-		auto tri1 = std::make_unique<Triangle>(
-			vector3(-borderLength, -2.0f, +borderLength),
-			vector3(-borderLength, -2.0f, -borderLength),
-			vector3(+borderLength, -2.0f, borderLength));
-		auto tri2 = std::make_unique<Triangle>(
-			vector3(+borderLength, -2.0f, +borderLength),
-			vector3(-borderLength, -2.0f, -borderLength),
-			vector3(+borderLength, -2.0f, -borderLength));
+        const Types::F32 borderLength = 20.0f;
+        auto tri1 = std::make_unique<Triangle>(
+            vector3(-borderLength, -2.0f, +borderLength),
+            vector3(-borderLength, -2.0f, -borderLength),
+            vector3(+borderLength, -2.0f, borderLength));
+        auto tri2 = std::make_unique<Triangle>(
+            vector3(+borderLength, -2.0f, +borderLength),
+            vector3(-borderLength, -2.0f, -borderLength),
+            vector3(+borderLength, -2.0f, -borderLength));
         tri1->m_material = triMat;
         tri2->m_material = triMat;
 
@@ -328,42 +328,42 @@ TEST_MODULE_START
         scene.Add(std::move(tri2));
         scene.Add(std::move(poly));
 
-		/*!
-			\brief config a camera.
-		*/
+        /*!
+            \brief config a camera.
+        */
         vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
         //vector3 camPosition = 2.0f * vector3(1.8f, 1.8f, 1.8f);
         //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
-		vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
-		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
-		Types::F32 focalLength = 0.5f;
-		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+        vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
+        vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+        Types::F32 focalLength = 0.5f;
+        PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
 
-		camera.SetFilm(std::make_unique<Film>(
-			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
-			-0.5f, +0.5f,
-			-0.5f, +0.5f));
+        camera.SetFilm(std::make_unique<Film>(
+            UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+            -0.5f, +0.5f,
+            -0.5f, +0.5f));
 
-		HitRecord hitRec, shadowHitRec;
-		Ray viewRay;
-		for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
-		{
-			for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
-			{
-				viewRay = camera.GetRay(i, j);
+        HitRecord hitRec, shadowHitRec;
+        Ray viewRay;
+        for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+        {
+            for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+            {
+                viewRay = camera.GetRay(i, j);
 
                 camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
-			}
-		}
+            }
+        }
 
-		camera.m_film->SaveTo(L"OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
+        camera.m_film->SaveTo(L"OutputTestImage\\RenderReflect\\ThisIsForSceneRayColor06.png");
 
-	TEST_UNIT_END;
+    TEST_UNIT_END;
 #pragma endregion
  
 #pragma region render inside boxes and sphere
-	TEST_UNIT_START("render inside boxes and sphere")
-		using namespace CommonClass;
+    TEST_UNIT_START("render inside boxes and sphere")
+        using namespace CommonClass;
 
         const bool SKIP_THIS_TEST = false;
 
@@ -373,9 +373,9 @@ TEST_MODULE_START
             return errorLogger.conclusion();
         }
 
-		/*!
-		`	\brief set scene and light.
-		*/
+        /*!
+        `    \brief set scene and light.
+        */
         Scene scene;
 
         /*!
@@ -403,10 +403,10 @@ TEST_MODULE_START
         scene.Add(std::move(pointLight2));
         scene.Add(std::move(pointLight3));
 
-		/*!
-			\brief set a sphere to render.
-		*/
-		auto tsph = std::make_unique<Sphere>(vector3(-1.0617f, 0.8190f, 1.2368f), 0.8f);
+        /*!
+            \brief set a sphere to render.
+        */
+        auto tsph = std::make_unique<Sphere>(vector3(-1.0617f, 0.8190f, 1.2368f), 0.8f);
         tsph->m_material = sphereMat;
 
 #pragma region build the big open box
@@ -558,22 +558,22 @@ TEST_MODULE_START
 
         scene.Add(std::move(tsph));
 
-		/*!
-			\brief config a camera.
-		*/
+        /*!
+            \brief config a camera.
+        */
         //vector3 camPosition = vector3(0.0f, 2.618f, 9.564f);        // original camera position
         //vector3 camPosition = vector3(-0.2f, 5.5f, 3.0f);
         //vector3 camPosition = vector3( -3.8f, 1.0f, 1.8f);
         vector3 camPosition = vector3(0.0f, 3.6f, 8.0f);
-		vector3 camTarget = vector3(0.0f, 2.145f, 0.0f);
-		vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
-		Types::F32 focalLength = 1.0f;
-		PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
+        vector3 camTarget = vector3(0.0f, 2.145f, 0.0f);
+        vector3 camLookUp = vector3(0.0f, 1.0f, 0.0f);
+        Types::F32 focalLength = 1.0f;
+        PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
 
-		camera.SetFilm(std::make_unique<Film>(
-			UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
-			-0.5f, +0.5f,
-			-0.5f, +0.5f));
+        camera.SetFilm(std::make_unique<Film>(
+            UserConfig::COMMON_PIXEL_WIDTH, UserConfig::COMMON_PIXEL_HEIGHT,
+            -0.5f, +0.5f,
+            -0.5f, +0.5f));
 
         /*!
             \brief help to trace the rendering progress.
@@ -582,12 +582,12 @@ TEST_MODULE_START
         const unsigned int PIXEL_HEIGHT = camera.m_film->m_height;
         const unsigned int NUM_ALL_PIXEL = PIXEL_WIDTH * PIXEL_HEIGHT;
 
-		HitRecord hitRec, shadowHitRec;
-		Ray viewRay;
-		for (unsigned int i = 0; i < PIXEL_WIDTH; ++i)
-		{
-			for (unsigned int j = 0; j < PIXEL_HEIGHT; ++j)
-			{
+        HitRecord hitRec, shadowHitRec;
+        Ray viewRay;
+        for (unsigned int i = 0; i < PIXEL_WIDTH; ++i)
+        {
+            for (unsigned int j = 0; j < PIXEL_HEIGHT; ++j)
+            {
                 // print the progress
                 const unsigned int CURR_COUNT_PIXE = j + i * PIXEL_HEIGHT + 1;
                 if (CURR_COUNT_PIXE % 2500 == 0)
@@ -597,19 +597,19 @@ TEST_MODULE_START
 
                 //BREAK_POINT_IF(i == 90 && j == 511 - 298);
 
-				viewRay = camera.GetRay(i, j);
+                viewRay = camera.GetRay(i, j);
 
                 //BREAK_POINT_IF(i == 93 && j == 511 - 76);
                 camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
-			}
-		}
+            }
+        }
 
-		camera.m_film->SaveTo(L"OutputTestImage\\RenderInsideBox\\InsideBox29.png");
+        camera.m_film->SaveTo(L"OutputTestImage\\RenderInsideBox\\InsideBox29.png");
 
         ImageWindow imgWnd(camera.m_film.get(), L"InsideBox29.png");
         imgWnd.BlockShow();
 
-	TEST_UNIT_END;
+    TEST_UNIT_END;
 #pragma endregion
 
 TEST_MODULE_END

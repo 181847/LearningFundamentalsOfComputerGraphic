@@ -38,48 +38,48 @@ const unsigned int G_MAX_INT = 1000;
 using namespace CommonClass;
 
 /*!
-	\brief some common configurations for the test.
+    \brief some common configurations for the test.
 */
 namespace UserConfig
 {
-	/*!
-		\brief whether let user check some output image file is right,
-		if false every check about the Image will be default to be correct.
-	*/
-	const bool LET_USER_CHECK_IMG = false;
+    /*!
+        \brief whether let user check some output image file is right,
+        if false every check about the Image will be default to be correct.
+    */
+    const bool LET_USER_CHECK_IMG = false;
 
-	/*!
-		\brief common image resolution on width
-	*/
-	const Types::U32 COMMON_PIXEL_WIDTH     = 512;
-	
-	/*!
-		\brief common image resolution on height
-	*/
-	const Types::U32 COMMON_PIXEL_HEIGHT    = 512;
-	
-	/*!
-		\brief common render option, left bound location
-	*/
-	const Types::F32 COMMON_RENDER_LEFT     = -3.0f;
+    /*!
+        \brief common image resolution on width
+    */
+    const Types::U32 COMMON_PIXEL_WIDTH     = 512;
+    
+    /*!
+        \brief common image resolution on height
+    */
+    const Types::U32 COMMON_PIXEL_HEIGHT    = 512;
+    
+    /*!
+        \brief common render option, left bound location
+    */
+    const Types::F32 COMMON_RENDER_LEFT     = -3.0f;
 
-	
-	/*!
-		\brief common render option, right bound location
-	*/
-	const Types::F32 COMMON_RENDER_RIGHT    = +3.0f;
+    
+    /*!
+        \brief common render option, right bound location
+    */
+    const Types::F32 COMMON_RENDER_RIGHT    = +3.0f;
 
-	
-	/*!
-		\brief common render option, bottom bound location
-	*/
-	const Types::F32 COMMON_RENDER_BOTTOM   = -3.0f;
+    
+    /*!
+        \brief common render option, bottom bound location
+    */
+    const Types::F32 COMMON_RENDER_BOTTOM   = -3.0f;
 
-	
-	/*!
-		\brief common render option, right bound location
-	*/
-	const Types::F32 COMMON_RENDER_TOP      = +3.0f;
+    
+    /*!
+        \brief common render option, right bound location
+    */
+    const Types::F32 COMMON_RENDER_TOP      = +3.0f;
 
     /*!
         \brief for some draw line tests, the loop time
@@ -94,23 +94,23 @@ namespace UserConfig
 
 
 /*!
-	\brief get random vector3.
-	if you want to set the seed, try globalMtr.SetRandomSeed(...);
+    \brief get random vector3.
+    if you want to set the seed, try globalMtr.SetRandomSeed(...);
 */
 CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true)
 {
-	CommonClass::vector3 randVec;
-	do
-	{
-		randVec = CommonClass::vector3((globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
-			(globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
-			(globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1));
+    CommonClass::vector3 randVec;
+    do
+    {
+        randVec = CommonClass::vector3((globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
+            (globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1),
+            (globalMtr.Random() - 0.5f) * (globalMtr.Random(G_MAX_INT) + 1));
 
-		// if allowZeroVector is false, loop until a none zero vector
-	} while (! allowZeroVector && randVec.m_x == 0.0f && randVec.m_y== 0.0f && randVec.m_z == 0.0f);
-	
+        // if allowZeroVector is false, loop until a none zero vector
+    } while (! allowZeroVector && randVec.m_x == 0.0f && randVec.m_y== 0.0f && randVec.m_z == 0.0f);
+    
 
-	return randVec;
+    return randVec;
 }
 
 

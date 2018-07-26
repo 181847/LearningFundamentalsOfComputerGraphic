@@ -7,7 +7,7 @@ namespace CommonClass
 {
 
 /*!
-	\brief this class is a prototype of the light in ray tracing, now it's a point light.
+    \brief this class is a prototype of the light in ray tracing, now it's a point light.
 */
 class Light
 {
@@ -15,28 +15,28 @@ public:
     /*!
         \brief the position of the light
     */
-	vector3 m_position;
+    vector3 m_position;
 
     /*!
         \brief the diffuse color of the color.
     */
     RGB     m_color;
-	
+    
 public:
     /*!
         \brief construct a light
         \param position where the light is
         \param diffuse the diffuse color of the light.
     */
-	Light(const vector3& position, const RGB& color);
-	~Light();
+    Light(const vector3& position, const RGB& color);
+    ~Light();
 
-	/*
-		\brief get a normalized vector from the reflect point to the light.
+    /*
+        \brief get a normalized vector from the reflect point to the light.
         \param reflectPoint the position of reflection
         \param pOutDistance return the distance between reflectPoint and light.
-	*/
-	vector3 ToMeFrom(const vector3& reflectPoint, Types::F32 * const pOutDistance) const;
+    */
+    vector3 ToMeFrom(const vector3& reflectPoint, Types::F32 * const pOutDistance) const;
 };
 
 } // namespace CommonClass
