@@ -223,5 +223,8 @@
     <ClCompile Include="ImageWindow.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Helpers.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -194,6 +194,7 @@
     <ClCompile Include="F32Buffer.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="FixPointNumber.cpp" />
+    <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="HitRecord.cpp" />
     <ClCompile Include="HPlaneEquation.cpp" />
     <ClCompile Include="hvector.cpp" />
