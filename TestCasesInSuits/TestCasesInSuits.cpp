@@ -1,29 +1,10 @@
 #include <MyTools/TestTool/Suit.h>  // include test framework
-
-#include "stdafx.h"
-#include "../CommonClasses/vector2.h"
-#include "../CommonClasses/vector3.h"
-#include "../CommonClasses/Image.h"
-#include "../CommonClasses/OrthographicCamera.h"
-#include "../CommonClasses/Ray.h"
-#include "../CommonClasses/Sphere.h"
-#include "../CommonClasses/PerspectiveCamera.h"
-#include "../CommonClasses/Triangle.h"
-#include "../CommonClasses/Scene.h"
-#include "../CommonClasses/Polygon.h"
-#include "../CommonClasses/ColorTemplate.h"
-#include "../CommonClasses/Light.h"
-#include "../CommonClasses/Material.h"
-#include "../CommonClasses/RasterizeImage.h"
-#include "../CommonClasses/Pipline.h"
-#include "../CommonClasses/CoordinateFrame.h"
-#include "../CommonClasses/DebugConfigs.h"
-#include "../CommonClasses/ImageWindow.h"
-#include "../CommonClasses/Helpers.h"
-#pragma comment(lib, "CommonClasses.lib")
-
+#include "CommonHeaders.h"
 // include required suits here
 #include "TestBasicTypesSuit.h"
+
+#pragma comment(lib, "MyTools/MyTool.lib")
+#pragma comment(lib, "CommonClasses.lib")
 
 /*!
     \brief the common environment for pipline, for example: some useful pixel shader, pipline stateObject.
