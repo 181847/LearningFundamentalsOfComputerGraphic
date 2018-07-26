@@ -24,6 +24,9 @@
     <ClInclude Include="TestBasicTypesSuit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommonHeaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
