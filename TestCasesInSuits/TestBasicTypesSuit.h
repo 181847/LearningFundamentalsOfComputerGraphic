@@ -1359,6 +1359,237 @@ public:
 	}
 };
 
+class CaseForEFloatConstructTest : public CaseContainRandomTool
+{
+public:
+	CaseForEFloatConstructTest() : CaseContainRandomTool("EFloat construct") {}
+
+	virtual void Run() override
+	{
+		const int MAX_INT = 2;
+		const int MAX_NUM = 7;
+
+		for (int numLoop = 0; numLoop < 20; ++numLoop)
+		{
+			// original number array
+			std::array<float, MAX_NUM> farr;
+			std::array<EFloat, farr.size()> efarr;
+
+			// assign numbers to the Array "farr".
+			farr[0] = 0.0f;
+			farr[1] = -0.0f;
+			farr[2] = mtr.Random();
+
+			const int POSITIVE_INF = 3;
+			const int NEGATIVE_INF = 4;
+			const int POSITIVE_MAX = 5;
+			const int NEGATIVE_MAX = 6;
+			farr[POSITIVE_INF] = +std::numeric_limits<float>::infinity();
+			farr[NEGATIVE_INF] = -std::numeric_limits<float>::infinity();
+			farr[POSITIVE_MAX] = +std::numeric_limits<float>::max();
+			farr[NEGATIVE_MAX] = -std::numeric_limits<float>::max();
+
+			for (unsigned int i = NEGATIVE_MAX + 1; i < farr.size(); ++i)
+			{
+				farr[i] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+				efarr[i] = EFloat(farr[i]);
+			}
+
+			for (auto & ef : efarr)
+			{
+				ef.Check();
+			}
+		}// end for numLoop
+	}
+};
+
+class CaseForEFloatOperatorTest : public CaseContainRandomTool
+{
+public:
+	CaseForEFloatOperatorTest() : CaseContainRandomTool("EFloat operator test") {}
+
+	virtual void Run() override
+	{
+		const int MAX_INT = 2;
+		const int MAX_NUM = 7;
+
+		const bool OUTPUT_RESUTL_TO_CONSOLE = false;
+
+		for (int numLoop = 0; numLoop < 30; ++numLoop)
+		{
+			// original number array
+			std::array<std::array<float, MAX_NUM>, 2> farr;
+			std::array<std::array<EFloat, MAX_NUM>, 2> efarr;
+
+			// start efloat construction
+			for (int i = 0; i < 2; ++i)
+			{
+				for (int j = 0; j < MAX_NUM; ++j)
+				{
+					farr[i][j] = (mtr.Random() - 0.5f) * 2.0f * MAX_INT;
+					efarr[i][j] = EFloat(farr[i][j]);
+				}
+			}// end for farr[i] construction
+
+			for (int i = 0; i < MAX_NUM; ++i)
+			{
+				EFloat efResult;
+				float floatResult;
+
+				// operator +
+				efResult = efarr[0][i] + efarr[1][i];
+				floatResult = farr[0][i] + farr[1][i];
+				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+				if (OUTPUT_RESUTL_TO_CONSOLE)
+				{
+					std::cout << farr[0][i] << " + " << farr[1][i] << " = \n"
+							  << efResult << "\n\n";
+				}
+
+				// operator -
+				efResult = efarr[0][i] - efarr[1][i];
+				floatResult = farr[0][i] - farr[1][i];
+				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+				if (OUTPUT_RESUTL_TO_CONSOLE)
+				{
+					std::cout << farr[0][i] << " - " << farr[1][i] << " = \n"
+						<< efResult << "\n\n";
+				}
+
+				// operator *
+				efResult = efarr[0][i] * efarr[1][i];
+				floatResult = farr[0][i] * farr[1][i];
+				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+				if (OUTPUT_RESUTL_TO_CONSOLE)
+				{
+					std::cout << farr[0][i] << " * " << farr[1][i] << " = \n"
+						<< efResult << "\n\n";
+				}
+
+				// operator /
+				efResult = efarr[0][i] / efarr[1][i];
+				floatResult = farr[0][i] / farr[1][i];
+				TEST_ASSERT(floatResult == static_cast<Types::F32>(efResult));
+				if (OUTPUT_RESUTL_TO_CONSOLE)
+				{
+					std::cout << farr[0][i] << " / " << farr[1][i] << " = \n"
+						<< efResult << "\n\n";
+				}
+
+				// abs
+				// using the EFloat from previous divided result, which will have some error bound.
+				const EFloat efWithBound = efResult;
+				efResult = abs(efWithBound);
+				TEST_ASSERT(efResult.LowerBound() >= 0.0f);
+				TEST_ASSERT(efResult.UpperBound() >= 0.0f);
+				TEST_ASSERT(static_cast<Types::F32>(efResult) >= 0.0f);
+				TEST_ASSERT(std::abs(static_cast<Types::F32>(efWithBound)) == static_cast<Types::F32>(efResult));
+				if (OUTPUT_RESUTL_TO_CONSOLE)
+				{
+					std::cout << "original = " << efWithBound << std::endl
+							  << "absolute = " << efResult << std::endl;
+				}
+
+				// square root just use the absolute value from the abs(efWithBound)
+				const EFloat absWithBound = efResult;
+				efResult = sqrt(absWithBound);
+				TEST_ASSERT(static_cast<Types::F32>(efResult) == std::sqrt(static_cast<Types::F32>(absWithBound)));
+				if (OUTPUT_RESUTL_TO_CONSOLE)
+				{
+					std::cout << "square root = " << efResult << std::endl;
+				}
+
+				// negative
+				efResult = -efWithBound;
+				TEST_ASSERT( 
+					- (static_cast<Types::F32>(efWithBound)) 
+					== static_cast<Types::F32>(efResult));
+				TEST_ASSERT(
+					- efWithBound.LowerBound() 
+					== efResult.UpperBound());
+				TEST_ASSERT(
+					-efWithBound.UpperBound()
+					== efResult.LowerBound());
+				if (OUTPUT_RESUTL_TO_CONSOLE)
+				{
+					std::cout << "original = " << efWithBound << std::endl
+							  << "negative = " << efResult << std::endl;
+				}
+			}// end for operation tests
+
+		}// end for numLoop
+	}
+};
+
+/*!
+	\brief this struct is for unit test of DebugClient.
+*/
+struct TestDebugConf
+{
+	static bool Active;
+	enum { ENABLE_CLIENT = 1 };
+};
+
+bool TestDebugConf::Active = false;
+
+class CaseForDebugClientTest : public CaseContainRandomTool
+{
+public:
+	CaseForDebugClientTest() : CaseContainRandomTool("DebugClient test") {}
+
+	virtual void Run() override
+	{
+		// if you have ensure the DebugClient is working,
+		// and don't want to be borthered by the interruption of the test inside.
+		// set next ENABLE_THIS_TEST to false, and the interruption will be ignored inside.
+		const bool ENABLE_THIS_TEST = true;
+
+		if (!ENABLE_THIS_TEST)
+		{
+			std::cout << "DebugClient test has been skipped, this test will always failed.\n";
+			CountOneError();
+			return; // return 1 for empethis that there is some unexpected situation.
+		}
+
+		// not hit
+		DEBUG_CLIENT(TestDebugConf);
+
+		TestDebugConf::Active = true;
+
+		// you should have encounter a assertion here.
+		DEBUG_CLIENT(TestDebugConf);
+
+		// disable it again,
+		TestDebugConf::Active = false;
+		DEBUG_CLIENT(TestDebugConf);
+
+		// using DebugGuard to assist DebugClient
+		{
+			// inside this scope
+			// the TestDebugConf::Active will be set to true
+			DebugGuard<TestDebugConf> guard;
+
+			// you should have encounter a assertion here.
+			DEBUG_CLIENT(TestDebugConf);
+
+		}// out side that scop TestDebugConf will be set to false.
+		DEBUG_CLIENT(TestDebugConf);
+
+
+		// test that the additional condition can control DebugClient
+		{
+			DebugGuard<TestDebugConf> guard;
+
+			// event the TestDebugConf::Active is setted to true,
+			// we pass the condition false to disable that.
+			DEBUG_CLIENT(TestDebugConf, false);
+
+			// you should have encounter a assertion here.
+			DEBUG_CLIENT(TestDebugConf, true);
+		}
+	}
+};
+
 class CaseFor : public CaseContainRandomTool
 {
 public:
@@ -1392,7 +1623,10 @@ BasicTypesTestSuit_BASE
 	CaseForTransformationMatrixConcation,
 	CaseForFixPointNumber,
 	CaseForFloatFoundFind,
-	CaseForEFloat
+	CaseForEFloat,
+	CaseForEFloatConstructTest,
+	CaseForEFloatOperatorTest,
+	CaseForDebugClientTest
 >;
 
 
