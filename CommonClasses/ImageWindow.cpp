@@ -25,6 +25,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN:
         return 0;
 
+	case WM_MBUTTONDOWN:		// close the window when middle mouse button pressed.
+		DestroyWindow(hwnd);
+		return 0;
+
     case WM_DESTROY:            // window is destoried
         PostQuitMessage(0);
         return 0;
