@@ -123,11 +123,18 @@ Transform Transform::OrthographicTransOG(const Types::F32 left, const Types::F32
     const Types::F32 recipocalHeight = 1.0f / (top   - bottom);
     const Types::F32 recipocalDist   = 1.0f / (near  - far);
 
-    
+    // map z to [-1(near), 1(far)]
+	/*return Transform(
+		2.0f * recipocalWidth,  0.0f,                       0.0f,                   (right + left) * - recipocalWidth,
+		0.0f,                   2.0f * recipocalHeight,     0.0f,                   (top + bottom) * - recipocalHeight,
+		0.0f,                   0.0f,                       2.0f * recipocalDist,   (near + far) * - recipocalDist,
+		0.0f,                   0.0f,                       0.0f,                   1.0f);*/
+
+	// map z to [0(near), 1(far)]
     return Transform(
         2.0f * recipocalWidth,  0.0f,                       0.0f,                   (right + left) * - recipocalWidth,
         0.0f,                   2.0f * recipocalHeight,     0.0f,                   (top + bottom) * - recipocalHeight,
-        0.0f,                   0.0f,                       2.0f * recipocalDist,   (near + far) * - recipocalDist,
+        0.0f,                   0.0f,                       - recipocalDist,		near * recipocalDist,
         0.0f,                   0.0f,                       0.0f,                   1.0f);
 }
 
