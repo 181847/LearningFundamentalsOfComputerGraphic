@@ -29,3 +29,5 @@
 #include "../CommonClasses/FixPointNumber.h"
 #include "../CommonClasses/EFloat.h"
 #include "../CommonClasses/Helpers.h"
+
+#include "BaseToolForCaseAndSuit.h"

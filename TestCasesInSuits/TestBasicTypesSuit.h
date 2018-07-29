@@ -10,7 +10,7 @@
 using namespace CommonClass;
 
 template<typename ... CASE_TYPE_LIST>
-class BasicTypesTestSuit_BASE: public TestSuit::Suit<CASE_TYPE_LIST...>
+class BasicTypesTestSuit_BASE: public SuitForPipline<CASE_TYPE_LIST...>
 {
     const std::string SuitName = "BasicTypes test";
 
@@ -21,26 +21,6 @@ public:
     virtual void PrepareTotal() override
     {
         printf("%s start.\n", SuitName.c_str());
-    }
-
-    /*!
-        \brief run before each case run.
-        \param pTheCase the case that will be run, don't worry about the memory of pTheCase right now.
-        \return a pointer can point to any thing, this pointer will be passed to the case.
-    */
-    virtual void * PrepareBeforeEachCase(TestSuit::Case * pTheCase) override
-    {
-        return nullptr;
-    }
-
-    /*!
-        \brief run after each case
-        \param pTheCase the case stops
-        \param pEnvironment the pointer that be returned by PrepareBeforeEachCase(...), 
-               Please take care of the memory where the pointer points to by yourself.
-    */
-    virtual void FinishEachCase(TestSuit::Case * pTheCase, void * pEnvironment) override
-    {
     }
 
     /*!
@@ -55,7 +35,7 @@ public:
 /*!
     \brief a base class for all cases that need Random number generator.
 */
-class CaseContainRandomTool : public TestSuit::Case
+class CaseContainRandomTool : public CaseForPipline
 {
 public:
     /*!
@@ -63,7 +43,7 @@ public:
     */
     RandomTool::MTRandom mtr;
 
-    CaseContainRandomTool(const std::string& caseName) : Case(caseName) {}
+    CaseContainRandomTool(const std::string& caseName) : CaseForPipline(caseName) {}
     
     /*!
         \brief clamp the channel to [0.0f, 1.0f]
@@ -1529,7 +1509,6 @@ struct TestDebugConf
     static bool Active;
     enum { ENABLE_CLIENT = 1 };
 };
-
 bool TestDebugConf::Active = false;
 
 class CaseForDebugClientTest : public CaseContainRandomTool
@@ -1590,6 +1569,111 @@ public:
     }
 };
 
+class CaseForTriangleRegionBoundary : public CaseContainRandomTool
+{
+public:
+    CaseForTriangleRegionBoundary() : CaseContainRandomTool("triangle region boundary in pipeline") {}
+
+    virtual void Run() override
+    {
+
+        // temp struct for line drawing.
+        struct SimplePoint
+        {
+        public:
+            hvector m_position;
+            SimplePoint(const hvector& pos)
+                :m_position(pos)
+            {
+                // empty
+            }
+        };
+        // create and config pipeline state object
+        auto pso = std::make_unique<PiplineStateObject>();
+        pso->m_primitiveType = PrimitiveType::LINE_LIST;
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
+        pso->m_vertexLayout.pixelShaderInputSize = sizeof(hvector);
+
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            return RGBA::RED;
+        };
+
+        vector3 localU(1.0f, 0.0f, 1.0f);
+        vector3 localV(0.0f, 1.0f, 0.0f);
+        vector3 coordPos(0.0f, 0.0f, 0.0f);
+        CoordinateFrame coordFrm(localU, localV, coordPos);
+        Transform toWorld = coordFrm.GetTransformLocalToWorld();
+
+        pso->m_vertexShader = [&toWorld](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            memcpy(pDestV, pSrcVertex, sizeof(SimplePoint));
+        };
+
+        Viewport viewport;
+        viewport.left = 0;
+        viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
+        viewport.bottom = 0;
+        viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+        pso->SetViewport(viewport);
+
+        // create and set a pipeline.
+        Pipline pipline;
+        pipline.SetPSO(std::move(pso));
+
+        // set a backbuffer
+        pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+            pEnvironment->COMMON_PIXEL_WIDTH,
+            pEnvironment->COMMON_PIXEL_HEIGHT,
+            RGBA::WHITE));
+
+        RandomTool::MTRandom mtr;
+
+        const float scaleRandomRange = 3.0f;
+        auto RandomScale = [&scaleRandomRange, &mtr]()->float {
+            return scaleRandomRange * 2.0f * (mtr.Random() - 1.0f);
+        };
+
+        for (int numLoop = 0; numLoop < 200; ++numLoop)
+        {
+            // make three vertex that shock around the boundary
+            // -----------------
+            // X               X
+            // |               |
+            // |               |
+            // |               |
+            // X               |
+            // -----------------
+            hvector
+                v1(viewport.left + RandomScale(),
+                    viewport.top + RandomScale()),
+                v2(viewport.right + RandomScale(),
+                    viewport.top + RandomScale()),
+                v3(viewport.left + RandomScale(),
+                    viewport.bottom + RandomScale());
+            std::array<const ScreenSpaceVertexTemplate*, 3> pv = {
+                reinterpret_cast<const ScreenSpaceVertexTemplate*>(&v1),
+                reinterpret_cast<const ScreenSpaceVertexTemplate*>(&v2),
+                reinterpret_cast<const ScreenSpaceVertexTemplate*>(&v3)
+            };
+
+            std::array<Types::U32, 2> minBound, maxBound;
+
+            {
+                COUNT_DETAIL_TIME;
+                pipline.FindTriangleBoundary(pv[0], pv[1], pv[2], &minBound, &maxBound);
+            }
+
+            const int x = 0, y = 1;
+            TEST_ASSERT(minBound[x] >= viewport.left);
+            TEST_ASSERT(minBound[y] >= viewport.bottom);
+            TEST_ASSERT(maxBound[x] <= viewport.right);
+            TEST_ASSERT(maxBound[y] <= viewport.top);
+
+            TEST_ASSERT(minBound[x] < maxBound[x]);
+            TEST_ASSERT(minBound[y] < maxBound[y]);
+        }// end for numLoop
+    }
+};
+
 class CaseFor : public CaseContainRandomTool
 {
 public:
@@ -1626,7 +1710,8 @@ BasicTypesTestSuit_BASE
     CaseForEFloat,
     CaseForEFloatConstructTest,
     CaseForEFloatOperatorTest,
-    CaseForDebugClientTest
+    CaseForDebugClientTest,
+    CaseForTriangleRegionBoundary
 >;
 
 
