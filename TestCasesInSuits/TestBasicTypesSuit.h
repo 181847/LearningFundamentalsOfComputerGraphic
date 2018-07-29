@@ -6,6 +6,7 @@
     [2018/7/25 9:22]
 */
 #include "CommonHeaders.h"
+#include <iomanip>
 
 using namespace CommonClass;
 
@@ -1212,6 +1213,21 @@ class CaseForFloatFoundFind : public CaseContainRandomTool
 public:
     CaseForFloatFoundFind() : CaseContainRandomTool("float bound find") {}
 
+	/*!
+		\brief this function is for floating point number round error analysis.
+	*/
+	template<typename RESULT_T, typename LONG_RESULT_T, typename BOUND_T>
+	void ShowNumberInBound(const RESULT_T value, const RESULT_T errorBound, const LONG_RESULT_T preciseValue, const BOUND_T low, const BOUND_T high)
+	{
+		std::cout
+			<< std::setprecision(std::numeric_limits<LONG_RESULT_T>::digits10 + 1) // remember to include <iomanip>
+			<< "||||\nlow resolution number = " << value << std::endl
+			<< "error bound           = " << errorBound << std::endl
+			<< "high precise number   = " << preciseValue << std::endl
+			<< "bounded interval      = [ " << low << " , " << high << " ]" << std::endl
+			<< "||||\n" << std::endl;
+	}
+
     virtual void Run() override
     {
         const unsigned int MAX_INT = 100;
@@ -1235,7 +1251,7 @@ public:
             // ensure the bound include the more precise value which is processed by production of double.
             TEST_ASSERT(low <= lc && lc <= high);
 
-            //ShowNumberInBound(c, errorBound, lc, low, high);
+            ShowNumberInBound(c, errorBound, lc, low, high);
 
             // next codes will check whether the error bound caculateion still apply to sqrt operation
             double lSqrtC = std::sqrt(lc);
@@ -1248,10 +1264,10 @@ public:
 
             TEST_ASSERT(sqrtLow <= lSqrtC && lSqrtC <= sqrtHigh);
 
-            //ShowNumberInBound(sqrtC, sqrtErrorBound, lSqrtC, sqrtLow, sqrtHigh);
+            ShowNumberInBound(sqrtC, sqrtErrorBound, lSqrtC, sqrtLow, sqrtHigh);
 
         } // end for loopTest
-    }
+    }// end Run()
 };
 
 class CaseForEFloat : public CaseContainRandomTool
