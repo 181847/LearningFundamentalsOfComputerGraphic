@@ -33,125 +33,6 @@ public:
     }
 };
 
-/*!
-    \brief a base class for all cases that need Random number generator.
-*/
-class CaseContainRandomTool : public CaseForPipline
-{
-public:
-    /*!
-        \brief the random number generator.
-    */
-    RandomTool::MTRandom mtr;
-
-    CaseContainRandomTool(const std::string& caseName) : CaseForPipline(caseName) {}
-    
-    /*!
-        \brief clamp the channel to [0.0f, 1.0f]
-        \param ch the channel value to be clamped.
-    */
-    Types::F32 ClampChannel(Types::F32 ch)
-    {
-        if (ch <= 0.0f)
-        {
-            return 0.0f;
-        }
-        else if (ch >= 1.0f)
-        {
-            return 1.0f;
-        }
-        else
-        {
-            return ch;
-        }
-    }
-
-    /*!
-        \brief get random rgb color.
-    */
-    RGB GetRandomRGB()
-    {
-        return RGB(mtr.Random(), mtr.Random(), mtr.Random());
-    }
-
-    /*!
-        \brief get random vector3.
-        if you want to set the seed, try mtr.SetRandomSeed(...);
-    */
-    CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true, const int MAX_INT = 200)
-    {
-        CommonClass::vector3 randVec;
-        do
-        {
-            randVec = CommonClass::vector3(
-                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
-                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
-                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1));
-
-            // if allowZeroVector is false, loop until a none zero vector
-        } while (!allowZeroVector && randVec.m_x == 0.0f && randVec.m_y == 0.0f && randVec.m_z == 0.0f);
-
-
-        return randVec;
-    }
-
-    /*!
-        \brief create a random float number between [-MAX_RADIUS, +MAX_RADIUS]
-        \param MAX_RADIUS max absolute value of the float.
-    */
-    Types::F32 RandomFloat(const Types::F32 MAX_RADIUS = 200.0f)
-    {
-        assert(MAX_RADIUS > 0.0f);
-        return (mtr.Random() - 0.5f) * 2.f * MAX_RADIUS;
-    }
-    
-    /*!
-        \brief create a float number between [-MAX_RADIUS, 0) ^ (0, +MAX_RADIUS]
-        \param MAX_RADIUS max absolute value of the float.
-    */
-    Types::F32 RandomFloatNotZero(const Types::F32 MAX_RADIUS = 200.0f)
-    {
-        assert(MAX_RADIUS > 0.0f);
-        float ret = 0.0f;
-        do 
-        {
-            ret = RandomFloat(MAX_RADIUS);
-        } while (ret == 0.0f);
-        return ret;
-    }
-
-    /*!
-        \brief create an array contain random float  [-200.0f, +200.0f]
-        \param MAX_RADIUS max absolute value of the float.
-    */
-    template<unsigned int COUNT>
-    std::array<Types::F32, COUNT> GetRandomFloatArray(const Types::F32 MAX_RADIUS = 200.0f)
-    {
-        assert(MAX_RADIUS > 0.0f);
-        std::array<Types::F32, COUNT> retArr;
-        for (auto& number : retArr)
-        {
-            number = RandomFloat(MAX_RADIUS);
-        }
-        return retArr;
-    }
-    
-    /*!
-        \brief create a float number between [-200.0f, 0) ^ (0, +200.0f]
-        \param MAX_RADIUS max absolute value of the float.
-    */
-    template<unsigned int COUNT>
-    std::array<Types::F32, COUNT> GetRandomFloatNotZeroArray(const Types::F32 MAX_RADIUS = 200.0f)
-    {
-        assert(MAX_RADIUS > 0.0f);
-        std::array<Types::F32, COUNT> retArr;
-        for (auto& number : retArr)
-        {
-            number = RandomFloatNotZero(MAX_RADIUS);
-        }
-        return retArr;
-    }
-};
 
 class CaseBasicVector2 :public TestSuit::Case
 {
@@ -167,10 +48,10 @@ public:
     }
 };
 
-class TestVector2Case :public CaseContainRandomTool
+class TestVector2Case :public CaseForPipline
 {
 public:
-    TestVector2Case() : CaseContainRandomTool("test vector2") {}
+    TestVector2Case() : CaseForPipline("test vector2") {}
     
     virtual void Run() override
     {
@@ -208,10 +89,10 @@ public:
     }// end Run
 };
 
-class CaseForVector3 : public CaseContainRandomTool
+class CaseForVector3 : public CaseForPipline
 {
 public:
-    CaseForVector3():CaseContainRandomTool("test vector3"){}
+    CaseForVector3():CaseForPipline("test vector3"){}
     
     virtual void Run() override
     {
@@ -287,10 +168,10 @@ public:
     }// end Run
 };
 
-class CaseForRGBA : public CaseContainRandomTool
+class CaseForRGBA : public CaseForPipline
 {
 public:
-    CaseForRGBA() :CaseContainRandomTool("test RGBA") {}
+    CaseForRGBA() :CaseForPipline("test RGBA") {}
 
     virtual void Run() override
     {
@@ -386,10 +267,10 @@ public:
     }// end Run
 };
 
-class CaseForRGB : public CaseContainRandomTool
+class CaseForRGB : public CaseForPipline
 {
 public:
-    CaseForRGB() :CaseContainRandomTool("test RGB") {}
+    CaseForRGB() :CaseForPipline("test RGB") {}
 
     virtual void Run() override
     {
@@ -498,10 +379,10 @@ public:
     }// end Run
 };
 
-class CaseForRGBAndRGBA : public CaseContainRandomTool
+class CaseForRGBAndRGBA : public CaseForPipline
 {
 public:
-    CaseForRGBAndRGBA() :CaseContainRandomTool("test casting between RGB and RGBA") {}
+    CaseForRGBAndRGBA() :CaseForPipline("test casting between RGB and RGBA") {}
 
     virtual void Run() override
     {
@@ -534,10 +415,10 @@ public:
     }
 };
 
-class CaseForMaterialProperty : public CaseContainRandomTool
+class CaseForMaterialProperty : public CaseForPipline
 {
 public:
-    CaseForMaterialProperty() :CaseContainRandomTool("check material construct properties") {}
+    CaseForMaterialProperty() :CaseForPipline("check material construct properties") {}
 
     virtual void Run() override
     {
@@ -570,10 +451,10 @@ public:
     }
 };
 
-class CaseForVector3Normalize : public CaseContainRandomTool
+class CaseForVector3Normalize : public CaseForPipline
 {
 public:
-    CaseForVector3Normalize() : CaseContainRandomTool("test vector3 normalize") {}
+    CaseForVector3Normalize() : CaseForPipline("test vector3 normalize") {}
 
     virtual void Run() override
     {
@@ -599,10 +480,10 @@ public:
     }// end Run
 };
 
-class CaseForHvector : public CaseContainRandomTool
+class CaseForHvector : public CaseForPipline
 {
 public:
-    CaseForHvector() :CaseContainRandomTool("hvector operation tests") {}
+    CaseForHvector() :CaseForPipline("hvector operation tests") {}
 
     virtual void Run() override
     {
@@ -701,10 +582,10 @@ public:
     }// end Run
 };
 
-class CaseForTransformConstruct : public CaseContainRandomTool
+class CaseForTransformConstruct : public CaseForPipline
 {
 public:
-    CaseForTransformConstruct() :CaseContainRandomTool("transform construct tests") {}
+    CaseForTransformConstruct() :CaseForPipline("transform construct tests") {}
 
     virtual void Run() override
     {
@@ -808,10 +689,10 @@ public:
     }// end Run()
 };
 
-class CaseForTranslateAndRotateHvector : public CaseContainRandomTool
+class CaseForTranslateAndRotateHvector : public CaseForPipline
 {
 public:
-    CaseForTranslateAndRotateHvector() : CaseContainRandomTool("translate and rotate hvector") {}
+    CaseForTranslateAndRotateHvector() : CaseForPipline("translate and rotate hvector") {}
     
     virtual void Run() override 
     {
@@ -907,10 +788,10 @@ public:
     }// end Run()
 };
 
-class CaseForF32Buffer : public CaseContainRandomTool
+class CaseForF32Buffer : public CaseForPipline
 {
 public:
-    CaseForF32Buffer() : CaseContainRandomTool("translate and rotate hvector") {}
+    CaseForF32Buffer() : CaseForPipline("translate and rotate hvector") {}
 
     virtual void Run() override
     {
@@ -951,10 +832,10 @@ public:
     }// end Run()
 };
 
-class CaseForCoordinateFrameConstruct : public CaseContainRandomTool
+class CaseForCoordinateFrameConstruct : public CaseForPipline
 {
 public:
-    CaseForCoordinateFrameConstruct() : CaseContainRandomTool("coordinate frame construct") {}
+    CaseForCoordinateFrameConstruct() : CaseForPipline("coordinate frame construct") {}
 
     virtual void Run() override
     {
@@ -985,10 +866,10 @@ public:
     }// end Run()
 };
 
-class CaseForOrthographicTransformationTest : public CaseContainRandomTool
+class CaseForOrthographicTransformationTest : public CaseForPipline
 {
 public:
-    CaseForOrthographicTransformationTest() : CaseContainRandomTool("orthographic transformation test") {}
+    CaseForOrthographicTransformationTest() : CaseForPipline("orthographic transformation test") {}
 
     virtual void Run() override
     {
@@ -1052,10 +933,10 @@ public:
     }
 };
 
-class CaseForTransformationMatrixConcation : public CaseContainRandomTool
+class CaseForTransformationMatrixConcation : public CaseForPipline
 {
 public:
-    CaseForTransformationMatrixConcation() : CaseContainRandomTool("transformation matrix concation") {}
+    CaseForTransformationMatrixConcation() : CaseForPipline("transformation matrix concation") {}
 
     virtual void Run() override
     {
@@ -1157,10 +1038,10 @@ public:
     }
 };
 
-class CaseForFixPointNumber : public CaseContainRandomTool
+class CaseForFixPointNumber : public CaseForPipline
 {
 public:
-    CaseForFixPointNumber() : CaseContainRandomTool("Fix Point Number basic test") {}
+    CaseForFixPointNumber() : CaseForPipline("Fix Point Number basic test") {}
 
     virtual void Run() override
     {
@@ -1208,10 +1089,10 @@ public:
     }
 };
 
-class CaseForFloatFoundFind : public CaseContainRandomTool
+class CaseForFloatFoundFind : public CaseForPipline
 {
 public:
-    CaseForFloatFoundFind() : CaseContainRandomTool("float bound find") {}
+    CaseForFloatFoundFind() : CaseForPipline("float bound find") {}
 
     /*!
         \brief this function is for floating point number round error analysis.
@@ -1270,10 +1151,10 @@ public:
     }// end Run()
 };
 
-class CaseForEFloat : public CaseContainRandomTool
+class CaseForEFloat : public CaseForPipline
 {
 public:
-    CaseForEFloat() : CaseContainRandomTool("EFloat tool test") {}
+    CaseForEFloat() : CaseForPipline("EFloat tool test") {}
 
     virtual void Run() override
     {
@@ -1355,10 +1236,10 @@ public:
     }
 };
 
-class CaseForEFloatConstructTest : public CaseContainRandomTool
+class CaseForEFloatConstructTest : public CaseForPipline
 {
 public:
-    CaseForEFloatConstructTest() : CaseContainRandomTool("EFloat construct") {}
+    CaseForEFloatConstructTest() : CaseForPipline("EFloat construct") {}
 
     virtual void Run() override
     {
@@ -1399,10 +1280,10 @@ public:
     }
 };
 
-class CaseForEFloatOperatorTest : public CaseContainRandomTool
+class CaseForEFloatOperatorTest : public CaseForPipline
 {
 public:
-    CaseForEFloatOperatorTest() : CaseContainRandomTool("EFloat operator test") {}
+    CaseForEFloatOperatorTest() : CaseForPipline("EFloat operator test") {}
 
     virtual void Run() override
     {
@@ -1527,10 +1408,10 @@ struct TestDebugConf
 };
 bool TestDebugConf::Active = false;
 
-class CaseForDebugClientTest : public CaseContainRandomTool
+class CaseForDebugClientTest : public CaseForPipline
 {
 public:
-    CaseForDebugClientTest() : CaseContainRandomTool("DebugClient test") {}
+    CaseForDebugClientTest() : CaseForPipline("DebugClient test") {}
 
     virtual void Run() override
     {
@@ -1585,10 +1466,10 @@ public:
     }
 };
 
-class CaseForTriangleRegionBoundary : public CaseContainRandomTool
+class CaseForTriangleRegionBoundary : public CaseForPipline
 {
 public:
-    CaseForTriangleRegionBoundary() : CaseContainRandomTool("triangle region boundary in pipeline") {}
+    CaseForTriangleRegionBoundary() : CaseForPipline("triangle region boundary in pipeline") {}
 
     virtual void Run() override
     {
@@ -1690,10 +1571,10 @@ public:
     }
 };
 
-class CaseForEdgeEquation : public CaseContainRandomTool
+class CaseForEdgeEquation : public CaseForPipline
 {
 public:
-    CaseForEdgeEquation() : CaseContainRandomTool("EdgeEquation test") {}
+    CaseForEdgeEquation() : CaseForPipline("EdgeEquation test") {}
 
     virtual void Run() override
     {

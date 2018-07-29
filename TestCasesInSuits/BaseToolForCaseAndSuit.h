@@ -103,7 +103,15 @@ public:
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "The size of SimplePoint is not matched for this case.");
 
 protected:
+    /*!
+        \brief the environment pointer for configuration.
+    */
     CommonEnvironment * pEnvironment;
+
+    /*!
+        \brief the random number generator.
+    */
+    RandomTool::MTRandom mtr;
 
 public:
     CaseForPipline(const std::string& caseName) : Case(caseName) {}
@@ -163,6 +171,113 @@ public:
             RADIO_OFFSET        // radio offset
             );// end calling SphereRay()
     }// end BuildSphereRayTriangleMeshData()
+
+    
+    /*!
+        \brief clamp the channel to [0.0f, 1.0f]
+        \param ch the channel value to be clamped.
+    */
+    Types::F32 ClampChannel(Types::F32 ch)
+    {
+        if (ch <= 0.0f)
+        {
+            return 0.0f;
+        }
+        else if (ch >= 1.0f)
+        {
+            return 1.0f;
+        }
+        else
+        {
+            return ch;
+        }
+    }
+
+    /*!
+        \brief get random rgb color.
+    */
+    RGB GetRandomRGB()
+    {
+        return RGB(mtr.Random(), mtr.Random(), mtr.Random());
+    }
+
+    /*!
+        \brief get random vector3.
+        if you want to set the seed, try mtr.SetRandomSeed(...);
+    */
+    CommonClass::vector3 GetRandomVector3(bool allowZeroVector = true, const int MAX_INT = 200)
+    {
+        CommonClass::vector3 randVec;
+        do
+        {
+            randVec = CommonClass::vector3(
+                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
+                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1),
+                (mtr.Random() - 0.5f) * (mtr.Random(MAX_INT) + 1));
+
+            // if allowZeroVector is false, loop until a none zero vector
+        } while (!allowZeroVector && randVec.m_x == 0.0f && randVec.m_y == 0.0f && randVec.m_z == 0.0f);
+
+
+        return randVec;
+    }
+
+    /*!
+        \brief create a random float number between [-MAX_RADIUS, +MAX_RADIUS]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    Types::F32 RandomFloat(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        return (mtr.Random() - 0.5f) * 2.f * MAX_RADIUS;
+    }
+    
+    /*!
+        \brief create a float number between [-MAX_RADIUS, 0) ^ (0, +MAX_RADIUS]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    Types::F32 RandomFloatNotZero(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        float ret = 0.0f;
+        do 
+        {
+            ret = RandomFloat(MAX_RADIUS);
+        } while (ret == 0.0f);
+        return ret;
+    }
+
+    /*!
+        \brief create an array contain random float  [-200.0f, +200.0f]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    template<unsigned int COUNT>
+    std::array<Types::F32, COUNT> GetRandomFloatArray(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        std::array<Types::F32, COUNT> retArr;
+        for (auto& number : retArr)
+        {
+            number = RandomFloat(MAX_RADIUS);
+        }
+        return retArr;
+    }
+    
+    /*!
+        \brief create a float number between [-200.0f, 0) ^ (0, +200.0f]
+        \param MAX_RADIUS max absolute value of the float.
+    */
+    template<unsigned int COUNT>
+    std::array<Types::F32, COUNT> GetRandomFloatNotZeroArray(const Types::F32 MAX_RADIUS = 200.0f)
+    {
+        assert(MAX_RADIUS > 0.0f);
+        std::array<Types::F32, COUNT> retArr;
+        for (auto& number : retArr)
+        {
+            number = RandomFloatNotZero(MAX_RADIUS);
+        }
+        return retArr;
+    }
 };
 
 /*!
@@ -185,3 +300,4 @@ public:
     }
 
 };
+
