@@ -159,6 +159,7 @@
     <ClInclude Include="TestBasicTypesSuit.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CaseAndSuitForCommonClasses.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TestCasesInSuits.cpp" />
   </ItemGroup>
