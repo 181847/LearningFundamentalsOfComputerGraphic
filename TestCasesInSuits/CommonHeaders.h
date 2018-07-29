@@ -29,5 +29,6 @@
 #include "../CommonClasses/FixPointNumber.h"
 #include "../CommonClasses/EFloat.h"
 #include "../CommonClasses/Helpers.h"
+#include "../CommonClasses/EdgeEquation2D.h"
 
 #include "BaseToolForCaseAndSuit.h"
