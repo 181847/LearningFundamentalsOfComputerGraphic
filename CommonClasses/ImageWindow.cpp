@@ -115,25 +115,37 @@ void ImageWindow::BlockShow()
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
 
-    WNDCLASSEX wc = { 0 };
-    wc.cbClsExtra = 0;
-    wc.cbSize = sizeof(wc);
-    wc.cbWndExtra = 0;
-    wc.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);             // window background
-    wc.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW));         // cursor type
-    wc.hIcon = LoadIcon(NULL, MAKEINTRESOURCE(IDI_APPLICATION));       // cursor appearance
-    wc.hIconSm = NULL;
-    wc.hInstance = hInstance;
-    wc.lpfnWndProc = WndProc;                                          // processing message function
-    wc.lpszClassName = L"my_windowClass";
-    wc.lpszMenuName = NULL;                                            // have no menu
-    wc.style = CS_HREDRAW | CS_VREDRAW;                                // class style
+    static bool bRegistered = false;
 
-    if (!RegisterClassEx(&wc))    //register window class
+    if ( ! bRegistered)
     {
-        MessageBox(NULL, L"Register Class Failed!", NULL, MB_OK);
-        return;
+
+        WNDCLASSEX wc = { 0 };
+        wc.cbClsExtra = 0;
+        wc.cbSize = sizeof(wc);
+        wc.cbWndExtra = 0;
+        wc.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);             // window background
+        wc.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW));         // cursor type
+        wc.hIcon = LoadIcon(NULL, MAKEINTRESOURCE(IDI_APPLICATION));       // cursor appearance
+        wc.hIconSm = NULL;
+        wc.hInstance = hInstance;
+        wc.lpfnWndProc = WndProc;                                          // processing message function
+        wc.lpszClassName = L"my_windowClass";
+        wc.lpszMenuName = NULL;                                            // have no menu
+        wc.style = CS_HREDRAW | CS_VREDRAW;                                // class style
+
+        if (!RegisterClassEx(&wc))    //register window class
+        {
+            MessageBox(NULL, L"Register Class Failed!", NULL, MB_OK);
+            return;
+        }
+        else
+        {
+            bRegistered = true;
+        }
+
     }
+
 
     const int WIDTH = m_pImg->m_width, HEIGHT = m_pImg->m_height;
     RECT rect;
