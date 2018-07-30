@@ -113,6 +113,11 @@ protected:
     */
     RandomTool::MTRandom mtr;
 
+    /*!
+        \brief a common path for output, which will have a back slash at the end of the string.
+    */
+    const std::wstring OUTPUT_PATH = L"../OutputTestImage/";
+
 public:
     CaseForPipline(const std::string& caseName) : Case(caseName) {}
 
@@ -277,6 +282,18 @@ public:
             number = RandomFloatNotZero(MAX_RADIUS);
         }
         return retArr;
+    }
+
+    /*!
+        \brief show the image and block the thread until user close the window.
+        \param pImg the image to be shown
+        \param title the title of the window
+    */
+    void BlockShowImg(Image * pImg, const std::wstring title)
+    {
+        assert(pImg != nullptr);
+        ImageWindow imgWnd(pImg, title);
+        imgWnd.BlockShow();
     }
 };
 
