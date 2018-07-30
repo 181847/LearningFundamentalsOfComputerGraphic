@@ -20,13 +20,21 @@ class CaseFor##RestClassName : public CaseForPipline\
 public:\
     CaseFor##RestClassName() :CaseForPipline(CaseName) {}\
     virtual void Run() override;\
+protected:\
+    const std::wstring SUB_FOLDER = L"ForCommonClasses/";\
 }
 
 #define CASE_NAME(RestClassName) CaseFor##RestClassName
 
 DECLARE_CASE_FOR(BasicImage, "test Basic Image");
 
+DECLARE_CASE_FOR(RGBAlphaSetting, "set color by RGB and Alpha");
+
+DECLARE_CASE_FOR(FilmCaptureLight, "film capture light test");
+
 using SuitForCommonClasses =
 SuitForPipline<
-    
+    CASE_NAME(BasicImage),
+    CASE_NAME(RGBAlphaSetting),
+    CASE_NAME(FilmCaptureLight)
 >;
