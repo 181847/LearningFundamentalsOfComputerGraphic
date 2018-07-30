@@ -35,8 +35,14 @@ public:
 
 public:
     // membbers
-    int COMMON_PIXEL_WIDTH = 512;
-    int COMMON_PIXEL_HEIGHT = 512;
+    int COMMON_PIXEL_WIDTH      = 512;
+    int COMMON_PIXEL_HEIGHT     = 512;
+
+    // render boundary can be used in orthographic camera.
+    int COMMON_RENDER_LEFT      = -3.0f;
+    int COMMON_RENDER_RIGHT     = +3.0f;
+    int COMMON_RENDER_BOTTOM    = -3.0f;
+    int COMMON_RENDER_TOP       = +3.0f;
 
 public:
     CommonEnvironment()
