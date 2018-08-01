@@ -301,6 +301,113 @@ public:
         ImageWindow imgWnd(pImg, title);
         imgWnd.BlockShow();
     }
+
+    /*!
+        \brief create a quad poly.
+        \param p1-4 four point position
+        remember the clockwise is front face.
+        A-------->
+        |
+        |   front order
+        |
+        <--------
+    */
+    auto CreatQuadPoly(const vector3 &p1, const vector3 &p2, const vector3 &p3, const vector3 &p4)
+    {
+
+        auto poly = std::make_unique<Polygon>(
+            p1,
+            p2,
+            p3
+            );
+
+        poly->AddPoint(p4);
+
+        return poly;
+    }
+
+    /*!
+        \brief help to get point position in an array whose size is 8.
+    */
+    enum PointsOrder
+    {
+        TOP_LEFT_FRONT = 0,
+        TOP_LEFT_BACK,
+        TOP_RIGHT_BACK,
+        TOP_RIGHT_FRONT,
+        BOTTOM_LEFT_FRONT,
+        BOTTOM_LEFT_BACK,
+        BOTTOM_RIGHT_BACK,
+        BOTTOM_RIGHT_FRONT
+    };
+
+
+    /*!
+        \brief build six poly for a box
+        \param points eight points to consist a box,
+        \return 6 polygons which is visible from the outside of the box, polygons are in the order of {top, bottom, left, right, front, back}
+        first four points is on the top, ranged in clockwise
+        last four points is on the bottom, ranged ALSO in clockwise
+        --------->
+        A        |  \
+        |  top   |   \
+        |start   V    \
+        *<--------     V
+        \       ---------->
+         \      A         |
+          \     |   bottom|
+           \    |start    V
+            V   *<---------
+
+    */
+    std::array<std::unique_ptr<Polygon>, 6> CreatBox(const std::array<vector3, 8>& points)
+    {
+        std::array<std::unique_ptr<Polygon>, 6> boxPolys;
+
+        // top
+        boxPolys[0] = std::move(CreatQuadPoly(
+            points[PointsOrder::TOP_LEFT_FRONT],
+            points[PointsOrder::TOP_LEFT_BACK], 
+            points[PointsOrder::TOP_RIGHT_BACK], 
+            points[PointsOrder::TOP_RIGHT_FRONT]));
+
+        // bottom
+        boxPolys[1] = std::move(CreatQuadPoly(
+            points[PointsOrder::BOTTOM_LEFT_BACK],
+            points[PointsOrder::BOTTOM_LEFT_FRONT],
+            points[PointsOrder::BOTTOM_RIGHT_FRONT],
+            points[PointsOrder::BOTTOM_RIGHT_BACK]));
+
+        // left
+        boxPolys[2] = std::move(CreatQuadPoly(
+            points[PointsOrder::TOP_LEFT_BACK],
+            points[PointsOrder::TOP_LEFT_FRONT],
+            points[PointsOrder::BOTTOM_LEFT_FRONT],
+            points[PointsOrder::BOTTOM_LEFT_BACK]));
+
+        // right
+        boxPolys[3] = std::move(CreatQuadPoly(
+            points[PointsOrder::TOP_RIGHT_FRONT],
+            points[PointsOrder::TOP_RIGHT_BACK],
+            points[PointsOrder::BOTTOM_RIGHT_BACK],
+            points[PointsOrder::BOTTOM_RIGHT_FRONT]));
+
+        // front
+        boxPolys[4] = std::move(CreatQuadPoly(
+            points[PointsOrder::TOP_LEFT_FRONT],
+            points[PointsOrder::TOP_RIGHT_FRONT],
+            points[PointsOrder::BOTTOM_RIGHT_FRONT],
+            points[PointsOrder::BOTTOM_LEFT_FRONT]));
+
+        // back
+        boxPolys[5] = std::move(CreatQuadPoly(
+            points[PointsOrder::TOP_RIGHT_BACK],
+            points[PointsOrder::TOP_LEFT_BACK],
+            points[PointsOrder::BOTTOM_LEFT_BACK],
+            points[PointsOrder::BOTTOM_RIGHT_BACK]));
+
+        return boxPolys;
+    }
 };
 
 /*!
