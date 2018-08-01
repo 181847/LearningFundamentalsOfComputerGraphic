@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="BaseToolForCaseAndSuit.h" />
     <ClInclude Include="CaseAndSuitForCommonClasses.h" />
+    <ClInclude Include="CaseAndSuitForRasterisation.h" />
     <ClInclude Include="CaseAndSuitForRayRender.h" />
     <ClInclude Include="CommonHeaders.h" />
     <ClInclude Include="stdafx.h" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CaseAndSuitForCommonClasses.cpp" />
+    <ClCompile Include="CaseAndSuitForRasterisation.cpp" />
     <ClCompile Include="CaseAndSuitForRayRender.h.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TestCasesInSuits.cpp" />
