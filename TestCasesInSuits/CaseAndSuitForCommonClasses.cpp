@@ -1,6 +1,6 @@
 #include "CaseAndSuitForCommonClasses.h"
 
-void CASE_NAME(BasicImage)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(BasicImage)::Run()
 {
     const Types::U32 WIDTH(pEnvironment->COMMON_PIXEL_WIDTH), HEIGHT(pEnvironment->COMMON_PIXEL_HEIGHT);
     CommonClass::Image testImage(WIDTH, HEIGHT);
@@ -27,7 +27,7 @@ void CASE_NAME(BasicImage)::Run()
     imgWnd.BlockShow();
 }
 
-void CASE_NAME(RGBAlphaSetting)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(RGBAlphaSetting)::Run()
 {
     const Types::U32 WIDTH(512), HEIGHT(512);
     CommonClass::Image testImage(WIDTH, HEIGHT);
@@ -58,7 +58,7 @@ void CASE_NAME(RGBAlphaSetting)::Run()
     BlockShowImg(&testImage, L"set color by RGB and Alpha");
 }
 
-void CASE_NAME(FilmCaptureLight)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(FilmCaptureLight)::Run()
 {
     const Types::U32 WIDTH(512), HEIGHT(512);
 
@@ -84,7 +84,7 @@ void CASE_NAME(FilmCaptureLight)::Run()
     BlockShowImg(&tfilm, L"film capture light");
 }
 
-void CASE_NAME(CameraBasis)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(CameraBasis)::Run()
 {
     /*!
         \brief help to check the vector's length is almost 1 unit.
@@ -134,7 +134,7 @@ void CASE_NAME(CameraBasis)::Run()
     }
 }
 
-void CASE_NAME(CameraCaptureLight)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(CameraCaptureLight)::Run()
 {
     using namespace MathTool;
 
@@ -202,7 +202,7 @@ void CASE_NAME(CameraCaptureLight)::Run()
     BlockShowImg(orthoCamera.m_film.get(), L"orthographic camera capture light");
 }
 
-void CASE_NAME(RayConstruct)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(RayConstruct)::Run()
 {
     for (int i = 0; i < 20; ++i)
     {
@@ -212,7 +212,7 @@ void CASE_NAME(RayConstruct)::Run()
     }
 }
 
-void CASE_NAME(RayFromOrthoCamera)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(RayFromOrthoCamera)::Run()
 {
     using namespace MathTool;
 
@@ -242,7 +242,7 @@ void CASE_NAME(RayFromOrthoCamera)::Run()
 
 }
 
-void CASE_NAME(CameraPixelLoc)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(CameraPixelLoc)::Run()
 {
     vector3 origin(0.0f, 0.0f, 0.0f);
     vector3 target(1.0f, 0.0f, 0.0f);
@@ -297,7 +297,7 @@ void CASE_NAME(CameraPixelLoc)::Run()
     BlockShowImg(orthoCamera.m_film.get(), L"pixel location");
 }
 
-void CASE_NAME(OrthoCameraAndSphere)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(OrthoCameraAndSphere)::Run()
 {
     Sphere tsph(vector3(-1.0f, 2.0f, 2.0f), 0.9f);
 
@@ -358,7 +358,7 @@ void CASE_NAME(OrthoCameraAndSphere)::Run()
     BlockShowImg(orthoCamera.m_film.get(), L"sphere in ortho camera");
 }
 
-void CASE_NAME(ConstColors)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(ConstColors)::Run()
 {
     using namespace Types;
 
@@ -415,7 +415,7 @@ void CASE_NAME(ConstColors)::Run()
     BlockShowImg(&img, L"constant colors");
 }
 
-void CASE_NAME(PerspectiveCameraAndSphere)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(PerspectiveCameraAndSphere)::Run()
 {
     Sphere tsph(vector3(0.0f, 0.0f, 0.0f), 1.0f);
 
@@ -475,7 +475,7 @@ void CASE_NAME(PerspectiveCameraAndSphere)::Run()
     BlockShowImg(perspectCamera.m_film.get(), L"sphere in perspective camera");
 }
 
-void CASE_NAME(TriangleAndRay)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(TriangleAndRay)::Run()
 {
     Triangle tri(
         vector3(1.0f, 0.0f, 0.0f),
@@ -543,7 +543,7 @@ void CASE_NAME(TriangleAndRay)::Run()
     BlockShowImg(camera.m_film.get(), L"triangle and ray");
 }
 
-void CASE_NAME(SceneAndRay)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(SceneAndRay)::Run()
 {
     Scene testScene;
 
@@ -615,7 +615,7 @@ void CASE_NAME(SceneAndRay)::Run()
     BlockShowImg(camera.m_film.get(), L"scene and ray");
 }
 
-void CASE_NAME(PolygoneAndRay)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(PolygoneAndRay)::Run()
 {
     const Types::F32 borderLength = 3.0f;
 
@@ -682,7 +682,7 @@ void CASE_NAME(PolygoneAndRay)::Run()
     BlockShowImg(camera.m_film.get(), L"polygon and ray");
 }
 
-void CASE_NAME(PointLight)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
 {
     /*!
     `    \brief set scene and light.
@@ -823,7 +823,7 @@ void CASE_NAME(PointLight)::Run()
     BlockShowImg(camera.m_film.get(), L"there is a light");
 }
 
-void CASE_NAME(RayColorFunction)::Run()
+void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
 {
     /*!
     `    \brief set scene and light.
