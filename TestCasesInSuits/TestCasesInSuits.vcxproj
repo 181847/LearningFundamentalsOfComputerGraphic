@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClCompile Include="CaseAndSuitForCommonClasses.cpp" />
     <ClCompile Include="CaseAndSuitForRasterisation.cpp" />
+    <ClCompile Include="CaseAndSuitForRasterizeTriangle.cpp" />
     <ClCompile Include="CaseAndSuitForRayRender.h.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TestCasesInSuits.cpp" />

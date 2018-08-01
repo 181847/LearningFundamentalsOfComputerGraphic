@@ -59,6 +59,9 @@
     <ClCompile Include="CaseAndSuitForRasterisation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CaseAndSuitForRasterizeTriangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.md" />
