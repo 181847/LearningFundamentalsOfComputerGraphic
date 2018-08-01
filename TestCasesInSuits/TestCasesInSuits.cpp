@@ -3,6 +3,7 @@
 // include required suits here
 #include "TestBasicTypesSuit.h"
 #include "CaseAndSuitForCommonClasses.h"
+#include "CaseAndSuitForRayRender.h"
 
 #pragma comment(lib, "MyTools/MyTool.lib")
 #pragma comment(lib, "CommonClasses.lib")
@@ -93,14 +94,16 @@ public:
 int main()
 {
     SuitForPipline<RaySphereLineCase> firstSuit;
-
-    firstSuit.Start();
+    //firstSuit.Start();
 
     BasicTypesTestSuit_Runable bttsRunable;
-    bttsRunable.Start();
+    //bttsRunable.Start();
 
     SuitForCommonClasses suitForCommonClasses;
-    suitForCommonClasses.Start();
+    //suitForCommonClasses.Start();
+
+    SuitForRayRender suitForRayRender;
+    suitForRayRender.Start();
 
     getchar();
     return 0;
