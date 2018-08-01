@@ -12,6 +12,7 @@ class CASE_NAME_IN_RASTERISATION(RestClassName) : public CaseForPipline\
 public:\
     CASE_NAME_IN_RASTERISATION(RestClassName)() :CaseForPipline(CaseName) {}\
     virtual void Run() override;\
+    virtual std::wstring GetStoragePath() const override {return OUTPUT_PATH + SUB_FOLDER;}\
 protected:\
     const std::wstring SUB_FOLDER = L"Rasterisation/";\
 }
@@ -34,9 +35,9 @@ DECLARE_CASE_IN_RASTERISATION_FOR(VertexTransform, "vertex transformation");
 
 DECLARE_CASE_IN_RASTERISATION_FOR(OrthoTransform, "orthographic view transformation");
 
-DECLARE_CASE_IN_RASTERISATION_FOR(PerspectTransform, "orthographic view transformation");
+DECLARE_CASE_IN_RASTERISATION_FOR(PerspectTransform, "perspective view transformation");
 
-DECLARE_CASE_IN_RASTERISATION_FOR(LineClippingErrorAnalysis, "orthographic view transformation");
+DECLARE_CASE_IN_RASTERISATION_FOR(LineClippingErrorAnalysis, "line clipping analysis");
 
 using SuitForRasterisation = SuitForPipline<
     CASE_NAME_IN_RASTERISATION(WuXiaolinLines),
