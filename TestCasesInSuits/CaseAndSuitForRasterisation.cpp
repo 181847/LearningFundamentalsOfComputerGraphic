@@ -221,9 +221,7 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
         pipline.DrawInstance(indices, vertexBuffer.get());
     }
 
-    pipline.m_backBuffer->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"drawLines.png");
-
-    BlockShowImg(pipline.m_backBuffer.get(), L"draw lines in pipline");
+    SaveAndShowPiplineBackbuffer(pipline, L"drawLines");
 }
 
 void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
@@ -308,9 +306,7 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
         pipline.DrawInstance(indices, vertexBuffer.get());
     }
 
-    pipline.m_backBuffer->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"lineClippingTest.png");
-
-    BlockShowImg(pipline.m_backBuffer.get(), L"line clipping in pipline");
+    SaveAndShowPiplineBackbuffer(pipline, L"lineClippingTest");
 }
 
 void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
@@ -411,9 +407,7 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
         pipline.DrawInstance(indices, vertexBuffer.get());
     }
 
-    pipline.m_backBuffer->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"lineVertexShaderProcess06.png");
-
-    BlockShowImg(pipline.m_backBuffer.get(), L"vertex transformation");
+    SaveAndShowPiplineBackbuffer(pipline, L"lineVertexShaderProcess06");
 }
 
 void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
@@ -515,7 +509,7 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     pipline.m_backBuffer->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"orthographicViewTransformationAfter.png");
 #endif
 
-    BlockShowImg(pipline.m_backBuffer.get(), L"orthographic view transformation");
+    SaveAndShowPiplineBackbuffer(pipline, L"orthographicViewTransformation");
 }
 
 void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
@@ -617,9 +611,7 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
         pipline.DrawInstance(indices, vertexBuffer.get());
     }
 
-    pipline.m_backBuffer->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"perspectiveViewTransformation.png");
-
-    BlockShowImg(pipline.m_backBuffer.get(), L"perspective view transformation");
+    SaveAndShowPiplineBackbuffer(pipline, L"perspectiveViewTransformation");
 }
 
 void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
@@ -757,7 +749,6 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
     }
 
     std::wstring pictureIndex = L"final";
-    pipline.m_backBuffer->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"lineClippingErrAnalysis_fixed_" + pictureIndex + L".png");
 
-    BlockShowImg(pipline.m_backBuffer.get(), L"line clipping error analysis");
+    SaveAndShowPiplineBackbuffer(pipline, L"lineClippingErrAnalysis_fixed_" + pictureIndex);
 }

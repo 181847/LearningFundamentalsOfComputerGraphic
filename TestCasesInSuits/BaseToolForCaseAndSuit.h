@@ -295,7 +295,7 @@ public:
         \param pImg the image to be shown
         \param title the title of the window
     */
-    void BlockShowImg(Image * pImg, const std::wstring title)
+    void BlockShowImg(Image * pImg, const std::wstring title) const
     {
         assert(pImg != nullptr);
         ImageWindow imgWnd(pImg, title);
@@ -407,6 +407,25 @@ public:
             points[PointsOrder::BOTTOM_RIGHT_BACK]));
 
         return boxPolys;
+    }
+
+    /*!
+        \brief get the path for output files.
+    */
+    virtual std::wstring GetStoragePath() const
+    {
+        return OUTPUT_PATH;
+    }
+
+    /*!
+        \brief save the image to the sub folder with specific name, and show the image in a block thread with the title as same as the image.
+        \param pipline the pipline to show
+        \param nameOfImgAndWnd image name without .png and the window title at the same time
+    */
+    void SaveAndShowPiplineBackbuffer(const Pipline & pipline, const std::wstring& nameOfImgAndWindow) const
+    {
+        pipline.m_backBuffer->SaveTo(GetStoragePath() + nameOfImgAndWindow + L".png");
+        BlockShowImg(pipline.m_backBuffer.get(), nameOfImgAndWindow);
     }
 };
 
