@@ -154,6 +154,7 @@
     <ClInclude Include="BaseToolForCaseAndSuit.h" />
     <ClInclude Include="CaseAndSuitForCommonClasses.h" />
     <ClInclude Include="CaseAndSuitForRasterisation.h" />
+    <ClInclude Include="CaseAndSuitForRasterizeTriangle.h" />
     <ClInclude Include="CaseAndSuitForRayRender.h" />
     <ClInclude Include="CommonHeaders.h" />
     <ClInclude Include="stdafx.h" />
