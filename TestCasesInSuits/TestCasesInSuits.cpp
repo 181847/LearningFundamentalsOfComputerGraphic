@@ -4,6 +4,7 @@
 #include "TestBasicTypesSuit.h"
 #include "CaseAndSuitForCommonClasses.h"
 #include "CaseAndSuitForRayRender.h"
+#include "CaseAndSuitForRasterisation.h"
 
 #pragma comment(lib, "MyTools/MyTool.lib")
 #pragma comment(lib, "CommonClasses.lib")
@@ -17,7 +18,10 @@ int main()
     //suitForCommonClasses.Start();
 
     SuitForRayRender suitForRayRender;
-    suitForRayRender.Start();
+    //suitForRayRender.Start();
+
+    SuitForRasterisation suitForRasterisation;
+    suitForRasterisation.Start();
 
     getchar();
     return 0;
