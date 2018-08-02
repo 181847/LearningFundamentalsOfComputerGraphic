@@ -7,8 +7,8 @@ void CASE_NAME_IN_RASTERISATION(WuXiaolinLines)::Run()
         RGBA::WHITE);
 
     const Types::F32 
-        CENTER_X = defaultImg.m_width / 2.0f,
-        CENTER_Y = defaultImg.m_height / 2.0f;
+        CENTER_X = defaultImg.GetWidth() / 2.0f,
+        CENTER_Y = defaultImg.GetHeight() / 2.0f;
 
     {
         COUNT_DETAIL_TIME;
@@ -31,8 +31,8 @@ void CASE_NAME_IN_RASTERISATION(BresenhamLine)::Run()
         RGBA::WHITE);
 
     const Types::F32 
-        CENTER_X = defaultImg.m_width / 2.0f,
-        CENTER_Y = defaultImg.m_height / 2.0f;
+        CENTER_X = defaultImg.GetWidth() / 2.0f,
+        CENTER_Y = defaultImg.GetHeight() / 2.0f;
 
     {
         COUNT_DETAIL_TIME;
@@ -92,8 +92,8 @@ void CASE_NAME_IN_RASTERISATION(FlagBottomTriangle)::Run()
 {
     RasterizeImage defaultImg(pEnvironment->COMMON_PIXEL_WIDTH, pEnvironment->COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
-    const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
-        CENTER_Y = defaultImg.m_height / 2.0f;
+    const Types::F32 CENTER_X = defaultImg.GetWidth() / 2.0f,
+        CENTER_Y = defaultImg.GetHeight() / 2.0f;
 
     {
         COUNT_DETAIL_TIME;
@@ -121,8 +121,8 @@ void CASE_NAME_IN_RASTERISATION(GeneralTriangle)::Run()
 {
     RasterizeImage defaultImg(pEnvironment->COMMON_PIXEL_WIDTH, pEnvironment->COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
-    const Types::F32 CENTER_X = defaultImg.m_width / 2.0f,
-        CENTER_Y = defaultImg.m_height / 2.0f;
+    const Types::F32 CENTER_X = defaultImg.GetWidth() / 2.0f,
+        CENTER_Y = defaultImg.GetHeight() / 2.0f;
 
     {
         COUNT_DETAIL_TIME;
