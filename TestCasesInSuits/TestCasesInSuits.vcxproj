@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="BaseToolForCaseAndSuit.h" />
     <ClInclude Include="CaseAndSuitForCommonClasses.h" />
+    <ClInclude Include="CaseAndSuitForDepthBuffer.h" />
     <ClInclude Include="CaseAndSuitForRasterisation.h" />
     <ClInclude Include="CaseAndSuitForRasterizeTriangle.h" />
     <ClInclude Include="CaseAndSuitForRayRender.h" />

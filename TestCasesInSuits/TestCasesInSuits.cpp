@@ -6,6 +6,7 @@
 #include "CaseAndSuitForRayRender.h"
 #include "CaseAndSuitForRasterisation.h"
 #include "CaseAndSuitForRasterizeTriangle.h"
+#include "CaseAndSuitForDepthBuffer.h"
 
 #pragma comment(lib, "MyTools/MyTool.lib")
 #pragma comment(lib, "CommonClasses.lib")
@@ -21,7 +22,10 @@ int main()
         SuitForRasterizeTriangle
     > suitQueueRunner;
 
-    suitQueueRunner.StartBatch();
+    //suitQueueRunner.StartBatch();
+
+    SuitForDepthBuffer sfdb;
+    sfdb.Start();
 
     getchar();
     return 0;

@@ -42,6 +42,9 @@
     <ClInclude Include="CaseAndSuitForRasterizeTriangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CaseAndSuitForDepthBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
