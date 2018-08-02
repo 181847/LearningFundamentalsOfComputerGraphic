@@ -151,6 +151,7 @@
     <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="CoordinateFrame.h" />
     <ClInclude Include="DebugConfigs.h" />
+    <ClInclude Include="DepthBuffer.h" />
     <ClInclude Include="EdgeEquation2D.h" />
     <ClInclude Include="EFloat.h" />
     <ClInclude Include="F32Buffer.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="ColorTemplate.cpp" />
     <ClCompile Include="CoordinateFrame.cpp" />
     <ClCompile Include="DebugConfigs.cpp" />
+    <ClCompile Include="DepthBuffer.cpp" />
     <ClCompile Include="EdgeEquation2D.cpp" />
     <ClCompile Include="EFloat.cpp" />
     <ClCompile Include="F32Buffer.cpp" />

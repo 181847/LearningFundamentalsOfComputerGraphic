@@ -122,6 +122,9 @@
     <ClInclude Include="ImageWindow.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="DepthBuffer.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vector2.cpp">
@@ -224,6 +227,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Helpers.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="DepthBuffer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
