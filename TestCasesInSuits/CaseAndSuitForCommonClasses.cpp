@@ -228,10 +228,10 @@ void CASE_NAME_IN_COMMON_CLASSES(RayFromOrthoCamera)::Run()
         pEnvironment->COMMON_RENDER_BOTTOM, 
         pEnvironment->COMMON_RENDER_TOP));
 
-    for (unsigned int i = 0; i < orthoCamera.m_film->m_width; ++i)
+    for (unsigned int i = 0; i < orthoCamera.m_film->GetWidth(); ++i)
     {
 
-        for (unsigned int j = 0; j < orthoCamera.m_film->m_height; ++j)
+        for (unsigned int j = 0; j < orthoCamera.m_film->GetHeight(); ++j)
         {
             Ray ray = orthoCamera.GetRay(i, j);
 
@@ -320,9 +320,9 @@ void CASE_NAME_IN_COMMON_CLASSES(OrthoCameraAndSphere)::Run()
 
     HitRecord hitRec;
 
-    for (unsigned int i = 0; i < orthoCamera.m_film->m_width; ++i)
+    for (unsigned int i = 0; i < orthoCamera.m_film->GetWidth(); ++i)
     {
-        for (unsigned int j = 0; j < orthoCamera.m_film->m_height; ++j)
+        for (unsigned int j = 0; j < orthoCamera.m_film->GetHeight(); ++j)
         {
             Ray ray = orthoCamera.GetRay(i, j);
 
@@ -437,9 +437,9 @@ void CASE_NAME_IN_COMMON_CLASSES(PerspectiveCameraAndSphere)::Run()
 
     HitRecord hitRec;
 
-    for (unsigned int i = 0; i < perspectCamera.m_film->m_width; ++i)
+    for (unsigned int i = 0; i < perspectCamera.m_film->GetWidth(); ++i)
     {
-        for (unsigned int j = 0; j < perspectCamera.m_film->m_height; ++j)
+        for (unsigned int j = 0; j < perspectCamera.m_film->GetHeight(); ++j)
         {
             Ray ray = perspectCamera.GetRay(i, j);
 
@@ -501,9 +501,9 @@ void CASE_NAME_IN_COMMON_CLASSES(TriangleAndRay)::Run()
 
     HitRecord hitRec;
 
-    for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+    for (unsigned int i = 0; i < camera.m_film->GetWidth(); ++i)
     {
-        for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+        for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
             Ray ray = camera.GetRay(i, j);
 
@@ -588,9 +588,9 @@ void CASE_NAME_IN_COMMON_CLASSES(SceneAndRay)::Run()
 
     HitRecord hitRec;
 
-    for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+    for (unsigned int i = 0; i < camera.m_film->GetWidth(); ++i)
     {
-        for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+        for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
             Ray ray = camera.GetRay(i, j);
 
@@ -646,9 +646,9 @@ void CASE_NAME_IN_COMMON_CLASSES(PolygoneAndRay)::Run()
 
     HitRecord hitRec;
 
-    for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+    for (unsigned int i = 0; i < camera.m_film->GetWidth(); ++i)
     {
-        for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+        for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
             Ray ray = camera.GetRay(i, j);
 
@@ -771,15 +771,15 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
 
     HitRecord hitRec, shadowHitRec;
     Ray viewRay;
-    for (unsigned int i = 0; i < camera.m_film->m_width; ++i)
+    for (unsigned int i = 0; i < camera.m_film->GetWidth(); ++i)
     {
-        for (unsigned int j = 0; j < camera.m_film->m_height; ++j)
+        for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
             viewRay = camera.GetRay(i, j);
 
             if ((i % 10) == 0 && (j % 10) == 0)
             {
-                ShowProgress((j + i * camera.m_film->m_width) * 1.0f / (camera.m_film->m_width * camera.m_film->m_height));
+                ShowProgress((j + i * camera.m_film->GetWidth()) * 1.0f / (camera.m_film->GetWidth() * camera.m_film->GetHeight()));
             }
                 
             //BREAK_POINT_IF(i == 224 && j == 511 - 231);
@@ -917,7 +917,7 @@ void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
     HitRecord hitRec, shadowHitRec;
     Ray viewRay;
 
-    const int WIDTH = camera.m_film->m_width, HEIGHT = camera.m_film->m_height;
+    const int WIDTH = camera.m_film->GetWidth(), HEIGHT = camera.m_film->GetHeight();
     for (unsigned int i = 0; i < WIDTH; ++i)
     {
         for (unsigned int j = 0; j < HEIGHT; ++j)

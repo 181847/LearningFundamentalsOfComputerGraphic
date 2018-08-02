@@ -147,7 +147,7 @@ void ImageWindow::BlockShow()
     }
 
 
-    const int WIDTH = m_pImg->m_width, HEIGHT = m_pImg->m_height;
+    const int WIDTH = m_pImg->GetWidth(), HEIGHT = m_pImg->GetHeight();
     RECT rect;
     rect.left = 0;
     rect.right = WIDTH;     // desired window width
@@ -212,7 +212,7 @@ void ImageWindow::BlockShow()
 
 void ImageWindow::PaintToWindow()
 {
-    const int   WIDTH       = m_pImg->m_width, HEIGHT = m_pImg->m_height;
+    const int   WIDTH       = m_pImg->GetWidth(), HEIGHT = m_pImg->GetHeight();
     HDC         paintHdc    = GetDC(reinterpret_cast<HWND>(m_hWnd));
     const int   PIXEL_BYTES = 3;
 
@@ -246,7 +246,7 @@ void ImageWindow::PaintToWindow()
 
 void ImageWindow::FillInBMP(void * pBitMapMemory)
 {
-    const int WIDTH = m_pImg->m_width, HEIGHT = m_pImg->m_height;
+    const int WIDTH = m_pImg->GetWidth(), HEIGHT = m_pImg->GetHeight();
     BMPSetterAgent bmp(pBitMapMemory, WIDTH, HEIGHT);
 
     for (int y = 0; y < HEIGHT; ++y)

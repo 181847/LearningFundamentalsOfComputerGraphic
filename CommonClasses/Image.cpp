@@ -18,6 +18,13 @@ Image::Image(const Types::U32 width, const Types::U32 height, const RGBA& initCo
     }
 }
 
+Image::Image(Image && moveObj)
+{
+    this->m_height = moveObj.m_height;
+    this->m_width = moveObj.m_width;
+    this->m_canvas = std::move(moveObj.m_canvas);
+}
+
 Image::~Image()
 {
     // empty

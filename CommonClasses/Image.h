@@ -33,12 +33,11 @@ protected:
     */
     std::vector<Pixel> m_canvas;
 
-public:
     /*!
         \brief the width and height of the image
         they should only be set once in the constructor of the Image.
     */
-    const Types::U32 m_width, m_height;
+    Types::U32 m_width, m_height;
 
 public:
     /*!
@@ -48,6 +47,7 @@ public:
     */
     Image(const Types::U32 width, const Types::U32 height, const RGBA& initColor = RGBA::BLACK);
     Image(const Image&) = delete;
+    Image(Image&& moveObj);
     Image& operator=(const Image&) = delete;
     ~Image();
     
@@ -95,6 +95,10 @@ public:
         \param y row of the pixel, from bottom to top
     */
     const Pixel& GetRawPixel(const Types::U32 x, const Types::U32 y) const;
+
+    Types::U32 GetWidth() const { return m_width; }
+
+    Types::U32 GetHeight() const { return m_height; }
 
 protected:
     /*!

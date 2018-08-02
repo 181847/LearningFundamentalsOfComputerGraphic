@@ -216,8 +216,8 @@ void CASE_NAME_IN_RAY_RENDER(InsideBoxesAndSphere)::Run()
     /*!
         \brief help to trace the rendering progress.
     */
-    const unsigned int PIXEL_WIDTH = camera.m_film->m_width;
-    const unsigned int PIXEL_HEIGHT = camera.m_film->m_height;
+    const unsigned int PIXEL_WIDTH = camera.m_film->GetWidth();
+    const unsigned int PIXEL_HEIGHT = camera.m_film->GetHeight();
     const unsigned int NUM_ALL_PIXEL = PIXEL_WIDTH * PIXEL_HEIGHT;
 
     HitRecord hitRec, shadowHitRec;
