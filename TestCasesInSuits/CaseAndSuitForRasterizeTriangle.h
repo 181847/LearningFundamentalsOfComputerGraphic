@@ -25,9 +25,6 @@ DECLARE_CASE_IN_RASTER_TRI_FOR(MultipleCutTriangle, "multiple planes cut tirangl
 
 DECLARE_CASE_IN_RASTER_TRI_FOR(AbstractFrustrumCut, "abstract frustrum plane test");
 
-DECLARE_CASE_IN_RASTER_TRI_FOR(, "abstract frustrum plane test");
-
-
 using SuitForRasterizeTriangle = SuitForPipline<
     CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
     CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),

@@ -13,7 +13,7 @@
 
 int main()
 {
-    SuitQueueRunner<
+    TestSuit::SuitQueueRunner<
         BasicTypesTestSuit_Runable, 
         SuitForCommonClasses,
         SuitForRayRender,

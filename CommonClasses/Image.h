@@ -28,7 +28,7 @@ private:
     };
 
 protected:
-    /*£¡
+    /*!
         \brief 1D array (access data through 2D method) store pixels
     */
     std::vector<Pixel> m_canvas;
