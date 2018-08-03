@@ -28,6 +28,8 @@ Pipline::~Pipline()
 void Pipline::SetBackBuffer(std::unique_ptr<RasterizeImage> backBuffer)
 {
     m_backBuffer = std::move(backBuffer);
+    m_depthBuffer = std::make_unique<DepthBuffer>(m_backBuffer->GetWidth(), m_backBuffer->GetHeight());
+    m_depthBuffer->SetAll(0.0f);
 }
 
 void Pipline::SetPSO(std::shared_ptr<PiplineStateObject> pso)
@@ -204,15 +206,27 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     for (auto x = x0; x <= x1; ++x)
     {
         Interpolate2(pv1, pv2, pPSVInput, t, realVertexSizeBytes);
+
+        
+        Types::F32 rhw = pPSVInput->m_posH.m_w; // rhw = 1/z
+        RecoverPerspective(pPSVInput, realVertexSizeBytes);
         if (steep)
         {
             //m_backBuffer->SetPixel(y, x, RGB::BLACK);
-            m_backBuffer->SetPixel(y, x, pixelShader(pPSVInput));
+            if (rhw > m_depthBuffer->ValueAt(y, x))// new pixel is close to camera.
+            {
+                m_backBuffer->SetPixel(y, x, pixelShader(pPSVInput));
+                m_depthBuffer->Value(y, x) = rhw;
+            }
         }
         else
         {
             //m_backBuffer->SetPixel(x, y, RGB::BLACK);
-            m_backBuffer->SetPixel(x, y, pixelShader(pPSVInput));
+            if (rhw > m_depthBuffer->ValueAt(x, y))// new pixel is close to camera.
+            {
+                m_backBuffer->SetPixel(x, y, pixelShader(pPSVInput));
+                m_depthBuffer->Value(x, y) = rhw;
+            }
         }
 
         // update interpolation coefficient.
@@ -251,6 +265,7 @@ void Pipline::DrawTriangle(
     std::array<Types::U32, 2> minBoundU, maxBoundU; // xxxbound[0] is for x, xxxbound[1] is for y
     FindTriangleBoundary(pv1, pv2, pv3, &minBoundU, &maxBoundU);
 
+    Types::F32 rhw = 0.0f;
     for (unsigned int y = minBoundU[1]; y <= maxBoundU[1]; ++y)
     {
         for (unsigned int x = minBoundU[0]; x <= maxBoundU[0]; ++x)
@@ -268,8 +283,16 @@ void Pipline::DrawTriangle(
                 Interpolate3(   pv1,    pv2,    pv3,    vertexPtr,
                                 alpha,  beta,   gamma,  realVertexSizeBytes);
 
-                // now for simplification, draw all triangle in black color.
-                m_backBuffer->SetPixel(x, y, pixelShader(vertexPtr));
+                RecoverPerspective(vertexPtr, realVertexSizeBytes);
+
+                rhw = vertexPtr->m_posH.m_w;// rhw = 1/z where z is the world depth in camera space
+
+                if (rhw > m_depthBuffer->ValueAt(x, y))
+                {
+                    // now for simplification, draw all triangle in black color.
+                    m_backBuffer->SetPixel(x, y, pixelShader(vertexPtr));
+                    m_depthBuffer->Value(x, y) = rhw;// update depth value
+                }
             }
         }// end for x, columns
     }// end for y, raws
@@ -846,18 +869,27 @@ std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_pt
         // copy the memory of the vertex, ensure the data (except the location) is same.
         memcpy(pDestVertex, pSrcVertex, realVertexSizeBytes);
 
+        // perspective divided
+        const Types::F32 RECIPOCAL_W = 1.0f / pDestVertex->m_posH.m_w;
+
         if (pDestVertex->m_posH.m_w != 1.0f)
         {
-            // perspective divided
-            const Types::F32 RECIPOCAL_W = 1.0f / pDestVertex->m_posH.m_w;
             pDestVertex->m_posH.m_x *= RECIPOCAL_W;
             pDestVertex->m_posH.m_y *= RECIPOCAL_W;
             pDestVertex->m_posH.m_z *= RECIPOCAL_W;
             pDestVertex->m_posH.m_w = 1.0f;
+
         }
 
-        // transform
+        // transform to screen space
         pDestVertex->m_posH = viewportTransformMat * pDestVertex->m_posH;
+
+        // for perspective correction
+        pDestVertex->m_posH.m_w = RECIPOCAL_W;
+        for (unsigned int i = 0; i < ScreenSpaceVertexTemplate::NumRestFloat(realVertexSizeBytes); ++i)
+        {
+            pDestVertex->m_restDates[i] *= RECIPOCAL_W;
+        }
 
         // move to next data.
         pSrcFloat += realVertexSizeBytes;
@@ -892,6 +924,15 @@ std::unique_ptr<F32Buffer> Pipline::VertexShaderTransform(const F32Buffer * pVer
     }
 
     return vertexOutputStream;
+}
+
+void Pipline::RecoverPerspective(ScreenSpaceVertexTemplate * pVertex, const unsigned int realVertexSizeByptes)
+{
+    const Types::F32 w = 1.0f / pVertex->m_posH.m_w;
+    for (unsigned int i = 0; i < ScreenSpaceVertexTemplate::NumRestFloat(realVertexSizeByptes); ++i)
+    {
+        pVertex->m_restDates[i] *= w;
+    }
 }
 
 void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::unique_ptr<F32Buffer> vertices, const unsigned int psInputStride)

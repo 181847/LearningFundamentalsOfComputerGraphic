@@ -6,6 +6,7 @@
 #include "ScreenSpaceVertexTemplate.h"
 #include "F32Buffer.h"
 #include "HPlaneEquation.h"
+#include "DepthBuffer.h"
 
 namespace CommonClass
 {
@@ -24,6 +25,11 @@ protected:
         \brief store the pixels.
     */
     std::unique_ptr<RasterizeImage> m_backBuffer;
+
+    /*!
+        \brief depth buffer which will store 1/z
+    */
+    std::unique_ptr<DepthBuffer> m_depthBuffer;
     
 protected:
     /*!
@@ -251,6 +257,12 @@ private:
         const F32Buffer*                    pVertexStream, 
         const unsigned int                  vsInputStride, 
         const unsigned int                  vsOutputStride);
+
+    /*!
+        \brief here we assume the pVertex.m_posH.w store the 1/z where z is the world depth in the camera space.
+        and this function is going to recover the attributes(except m_posH) by being divided by (1/z).
+    */
+    void RecoverPerspective(ScreenSpaceVertexTemplate* pVertex, const unsigned int realVertexSizeByptes);
 };
 
 } // namespace CommonClass
