@@ -158,6 +158,7 @@
     <ClInclude Include="Film.h" />
     <ClInclude Include="DebugHelpers.h" />
     <ClInclude Include="FixPointNumber.h" />
+    <ClInclude Include="GeomentryBuilder.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="HitRecord.h" />
     <ClInclude Include="HPlaneEquation.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="F32Buffer.cpp" />
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="FixPointNumber.cpp" />
+    <ClCompile Include="GeomentryBuilder.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="HitRecord.cpp" />
     <ClCompile Include="HPlaneEquation.cpp" />
