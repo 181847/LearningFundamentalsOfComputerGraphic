@@ -69,6 +69,11 @@ Transform Transform::Translation(const Types::F32 x, const Types::F32 y, const T
         0.0f, 0.0f, 0.0f, 1.0f);
 }
 
+Transform Transform::Rotation(const Types::F32 yaw, const Types::F32 pitch, const Types::F32 roll)
+{
+    return RotationY(yaw) * RotationX(pitch) * RotationZ(roll);
+}
+
 Transform Transform::RotationX(const Types::F32 x)
 {
     float 
@@ -106,6 +111,20 @@ Transform Transform::RotationZ(const Types::F32 z)
         sinTheta,  cosTheta,  0.0f,     0.0f,
         0.0f,      0.0f,      1.0f,     0.0f,
         0.0f,      0.0f,      0.0f,     1.0f);
+}
+
+Transform Transform::Scale(const Types::F32 x, const Types::F32 y, const Types::F32 z)
+{
+    return Transform(
+        x,         0.0f,      0.0f,     0.0f,
+        0.0f,      y,         0.0f,     0.0f,
+        0.0f,      0.0f,      z,        0.0f,
+        0.0f,      0.0f,      0.0f,     1.0f);
+}
+
+Transform Transform::TRS(const vector3 & t, const vector3 & r, const vector3 & s)
+{
+    return Translation(t.m_x, t.m_y, t.m_z) * Rotation(r.m_y, r.m_x, r.m_z) * Scale(s.m_x, s.m_y, s.m_z);
 }
 
 Transform Transform::Viewport(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top)

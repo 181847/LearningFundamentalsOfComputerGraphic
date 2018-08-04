@@ -1,6 +1,7 @@
 #pragma once
 #include "CommonTypes.h"
 #include "hvector.h"
+#include "vector3.h"
 
 /*!
     \brief whether to use the special version opengl perspective matrix,
@@ -75,6 +76,14 @@ public:
         \param z movement in z direction
     */
     static Transform Translation(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f);
+    
+    /*!
+        \brief build rotation by three free degree,
+        we assume positive Z is the front direction,
+        positive Y is up direction,
+        combine order is (yaw <- pitch <- roll)
+    */
+    static Transform Rotation(const Types::F32 yaw, const Types::F32 pitch, const Types::F32 roll);
 
     /*!
         \brief construct a rotation matrix around axis x
@@ -93,6 +102,21 @@ public:
         \param z rotate radians
     */
     static Transform RotationZ(const Types::F32 z);
+
+    /*!
+        \brief get the matrix for scale
+    */
+    static Transform Scale(const Types::F32 x, const Types::F32 y, const Types::F32 z);
+
+    /*!
+        \brief build a transfom that combine translation, rotation and scaling.
+        \param t translation for x/y/z
+        \param r rotation x::pitch, y::yaw, z::roll ( yaw <- pitch <- roll )
+        the operator order is left combined, so the scaling is first apply to the vector/position,
+        then rotation( Z first, then X, then Y )
+        last is the translation.
+    */
+    static Transform TRS(const vector3& t, const vector3& r, const vector3& s);
 
     /*!
         \brief construct a viewport transformation with four window boundry, 
