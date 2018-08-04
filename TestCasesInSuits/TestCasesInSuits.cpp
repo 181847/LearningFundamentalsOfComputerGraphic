@@ -22,10 +22,7 @@ int main()
         SuitForRasterizeTriangle
     > suitQueueRunner;
 
-    //suitQueueRunner.StartBatch();
-
-    SuitForDepthBuffer sfdb;
-    sfdb.Start();
+    suitQueueRunner.StartBatch();
 
     getchar();
     return 0;
