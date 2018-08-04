@@ -30,7 +30,7 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
         vInScreen[i] = reinterpret_cast<ScreenSpaceVertexTemplate*>(&triv[i]);
     }
 
-    pipline->DrawTriangle(vInScreen[0], vInScreen[1], vInScreen[2], sizeof(hvector));
+    pipline->DrawTriangle(vInScreen[0], vInScreen[2], vInScreen[1], sizeof(hvector));
 
     std::wstring pictureIndex = L"001";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"screenSpaceTriangle_" + pictureIndex);
@@ -145,6 +145,9 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
 
     std::wstring pictureIndex = L"007";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"sphereTri_" + pictureIndex);
+
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), - 1 / NEAR);
+    BlockShowImg(&depthImg, L"the depth buffer of previous window");
 }
 
 void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
@@ -407,4 +410,95 @@ void CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut)::Run()
 
     std::wstring pictureIndex = L"001";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"frustumPlaneCut_" + pictureIndex);
+}
+
+void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
+{
+    using SimplePoint = CommonEnvironment::SimplePoint;
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
+
+    auto pipline = pEnvironment->GetCommonPipline();
+    auto pso = pipline->GetPSO();
+
+    // the pixel shader will not work
+    // due to the imcompletation of the triangle pipeline.
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
+
+        return RGBA(pPoint->m_rayIndex.m_x, pPoint->m_rayIndex.m_y, pPoint->m_rayIndex.m_z);
+    };
+
+    const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
+
+    // rotate the line a little.
+    Types::F32 pitch(3.14f * 3 / 4), yaw(3.14 / 4), roll(0 * 3.14 / 3);
+
+    // perspective transformation
+    Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+
+    Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
+
+    Transform mat = perspect * trs;
+
+    pso->m_vertexShader = [&mat, &trs, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+        const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
+        SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
+
+        hvector inViewPos = trs * pSrcH->m_position;
+
+        pDestH->m_position = perspect * inViewPos;
+        //pDestH->m_position = pSrcH->m_position;
+        pDestH->m_rayIndex = pSrcH->m_rayIndex;
+    };
+
+    std::vector<SimplePoint> points;
+    std::vector<unsigned int> indices;
+    unsigned int numIndices = 0;
+
+    std::vector<vector3> positions;
+    GeometryBuilder::BuildCube(1.0f, &positions, &indices);
+
+    points.clear();
+    int count = 0;
+    for (const auto& pos : positions)
+    {
+        SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
+        sp.m_rayIndex = hvector( (count >> 2) % 2, (count) % 2, (count >> 1) % 2);
+        points.push_back(sp);
+
+        ++count;
+    }
+
+    auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
+    memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
+
+    pso->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        pipline->DrawInstance(indices, vertexBuffer.get());
+    }
+
+    // change the trs matrix and draw same cube with different instance
+    trs = Transform::TRS(vector3(0.8f, -0.6f, -2.0f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(0.1f, 1.0f, 0.4f));
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        pipline->DrawInstance(indices, vertexBuffer.get());
+    }
+
+    // change the trs matrix and draw same cube with different instance
+    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2, roll + 3.14 / 8), vector3(1.2f, 2.0f, 1.4f));
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        pipline->DrawInstance(indices, vertexBuffer.get());
+    }
+
+    std::wstring pictureIndex = L"006";
+    SaveAndShowPiplineBackbuffer((*(pipline.get())), L"cube_" + pictureIndex);
+
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
+    BlockShowImg(&depthImg, L"the depth buffer of previous cube");
+    depthImg.SaveTo(this->GetStoragePath() + L"cube_" + pictureIndex + L"_depth.png");
 }
