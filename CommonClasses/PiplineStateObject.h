@@ -36,6 +36,16 @@ enum PrimitiveType
 };
 
 /*!
+    \brief the face to be culled.
+*/
+enum CullFace
+{
+    NONE = 0,
+    COUNTER_CLOCK_WISE,
+    CLOCK_WISE
+};
+
+/*!
     \brief a viewport struct to describe how 
     to project normalized device coordinate into pixel space.
     the viewport is defined by the pixel index starting from Zero.
@@ -64,6 +74,12 @@ public:
         \brief the primitive type to be drawn.
     */
     PrimitiveType m_primitiveType = PrimitiveType::UNKNOWN;
+
+    /*!
+        \brief indicate which fase to be culled,
+        default to be CounterClockWise.
+    */
+    CullFace m_cullFace = CLOCK_WISE;
 
     /*!
         \brief the vertex size of different of stage in the pipeline.
