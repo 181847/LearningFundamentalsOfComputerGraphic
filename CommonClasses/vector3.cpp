@@ -17,6 +17,12 @@ vector3::vector3(const Types::F32 & x, const Types::F32 & y, const Types::F32 & 
 }
 
 
+vector3::vector3(const Types::F32* pArr)
+    :m_x(pArr[0]), m_y(pArr[1]), m_z(pArr[2])
+{
+    // empty
+}
+
 vector3::~vector3()
 {
     // empty
