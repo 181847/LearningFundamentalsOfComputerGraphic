@@ -250,8 +250,22 @@ void Pipline::DrawTriangle(
     const ScreenSpaceVertexTemplate * pv3, 
     const unsigned int realVertexSizeBytes)
 {
-    // Notice: the edge equation will estimate the right side to be positive,
-    //     so the count-clockwise of the triangle is the front side.
+    // should we cull back face?
+    if (m_pso->m_cullFace != CullFace::NONE)
+    {
+        // cull face
+        vector3 edgeV2((pv2->m_posH - pv1->m_posH).m_arr);
+        vector3 edgeV3((pv3->m_posH - pv1->m_posH).m_arr);
+        edgeV2.m_z = edgeV3.m_z = 0;
+        vector3 directionV = crossProd(edgeV2, edgeV3);
+        if ((directionV.m_z > 0 && m_pso->m_cullFace == CullFace::COUNTER_CLOCK_WISE)
+            || (directionV.m_z < 0 && m_pso->m_cullFace == CullFace::CLOCK_WISE))
+        {
+            return;
+        }
+    }
+    
+
     EdgeEquation2D 
         f12(pv1->m_posH, pv2->m_posH), 
         f23(pv2->m_posH, pv3->m_posH),
@@ -289,7 +303,6 @@ void Pipline::DrawTriangle(
 
                 if (rhw > m_depthBuffer->ValueAt(x, y))
                 {
-                    // now for simplification, draw all triangle in black color.
                     m_backBuffer->SetPixel(x, y, pixelShader(vertexPtr));
                     m_depthBuffer->Value(x, y) = rhw;// update depth value
                 }
