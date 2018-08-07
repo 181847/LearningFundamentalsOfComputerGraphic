@@ -420,6 +420,8 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
     auto pipline = pEnvironment->GetCommonPipline();
     auto pso = pipline->GetPSO();
 
+    pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
+
     // the pixel shader will not work
     // due to the imcompletation of the triangle pipeline.
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
@@ -495,7 +497,7 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
         pipline->DrawInstance(indices, vertexBuffer.get());
     }
 
-    std::wstring pictureIndex = L"006";
+    std::wstring pictureIndex = L"008";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"cube_" + pictureIndex);
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
