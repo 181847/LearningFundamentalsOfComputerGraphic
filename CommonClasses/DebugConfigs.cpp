@@ -6,3 +6,5 @@
 bool DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS::Active = false;
 
 bool DEBUG_CLIENT_CONF_TRIANGL::Active = false;
+
+bool DEBUG_FILTER::Active = false;

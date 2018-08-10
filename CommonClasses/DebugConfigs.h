@@ -52,3 +52,14 @@ public:
         ENABLE_CLIENT = 1
     };
 };
+
+class DEBUG_FILTER
+{
+public:
+    static bool Active;
+
+    enum
+    {
+        ENABLE_CLIENT = 1
+    };
+};
