@@ -157,6 +157,7 @@
     <ClInclude Include="F32Buffer.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="DebugHelpers.h" />
+    <ClInclude Include="Filter.h" />
     <ClInclude Include="FixPointNumber.h" />
     <ClInclude Include="GeomentryBuilder.h" />
     <ClInclude Include="Helpers.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="EFloat.cpp" />
     <ClCompile Include="F32Buffer.cpp" />
     <ClCompile Include="Film.cpp" />
+    <ClCompile Include="Filter.cpp" />
     <ClCompile Include="FixPointNumber.cpp" />
     <ClCompile Include="GeomentryBuilder.cpp" />
     <ClCompile Include="Helpers.cpp" />
