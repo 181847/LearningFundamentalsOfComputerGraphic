@@ -32,5 +32,6 @@
 #include "../CommonClasses/EdgeEquation2D.h"
 #include "../CommonClasses/DepthBuffer.h"
 #include "../CommonClasses/GeomentryBuilder.h"
+#include "../CommonClasses/Filter.h"
 
 #include "BaseToolForCaseAndSuit.h"
