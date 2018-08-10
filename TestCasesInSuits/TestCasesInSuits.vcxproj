@@ -154,6 +154,7 @@
     <ClInclude Include="BaseToolForCaseAndSuit.h" />
     <ClInclude Include="CaseAndSuitForCommonClasses.h" />
     <ClInclude Include="CaseAndSuitForDepthBuffer.h" />
+    <ClInclude Include="CaseAndSuitForFilter.h" />
     <ClInclude Include="CaseAndSuitForRasterisation.h" />
     <ClInclude Include="CaseAndSuitForRasterizeTriangle.h" />
     <ClInclude Include="CaseAndSuitForRayRender.h" />
@@ -164,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CaseAndSuitForCommonClasses.cpp" />
+    <ClCompile Include="CaseAndSuitForFilter.cpp" />
     <ClCompile Include="CaseAndSuitForRasterisation.cpp" />
     <ClCompile Include="CaseAndSuitForRasterizeTriangle.cpp" />
     <ClCompile Include="CaseAndSuitForRayRender.h.cpp" />
