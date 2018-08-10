@@ -71,6 +71,7 @@ public:
         :pMem(reinterpret_cast<unsigned char * const>(pBMPMemory)), WIDTH(width), HEIGHT(height)
     {
         // empty body
+        PAD_SCANLINE = (4 - (WIDTH * PIXEL_SIZE) % 4) % 4;
     }
 
     ~BMPSetterAgent() {}
@@ -88,7 +89,7 @@ public:
         assert(0 <= x && x < WIDTH);
         assert(0 <= y && y < HEIGHT);
 
-        pMem[PIXEL_SIZE * (y * WIDTH + x) + _CH] = value;
+        pMem[PIXEL_SIZE * (y * WIDTH + x) + y * PAD_SCANLINE + _CH] = value;
 
         // pMem layout:
         // as the address of pMem increase
@@ -109,6 +110,7 @@ private:
     unsigned char * const   pMem;
     const int               WIDTH, HEIGHT;
     const int               PIXEL_SIZE = 3; // each pixel have three bytes [R, G, B]
+    unsigned int            PAD_SCANLINE;   // each scanline must be padded to the size of LONG(4 bytes)
 };
 
 void ImageWindow::BlockShow()

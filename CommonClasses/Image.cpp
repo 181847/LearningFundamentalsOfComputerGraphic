@@ -105,8 +105,8 @@ RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
     
     const Types::F32 floatRed  (returnedPixel.m_r * reciprocal8BitsOne),
                      floatGreen(returnedPixel.m_g * reciprocal8BitsOne),
-                     floatBlue (returnedPixel.m_g * reciprocal8BitsOne),
-                     floatAlpha(returnedPixel.m_g * reciprocal8BitsOne);
+                     floatBlue (returnedPixel.m_b * reciprocal8BitsOne),
+                     floatAlpha(returnedPixel.m_a * reciprocal8BitsOne);
 
     return RGBA(floatRed, floatGreen, floatBlue, floatAlpha);
 }
