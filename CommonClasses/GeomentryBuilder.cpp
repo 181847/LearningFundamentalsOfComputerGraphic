@@ -2,6 +2,10 @@
 #include <array>
 #include <assert.h>
 
+namespace CommonClass
+{
+
+
 void GeometryBuilder::BuildCube(const Types::F32 & oneSide, std::vector<CommonClass::vector3>* outVertices, std::vector<unsigned int>* outIndices)
 {
     using namespace CommonClass;
@@ -104,3 +108,156 @@ void GeometryBuilder::BuildCube(const Types::F32 & oneSide, std::vector<CommonCl
     outIndices->push_back(6);
 
 }
+
+MeshData GeometryBuilder::BuildCylinder(
+    const Types::F32& topRadius,
+    const Types::F32& bottomRadius,
+    const Types::F32& height,
+    const Types::U32& slice,
+    const Types::U32& stack,
+    const bool        needCap)
+{
+    using namespace Types;
+
+    MeshData retData;
+    retData.m_indices.clear();
+    retData.m_vertices.clear();
+
+
+    // push vetex
+    const F32 deltaRadius = (topRadius - bottomRadius) / stack; // radius diff between stacks
+    const F32 deltaRadio = 2.0f * Constant::PI_F / slice; // delta radio in one circle
+    const F32 deltaStack = height / stack;
+    const U32 numSideVertex = slice * (stack + 1);
+
+    F32 radius = bottomRadius;
+    F32 radio;
+    F32 x, z;
+    F32 y = 0.0f;
+    F32 usingRightHand = -1.0f;
+    for (U32 stackIndex = 0; stackIndex <= stack; ++stackIndex)
+    {
+
+        radio = 0.0f;
+        for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+        {
+            x = std::cosf(radio) * radius;
+            z = std::sinf(radio) * radius;
+
+            retData.m_vertices.push_back(vector3(x, y, usingRightHand * z));
+
+            radio += deltaRadio;
+        }
+
+        radius += deltaRadius;
+        y += deltaStack;
+    }// end for stackIndex
+
+    // push indices
+
+    // a ----b
+    // |    /|
+    // |   / |
+    // |  /  |
+    // | /   |
+    // |/    |
+    // c ----d
+    U32 a, b,
+        c, d;
+
+
+    for (U32 stackIndex = 0; stackIndex < stack; ++stackIndex)
+    {
+        for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+        {
+            if (sliceIndex == slice - 1)
+            {
+                a = (stackIndex + 1) * slice + sliceIndex;      b = a - sliceIndex;
+                c = stackIndex * slice + sliceIndex;            d = c - sliceIndex;
+            }
+            else
+            {
+                a = (stackIndex + 1) * slice + sliceIndex;      b = a + 1;
+                c = stackIndex * slice + sliceIndex;            d = c + 1;
+            }
+
+            // counter clockwise
+            retData.m_indices.push_back(a);
+            retData.m_indices.push_back(c);
+            retData.m_indices.push_back(b);
+            // counter clockwise
+            retData.m_indices.push_back(b);
+            retData.m_indices.push_back(c);
+            retData.m_indices.push_back(d);
+        }// end for slices
+    }// end for stacks
+
+    if (!needCap)
+    {
+        return retData;
+    }
+
+    U32 accumulateIndex = retData.m_vertices.size();
+    
+
+    // cap vertices
+    radio = 0.0f;
+    for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+    {
+        x = std::cosf(radio);
+        z = std::sinf(radio);
+
+        // top
+        retData.m_vertices.push_back(vector3(x * topRadius,     height, usingRightHand * z * topRadius));
+        // bottom
+        retData.m_vertices.push_back(vector3(x * bottomRadius,  0.0f,   usingRightHand * z * bottomRadius));
+        
+        radio += deltaRadio;
+    }// end for
+    const U32 topCenter = retData.m_vertices.size();
+    const U32 bottomCenter = topCenter + 1;
+    retData.m_vertices.push_back(vector3(0.0f, height, 0.0f));
+    retData.m_vertices.push_back(vector3(0.0f, 0.0f,   0.0f));
+
+    //   topCenter
+    //     /\                         
+    //    /  \                        
+    //   /    \                       
+    //  /      \                      
+    // a ------ b
+    //                             
+    //                             
+    //                             
+    // c ------- d                   
+    //  \       /                     
+    //   \     /                      
+    //    \   /                       
+    //     \ /                        
+    //    bottomCenter                        
+    
+    // cap indices
+    for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+    {
+        if (sliceIndex == slice - 1)
+        {
+            a = accumulateIndex + sliceIndex * 2 + 0;   b = a - sliceIndex * 2;
+            c = accumulateIndex + sliceIndex * 2 + 1;   d = c - sliceIndex * 2;
+        }
+        else
+        {
+            a = accumulateIndex + sliceIndex * 2 + 0;   b = a + 2;
+            c = accumulateIndex + sliceIndex * 2 + 1;   d = c + 2;
+        }
+
+        retData.m_indices.push_back(topCenter);
+        retData.m_indices.push_back(a);
+        retData.m_indices.push_back(b);
+        retData.m_indices.push_back(bottomCenter);
+        retData.m_indices.push_back(d);
+        retData.m_indices.push_back(c);
+    }
+
+    return retData;
+}
+
+}// namespace CommonClass
