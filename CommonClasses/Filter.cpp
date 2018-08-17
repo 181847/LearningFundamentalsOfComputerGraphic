@@ -19,7 +19,7 @@ Filter::~Filter()
 Image Filter::Convolve(const Image & img)
 {
     const Loc IMG_S = { static_cast<int>(img.GetWidth()), static_cast<int>(img.GetHeight()) };
-    const Loc CON_S = ConvolutionSize(IMG_S, { static_cast<int>(m_width), static_cast<int>(m_height) });
+    const Loc CON_S = ConvolutionSize(IMG_S);
 
     Image convolutionResult(CON_S.X, CON_S.Y, RGBA::BLACK);
 
