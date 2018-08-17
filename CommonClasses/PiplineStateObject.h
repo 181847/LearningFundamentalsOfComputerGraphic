@@ -77,7 +77,7 @@ public:
 
     /*!
         \brief indicate which fase to be culled,
-        default to be CounterClockWise.
+        default to be ClockWise.
     */
     CullFace m_cullFace = CLOCK_WISE;
 
