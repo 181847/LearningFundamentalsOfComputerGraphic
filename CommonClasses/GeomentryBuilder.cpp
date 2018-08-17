@@ -134,7 +134,6 @@ MeshData GeometryBuilder::BuildCylinder(
     F32 radio;
     F32 x, z;
     F32 y = 0.0f;
-    F32 usingRightHand = -1.0f;
     for (U32 stackIndex = 0; stackIndex <= stack; ++stackIndex)
     {
 
@@ -142,9 +141,9 @@ MeshData GeometryBuilder::BuildCylinder(
         for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
         {
             x = std::cosf(radio) * radius;
-            z = std::sinf(radio) * radius;
+            z = - std::sinf(radio) * radius;
 
-            retData.m_vertices.push_back(vector3(x, y, usingRightHand * z));
+            retData.m_vertices.push_back(vector3(x, y, z));
 
             radio += deltaRadio;
         }
@@ -205,12 +204,12 @@ MeshData GeometryBuilder::BuildCylinder(
     for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
     {
         x = std::cosf(radio);
-        z = std::sinf(radio);
+        z = - std::sinf(radio);
 
         // top
-        retData.m_vertices.push_back(vector3(x * topRadius,     height, usingRightHand * z * topRadius));
+        retData.m_vertices.push_back(vector3(x * topRadius,     height, z * topRadius));
         // bottom
-        retData.m_vertices.push_back(vector3(x * bottomRadius,  0.0f,   usingRightHand * z * bottomRadius));
+        retData.m_vertices.push_back(vector3(x * bottomRadius,  0.0f,   z * bottomRadius));
         
         radio += deltaRadio;
     }// end for
@@ -247,6 +246,146 @@ MeshData GeometryBuilder::BuildCylinder(
         {
             a = accumulateIndex + sliceIndex * 2 + 0;   b = a + 2;
             c = accumulateIndex + sliceIndex * 2 + 1;   d = c + 2;
+        }
+
+        retData.m_indices.push_back(topCenter);
+        retData.m_indices.push_back(a);
+        retData.m_indices.push_back(b);
+        retData.m_indices.push_back(bottomCenter);
+        retData.m_indices.push_back(d);
+        retData.m_indices.push_back(c);
+    }
+
+    return retData;
+}
+
+CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, const Types::F32& slice, const Types::F32& stack)
+{
+    using namespace Types;
+
+    MeshData retData;
+    retData.m_indices.clear();
+    retData.m_vertices.clear();
+
+    const F32 DELTA_SLICE_RADIO = Constant::PI_F * 2.0f / slice;
+    const F32 DELTA_STACK_RADIO = Constant::PI_F / stack;
+    const F32 usingRightHand = -1.0f;
+
+    F32 x, y, z;
+
+    // A  Y
+    // |
+    // |
+    // |             
+    // |             
+    // |------------------> X
+    // |\             
+    // | \            
+    // |--\  verticalRadio         
+    // |   \          
+    // |    \             
+    // |     \            
+    // |      \           
+    // |                 
+    // |   
+    F32 verticalRadio = DELTA_STACK_RADIO;
+    F32 horizontalRadio = 0.0f;
+    F32 horizontalRadius = 0.0f;
+    
+    for (U32 stackIndex = 0; stackIndex < stack - 1; ++stackIndex) // loop (stack - 1)
+    {
+        y = -std::cosf(verticalRadio) * radius; // height
+
+        horizontalRadio = 0.0f;
+        horizontalRadius = std::sinf(verticalRadio) * radius; // stack radius
+        for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+        {
+            x = std::cosf(horizontalRadio) * horizontalRadius;
+            z = - std::sinf(horizontalRadio) * horizontalRadius;
+
+            retData.m_vertices.push_back(vector3(x, y, z));
+
+            horizontalRadio += DELTA_SLICE_RADIO;
+        }
+
+        verticalRadio += DELTA_STACK_RADIO;
+    }// end for stackIndex
+
+    // extra two vertex
+    retData.m_vertices.push_back(vector3(0.0f, -radius, 0.0f)); // push bottom vertex
+    retData.m_vertices.push_back(vector3(0.0f, +radius, 0.0f)); // push top vertex
+
+     // push indices
+     // a ----b
+     // |    /|
+     // |   / |
+     // |  /  |
+     // | /   |
+     // |/    |
+     // c ----d
+    U32 a, b,
+        c, d;
+
+    // middle faces
+    for (U32 stackIndex = 0; stackIndex < stack - 2; ++stackIndex)
+    {
+        for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+        {
+            if (sliceIndex == slice - 1)
+            {
+                a = (stackIndex + 1) * slice + sliceIndex;      b = a - sliceIndex;
+                c = stackIndex * slice + sliceIndex;            d = c - sliceIndex;
+            }
+            else
+            {
+                a = (stackIndex + 1) * slice + sliceIndex;      b = a + 1;
+                c = stackIndex * slice + sliceIndex;            d = c + 1;
+            }
+
+            // counter clockwise
+            retData.m_indices.push_back(a);
+            retData.m_indices.push_back(c);
+            retData.m_indices.push_back(b);
+            // counter clockwise
+            retData.m_indices.push_back(b);
+            retData.m_indices.push_back(c);
+            retData.m_indices.push_back(d);
+        }// end for slices
+    }// end for stacks
+
+    // cap bottom and top
+    U32 accumulateIndex = retData.m_vertices.size() - 2; // substract top and bottom vertex
+    const U32 bottomCenter = accumulateIndex;
+    const U32 topCenter    = accumulateIndex + 1;
+
+    //   topCenter
+    //     /\                         
+    //    /  \                        
+    //   /    \                       
+    //  /      \                      
+    // a ------ b
+    //                             
+    //                             
+    //                             
+    // c ------- d                   
+    //  \       /                     
+    //   \     /                      
+    //    \   /                       
+    //     \ /                        
+    //    bottomCenter                        
+
+    // cap indices
+    for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+    {
+        if (sliceIndex == slice - 1)
+        {
+            a = accumulateIndex - slice + sliceIndex;   b = a - slice;
+            c = sliceIndex;                             d = 0;
+        }
+        else
+        {
+            a = accumulateIndex - slice + sliceIndex;   b = a + 1;
+            c = sliceIndex;                             d = c + 1;
         }
 
         retData.m_indices.push_back(topCenter);

@@ -40,6 +40,17 @@ public:
         const Types::U32& slice, 
         const Types::U32& stack,
         const bool        needCap);
+
+    /*!
+        \brief build a sphere 
+        \param radius of sphere
+        \param slice split vertically
+        \param stack split horizontally
+    */
+    static MeshData BuildSphere(
+        const Types::F32& radius,
+        const Types::F32& slice,
+        const Types::F32& stack);
 };
 
 }// namespace CommonClass
