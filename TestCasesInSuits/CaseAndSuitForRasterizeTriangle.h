@@ -29,6 +29,8 @@ DECLARE_CASE_IN_RASTER_TRI_FOR(CubeMesh, "render a cube mesh builded by triangle
 
 DECLARE_CASE_IN_RASTER_TRI_FOR(CylinderMesh, "render a cylinder mesh builded by triangles");
 
+DECLARE_CASE_IN_RASTER_TRI_FOR(SphereMesh, "render a sphere mesh builded by triangles");
+
 using SuitForRasterizeTriangle = SuitForPipline<
     //CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
     //CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),
@@ -36,6 +38,7 @@ using SuitForRasterizeTriangle = SuitForPipline<
     //CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle),
     //CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut),
     //CASE_NAME_IN_RASTER_TRI(CubeMesh),
-    CASE_NAME_IN_RASTER_TRI(CylinderMesh)
+    //CASE_NAME_IN_RASTER_TRI(CylinderMesh),
+    CASE_NAME_IN_RASTER_TRI(SphereMesh)
 >;
 
