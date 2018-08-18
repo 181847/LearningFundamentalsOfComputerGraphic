@@ -399,4 +399,112 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     return retData;
 }
 
+CommonClass::MeshData GeometryBuilder::BuildGeoSphere(const Types::F32& radius, const Types::U32 subdivide /*= 0*/)
+{
+    using namespace Types;
+    MeshData retData;
+
+    const F32 X = 0.525731f;
+    const F32 Z = 0.850651f;
+    
+    std::array<vector3, 12> pos = 
+    {
+        vector3(-X,   0.0f,  Z  ), vector3(X,   0.0f,  Z ),
+        vector3(-X,   0.0f, -Z  ), vector3(X,   0.0f, -Z ),
+        vector3(0.0f,  Z,    X  ), vector3(0.0f,  Z,  -X ),
+        vector3(0.0f, -Z,    X  ), vector3(0.0f, -Z,  -X ),
+        vector3( Z,    X,   0.0f), vector3(-Z,    X,  0.0f),
+        vector3( Z,   -X,   0.0f), vector3(-Z,   -X,  0.0f)
+    };// end array
+    std::array<U32, 60> indicesOfPos =
+    {
+        1,4,0,   4,9,0, 4,5,9,  8,5,4,  1,8,4,
+        1,10,8, 10,3,8, 8,3,5,  3,2,5,  3,7,2,
+        3,10,7, 10,6,7, 6,11,7, 6,0,11, 6,1,0,
+        10,1,6, 11,0,9, 2,11,9, 5,2,9,  11,2,7
+    };// end array
+
+    retData.m_vertices.assign(pos.begin(), pos.end());
+    retData.m_indices.assign(indicesOfPos.begin(), indicesOfPos.end());
+
+    for (U32 i = 0; i < subdivide; ++i)
+    {
+        Subdivide(retData);
+    }
+
+    // reproject all vertex into the sphere.
+    for (auto& vertex : retData.m_vertices)
+    {
+        vertex = Normalize(vertex) * radius;
+    }
+
+    return retData;
+}
+
+void GeometryBuilder::Subdivide(MeshData & target)
+{
+    using namespace Types;
+    
+    assert(target.m_indices.size() % 3 == 0 && "subdivision failed, incomplete triangle list");
+
+    std::vector<vector3>& Vertices = target.m_vertices;     // reference to all vertices
+    std::vector<U32> Indices = std::move(target.m_indices); // old indices
+    target.m_indices.clear();                               // ensure all old indices are cleared
+
+    const U32 NUM_ALL_TRIANGLE = Indices.size() / 3;
+    const U32 NUM_PREV_VERTEX = Vertices.size();
+    U32    I1,    I2,    I3;          // old vertex index
+    U32 newI1, newI2, newI3; // interpolation vertex index
+
+    for (U32 i = 0; i < NUM_ALL_TRIANGLE; ++i)
+    {
+        I1 = Indices[i * 3    ];
+        I2 = Indices[i * 3 + 1];
+        I3 = Indices[i * 3 + 2];
+
+        // new vertex
+        vector3 v1 = (Vertices[I2] + Vertices[I3]) * 0.5f;
+        vector3 v2 = (Vertices[I1] + Vertices[I3]) * 0.5f;
+        vector3 v3 = (Vertices[I1] + Vertices[I2]) * 0.5f;
+
+        // new corresponding index
+        newI1 = Vertices.size();
+        newI2 = newI1 + 1;
+        newI3 = newI1 + 2;
+
+        // append new vertex
+        Vertices.push_back(v1);
+        Vertices.push_back(v2);
+        Vertices.push_back(v3);
+
+                       
+        //         <I1>                         
+        //         /  \                          
+        //        /    \                         
+        // <newI3>------<newI2>                      
+        //      /\      /\                           
+        //     /  \    /  \                          
+        //    /    \  /    \                         
+        //  <I2>---<newI1>---<I3>
+
+        // those faces will have the same winding order as before.
+        // four triangles
+        target.m_indices.push_back(I1);
+        target.m_indices.push_back(newI3);
+        target.m_indices.push_back(newI2);
+
+        target.m_indices.push_back(I2);
+        target.m_indices.push_back(newI1);
+        target.m_indices.push_back(newI3);
+
+        target.m_indices.push_back(I3);
+        target.m_indices.push_back(newI2);
+        target.m_indices.push_back(newI1);
+
+        target.m_indices.push_back(newI1);
+        target.m_indices.push_back(newI2);
+        target.m_indices.push_back(newI3);
+    }
+}
+
 }// namespace CommonClass

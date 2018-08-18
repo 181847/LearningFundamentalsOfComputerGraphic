@@ -51,6 +51,19 @@ public:
         const Types::F32& radius,
         const Types::F32& slice,
         const Types::F32& stack);
+
+    /*!
+        \brief build a sphere by icosahedron
+        \param subdivide subdivision level of the sphere, 0 means no subdivision.
+    */
+    static MeshData BuildGeoSphere(const Types::F32& radius, const Types::U32 subdivide = 0);
+
+protected:
+    /*!
+        \brief subdivide the mesh data by interpolate vertex in each triangle, subdivides each triangle to four sub triangle.
+        only triangle list supported.
+    */
+    static void Subdivide(MeshData& target);
 };
 
 }// namespace CommonClass
