@@ -46,6 +46,15 @@ enum CullFace
 };
 
 /*!
+    \brief identity fill mode for triangle.
+*/
+enum FillMode
+{
+    SOLIDE = 0,
+    WIREFRAME
+};
+
+/*!
     \brief a viewport struct to describe how 
     to project normalized device coordinate into pixel space.
     the viewport is defined by the pixel index starting from Zero.
@@ -76,10 +85,15 @@ public:
     PrimitiveType m_primitiveType = PrimitiveType::UNKNOWN;
 
     /*!
-        \brief indicate which fase to be culled,
+        \brief indicate which face to be culled,
         default to be ClockWise.
     */
     CullFace m_cullFace = CLOCK_WISE;
+
+    /*!
+        \brief fill mode for triangle
+    */
+    FillMode m_fillMode = SOLIDE;
 
     /*!
         \brief the vertex size of different of stage in the pipeline.

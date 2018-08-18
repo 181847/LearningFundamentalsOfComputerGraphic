@@ -250,22 +250,6 @@ void Pipline::DrawTriangle(
     const ScreenSpaceVertexTemplate * pv3, 
     const unsigned int realVertexSizeBytes)
 {
-    // should we cull back face?
-    if (m_pso->m_cullFace != CullFace::NONE)
-    {
-        // cull face
-        vector3 edgeV2((pv2->m_posH - pv1->m_posH).m_arr);
-        vector3 edgeV3((pv3->m_posH - pv1->m_posH).m_arr);
-        edgeV2.m_z = edgeV3.m_z = 0;
-        vector3 directionV = crossProd(edgeV2, edgeV3);
-        if ((directionV.m_z > 0 && m_pso->m_cullFace == CullFace::COUNTER_CLOCK_WISE)
-            || (directionV.m_z < 0 && m_pso->m_cullFace == CullFace::CLOCK_WISE))
-        {
-            return;
-        }
-    }
-    
-
     EdgeEquation2D 
         f12(pv1->m_posH, pv2->m_posH), 
         f23(pv2->m_posH, pv3->m_posH),
@@ -948,6 +932,25 @@ void Pipline::RecoverPerspective(ScreenSpaceVertexTemplate * pVertex, const unsi
     }
 }
 
+bool Pipline::IsCulled(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVertexTemplate* pv2, const ScreenSpaceVertexTemplate* pv3)
+{
+    // should we cull back face?
+    if (m_pso->m_cullFace != CullFace::NONE)
+    {
+        // cull face
+        vector3 edgeV2((pv2->m_posH - pv1->m_posH).m_arr);
+        vector3 edgeV3((pv3->m_posH - pv1->m_posH).m_arr);
+        edgeV2.m_z = edgeV3.m_z = 0;
+        vector3 directionV = crossProd(edgeV2, edgeV3);
+        if ((directionV.m_z > 0 && m_pso->m_cullFace == CullFace::COUNTER_CLOCK_WISE)
+            || (directionV.m_z < 0 && m_pso->m_cullFace == CullFace::CLOCK_WISE))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::unique_ptr<F32Buffer> vertices, const unsigned int psInputStride)
 {
     const size_t numIndex = indices.size();
@@ -962,8 +965,24 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
         pv1 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i],     psInputStride);
         pv2 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 1], psInputStride);
         pv3 = GetVertexPtrAt<ScreenSpaceVertexTemplate>(pVertexAddress, indices[i + 2], psInputStride);
-
-        DrawTriangle(pv1, pv2, pv3, psInputStride);
+        
+        if (IsCulled(pv1, pv2, pv3))
+        {
+            continue;
+        }
+        else
+        {
+            if (m_pso->m_fillMode == FillMode::SOLIDE)
+            {
+                DrawTriangle(pv1, pv2, pv3, psInputStride);
+            }
+            else // is wireframe mode, just draw lines.
+            {
+                DrawBresenhamLine(pv1, pv2, psInputStride);
+                DrawBresenhamLine(pv1, pv3, psInputStride);
+                DrawBresenhamLine(pv2, pv3, psInputStride);
+            }
+        }
     }
 }
 

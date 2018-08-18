@@ -263,6 +263,15 @@ private:
         and this function is going to recover the attributes(except m_posH) by being divided by (1/z).
     */
     void RecoverPerspective(ScreenSpaceVertexTemplate* pVertex, const unsigned int realVertexSizeByptes);
+
+    /*!
+        \brief figure should this triangle be culled or not.
+        \param pv1-3 three vertex consist a triangle
+    */
+    bool IsCulled(
+        const ScreenSpaceVertexTemplate* pv1,
+        const ScreenSpaceVertexTemplate* pv2,
+        const ScreenSpaceVertexTemplate* pv3);
 };
 
 } // namespace CommonClass
