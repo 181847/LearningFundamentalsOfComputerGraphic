@@ -36,7 +36,7 @@ Types::F32 rfpart(const Types::F32 x)
     \param t interpolation parameter
     t * src + (1 - t) * dest.
 */
-RGB Interpolate(const RGB& src, const RGB& dest, const Types::F32 t)
+CommonClass::RGB Interpolate(const CommonClass::RGB& src, const CommonClass::RGB& dest, const Types::F32 t)
 {
     return t * src + (1.0f - t) * dest;
 }
@@ -127,7 +127,7 @@ void RasterizeImage::SetScissor(const ScissorRect & rect)
 void RasterizeImage::DrawLine(
     const Types::F32 x0, const Types::F32 y0, 
     const Types::F32 x1, const Types::F32 y1, 
-    const RGB & color)
+    const CommonClass::RGB & color)
 {
     Types::F32 p1 = x0 - x1;
     Types::F32 p2 = -p1;
@@ -208,7 +208,7 @@ void RasterizeImage::DrawLine(
     );
 }
 
-void RasterizeImage::DrawBresenhamLine(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB & color)
+void RasterizeImage::DrawBresenhamLine(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const CommonClass::RGB & color)
 {
     if (IsOutOfRange(x0, y0) || IsOutOfRange(x1, y1))
     {
@@ -324,7 +324,7 @@ void RasterizeImage::DrawBresenhamLine_inOneCall(Types::I32 x0, Types::I32 y0, T
     
 }
 
-void RasterizeImage::DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, const RGB& foreColor, const RGB& backgroundColor)
+void RasterizeImage::DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, const CommonClass::RGB& foreColor, const CommonClass::RGB& backgroundColor)
 {
     bool steep = std::abs(y1 - y0) > abs(x1 - x0);
 
@@ -408,7 +408,7 @@ void RasterizeImage::DrawWuXiaolinLine(Types::F32 x0, Types::F32 y0, Types::F32 
     }
 }
 
-void RasterizeImage::DrawTriangle(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB & color)
+void RasterizeImage::DrawTriangle(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const CommonClass::RGB & color)
 {
     if (y0 < y1)
     {
@@ -447,7 +447,7 @@ void RasterizeImage::DrawTriangle(Types::F32 x0, Types::F32 y0, Types::F32 x1, T
     }
 }
 
-void RasterizeImage::DrawTri_flatBottom(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB & color)
+void RasterizeImage::DrawTri_flatBottom(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const CommonClass::RGB & color)
 {
     assert(MathTool::almost_equal(y1, y2, FLOAT_CMP_ULP));
     if (x1 > x2)
@@ -461,15 +461,15 @@ void RasterizeImage::DrawTri_flatBottom(Types::F32 x0, Types::F32 y0, Types::F32
     Types::F32 xLeft  = x0;
     Types::F32 xRight = x0;
 
-    for (int y = y0; y >= y1; --y)
+    for (int y = static_cast<int>(y0); y >= y1; --y)
     {
-        DrawFlatLine(xLeft, xRight, y, color);
+        DrawFlatLine(static_cast<Types::U32>(xLeft), static_cast<Types::U32>(xRight), y, color);
         xLeft  -= dxLeft;
         xRight -= dxRight;
     }
 }
 
-void RasterizeImage::DrawTri_flatTop(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const RGB & color)
+void RasterizeImage::DrawTri_flatTop(Types::F32 x0, Types::F32 y0, Types::F32 x1, Types::F32 y1, Types::F32 x2, Types::F32 y2, const CommonClass::RGB & color)
 {
     assert(MathTool::almost_equal(y1, y2, FLOAT_CMP_ULP));
     if (x1 > x2)
@@ -483,15 +483,15 @@ void RasterizeImage::DrawTri_flatTop(Types::F32 x0, Types::F32 y0, Types::F32 x1
     Types::F32 xLeft = x0;
     Types::F32 xRight = x0;
 
-    for (int y = y0; y <= y1; ++y)
+    for (int y = static_cast<int>(y0); y <= y1; ++y)
     {
-        DrawFlatLine(xLeft, xRight, y, color);
+        DrawFlatLine(static_cast<Types::U32>(xLeft), static_cast<Types::U32>(xRight), y, color);
         xLeft += dxLeft;
         xRight += dxRight;
     }
 }
 
-void RasterizeImage::DrawFlatLine(Types::U32 xLeft, Types::U32 xRight, Types::U32 y, const RGB & color)
+void RasterizeImage::DrawFlatLine(Types::U32 xLeft, Types::U32 xRight, Types::U32 y, const CommonClass::RGB & color)
 {
     for (Types::U32 x = xLeft; x <= xRight; ++x)
     {
@@ -509,7 +509,7 @@ bool RasterizeImage::IsOutOfRange(const Types::I32 x, const Types::I32 y)
     return false;
 }
 
-void RasterizeImage::plotLineLow(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB & color)
+void RasterizeImage::plotLineLow(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const CommonClass::RGB & color)
 {
     Types::I32 dx = x1 - x0;
     Types::I32 twoDy = 2 * (y1 - y0);
@@ -537,7 +537,7 @@ void RasterizeImage::plotLineLow(const Types::I32 x0, const Types::I32 y0, const
     }
 }
 
-void RasterizeImage::plotLineHeight(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const RGB & color)
+void RasterizeImage::plotLineHeight(const Types::I32 x0, const Types::I32 y0, const Types::I32 x1, const Types::I32 y1, const CommonClass::RGB & color)
 {
     Types::I32 dy = y1 - y0;
     Types::I32 twoDx = 2 * (x1 - x0);

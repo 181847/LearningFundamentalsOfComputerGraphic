@@ -74,7 +74,7 @@ public:
     void DrawLine(
         const Types::F32 x0, const Types::F32 y0, 
         const Types::F32 x1, const Types::F32 y1, 
-        const RGB& color = RGB::BLACK);
+        const CommonClass::RGB& color = CommonClass::RGB::BLACK);
 
     /*!
         \brief draw a line in the image.

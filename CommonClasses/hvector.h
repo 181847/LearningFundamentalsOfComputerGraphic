@@ -26,7 +26,7 @@ public:
     /*!
         \brief construct a homogeneous vector, default to be (0, 0, 0, 1)
     */
-    hvector(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f, const Types::F32 w = 1.0f);
+    explicit hvector(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f, const Types::F32 w = 1.0f);
     hvector& operator = (const hvector& v);
     ~hvector();
 };

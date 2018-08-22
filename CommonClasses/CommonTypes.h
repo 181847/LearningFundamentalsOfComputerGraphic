@@ -26,6 +26,7 @@ const float  PI_F = 3.14159265358979f;
 */
 const Types::F32 EPSILON_F32 = 1e-20f;
 
+#undef max
 /*!
     \brief positive max float number.
 */

@@ -52,11 +52,18 @@ public:
     ~Image();
     
     /*!
-        \brief save the image to the file
+        \brief save the image to the file unicode version
         \param filePath the file path to save the image
         this function will overwrite the file with same name.
     */
     void SaveTo(const std::wstring& filePath) const;
+    
+    /*!
+        \brief save the image to the file ascii version
+        \param filePath the file path to save the image
+        this function will overwrite the file with same name.
+    */
+    void SaveTo(const std::string& filePath) const;
 
     /*!
         \brief set one pixel with RGBA
@@ -99,6 +106,11 @@ public:
     Types::U32 GetWidth() const { return m_width; }
 
     Types::U32 GetHeight() const { return m_height; }
+    
+    /*!
+        \brief return the pixel data address of current image
+    */
+    unsigned char * GetRawData();
 
 protected:
     /*!

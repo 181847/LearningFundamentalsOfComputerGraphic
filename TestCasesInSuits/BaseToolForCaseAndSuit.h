@@ -4,6 +4,7 @@
 */
 
 #include "CommonHeaders.h"
+#undef RGB
 
 using namespace CommonClass;
 
@@ -39,10 +40,10 @@ public:
     int COMMON_PIXEL_HEIGHT     = 512;
 
     // render boundary can be used in orthographic camera.
-    int COMMON_RENDER_LEFT      = -3.0f;
-    int COMMON_RENDER_RIGHT     = +3.0f;
-    int COMMON_RENDER_BOTTOM    = -3.0f;
-    int COMMON_RENDER_TOP       = +3.0f;
+    float COMMON_RENDER_LEFT      = -3.0f;
+    float COMMON_RENDER_RIGHT     = +3.0f;
+    float COMMON_RENDER_BOTTOM    = -3.0f;
+    float COMMON_RENDER_TOP       = +3.0f;
 
 public:
     CommonEnvironment()
@@ -70,10 +71,10 @@ public:
     Viewport GetCommonViewport()
     {
         Viewport viewport;
-        viewport.left = 0;
-        viewport.right = COMMON_PIXEL_WIDTH - 1;
-        viewport.bottom = 0;
-        viewport.top = COMMON_PIXEL_HEIGHT - 1;
+        viewport.left = 0.0f;
+        viewport.right = static_cast<Types::F32>(COMMON_PIXEL_WIDTH - 1);
+        viewport.bottom = 0.0f;
+        viewport.top = static_cast<Types::F32>(COMMON_PIXEL_HEIGHT - 1);
         return viewport;
     }
 
@@ -147,8 +148,8 @@ public:
         const float CENTER_X = 0.0f;
         const float CENTER_Y = 0.0f;
         const float SEGMENT_LENGTH = 0.3f;
-        const float START_RADIUS = 0.3;
-        const float NUM_ROUNDS = 12;
+        const float START_RADIUS = 0.3f;
+        const Types::U32 NUM_ROUNDS = 12;
         const float RADIO_OFFSET = 0.0f; // Add this offset to every angle inside the sphereRay generating process.
 
                                          // create line segments in sphere ray.
@@ -160,17 +161,17 @@ public:
             //{
             // add start vertex and its index
             SimplePoint start(hvector(x0, y0, 0.0f));
-            start.m_rayIndex.m_x = roundIndex;
-            start.m_rayIndex.m_y = lineIndex;
-            start.m_rayIndex.m_z = 0;
+            start.m_rayIndex.m_x = static_cast<Types::F32>(roundIndex);
+            start.m_rayIndex.m_y = static_cast<Types::F32>(lineIndex);
+            start.m_rayIndex.m_z = 0.0f;
             outVertexData.push_back(start);
             outIndices.push_back(numIndices++);
 
             // add end vertex and its index
             SimplePoint end(hvector(x1, y1, 0.0f));
-            end.m_rayIndex.m_x = roundIndex;
-            end.m_rayIndex.m_y = lineIndex;
-            end.m_rayIndex.m_z = 1;
+            end.m_rayIndex.m_x = static_cast<Types::F32>(roundIndex);
+            end.m_rayIndex.m_y = static_cast<Types::F32>(lineIndex);
+            end.m_rayIndex.m_z = 1.0f;
             outVertexData.push_back(end);
             outIndices.push_back(numIndices++);
             //}
@@ -207,9 +208,9 @@ public:
     /*!
         \brief get random rgb color.
     */
-    RGB GetRandomRGB()
+    CommonClass::RGB GetRandomRGB()
     {
-        return RGB(mtr.Random(), mtr.Random(), mtr.Random());
+        return CommonClass::RGB(mtr.Random(), mtr.Random(), mtr.Random());
     }
 
     /*!
@@ -315,7 +316,7 @@ public:
     auto CreatQuadPoly(const vector3 &p1, const vector3 &p2, const vector3 &p3, const vector3 &p4)
     {
 
-        auto poly = std::make_unique<Polygon>(
+        auto poly = std::make_unique<CommonClass::Polygon>(
             p1,
             p2,
             p3
@@ -360,9 +361,9 @@ public:
             V   *<---------
 
     */
-    std::array<std::unique_ptr<Polygon>, 6> CreatBox(const std::array<vector3, 8>& points)
+    std::array<std::unique_ptr<CommonClass::Polygon>, 6> CreatBox(const std::array<vector3, 8>& points)
     {
-        std::array<std::unique_ptr<Polygon>, 6> boxPolys;
+        std::array<std::unique_ptr<CommonClass::Polygon>, 6> boxPolys;
 
         // top
         boxPolys[0] = std::move(CreatQuadPoly(

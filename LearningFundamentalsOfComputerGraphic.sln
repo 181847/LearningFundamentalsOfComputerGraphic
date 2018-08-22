@@ -12,6 +12,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestCasesInSuits", "TestCas
 		{0ECCF441-CB05-494B-B6E4-4E19E447CC47} = {0ECCF441-CB05-494B-B6E4-4E19E447CC47}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FastCommandPrompt", "FastCommandPrompt\FastCommandPrompt.vcxproj", "{845E5DF7-A883-4C12-B2DE-CB407A8C0911}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0ECCF441-CB05-494B-B6E4-4E19E447CC47} = {0ECCF441-CB05-494B-B6E4-4E19E447CC47}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -36,12 +41,21 @@ Global
 		{DFB04CF2-3194-4764-8FDC-B26816EA98B2}.Release|x64.Build.0 = Release|x64
 		{DFB04CF2-3194-4764-8FDC-B26816EA98B2}.Release|x86.ActiveCfg = Release|Win32
 		{DFB04CF2-3194-4764-8FDC-B26816EA98B2}.Release|x86.Build.0 = Release|Win32
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Debug|x64.ActiveCfg = Debug|x64
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Debug|x64.Build.0 = Debug|x64
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Debug|x86.ActiveCfg = Debug|Win32
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Debug|x86.Build.0 = Debug|Win32
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Release|x64.ActiveCfg = Release|x64
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Release|x64.Build.0 = Release|x64
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Release|x86.ActiveCfg = Release|Win32
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DFB04CF2-3194-4764-8FDC-B26816EA98B2} = {1040B2C0-7328-42EF-BF70-47E21F51EB5F}
+		{845E5DF7-A883-4C12-B2DE-CB407A8C0911} = {1040B2C0-7328-42EF-BF70-47E21F51EB5F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7E04A65A-EEE1-401C-8B61-84D625835EAD}

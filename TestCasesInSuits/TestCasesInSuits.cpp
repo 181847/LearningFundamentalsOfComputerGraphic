@@ -8,6 +8,7 @@
 #include "CaseAndSuitForRasterizeTriangle.h"
 #include "CaseAndSuitForDepthBuffer.h"
 #include "CaseAndSuitForFilter.h"
+#include "CaseAndSuitForStbImage.h"
 
 #pragma comment(lib, "MyTools/MyTool.lib")
 #pragma comment(lib, "CommonClasses.lib")
@@ -15,12 +16,13 @@
 int main()
 {
     TestSuit::SuitQueueRunner<
-        //BasicTypesTestSuit_Runable, 
-        //SuitForCommonClasses,
-        //SuitForRayRender,
-        //SuitForRasterisation, 
-        SuitForRasterizeTriangle
-        //SuitForFilter
+        BasicTypesTestSuit_Runable, 
+        SuitForCommonClasses,
+        SuitForRayRender,
+        SuitForRasterisation, 
+        SuitForRasterizeTriangle,
+        SuitForFilter,
+        SuitForStbImage
     > suitQueueRunner;
 
     suitQueueRunner.StartBatch();

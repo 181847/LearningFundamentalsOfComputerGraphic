@@ -595,7 +595,7 @@ public:
         {
             COUNT_DETAIL_TIME;
 
-            auto comfArr = GetRandomFloatArray<9>(MAX_RAND_INT);
+            auto comfArr = GetRandomFloatArray<9>(static_cast<Types::F32>(MAX_RAND_INT));
 
             // Translation 
             Transform trl = Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);
@@ -702,7 +702,7 @@ public:
         {
             COUNT_DETAIL_TIME;
 
-            auto comfArr = GetRandomFloatArray<9>(MAX_RAND_INT);
+            auto comfArr = GetRandomFloatArray<9>(static_cast<Types::F32>(MAX_RAND_INT));
 
             Transform trl = Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);    // translation matrix
 
@@ -1507,9 +1507,9 @@ public:
 
         Viewport viewport;
         viewport.left = 0;
-        viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
+        viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.0f;
         viewport.bottom = 0;
-        viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+        viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.0f;
         pso->SetViewport(viewport);
 
         // create and set a pipeline.

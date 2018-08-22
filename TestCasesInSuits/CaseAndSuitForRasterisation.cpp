@@ -177,10 +177,10 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
     };
 
     Viewport viewport;
-    viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
-    viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+    viewport.left = 0.f;
+    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.f;
+    viewport.bottom = 0.f;
+    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -262,10 +262,10 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
     };
 
     Viewport viewport;
-    viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
-    viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+    viewport.left = 0.f;
+    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.f;
+    viewport.bottom = 0.f;
+    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -363,10 +363,10 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
     };
 
     Viewport viewport;
-    viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
-    viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+    viewport.left = 0.f;
+    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.f;
+    viewport.bottom = 0.f;
+    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -459,10 +459,10 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     };
 
     Viewport viewport;
-    viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
-    viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+    viewport.left = 0.f;
+    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.f;
+    viewport.bottom = 0.f;
+    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -564,10 +564,10 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
     };
 
     Viewport viewport;
-    viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
-    viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+    viewport.left = 0.f;
+    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.f;
+    viewport.bottom = 0.f;
+    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -689,10 +689,10 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
     };
 
     Viewport viewport;
-    viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
-    viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+    viewport.left = 0.f;
+    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.f;
+    viewport.bottom = 0.f;
+    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -718,17 +718,17 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
         //{
         // add start vertex and its index
         SimplePoint start(hvector(x0, y0, 0.0f));
-        start.m_rayIndex.m_x = roundIndex;
-        start.m_rayIndex.m_y = lineIndex;
-        start.m_rayIndex.m_z = 0;
+        start.m_rayIndex.m_x = roundIndex * 1.0f;
+        start.m_rayIndex.m_y = lineIndex * 1.0f;
+        start.m_rayIndex.m_z = 0.f;
         points.push_back(start);
         indices.push_back(numIndices++);
 
         // add end vertex and its index
         SimplePoint end(hvector(x1, y1, 0.0f));
-        end.m_rayIndex.m_x = roundIndex;
-        end.m_rayIndex.m_y = lineIndex;
-        end.m_rayIndex.m_z = 1;
+        end.m_rayIndex.m_x = roundIndex * 1.0f;
+        end.m_rayIndex.m_y = lineIndex * 1.0f;
+        end.m_rayIndex.m_z = 1.f;
         points.push_back(end);
         indices.push_back(numIndices++);
         //}

@@ -44,7 +44,29 @@ void Image::SaveTo(const std::wstring & filePath) const
             fclose(outputFile);
         }
 
-        throw std::exception("PngImage openning image file failed.");
+        throw std::exception("PngImage openning image file failed - unicode version");
+    }
+
+    svpng(outputFile, m_width, m_height, reinterpret_cast<const unsigned char *>(m_canvas.data()), 1);
+
+    fclose(outputFile);
+}
+
+void Image::SaveTo(const std::string& filePath) const
+{
+    FILE * outputFile;
+    // Warning!! Must open the file with the Binary mode, or the image will be broken.
+    //errno_t error = fopen_s(&outputFile, filePath.c_str(), "wb");
+    errno_t error = fopen_s(&outputFile, filePath.c_str(), "wb");
+    if (error != 0)
+    {
+        // some error happend.
+        if (nullptr != outputFile)
+        {
+            fclose(outputFile);
+        }
+
+        throw std::exception("PngImage openning image file failed - ascii version");
     }
 
     svpng(outputFile, m_width, m_height, reinterpret_cast<const unsigned char *>(m_canvas.data()), 1);
@@ -114,6 +136,11 @@ RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 const Image::Pixel & Image::GetRawPixel(const Types::U32 x, const Types::U32 y) const
 {
     return m_canvas[To1DArrIndex(x, y)];
+}
+
+unsigned char * Image::GetRawData()
+{
+    return reinterpret_cast<unsigned char*>(m_canvas.data());
 }
 
 Image::Pixel::Pixel(Types::U8 r, Types::U8 g, Types::U8 b, Types::U8 a)

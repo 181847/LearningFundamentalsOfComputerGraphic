@@ -259,7 +259,7 @@ MeshData GeometryBuilder::BuildCylinder(
     return retData;
 }
 
-CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, const Types::F32& slice, const Types::F32& stack)
+CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, const Types::U32& slice, const Types::U32& stack)
 {
     using namespace Types;
 

@@ -27,8 +27,8 @@ public:
 
 public:
     vector3();
-    vector3(const Types::F32 & x, const Types::F32 & y, const Types::F32 & z);
-    vector3(const Types::F32* pArr);
+    explicit vector3(const Types::F32 & x, const Types::F32 & y, const Types::F32 & z);
+    explicit vector3(const Types::F32* pArr);
     ~vector3();
 };
 /*! ensurance */

@@ -49,8 +49,8 @@ public:
     */
     static MeshData BuildSphere(
         const Types::F32& radius,
-        const Types::F32& slice,
-        const Types::F32& stack);
+        const Types::U32& slice,
+        const Types::U32& stack);
 
     /*!
         \brief build a sphere by icosahedron

@@ -9,9 +9,9 @@ void CASE_NAME_IN_COMMON_CLASSES(BasicImage)::Run()
 
     pixelSetterT.SetChannel<RGBA::B>(0.5f);
 
-    for (int x = 0; x < WIDTH; ++x)
+    for (Types::U32 x = 0; x < WIDTH; ++x)
     {
-        for (int y = 0; y < HEIGHT; ++y)
+        for (Types::U32 y = 0; y < HEIGHT; ++y)
         {
             pixelSetterT.SetChannel<RGBA::R>(x / 512.0f);
             pixelSetterT.SetChannel<RGBA::G>(y / 512.0f);
@@ -917,10 +917,10 @@ void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
     HitRecord hitRec, shadowHitRec;
     Ray viewRay;
 
-    const int WIDTH = camera.m_film->GetWidth(), HEIGHT = camera.m_film->GetHeight();
-    for (unsigned int i = 0; i < WIDTH; ++i)
+    const Types::U32 WIDTH = camera.m_film->GetWidth(), HEIGHT = camera.m_film->GetHeight();
+    for (Types::U32 i = 0; i < WIDTH; ++i)
     {
-        for (unsigned int j = 0; j < HEIGHT; ++j)
+        for (Types::U32 j = 0; j < HEIGHT; ++j)
         {
             viewRay = camera.GetRay(i, j);
 

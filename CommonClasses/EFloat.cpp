@@ -174,7 +174,7 @@ EFloat operator*(const EFloat & ef1, const EFloat & ef2)
     r.m_low = r.m_high = ferr[0];
     // set r.m_low = min(ferr), r.m_high = max(ferr)
     // note: here skip the first element which is setted as initialization.
-    for (int i = 1; i < ferr.size(); ++i)
+    for (unsigned int i = 1; i < ferr.size(); ++i)
     {
         if (ferr[i] < r.m_low)
             r.m_low = ferr[i]; // update min
@@ -215,7 +215,7 @@ EFloat operator/(const EFloat & ef1, const EFloat & ef2)
         r.m_low = r.m_high = ferr[0];
         // set r.m_low = min(ferr), r.m_high = max(ferr)
         // note: here skip the first element which is setted as initialization.
-        for (int i = 1; i < ferr.size(); ++i)
+        for (unsigned int i = 1; i < ferr.size(); ++i)
         {
             if (ferr[i] < r.m_low)
                 r.m_low = ferr[i]; // update min

@@ -26,10 +26,10 @@ Image Filter::Convolve(const Image & img)
     Loc start = { -static_cast<int>(m_padding), -static_cast<int>(m_padding) };
 
     Loc rowHead = start;
-    for (unsigned int y = 0; y < CON_S.Y; ++y)
+    for (int y = 0; y < CON_S.Y; ++y)
     {
         Loc horizontalScaner = rowHead;
-        for (unsigned int x = 0; x < CON_S.X; ++x)
+        for (int x = 0; x < CON_S.X; ++x)
         {
             convolutionResult.SetPixel(x, y, Step(img, horizontalScaner));
             horizontalScaner = horizontalScaner.Go<Loc::RIGHT>(static_cast<int>(m_step));
@@ -71,7 +71,7 @@ RGBA Filter::Step(const Image& img, const Loc& location)
 
 RGBA Filter::TryGetPixel(const Image& img, const Loc& location)
 {
-    const Loc IMG_S = { img.GetWidth(), img.GetHeight() };
+    const Loc IMG_S = { static_cast<int>(img.GetWidth()), static_cast<int>(img.GetHeight()) };
     if (!IMG_S.IsInclude(location)) // if out of boundary
     {
         return RGBA::BLACK;
@@ -85,8 +85,8 @@ RGBA Filter::TryGetPixel(const Image& img, const Loc& location)
 Filter::Loc Filter::ConvolutionSize(const Loc& imgSize) const
 {
     Loc ret;
-    ret.X = std::floor((imgSize.X + 2 * m_padding -  m_width) * 1.0f / m_step + 1);
-    ret.Y = std::floor((imgSize.Y + 2 * m_padding - m_height) * 1.0f / m_step + 1);
+    ret.X = static_cast<int>(std::floor((imgSize.X + 2 * m_padding -  m_width) * 1.0f / m_step + 1));
+    ret.Y = static_cast<int>(std::floor((imgSize.Y + 2 * m_padding - m_height) * 1.0f / m_step + 1));
     return ret;
 }
 
@@ -94,7 +94,6 @@ std::vector<CommonClass::Filter::Loc> Filter::GenerateSampleLocations(const Loc&
 {
     std::vector<Loc> retList;
     
-    Loc step;
     Loc RowHead = bottomLeft;
     for (unsigned int y = 0; y < m_height; ++y)
     {

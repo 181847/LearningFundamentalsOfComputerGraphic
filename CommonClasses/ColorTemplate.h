@@ -4,6 +4,10 @@
 #include <assert.h>
 #include <MyTools\MathTool.h>
 
+
+namespace CommonClass
+{
+
 /*!
     \brief a helper struct to assist the ColorTemplate to access individual channels of a color.
     this struct support RGB three channels to read.
@@ -412,3 +416,5 @@ ColorTemplate<true> Cast(const ColorTemplate<false>& color, const Types::F32 alp
 */
 using RGB = ColorTemplate<false>;
 using RGBA = ColorTemplate<true>;
+
+}// namespace CommonClass

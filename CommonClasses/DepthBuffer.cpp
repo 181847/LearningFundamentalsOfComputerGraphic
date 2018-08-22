@@ -44,7 +44,7 @@ Types::F32 & DepthBuffer::Value(const Types::U32 x, const Types::U32 y)
 
 void DepthBuffer::SetAll(const Types::F32 val)
 {
-    for (int i = 0; i < m_width * m_height; ++i)
+    for (Types::U32 i = 0; i < m_width * m_height; ++i)
     {
         m_pBuffer[i] = val;
     }
@@ -55,9 +55,9 @@ Image ToImage(const DepthBuffer & buffer, Types::F32 maxValue)
     const Types::U32 WIDTH(buffer.GetWidth()), HEIGHT(buffer.GetHeight());
     Image retImg(WIDTH, HEIGHT);
 
-    for (int y = 0; y < HEIGHT; ++y)
+    for (Types::U32 y = 0; y < HEIGHT; ++y)
     {
-        for (int x = 0; x < WIDTH; ++x)
+        for (Types::U32 x = 0; x < WIDTH; ++x)
         {
             Types::F32 value = buffer.ValueAt(x, y) / maxValue;
             retImg.SetPixel(x, y, RGBA(value, value, value));

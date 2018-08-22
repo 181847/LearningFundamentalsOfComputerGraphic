@@ -13,9 +13,9 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
     Viewport viewport;
     viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1;
+    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.0f;
     viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1;
+    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.0f;
     pso->SetViewport(viewport);
 
     std::array<hvector, 3> triv = {
@@ -106,23 +106,23 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
         //if (lineIndex == 32)
         {
             SimplePoint p0(hvector(x0, y0, 0.0f));
-            p0.m_rayIndex.m_x = roundIndex;
-            p0.m_rayIndex.m_y = lineIndex;
-            p0.m_rayIndex.m_z = 0;
+            p0.m_rayIndex.m_x = roundIndex * 1.0f;
+            p0.m_rayIndex.m_y = lineIndex * 1.0f;
+            p0.m_rayIndex.m_z = 0.0f;
             points.push_back(p0);
             indices.push_back(numIndices++);
 
             SimplePoint p1(hvector(x1, y1, 0.0f));
-            p1.m_rayIndex.m_x = roundIndex;
-            p1.m_rayIndex.m_y = lineIndex;
-            p1.m_rayIndex.m_z = 1;
+            p1.m_rayIndex.m_x = roundIndex * 1.0f;
+            p1.m_rayIndex.m_y = lineIndex * 1.0f;
+            p1.m_rayIndex.m_z = 1.0f;
             points.push_back(p1);
             indices.push_back(numIndices++);
 
             SimplePoint p2(hvector(x2, y2, 0.0f));
-            p2.m_rayIndex.m_x = roundIndex;
-            p2.m_rayIndex.m_y = lineIndex;
-            p2.m_rayIndex.m_z = 1;
+            p2.m_rayIndex.m_x = roundIndex * 1.0f;
+            p2.m_rayIndex.m_y = lineIndex * 1.0f;
+            p2.m_rayIndex.m_z = 1.0f;
             points.push_back(p2);
             indices.push_back(numIndices++);
         } // end if lineIndex
@@ -433,7 +433,7 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
     // rotate the line a little.
-    Types::F32 pitch(3.14f * 3 / 4), yaw(3.14 / 4), roll(0 * 3.14 / 3);
+    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
 
     // perspective transformation
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
@@ -465,7 +465,10 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
     for (const auto& pos : positions)
     {
         SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector( (count >> 2) % 2, (count) % 2, (count >> 1) % 2);
+        sp.m_rayIndex = hvector(
+            static_cast<Types::F32>((count >> 2) % 2),
+            static_cast<Types::F32>((count) % 2),
+            static_cast<Types::F32>((count >> 1) % 2));
         points.push_back(sp);
 
         ++count;
@@ -490,7 +493,7 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
     }
 
     // change the trs matrix and draw same cube with different instance
-    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2, roll + 3.14 / 8), vector3(1.2f, 2.0f, 1.4f));
+    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(1.2f, 2.0f, 1.4f));
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -527,7 +530,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
     // rotate the line a little.
-    Types::F32 pitch(3.14f * 3 / 4), yaw(3.14 / 4), roll(0 * 3.14 / 3);
+    Types::F32 pitch(3.14f * 3 / 4), yaw(3.14f / 4), roll(0 * 3.14f / 3);
 
     // perspective transformation
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
@@ -562,7 +565,10 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     for (const auto& pos : positions)
     {
         SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector((count >> 2) % 2, (count) % 2, (count >> 1) % 2);
+        sp.m_rayIndex = hvector(
+            static_cast<Types::F32>((count >> 2) % 2), 
+            static_cast<Types::F32>((count) % 2), 
+            static_cast<Types::F32>((count >> 1) % 2));
         points.push_back(sp);
 
         ++count;
@@ -588,7 +594,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     }
 
     // change the trs matrix and draw same cube with different instance
-    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2, roll + 3.14 / 8), vector3(1.2f, 2.0f, 1.4f));
+    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(1.2f, 2.0f, 1.4f));
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -625,7 +631,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
     // rotate the line a little.
-    Types::F32 pitch(3.14f * 3 / 4), yaw(3.14 / 4), roll(0 * 3.14 / 3);
+    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
 
     // perspective transformation
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
@@ -660,7 +666,10 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     for (const auto& pos : positions)
     {
         SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector((count >> 2) % 2, (count) % 2, (count >> 1) % 2);
+        sp.m_rayIndex = hvector(
+            static_cast<Types::F32>((count >> 2) % 2),
+            static_cast<Types::F32>((count) % 2),
+            static_cast<Types::F32>((count >> 1) % 2));
         points.push_back(sp);
 
         ++count;
@@ -686,7 +695,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     }
 
     // change the trs matrix and draw same cube with different instance
-    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2, roll + 3.14 / 8), vector3(0.5f, 0.5f, 0.5f));
+    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.5f, 0.5f, 0.5f));
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -724,7 +733,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
     // rotate the line a little.
-    Types::F32 pitch(3.14f * 3 / 4), yaw(3.14 / 4), roll(0 * 3.14 / 3);
+    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
 
     // perspective transformation
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
@@ -759,7 +768,10 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
     for (const auto& pos : positions)
     {
         SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector((count >> 2) % 2, (count) % 2, (count >> 1) % 2);
+        sp.m_rayIndex = hvector(
+            static_cast<Types::F32>((count >> 2) % 2),
+            static_cast<Types::F32>((count) % 2),
+            static_cast<Types::F32>((count >> 1) % 2));
         points.push_back(sp);
 
         ++count;
@@ -788,7 +800,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
 
     pso->m_fillMode = FillMode::WIREFRAME;
     // change the trs matrix and draw same cube with different instance
-    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2, roll + 3.14 / 8), vector3(0.5f, 0.5f, 0.5f));
+    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.5f, 0.5f, 0.5f));
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -826,7 +838,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
     // rotate the line a little.
-    Types::F32 pitch(3.14f * 3 / 4), yaw(3.14 / 4), roll(0 * 3.14 / 3);
+    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
 
     // perspective transformation
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
@@ -861,7 +873,10 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     for (const auto& pos : positions)
     {
         SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector((count >> 2) % 2, (count) % 2, (count >> 1) % 2);
+        sp.m_rayIndex = hvector(
+            static_cast<Types::F32>((count >> 2) % 2),
+            static_cast<Types::F32>((count) % 2),
+            static_cast<Types::F32>((count >> 1) % 2));
         points.push_back(sp);
 
         ++count;
@@ -889,7 +904,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 
     pso->m_fillMode = FillMode::WIREFRAME;
     // change the trs matrix and draw same cube with different instance
-    trs = Transform::TRS(vector3(0.4f, 0.6f, -4.0f), vector3(pitch, yaw + 3.14f / 2, roll + 3.14 / 8), vector3(0.8f, 0.8f, 0.8f));
+    trs = Transform::TRS(vector3(0.4f, 0.6f, -4.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.8f, 0.8f, 0.8f));
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;

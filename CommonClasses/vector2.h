@@ -27,7 +27,7 @@ public:
 
 public:
     vector2();
-    vector2(const Types::F32 & x, const Types::F32 & y);
+    explicit vector2(const Types::F32 & x, const Types::F32 & y);
     ~vector2();
 };
 
