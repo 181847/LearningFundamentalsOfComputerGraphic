@@ -4,6 +4,8 @@
 namespace CommonClass
 {
 
+class vector3;
+
 /*!
     \brief homogeneous vector with four components
     we assume the hvector is column vector
@@ -29,6 +31,11 @@ public:
     explicit hvector(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f, const Types::F32 w = 1.0f);
     hvector& operator = (const hvector& v);
     ~hvector();
+
+    /*!
+        \brief convert xyz part to vector3
+    */
+    vector3 ToVector3() const;
 };
 static_assert(sizeof(hvector) == 4 * sizeof(Types::F32), "sizeof hvector should be four times of F32");
 
@@ -49,7 +56,7 @@ hvector& operator /= (hvector&          v1,     const hvector&      v2      );
 hvector& operator *= (hvector&          v,      Types::F32          s       );
 hvector& operator /= (hvector&          v,      Types::F32          s       );
 bool     operator != (const hvector&    v1,     const hvector&      v2      );
-bool     operator == (const hvector&    v1,     const hvector&      v2);
+bool     operator == (const hvector&    v1,     const hvector&      v2      );
 
 /*!
     \brief prevent any other type do the comparison with hvector

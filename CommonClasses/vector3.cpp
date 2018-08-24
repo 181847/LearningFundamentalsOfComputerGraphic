@@ -1,4 +1,5 @@
 #include "vector3.h"
+#include "hvector.h"
 #include <MyTools\MathTool.h>
 
 namespace CommonClass
@@ -26,6 +27,11 @@ vector3::vector3(const Types::F32* pArr)
 vector3::~vector3()
 {
     // empty
+}
+
+CommonClass::hvector vector3::ToHvector(const Types::F32& w /*= 1.0f*/) const
+{
+    return hvector(m_x, m_y, m_z, w);
 }
 
 vector3 operator+(const vector3 & a, const vector3 & b)
