@@ -140,10 +140,10 @@ MeshData GeometryBuilder::BuildCylinder(
         radio = 0.0f;
         for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
         {
-            x = std::cosf(radio) * radius;
-            z = - std::sinf(radio) * radius;
+            x = std::cosf(radio);
+            z = - std::sinf(radio);
 
-            retData.m_vertices.push_back(vector3(x, y, z));
+            retData.m_vertices.push_back({ vector3(x * radius, y, z * radius), vector3(x, 0.0f, z) });
 
             radio += deltaRadio;
         }
@@ -204,19 +204,20 @@ MeshData GeometryBuilder::BuildCylinder(
     for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
     {
         x = std::cosf(radio);
-        z = - std::sinf(radio);
+        z = -std::sinf(radio);
 
         // top
-        retData.m_vertices.push_back(vector3(x * topRadius,     height, z * topRadius));
+        retData.m_vertices.push_back({ vector3(x * topRadius,     height, z * topRadius   ), vector3(0.0f, +1.0f, 0.0f) });
         // bottom
-        retData.m_vertices.push_back(vector3(x * bottomRadius,  0.0f,   z * bottomRadius));
+        retData.m_vertices.push_back({ vector3(x * bottomRadius,    0.0f, z * bottomRadius), vector3(0.0f, -1.0f, 0.0f) });
         
         radio += deltaRadio;
     }// end for
+
     const U32 topCenter = retData.m_vertices.size();
     const U32 bottomCenter = topCenter + 1;
-    retData.m_vertices.push_back(vector3(0.0f, height, 0.0f));
-    retData.m_vertices.push_back(vector3(0.0f, 0.0f,   0.0f));
+    retData.m_vertices.push_back({ vector3(0.0f, height, 0.0f), vector3(0.0f, +1.0f, 0.0f) });
+    retData.m_vertices.push_back({ vector3(0.0f, 0.0f,   0.0f), vector3(0.0f, -1.0f, 0.0f) });
 
     //   topCenter
     //     /\                         
@@ -294,16 +295,18 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     
     for (U32 stackIndex = 0; stackIndex < stack - 1; ++stackIndex) // loop (stack - 1)
     {
-        y = -std::cosf(verticalRadio) * radius; // height
+        y = -std::cosf(verticalRadio); // unit height
 
         horizontalRadio = 0.0f;
-        horizontalRadius = std::sinf(verticalRadio) * radius; // stack radius
+        horizontalRadius = std::sinf(verticalRadio); // stack radius
         for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
         {
-            x = std::cosf(horizontalRadio) * horizontalRadius;
-            z = - std::sinf(horizontalRadio) * horizontalRadius;
+            x = std::cosf(horizontalRadio) * horizontalRadius;  // unit x
+            z = - std::sinf(horizontalRadio) * horizontalRadius; // unit z
 
-            retData.m_vertices.push_back(vector3(x, y, z));
+            retData.m_vertices.push_back(
+                {   vector3(x, y, z) * radius,  // stretch position by radius
+                    vector3(x,y,z) });          // normal
 
             horizontalRadio += DELTA_SLICE_RADIO;
         }
@@ -312,8 +315,8 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     }// end for stackIndex
 
     // extra two vertex
-    retData.m_vertices.push_back(vector3(0.0f, -radius, 0.0f)); // push bottom vertex
-    retData.m_vertices.push_back(vector3(0.0f, +radius, 0.0f)); // push top vertex
+    retData.m_vertices.push_back({ vector3(0.0f, -radius, 0.0f), vector3(0.0f, -1.0f, 0.0f) }); // push bottom vertex
+    retData.m_vertices.push_back({ vector3(0.0f, +radius, 0.0f), vector3(0.0f, +1.0f, 0.0f) }); // push top vertex
 
      // push indices
      // a ----b
@@ -424,7 +427,11 @@ CommonClass::MeshData GeometryBuilder::BuildGeoSphere(const Types::F32& radius, 
         10,1,6, 11,0,9, 2,11,9, 5,2,9,  11,2,7
     };// end array
 
-    retData.m_vertices.assign(pos.begin(), pos.end());
+    retData.m_vertices.resize(pos.size());
+    for (unsigned int i = 0; i < pos.size(); ++i)
+    {
+        retData.m_vertices[i] = { pos[i], pos[i]/* as normal */ };
+    }
     retData.m_indices.assign(indicesOfPos.begin(), indicesOfPos.end());
 
     for (U32 i = 0; i < subdivide; ++i)
@@ -433,9 +440,11 @@ CommonClass::MeshData GeometryBuilder::BuildGeoSphere(const Types::F32& radius, 
     }
 
     // reproject all vertex into the sphere.
+    // and fix the normal to unit.
     for (auto& vertex : retData.m_vertices)
     {
-        vertex = Normalize(vertex) * radius;
+        vertex.m_pos = Normalize(vertex.m_pos) * radius;
+        vertex.m_normal = Normalize(vertex.m_normal);
     }
 
     return retData;
@@ -447,8 +456,8 @@ void GeometryBuilder::Subdivide(MeshData & target)
     
     assert(target.m_indices.size() % 3 == 0 && "subdivision failed, incomplete triangle list");
 
-    std::vector<vector3>& Vertices = target.m_vertices;     // reference to all vertices
-    std::vector<U32> Indices = std::move(target.m_indices); // old indices
+    std::vector<MeshData::Vertex>& Vertices = target.m_vertices;     // reference to all vertices
+    std::vector<U32> Indices = std::move(target.m_indices); // take over old indices
     target.m_indices.clear();                               // ensure all old indices are cleared
 
     const U32 NUM_ALL_TRIANGLE = Indices.size() / 3;
@@ -462,10 +471,18 @@ void GeometryBuilder::Subdivide(MeshData & target)
         I2 = Indices[i * 3 + 1];
         I3 = Indices[i * 3 + 2];
 
+        MeshData::Vertex v1, v2, v3;
+
         // new vertex
-        vector3 v1 = (Vertices[I2] + Vertices[I3]) * 0.5f;
-        vector3 v2 = (Vertices[I1] + Vertices[I3]) * 0.5f;
-        vector3 v3 = (Vertices[I1] + Vertices[I2]) * 0.5f;
+        v1 = (Vertices[I2] + Vertices[I3]);
+        v2 = (Vertices[I1] + Vertices[I3]);
+        v3 = (Vertices[I1] + Vertices[I2]);
+        v1.m_pos = v1.m_pos * 0.5f;
+        v2.m_pos = v2.m_pos * 0.5f;
+        v3.m_pos = v3.m_pos * 0.5f;
+        v1.m_normal = v1.m_normal * 0.5f;
+        v2.m_normal = v2.m_normal * 0.5f;
+        v3.m_normal = v3.m_normal * 0.5f;
 
         // new corresponding index
         newI1 = Vertices.size();
@@ -505,6 +522,11 @@ void GeometryBuilder::Subdivide(MeshData & target)
         target.m_indices.push_back(newI2);
         target.m_indices.push_back(newI3);
     }
+}
+
+CommonClass::MeshData::Vertex operator+(const MeshData::Vertex& v1, const MeshData::Vertex& v2)
+{
+    return {v1.m_pos + v2.m_pos, v1.m_normal + v2.m_normal};
 }
 
 }// namespace CommonClass

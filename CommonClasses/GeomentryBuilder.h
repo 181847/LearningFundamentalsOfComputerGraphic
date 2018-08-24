@@ -10,9 +10,18 @@ namespace CommonClass
 
 struct MeshData
 {
-    std::vector<CommonClass::vector3> m_vertices;
+
+    struct Vertex
+    {
+        vector3 m_pos;
+        vector3 m_normal;
+    };
+
+    std::vector<Vertex> m_vertices;
     std::vector<unsigned int> m_indices;
 };
+
+MeshData::Vertex operator + (const MeshData::Vertex& v1, const MeshData::Vertex& v2);
 
 class GeometryBuilder
 {
