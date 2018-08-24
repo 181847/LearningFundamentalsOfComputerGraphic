@@ -70,12 +70,18 @@ public:
     Transform& operator = (const Transform& m);
 
     /*!
+        \brie get the transpose of the matrix
+    */
+    Transform T();
+
+    /*!
         \brief construct a translation matrix for x/y/z.
         \param x movement in x direction
         \param y movement in y direction
         \param z movement in z direction
     */
-    static Transform Translation(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f);
+    static Transform Translation       (const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f);
+    static Transform InverseTranslation(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f);
     
     /*!
         \brief build rotation by three free degree,
@@ -83,13 +89,14 @@ public:
         positive Y is up direction,
         combine order is (yaw <- pitch <- roll)
     */
-    static Transform Rotation(const Types::F32 yaw, const Types::F32 pitch, const Types::F32 roll);
+    static Transform Rotation       (const Types::F32 yaw, const Types::F32 pitch, const Types::F32 roll);
+    static Transform InverseRotation(const Types::F32 yaw, const Types::F32 pitch, const Types::F32 roll);
 
     /*!
         \brief construct a rotation matrix around axis x
         \param x rotate radians
     */
-    static Transform RotationX(const Types::F32 x);
+    static Transform RotationX       (const Types::F32 x);
     
     /*!
         \brief construct a rotation matrix around axis y
@@ -106,7 +113,8 @@ public:
     /*!
         \brief get the matrix for scale
     */
-    static Transform Scale(const Types::F32 x, const Types::F32 y, const Types::F32 z);
+    static Transform Scale       (const Types::F32 x, const Types::F32 y, const Types::F32 z);
+    static Transform InverseScale(const Types::F32 x, const Types::F32 y, const Types::F32 z);
 
     /*!
         \brief build a transfom that combine translation, rotation and scaling.
@@ -116,7 +124,8 @@ public:
         then rotation( Z first, then X, then Y )
         last is the translation.
     */
-    static Transform TRS(const vector3& t, const vector3& r, const vector3& s);
+    static Transform TRS       (const vector3& t, const vector3& r, const vector3& s);
+    static Transform InverseTRS(const vector3& t, const vector3& r, const vector3& s);
 
     /*!
         \brief construct a viewport transformation with four window boundry, 

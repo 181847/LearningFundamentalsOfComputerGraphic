@@ -60,6 +60,14 @@ Transform & Transform::operator=(const Transform & m)
     return *this;
 }
 
+CommonClass::Transform Transform::T()
+{
+    return Transform(m_11, m_21, m_31, m_41,
+                     m_12, m_22, m_32, m_42,
+                     m_13, m_23, m_33, m_43,
+                     m_14, m_24, m_34, m_44);
+}
+
 Transform Transform::Translation(const Types::F32 x, const Types::F32 y, const Types::F32 z)
 {
     return Transform(
@@ -69,9 +77,19 @@ Transform Transform::Translation(const Types::F32 x, const Types::F32 y, const T
         0.0f, 0.0f, 0.0f, 1.0f);
 }
 
+Transform Transform::InverseTranslation(const Types::F32 x /*= 0.0f*/, const Types::F32 y /*= 0.0f*/, const Types::F32 z /*= 0.0f*/)
+{
+    return Translation(-x, -y, -z);
+}
+
 Transform Transform::Rotation(const Types::F32 yaw, const Types::F32 pitch, const Types::F32 roll)
 {
     return RotationY(yaw) * RotationX(pitch) * RotationZ(roll);
+}
+
+Transform Transform::InverseRotation(const Types::F32 yaw, const Types::F32 pitch, const Types::F32 roll)
+{
+    return RotationZ(-roll) * RotationX(-pitch) * RotationY(-yaw);
 }
 
 Transform Transform::RotationX(const Types::F32 x)
@@ -122,9 +140,19 @@ Transform Transform::Scale(const Types::F32 x, const Types::F32 y, const Types::
         0.0f,      0.0f,      0.0f,     1.0f);
 }
 
+Transform Transform::InverseScale(const Types::F32 x, const Types::F32 y, const Types::F32 z)
+{
+    return Scale(-x, -y, -z);
+}
+
 Transform Transform::TRS(const vector3 & t, const vector3 & r, const vector3 & s)
 {
     return Translation(t.m_x, t.m_y, t.m_z) * Rotation(r.m_y, r.m_x, r.m_z) * Scale(s.m_x, s.m_y, s.m_z);
+}
+
+Transform Transform::InverseTRS(const vector3& t, const vector3& r, const vector3& s)
+{
+    return InverseScale(s.m_x, s.m_y, s.m_z) * InverseRotation(r.m_y, r.m_x, r.m_z) * InverseTranslation(t.m_x, t.m_y, t.m_z);
 }
 
 Transform Transform::Viewport(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top)
