@@ -518,14 +518,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    // the pixel shader will not work
-    // due to the imcompletation of the triangle pipeline.
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
-
-        return RGBA::BLUE;
-        return RGBA(pPoint->m_rayIndex.m_x, pPoint->m_rayIndex.m_y, pPoint->m_rayIndex.m_z);
-    };
+    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -536,42 +529,19 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
 
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
+    Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    Transform mat = perspect * trs;
-
-    pso->m_vertexShader = [&mat, &trs, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-        const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
-        SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
-
-        hvector inViewPos = trs * pSrcH->m_position;
-
-        pDestH->m_position = perspect * inViewPos;
-        //pDestH->m_position = pSrcH->m_position;
-        pDestH->m_rayIndex = pSrcH->m_rayIndex;
-    };
+    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
-    unsigned int numIndices = 0;
-
-    
-    std::vector<vector3> positions;
     auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 50, 1, true);
-    positions = meshData.m_vertices;
     indices = meshData.m_indices;
-
     points.clear();
-    int count = 0;
-    for (const auto& pos : positions)
-    {
-        SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector(
-            static_cast<Types::F32>((count >> 2) % 2), 
-            static_cast<Types::F32>((count) % 2), 
-            static_cast<Types::F32>((count >> 1) % 2));
-        points.push_back(sp);
 
-        ++count;
+    for (const auto& vertex : meshData.m_vertices)
+    {
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -587,6 +557,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(0.8f, -0.6f, -2.0f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(0.1f, 1.0f, 0.4f));
+    normalTrs = Transform::InverseTRS(vector3(0.8f, -0.6f, -2.0f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(0.1f, 1.0f, 0.4f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -595,13 +566,14 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(1.2f, 2.0f, 1.4f));
+    normalTrs = Transform::InverseTRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(1.2f, 2.0f, 1.4f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
         pipline->DrawInstance(indices, vertexBuffer.get());
     }
 
-    std::wstring pictureIndex = L"001";
+    std::wstring pictureIndex = L"002";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"cylinder_" + pictureIndex);
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
@@ -619,14 +591,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    // the pixel shader will not work
-    // due to the imcompletation of the triangle pipeline.
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
-
-        return RGBA::BLUE;
-        return RGBA(pPoint->m_rayIndex.m_x, pPoint->m_rayIndex.m_y, pPoint->m_rayIndex.m_z);
-    };
+    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -637,42 +602,19 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
 
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
+    Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    Transform mat = perspect * trs;
-
-    pso->m_vertexShader = [&mat, &trs, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-        const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
-        SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
-
-        hvector inViewPos = trs * pSrcH->m_position;
-
-        pDestH->m_position = perspect * inViewPos;
-        //pDestH->m_position = pSrcH->m_position;
-        pDestH->m_rayIndex = pSrcH->m_rayIndex;
-    };
+    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
-    unsigned int numIndices = 0;
-
-
-    std::vector<vector3> positions;
     auto meshData = GeometryBuilder::BuildSphere(0.8f, 16, 16);
-    positions = meshData.m_vertices;
     indices = meshData.m_indices;
-
     points.clear();
-    int count = 0;
-    for (const auto& pos : positions)
-    {
-        SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector(
-            static_cast<Types::F32>((count >> 2) % 2),
-            static_cast<Types::F32>((count) % 2),
-            static_cast<Types::F32>((count >> 1) % 2));
-        points.push_back(sp);
 
-        ++count;
+    for (const auto& vertex : meshData.m_vertices)
+    {
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -688,6 +630,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(1.5f, 1.5f, 1.5f));
+    normalTrs = Transform::InverseTRS(vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(1.5f, 1.5f, 1.5f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -695,14 +638,15 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     }
 
     // change the trs matrix and draw same cube with different instance
-    trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.5f, 0.5f, 0.5f));
+    trs = Transform::TRS(vector3(1.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.5f, 0.5f, 0.5f));
+    normalTrs = Transform::InverseTRS(vector3(1.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.5f, 0.5f, 0.5f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
         pipline->DrawInstance(indices, vertexBuffer.get());
     }
 
-    std::wstring pictureIndex = L"001";
+    std::wstring pictureIndex = L"002";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"sphere_" + pictureIndex);
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
@@ -721,14 +665,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    // the pixel shader will not work
-    // due to the imcompletation of the triangle pipeline.
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
-
-        return RGBA::BLUE;
-        return RGBA(pPoint->m_rayIndex.m_x, pPoint->m_rayIndex.m_y, pPoint->m_rayIndex.m_z);
-    };
+    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -739,42 +676,19 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
 
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
+    Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    Transform mat = perspect * trs;
-
-    pso->m_vertexShader = [&mat, &trs, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-        const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
-        SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
-
-        hvector inViewPos = trs * pSrcH->m_position;
-
-        pDestH->m_position = perspect * inViewPos;
-        //pDestH->m_position = pSrcH->m_position;
-        pDestH->m_rayIndex = pSrcH->m_rayIndex;
-    };
+    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
-    unsigned int numIndices = 0;
-
-
-    std::vector<vector3> positions;
     auto meshData = GeometryBuilder::BuildSphere(0.8f, 16, 16);
-    positions = meshData.m_vertices;
     indices = meshData.m_indices;
-
     points.clear();
-    int count = 0;
-    for (const auto& pos : positions)
-    {
-        SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector(
-            static_cast<Types::F32>((count >> 2) % 2),
-            static_cast<Types::F32>((count) % 2),
-            static_cast<Types::F32>((count >> 1) % 2));
-        points.push_back(sp);
 
-        ++count;
+    for (const auto& vertex : meshData.m_vertices)
+    {
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -792,6 +706,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
     pso->m_fillMode = FillMode::SOLIDE;
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(1.5f, 1.5f, 1.5f));
+    normalTrs = Transform::InverseTRS(vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(1.5f, 1.5f, 1.5f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -801,6 +716,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
     pso->m_fillMode = FillMode::WIREFRAME;
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.5f, 0.5f, 0.5f));
+    normalTrs = Transform::InverseTRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.5f, 0.5f, 0.5f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -826,14 +742,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    // the pixel shader will not work
-    // due to the imcompletation of the triangle pipeline.
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
-
-        return RGBA::BLUE;
-        return RGBA(pPoint->m_rayIndex.m_x, pPoint->m_rayIndex.m_y, pPoint->m_rayIndex.m_z);
-    };
+    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -844,42 +753,19 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
 
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
+    Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    Transform mat = perspect * trs;
-
-    pso->m_vertexShader = [&mat, &trs, &perspect](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-        const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
-        SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
-
-        hvector inViewPos = trs * pSrcH->m_position;
-
-        pDestH->m_position = perspect * inViewPos;
-        //pDestH->m_position = pSrcH->m_position;
-        pDestH->m_rayIndex = pSrcH->m_rayIndex;
-    };
+    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
-    unsigned int numIndices = 0;
-
-
-    std::vector<vector3> positions;
     auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
-    positions = meshData.m_vertices;
     indices = meshData.m_indices;
-
     points.clear();
-    int count = 0;
-    for (const auto& pos : positions)
-    {
-        SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector(
-            static_cast<Types::F32>((count >> 2) % 2),
-            static_cast<Types::F32>((count) % 2),
-            static_cast<Types::F32>((count >> 1) % 2));
-        points.push_back(sp);
 
-        ++count;
+    for (const auto& vertex : meshData.m_vertices)
+    {
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -896,6 +782,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     pso->m_fillMode = FillMode::WIREFRAME;
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(1.5f, 1.5f, 1.5f));
+    normalTrs = Transform::InverseTRS(vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll), vector3(1.5f, 1.5f, 1.5f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -905,6 +792,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     pso->m_fillMode = FillMode::WIREFRAME;
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(0.4f, 0.6f, -4.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.8f, 0.8f, 0.8f));
+    normalTrs = Transform::InverseTRS(vector3(0.4f, 0.6f, -4.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.8f, 0.8f, 0.8f)).T();
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -917,4 +805,59 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
     depthImg.SaveTo(this->GetStoragePath() + L"geosphere_" + pictureIndex + L"_depth.png");
+}
+
+void CASE_NAME_IN_RASTER_TRI(NormalOfSphere)::Run()
+{
+    using SimplePoint = CommonEnvironment::SimplePoint;
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
+
+    auto pipline = pEnvironment->GetCommonPipline();
+    auto pso = pipline->GetPSO();
+
+    pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
+
+    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
+
+    const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
+
+    // rotate the line a little.
+    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
+
+    // perspective transformation
+    Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+
+    Transform trs = Transform::TRS(vector3(0, 0, -5), vector3(1, 1, 0), vector3(2, 1, 1));
+    Transform normalTrs = Transform::InverseTRS(vector3(0, 0, -5), vector3(1, 1, 0), vector3(2, 1, 1)).T();
+
+    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
+
+    std::vector<SimplePoint> points;
+    std::vector<unsigned int> indices;
+    auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
+    indices = meshData.m_indices;
+    points.clear();
+
+    for (const auto& vertex : meshData.m_vertices)
+    {
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
+    }
+
+    auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
+    memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
+
+    pso->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
+    pso->m_cullFace = CullFace::CLOCK_WISE;
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        pipline->DrawInstance(indices, vertexBuffer.get());
+    }
+
+    std::wstring pictureIndex = L"004";
+    SaveAndShowPiplineBackbuffer((*(pipline.get())), L"normalInGeoSphere_" + pictureIndex);
+
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
+    BlockShowImg(&depthImg, L"normal vectors of geoSphere");
+    depthImg.SaveTo(this->GetStoragePath() + L"normalInGeoSphere" + pictureIndex + L"_depth.png");
 }
