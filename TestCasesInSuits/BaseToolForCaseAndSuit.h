@@ -27,8 +27,8 @@ public:
             z = 1 means it's end point
         */
         hvector m_rayIndex;
-        explicit SimplePoint(const hvector& pos)
-            :m_position(pos)
+        explicit SimplePoint(const hvector& pos = hvector(), const hvector& normal = hvector())
+            :m_position(pos), m_rayIndex(normal)
         {
             // empty
         }
@@ -97,6 +97,40 @@ public:
 
         return std::move(pipline);
     }
+
+    /*!
+        \brief pixel shader for vertex that have normal.
+    */
+    static std::function<RGBA(const ScreenSpaceVertexTemplate*)> GetPixelShaderWithNormal()
+    {
+        return [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
+            vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
+            
+            vector3 normal = pPoint->m_rayIndex.ToVector3();
+            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
+
+            RGB result = kw * RGB::BLUE + (1 - kw) * RGB::RED;
+            return Cast(result);
+        };
+    }
+
+    static typename std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormal(Transform& trs, Transform& perspect, Transform& normalTrs)
+    {
+        return [&trs, &perspect, &normalTrs](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
+            SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
+
+            hvector inViewPos = trs * pSrcH->m_position;
+
+            pDestH->m_position = perspect * inViewPos;
+            //pDestH->m_position = pSrcH->m_position;
+            hvector normal = pSrcH->m_rayIndex;
+            normal.m_w = 0.0f;
+            pDestH->m_rayIndex = normalTrs * normal;
+        };
+    }
+        
 };
 
 /*!
