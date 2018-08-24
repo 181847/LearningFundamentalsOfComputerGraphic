@@ -35,6 +35,9 @@ DECLARE_CASE_IN_RASTER_TRI_FOR(SphereMeshInWireframe, "render a sphere mesh in w
 
 DECLARE_CASE_IN_RASTER_TRI_FOR(GeoSphereMesh, "render a geo sphere mesh builded by triangles");
 
+DECLARE_CASE_IN_RASTER_TRI_FOR(NormalOfSphere, "render a geo sphere mesh builded by triangles");
+
+
 using SuitForRasterizeTriangle = SuitForPipline<
     //CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
     //CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),
@@ -42,9 +45,10 @@ using SuitForRasterizeTriangle = SuitForPipline<
     //CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle),
     //CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut),
     //CASE_NAME_IN_RASTER_TRI(CubeMesh),
-    //CASE_NAME_IN_RASTER_TRI(CylinderMesh),
-    //CASE_NAME_IN_RASTER_TRI(SphereMesh),
-    //CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe),
-    CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)
+    CASE_NAME_IN_RASTER_TRI(CylinderMesh),
+    CASE_NAME_IN_RASTER_TRI(SphereMesh),
+    CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe),
+    CASE_NAME_IN_RASTER_TRI(GeoSphereMesh),
+    CASE_NAME_IN_RASTER_TRI(NormalOfSphere)
 >;
 
