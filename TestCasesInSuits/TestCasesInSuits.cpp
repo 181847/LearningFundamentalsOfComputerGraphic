@@ -10,7 +10,10 @@
 #include "CaseAndSuitForFilter.h"
 #include "CaseAndSuitForStbImage.h"
 
-#pragma comment(lib, "MyTools/MyTool.lib")
+#ifdef _DEBUG // static library for debug
+#pragma comment(lib, "MyTools/lib/Debug/MyTool.lib")
+#endif
+
 #pragma comment(lib, "CommonClasses.lib")
 
 int main()
