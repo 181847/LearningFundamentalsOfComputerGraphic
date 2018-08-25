@@ -152,23 +152,13 @@ ImguiWrapImageDX11 BuildATempImage()
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
-    unsigned int numIndices = 0;
-
-
-    std::vector<vector3> positions;
     auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
-    positions = meshData.m_vertices;
     indices = meshData.m_indices;
-
     points.clear();
-    int count = 0;
-    for (const auto& pos : positions)
+    for (const auto& vertex : meshData.m_vertices)
     {
-        SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector((count >> 2) % 2, (count) % 2, (count >> 1) % 2);
+        SimplePoint sp(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector());
         points.push_back(sp);
-
-        ++count;
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
