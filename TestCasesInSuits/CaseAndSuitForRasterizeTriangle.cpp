@@ -505,7 +505,7 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"the depth buffer of previous cube");
-    depthImg.SaveTo(this->GetStoragePath() + L"cube_" + pictureIndex + L"_depth.png");
+    depthImg.SaveTo(this->GetSafeStoragePath() + L"cube_" + pictureIndex + L"_depth.png");
 }
 
 void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
@@ -578,7 +578,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"the depth buffer of previous cylinder");
-    depthImg.SaveTo(this->GetStoragePath() + L"cylinder_" + pictureIndex + L"_depth.png");
+    depthImg.SaveTo(this->GetSafeStoragePath() + L"cylinder_" + pictureIndex + L"_depth.png");
 }
 
 void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
@@ -651,7 +651,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"the depth buffer of previous sphere");
-    depthImg.SaveTo(this->GetStoragePath() + L"sphere_" + pictureIndex + L"_depth.png");
+    depthImg.SaveTo(this->GetSafeStoragePath() + L"sphere_" + pictureIndex + L"_depth.png");
 }
 
 void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
@@ -728,7 +728,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"the depth buffer of previous sphere");
-    depthImg.SaveTo(this->GetStoragePath() + L"sphere_wireframe_" + pictureIndex + L"_depth.png");
+    depthImg.SaveTo(this->GetSafeStoragePath() + L"sphere_wireframe_" + pictureIndex + L"_depth.png");
 }
 
 void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
@@ -804,7 +804,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
-    depthImg.SaveTo(this->GetStoragePath() + L"geosphere_" + pictureIndex + L"_depth.png");
+    depthImg.SaveTo(this->GetSafeStoragePath() + L"geosphere_" + pictureIndex + L"_depth.png");
 }
 
 void CASE_NAME_IN_RASTER_TRI(NormalOfSphere)::Run()
@@ -859,5 +859,5 @@ void CASE_NAME_IN_RASTER_TRI(NormalOfSphere)::Run()
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"normal vectors of geoSphere");
-    depthImg.SaveTo(this->GetStoragePath() + L"normalInGeoSphere" + pictureIndex + L"_depth.png");
+    depthImg.SaveTo(this->GetSafeStoragePath() + L"normalInGeoSphere" + pictureIndex + L"_depth.png");
 }

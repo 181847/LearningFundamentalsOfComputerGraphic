@@ -242,7 +242,7 @@ void CASE_NAME_IN_RAY_RENDER(InsideBoxesAndSphere)::Run()
         }
     }
 
-    camera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"InsideBox29.png");
+    camera.m_film->SaveTo(GetSafeStoragePath() + L"InsideBox29.png");
 
     ImageWindow imgWnd(camera.m_film.get(), L"InsideBox29.png");
     imgWnd.BlockShow();

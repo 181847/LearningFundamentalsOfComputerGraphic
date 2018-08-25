@@ -53,7 +53,7 @@ void CASE_NAME_IN_COMMON_CLASSES(RGBAlphaSetting)::Run()
         }
     }
 
-    testImage.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForWriteRGB_alpha.png");
+    testImage.SaveTo(GetSafeStoragePath() + L"ThisImageIsForWriteRGB_alpha.png");
 
     BlockShowImg(&testImage, L"set color by RGB and Alpha");
 }
@@ -79,7 +79,7 @@ void CASE_NAME_IN_COMMON_CLASSES(FilmCaptureLight)::Run()
         }
     }
 
-    tfilm.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForFilm.png");
+    tfilm.SaveTo(GetSafeStoragePath() + L"ThisImageIsForFilm.png");
 
     BlockShowImg(&tfilm, L"film capture light");
 }
@@ -197,7 +197,7 @@ void CASE_NAME_IN_COMMON_CLASSES(CameraCaptureLight)::Run()
         }
     }
 
-    orthoCamera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForOrthoCamera.png");
+    orthoCamera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForOrthoCamera.png");
 
     BlockShowImg(orthoCamera.m_film.get(), L"orthographic camera capture light");
 }
@@ -292,7 +292,7 @@ void CASE_NAME_IN_COMMON_CLASSES(CameraPixelLoc)::Run()
         " |                               V \n"
         " blue <------------------------ green \n");
 
-    orthoCamera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForOrthoCameraPixelLoc.png");
+    orthoCamera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForOrthoCameraPixelLoc.png");
 
     BlockShowImg(orthoCamera.m_film.get(), L"pixel location");
 }
@@ -353,7 +353,7 @@ void CASE_NAME_IN_COMMON_CLASSES(OrthoCameraAndSphere)::Run()
         }
     }
 
-    orthoCamera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForOrthoCameraRenderSphere.png");
+    orthoCamera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForOrthoCameraRenderSphere.png");
 
     BlockShowImg(orthoCamera.m_film.get(), L"sphere in ortho camera");
 }
@@ -410,7 +410,7 @@ void CASE_NAME_IN_COMMON_CLASSES(ConstColors)::Run()
         ++colorIndex;
     }
 
-    img.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ConstantColorCheck.png");
+    img.SaveTo(GetSafeStoragePath() + L"ConstantColorCheck.png");
 
     BlockShowImg(&img, L"constant colors");
 }
@@ -470,7 +470,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PerspectiveCameraAndSphere)::Run()
         }
     }
 
-    perspectCamera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForPerspectiveCameraRenderSphere.png");
+    perspectCamera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForPerspectiveCameraRenderSphere.png");
     
     BlockShowImg(perspectCamera.m_film.get(), L"sphere in perspective camera");
 }
@@ -538,7 +538,7 @@ void CASE_NAME_IN_COMMON_CLASSES(TriangleAndRay)::Run()
         }
     }
 
-    camera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForOrthoCameraRenderTriangle.png");
+    camera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForOrthoCameraRenderTriangle.png");
 
     BlockShowImg(camera.m_film.get(), L"triangle and ray");
 }
@@ -610,7 +610,7 @@ void CASE_NAME_IN_COMMON_CLASSES(SceneAndRay)::Run()
         }
     }
 
-    camera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForSceneHit.png");
+    camera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForSceneHit.png");
 
     BlockShowImg(camera.m_film.get(), L"scene and ray");
 }
@@ -677,7 +677,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PolygoneAndRay)::Run()
         }
     }
 
-    camera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForHitPolygon.png");
+    camera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForHitPolygon.png");
 
     BlockShowImg(camera.m_film.get(), L"polygon and ray");
 }
@@ -818,7 +818,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
         }
     }
 
-    camera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForTempPointLight15.png");
+    camera.m_film->SaveTo(GetSafeStoragePath() + L"ThisImageIsForTempPointLight15.png");
 
     BlockShowImg(camera.m_film.get(), L"there is a light");
 }
@@ -933,7 +933,7 @@ void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
         }
     }
 
-    camera.m_film->SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisIsForSceneRayColor06.png");
+    camera.m_film->SaveTo(GetSafeStoragePath() + L"ThisIsForSceneRayColor06.png");
 
     BlockShowImg(camera.m_film.get(), L"power of Scene::RayColor()");
 }

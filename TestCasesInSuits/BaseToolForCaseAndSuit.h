@@ -4,6 +4,7 @@
 */
 
 #include "CommonHeaders.h"
+#include <filesystem>
 #undef RGB
 
 using namespace CommonClass;
@@ -453,13 +454,26 @@ public:
     }
 
     /*!
+        \brief get safe storage path, if the path not exist, create it right now.
+    */
+    virtual std::wstring GetSafeStoragePath() const
+    {
+        auto path = GetStoragePath();
+        if ( ! std::experimental::filesystem::exists(path))
+        {
+            std::experimental::filesystem::create_directory(path);
+        }
+        return path;
+    }
+
+    /*!
         \brief save the image to the sub folder with specific name, and show the image in a block thread with the title as same as the image.
         \param pipline the pipline to show
         \param nameOfImgAndWnd image name without .png and the window title at the same time
     */
     void SaveAndShowPiplineBackbuffer(const Pipline & pipline, const std::wstring& nameOfImgAndWindow) const
     {
-        pipline.m_backBuffer->SaveTo(GetStoragePath() + nameOfImgAndWindow + L".png");
+        pipline.m_backBuffer->SaveTo(GetSafeStoragePath() + nameOfImgAndWindow + L".png");
         BlockShowImg(pipline.m_backBuffer.get(), nameOfImgAndWindow);
     }
 };

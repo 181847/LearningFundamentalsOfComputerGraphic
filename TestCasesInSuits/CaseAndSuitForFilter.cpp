@@ -136,22 +136,22 @@ void CASE_NAME_IN_FILTER(Exercise)::Run()
 
     Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
     BlockShowImg(&depthImg, L"the depth buffer of previous cube");
-    depthImg.SaveTo(this->GetStoragePath() + L"cube_" + pictureIndex + L"_depth.png");
+    depthImg.SaveTo(this->GetSafeStoragePath() + L"cube_" + pictureIndex + L"_depth.png");
 
     Filter filter2x2x2(2, 2, 2, 0);
 
     //DebugGuard<DEBUG_FILTER> guard;
     auto convResult1 = filter2x2x2.Convolve(*(pipline->m_backBuffer.get()));
     BlockShowImg(&convResult1, L"convolution result1");
-    convResult1.SaveTo(this->GetStoragePath() + L"cube_" + pictureIndex + L"_convolution_2x2x2.png");
+    convResult1.SaveTo(this->GetSafeStoragePath() + L"cube_" + pictureIndex + L"_convolution_2x2x2.png");
 
 
     Filter filter1x3x3(1, 3, 3, 0);
     auto convResult2 = filter1x3x3.Convolve(*(pipline->m_backBuffer.get()));
     BlockShowImg(&convResult2, L"convolution result2");
-    convResult2.SaveTo(this->GetStoragePath() + L"cube_" + pictureIndex + L"_convolution_1x3x3.png");
+    convResult2.SaveTo(this->GetSafeStoragePath() + L"cube_" + pictureIndex + L"_convolution_1x3x3.png");
 
     auto convResult3 = filter2x2x2.Convolve(convResult2);
     BlockShowImg(&convResult3, L"re convolve convolution result 2");
-    convResult3.SaveTo(this->GetStoragePath() + L"cube_" + pictureIndex + L"_convolution2_2x2x2.png");
+    convResult3.SaveTo(this->GetSafeStoragePath() + L"cube_" + pictureIndex + L"_convolution2_2x2x2.png");
 }

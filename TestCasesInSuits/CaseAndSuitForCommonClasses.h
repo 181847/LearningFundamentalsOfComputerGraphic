@@ -23,6 +23,7 @@ class CASE_NAME_IN_COMMON_CLASSES(RestClassName) : public CaseForPipline\
 public:\
     CASE_NAME_IN_COMMON_CLASSES(RestClassName)() :CaseForPipline(CaseName) {}\
     virtual void Run() override;\
+    virtual std::wstring GetStoragePath() const override {return OUTPUT_PATH + SUB_FOLDER;}\
 protected:\
     const std::wstring SUB_FOLDER = L"ForCommonClasses/";\
 }
