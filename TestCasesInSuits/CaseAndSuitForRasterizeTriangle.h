@@ -10,7 +10,7 @@ class CASE_NAME_IN_RASTER_TRI(RestClassName) : public CaseForPipline\
 public:\
     CASE_NAME_IN_RASTER_TRI(RestClassName)() :CaseForPipline(CaseName) {}\
     virtual void Run() override;\
-    virtual std::wstring GetStoragePath() const override {return OUTPUT_PATH + SUB_FOLDER;}\
+    virtual std::wstring GetStoragePath() const override {return Super::GetStoragePath() + SUB_FOLDER;}\
 protected:\
     const std::wstring SUB_FOLDER = L"RasterizeTriangle/";\
 }
@@ -39,12 +39,12 @@ DECLARE_CASE_IN_RASTER_TRI_FOR(NormalOfSphere, "render a geo sphere mesh builded
 
 
 using SuitForRasterizeTriangle = SuitForPipline<
-    //CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
-    //CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),
-    //CASE_NAME_IN_RASTER_TRI(TriangleCut),
-    //CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle),
-    //CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut),
-    //CASE_NAME_IN_RASTER_TRI(CubeMesh),
+    CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
+    CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),
+    CASE_NAME_IN_RASTER_TRI(TriangleCut),
+    CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle),
+    CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut),
+    CASE_NAME_IN_RASTER_TRI(CubeMesh),
     CASE_NAME_IN_RASTER_TRI(CylinderMesh),
     CASE_NAME_IN_RASTER_TRI(SphereMesh),
     CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe),

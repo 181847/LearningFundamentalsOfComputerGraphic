@@ -18,7 +18,7 @@ void CASE_NAME_IN_RASTERISATION(WuXiaolinLines)::Run()
         }, CENTER_X, CENTER_Y);
     }// end time counter
 
-    defaultImg.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"sphereRayWuXiaolinLines.png");
+    defaultImg.SaveTo(GetSafeStoragePath() + L"sphereRayWuXiaolinLines.png");
 
     BlockShowImg(&defaultImg, L"draw lines using WuXiaolin method");
 }
@@ -47,7 +47,7 @@ void CASE_NAME_IN_RASTERISATION(BresenhamLine)::Run()
         }, CENTER_X, CENTER_Y);
     }// end time counter
 
-    defaultImg.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"sphereRayBresenhamLines.png");
+    defaultImg.SaveTo(GetSafeStoragePath() + L"sphereRayBresenhamLines.png");
 
     BlockShowImg(&defaultImg, L"Bresenham line method");
 }
@@ -83,7 +83,7 @@ void CASE_NAME_IN_RASTERISATION(2DLineClip)::Run()
         }, CENTER_X, CENTER_Y, 0.05f, 0.1f, 8);
     }// end time counter
 
-    defaultImg.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"2d_line_clipping.png");
+    defaultImg.SaveTo(GetSafeStoragePath() + L"2d_line_clipping.png");
 
     BlockShowImg(&defaultImg, L"2d line clipping");
 }
@@ -112,7 +112,7 @@ void CASE_NAME_IN_RASTERISATION(FlagBottomTriangle)::Run()
 
     }// end time counter
 
-    defaultImg.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"triangleFlatBottom.png");
+    defaultImg.SaveTo(GetSafeStoragePath() + L"triangleFlatBottom.png");
 
     BlockShowImg(&defaultImg, L"triangle flat bottom");
 }
@@ -135,7 +135,7 @@ void CASE_NAME_IN_RASTERISATION(GeneralTriangle)::Run()
 
     }// end time counter
 
-    defaultImg.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"generalTriangle.png");
+    defaultImg.SaveTo(GetSafeStoragePath() + L"generalTriangle.png");
 
     BlockShowImg(&defaultImg, L"general triangle");
 }

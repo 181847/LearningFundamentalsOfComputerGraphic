@@ -21,7 +21,7 @@ void CASE_NAME_IN_COMMON_CLASSES(BasicImage)::Run()
         }
     }
 
-    testImage.SaveTo(OUTPUT_PATH + SUB_FOLDER + L"ThisImageIsForTest.png");
+    testImage.SaveTo(GetSafeStoragePath() + L"ThisImageIsForTest.png");
 
     ImageWindow imgWnd(&testImage, L"basic image");
     imgWnd.BlockShow();

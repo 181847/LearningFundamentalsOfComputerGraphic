@@ -12,7 +12,7 @@ class CASE_NAME_IN_STB_IMG(RestClassName) : public CaseForPipline\
 public:\
     CASE_NAME_IN_STB_IMG(RestClassName)() :CaseForPipline(CaseName) {}\
     virtual void Run() override;\
-    virtual std::wstring GetStoragePath() const override {return OUTPUT_PATH + SUB_FOLDER;}\
+    virtual std::wstring GetStoragePath() const override {return Super::GetStoragePath() + SUB_FOLDER;}\
     const std::string LOAD_IMAGE_PATH = "../OutputTestImage/RayRender/";\
 protected:\
     const std::wstring SUB_FOLDER = L"StbImg/";\

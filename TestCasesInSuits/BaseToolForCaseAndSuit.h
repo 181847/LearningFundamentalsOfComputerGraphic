@@ -140,6 +140,9 @@ public:
 */
 class CaseForPipline : public TestSuit::Case
 {
+protected:
+    using Super = CaseForPipline;
+
 public:
     using SimplePoint = CommonEnvironment::SimplePoint;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "The size of SimplePoint is not matched for this case.");
