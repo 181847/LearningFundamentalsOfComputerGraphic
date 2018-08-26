@@ -148,6 +148,7 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraFrame.h" />
     <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="CoordinateFrame.h" />
     <ClInclude Include="DebugConfigs.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="DebugHelpers.h" />
     <ClInclude Include="Filter.h" />
     <ClInclude Include="FixPointNumber.h" />
+    <ClInclude Include="Frame.h" />
     <ClInclude Include="GeomentryBuilder.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="HitRecord.h" />
@@ -189,6 +191,7 @@
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraFrame.cpp" />
     <ClCompile Include="ColorTemplate.cpp" />
     <ClCompile Include="CoordinateFrame.cpp" />
     <ClCompile Include="DebugConfigs.cpp" />
@@ -199,6 +202,7 @@
     <ClCompile Include="Film.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="FixPointNumber.cpp" />
+    <ClCompile Include="Frame.cpp" />
     <ClCompile Include="GeomentryBuilder.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="HitRecord.cpp" />
