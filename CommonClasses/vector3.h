@@ -95,7 +95,7 @@ bool AlmostEqual(const vector3 & a, const vector3 & b, int ulp = vector3::COMPAR
     \param minBound/maxBound this check use dot product, but the error in the dot product is large, so here we set an acceptable range,
             in which we think 'a' and 'b' are perpendicular.
 */
-bool AlmostPerpendicular(const vector3 & a, const vector3 & b, const Types::F32 epsilon = -1e-7f);
+bool AlmostPerpendicular(const vector3 & a, const vector3 & b, const Types::F32 epsilon = +1e-7f);
 
 /*!
     \brief check whether a vector is almost a unit vector

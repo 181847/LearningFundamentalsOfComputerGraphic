@@ -134,7 +134,7 @@ bool AlmostEqual(const vector3 & a, const vector3 & b, int ulp)
 bool AlmostPerpendicular(const vector3 & a, const vector3 & b, const Types::F32 epsilon)
 {
     Types::F32 dpValue = dotProd(a, b);
-    return -epsilon < dpValue && dpValue < epsilon;
+    return std::abs(dpValue) < std::abs(epsilon);
 }
 
 bool AlmostIsUnitVector(const vector3 & a, int ulp)
