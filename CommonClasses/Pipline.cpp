@@ -12,13 +12,13 @@ Pipline::Pipline()
     // prepare triangle cutting planes
     m_frustumCutPlanes.push_back(std::make_unique<WZeroHPlaneEquation>());
 
-
+    // please keep those cut planes for drawing wire frame for triangles.
     m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<NEAR_FRUSTUM_PLANE>>());
-    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, true >>());
-    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, true >>());
-    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<0, false>>());
-    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<1, false>>());
-    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<2, false>>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<FAR_FRUSTUM_PLANE>>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<LEFT_FRUSTUM_PLANE>>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<RIGHT_FRUSTUM_PLANE>>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<BOTTOM_FRUSTUM_PLANE>>());
+    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<TOP_FRUSTUM_PLANE>>());
 }
 
 Pipline::~Pipline()
@@ -163,7 +163,6 @@ void Pipline::DrawBresenhamLine(const ScreenSpaceVertexTemplate* pv1, const Scre
     x1 = static_cast<Types::I32>(pv2->m_posH.m_x);
     y1 = static_cast<Types::I32>(pv2->m_posH.m_y);
 
-    
     bool steep = std::abs(y1 - y0) > std::abs(x1 - x0);
     // ensure the absolute value of slope of the line is less than one.
     if (steep)
@@ -866,7 +865,8 @@ std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_pt
         // copy the memory of the vertex, ensure the data (except the location) is same.
         memcpy(pDestVertex, pSrcVertex, realVertexSizeBytes);
 
-        // perspective divided
+        // perspective divided, please notice that the m_posH.m_w is the depth in camera space
+        // and it should be positive.
         const Types::F32 RECIPOCAL_W = 1.0f / pDestVertex->m_posH.m_w;
 
         if (pDestVertex->m_posH.m_w != 1.0f)
@@ -875,13 +875,12 @@ std::unique_ptr<F32Buffer> Pipline::ViewportTransformVertexStream(std::unique_pt
             pDestVertex->m_posH.m_y *= RECIPOCAL_W;
             pDestVertex->m_posH.m_z *= RECIPOCAL_W;
             pDestVertex->m_posH.m_w = 1.0f;
-
         }
 
         // transform to screen space
         pDestVertex->m_posH = viewportTransformMat * pDestVertex->m_posH;
 
-        // for perspective correction
+        // for perspective correction, store the 1/w where w is the depth in camera space
         pDestVertex->m_posH.m_w = RECIPOCAL_W;
         for (unsigned int i = 0; i < ScreenSpaceVertexTemplate::NumRestFloat(realVertexSizeBytes); ++i)
         {
@@ -904,14 +903,12 @@ std::unique_ptr<F32Buffer> Pipline::VertexShaderTransform(const F32Buffer * pVer
     assert(sizeOfInputStream % vsInputStride == 0 && "vertexShader stream input error, the size is not complete.");
 
     const unsigned int  numVertex           = sizeOfInputStream / vsInputStride;
-
     auto                vertexOutputStream  = std::make_unique<F32Buffer>(numVertex * vsOutputStride);
 
     unsigned char *     pVSInput            = pVertexStream->GetBuffer();
     unsigned char *     pVSOutput           = vertexOutputStream->GetBuffer();
 
-    auto                vertexShader = m_pso->m_vertexShader;
-
+    auto                vertexShader        = m_pso->m_vertexShader;
     for (unsigned int i = 0; i < numVertex; ++i)
     {
         vertexShader(pVSInput, reinterpret_cast<ScreenSpaceVertexTemplate*>(pVSOutput));
@@ -976,7 +973,7 @@ void Pipline::DrawTriangleList(const std::vector<unsigned int>& indices, std::un
             {
                 DrawTriangle(pv1, pv2, pv3, psInputStride);
             }
-            else // is wireframe mode, just draw lines.
+            else // is wire frame mode, just draw lines.
             {
                 DrawBresenhamLine(pv1, pv2, psInputStride);
                 DrawBresenhamLine(pv1, pv3, psInputStride);
