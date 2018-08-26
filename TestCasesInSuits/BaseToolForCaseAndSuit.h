@@ -35,6 +35,21 @@ public:
         }
     };
 
+    // constant buffer for instances
+    struct ConstantBufferForInstance
+    {
+        Transform m_toWorld;         // matrix for objects to world
+        Transform m_toWorldInverse;  // inverse matrix to world
+    };
+
+    // constant buffer for camera settings
+    struct ConstantBufferForCamera
+    {
+        Transform m_toCamera;        // matrix to transform vertex to camera space
+        Transform m_toCameraInverse; // inverse matrix from world to camera
+        Transform m_project;         // projection matrix
+    };
+
 public:
     // membbers
     int COMMON_PIXEL_WIDTH      = 512;
@@ -85,7 +100,7 @@ public:
         and call drawing function with mesh data.
     */
     std::unique_ptr<Pipline> GetCommonPipline()
-    {
+     {
         // create and set a pipline.
         auto pipline = std::make_unique<Pipline>();
         pipline->SetPSO(std::move(GetCommonPSO()));
@@ -131,7 +146,28 @@ public:
             pDestH->m_rayIndex = normalTrs * normal;
         };
     }
-        
+
+    /*!
+        \brief get a useful vertex shader that require a ConstantBuffer for transformations.
+    */
+    static std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormalAndConstantBuffer(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
+    {
+        return [&constBufInstance, &constBufCamera](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
+            SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
+
+            hvector world  = constBufInstance.m_toWorld * pSrcH->m_position;
+            hvector camera = constBufCamera.m_toCamera * world;
+
+            pDestH->m_position = constBufCamera.m_project * camera;
+            //pDestH->m_position = pSrcH->m_position;
+
+            hvector normal = pSrcH->m_rayIndex;
+            normal.m_w = 0.0f;// ensure translation will not affect calculations.
+            Transform transformNormalToCamera = (constBufInstance.m_toWorldInverse * constBufCamera.m_toCameraInverse).T();// take transposes
+            pDestH->m_rayIndex = transformNormalToCamera * normal;
+        };
+    }
 };
 
 /*!
