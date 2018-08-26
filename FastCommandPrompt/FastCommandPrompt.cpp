@@ -157,7 +157,7 @@ ImguiWrapImageDX11 BuildATempImage()
     points.clear();
     for (const auto& vertex : meshData.m_vertices)
     {
-        SimplePoint sp(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector());
+        SimplePoint sp(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f));
         points.push_back(sp);
     }
 
