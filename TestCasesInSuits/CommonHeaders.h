@@ -33,5 +33,6 @@
 #include "../CommonClasses/DepthBuffer.h"
 #include "../CommonClasses/GeomentryBuilder.h"
 #include "../CommonClasses/Filter.h"
+#include "../CommonClasses/CameraFrame.h"
 
 #include "BaseToolForCaseAndSuit.h"
