@@ -541,7 +541,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
     for (const auto& vertex : meshData.m_vertices)
     {
-        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -614,7 +614,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 
     for (const auto& vertex : meshData.m_vertices)
     {
-        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -688,7 +688,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
 
     for (const auto& vertex : meshData.m_vertices)
     {
-        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -765,7 +765,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 
     for (const auto& vertex : meshData.m_vertices)
     {
-        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
+        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
     }
 
     auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
@@ -807,57 +807,105 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     depthImg.SaveTo(this->GetSafeStoragePath() + L"geosphere_" + pictureIndex + L"_depth.png");
 }
 
-void CASE_NAME_IN_RASTER_TRI(NormalOfSphere)::Run()
+void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
 {
-    using SimplePoint = CommonEnvironment::SimplePoint;
+    using SimplePoint               = CommonEnvironment::SimplePoint;
+    using ConstantBufferForCamera   = CommonEnvironment::ConstantBufferForCamera;
+    using ConstantBufferForInstance = CommonEnvironment::ConstantBufferForInstance;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
 
-    auto pipline = pEnvironment->GetCommonPipline();
-    auto pso = pipline->GetPSO();
-
-    pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
-
-    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
-
-    const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
-
-    // rotate the line a little.
-    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
+    // build two frame, to render the scene in different view.
+    const unsigned int CAM1 = 0, CAM2 = 1;
+    std::array<std::unique_ptr<CommonClass::Pipline>,           2> piplines = { pEnvironment->GetCommonPipline() , pEnvironment->GetCommonPipline() };
+    std::array<std::shared_ptr<CommonClass::PiplineStateObject>,2> PSOs     = { piplines[CAM1]->GetPSO(),          piplines[CAM2]->GetPSO()};
 
     // perspective transformation
+    const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
     Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
 
-    Transform trs = Transform::TRS(vector3(0, 0, -5), vector3(1, 1, 0), vector3(2, 1, 1));
-    Transform normalTrs = Transform::InverseTRS(vector3(0, 0, -5), vector3(1, 1, 0), vector3(2, 1, 1)).T();
+    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
+    std::array<ConstantBufferForInstance, 3> instances;
+    //instances[0].m_toWorld          = Transform();
+    //instances[0].m_toWorldInverse   = Transform();
+    instances[0].m_toWorld          = Transform::TRS        (vector3(0.0f, -1.0f, 0.0f), vector3(0, 0, 0),                             vector3(1.5f, 2.1f, 1.0f));
+    instances[0].m_toWorldInverse   = Transform::InverseTRS (vector3(0.0f, -1.0f, 0.0f), vector3(0, 0, 0),                             vector3(1.5f, 2.1f, 1.0f));
+    instances[1].m_toWorld          = Transform::TRS        (vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll),                 vector3(1.5f, 1.5f, 1.5f));
+    instances[1].m_toWorldInverse   = Transform::InverseTRS (vector3(-0.1f, 1.4f, -3.2f), vector3(pitch, yaw + 3.14f / 3, roll),                 vector3(1.5f, 1.5f, 1.5f));
+    instances[2].m_toWorld          = Transform::TRS        (vector3(0.4f, 0.6f, -4.0f),  vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.8f, 0.8f, 0.8f));
+    instances[2].m_toWorldInverse   = Transform::InverseTRS (vector3(0.4f, 0.6f, -4.0f),  vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(0.8f, 0.8f, 0.8f));
 
-    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
+    std::wstring pictureIndex = L"005";
+    std::array<CameraFrame, 2> cameraFrames = {
+        CameraFrame(vector3(1.0f, 0.0f, 1.0f) * 3.0f, vector3(0.0f, 0.0f, 0.0f)),
+        CameraFrame(vector3(1.0f, 0.5f, -1.0f) * 4.0f, vector3(0.0f, 0.0f, 0.0f))};
+    std::array<ConstantBufferForCamera, 2> cameraBuffer;
+    cameraBuffer[CAM1].m_toCamera           = cameraFrames[CAM1].WorldToLocal();
+    cameraBuffer[CAM1].m_toCameraInverse    = cameraFrames[CAM1].LocalToWorld();
+    cameraBuffer[CAM1].m_project            = perspect;
+    cameraBuffer[CAM2].m_toCamera           = cameraFrames[CAM2].WorldToLocal();
+    cameraBuffer[CAM2].m_toCameraInverse    = cameraFrames[CAM2].LocalToWorld();
+    cameraBuffer[CAM2].m_project            = perspect;
 
-    std::vector<SimplePoint> points;
+    ConstantBufferForInstance instanceBufAgent;// agent buffer for setting instance data
+    // two pipline will share the same instanceData, but with different Camera.
+    PSOs[CAM1]->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM1]);
+    PSOs[CAM2]->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM2]);
+
+    // set pixel shader, two pipline will share the same pixel shader.
+    PSOs[CAM1]->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
+    PSOs[CAM2]->m_pixelShader = PSOs[CAM1]->m_pixelShader;
+
+    // build mesh data
+    std::vector<SimplePoint>  vertices;
     std::vector<unsigned int> indices;
-    auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
+    auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 50, 3, true);
     indices = meshData.m_indices;
-    points.clear();
-
+    vertices.clear();
     for (const auto& vertex : meshData.m_vertices)
     {
-        points.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector()));
+        vertices.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
     }
-
-    auto vertexBuffer = std::make_unique<F32Buffer>(points.size() * sizeof(SimplePoint));
-    memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
-
-    pso->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
-    pso->m_cullFace = CullFace::CLOCK_WISE;
+    auto vertexBuffer = std::make_unique<F32Buffer>(vertices.size() * sizeof(SimplePoint));
+    memcpy(vertexBuffer->GetBuffer(), vertices.data(), vertexBuffer->GetSizeOfByte());
+    
+    for (auto& pso : PSOs)
+    {
+        pso->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
+        pso->m_cullFace      = CullFace::CLOCK_WISE;
+        pso->m_fillMode      = FillMode::SOLIDE;
+    }
+    instanceBufAgent = instances[0];
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
-        pipline->DrawInstance(indices, vertexBuffer.get());
+        piplines[CAM1]->DrawInstance(indices, vertexBuffer.get());
+        piplines[CAM2]->DrawInstance(indices, vertexBuffer.get());
+    }
+    
+    for (auto& pso : PSOs) { pso->m_fillMode = FillMode::SOLIDE; }
+    instanceBufAgent = instances[1];
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        piplines[CAM1]->DrawInstance(indices, vertexBuffer.get());
+        piplines[CAM2]->DrawInstance(indices, vertexBuffer.get());
     }
 
-    std::wstring pictureIndex = L"004";
-    SaveAndShowPiplineBackbuffer((*(pipline.get())), L"normalInGeoSphere_" + pictureIndex);
+    for (auto& pso : PSOs) { pso->m_fillMode = FillMode::WIREFRAME; }
+    instanceBufAgent = instances[2];
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        piplines[CAM1]->DrawInstance(indices, vertexBuffer.get());
+        piplines[CAM2]->DrawInstance(indices, vertexBuffer.get());
+    }
 
-    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
-    BlockShowImg(&depthImg, L"normal vectors of geoSphere");
-    depthImg.SaveTo(this->GetSafeStoragePath() + L"normalInGeoSphere" + pictureIndex + L"_depth.png");
+    for (unsigned int i = 0; i < piplines.size(); ++i)
+    {
+        std::wstring pictureNameWithNoExt = L"geosphere_" + pictureIndex + L"_cam" + std::to_wstring(i);
+        SaveAndShowPiplineBackbuffer((*(piplines[i].get())), pictureNameWithNoExt);
+        Image depthImg = ToImage(*(piplines[i]->m_depthBuffer.get()), -1 / NEAR);
+        BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
+        depthImg.SaveTo(this->GetSafeStoragePath() + pictureNameWithNoExt + L"_depth.png");
+    }
 }
