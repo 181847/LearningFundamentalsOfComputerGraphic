@@ -2,7 +2,7 @@
 
 void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
 {
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
 
     auto pso = pipline->GetPSO();
 
@@ -13,9 +13,9 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
     Viewport viewport;
     viewport.left = 0;
-    viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.0f;
+    viewport.right = COMMON_PIXEL_WIDTH - 1.0f;
     viewport.bottom = 0;
-    viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.0f;
+    viewport.top = COMMON_PIXEL_HEIGHT - 1.0f;
     pso->SetViewport(viewport);
 
     std::array<hvector, 3> triv = {
@@ -38,10 +38,7 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
 {
-    using SimplePoint = CommonEnvironment::SimplePoint;
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
-
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
         
     // the pixel shader will not work
@@ -153,7 +150,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
 void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
 {
     // create and set a pipline.
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     // create and config pipeline state object
     auto pso = pipline->GetPSO();
 
@@ -232,7 +229,7 @@ void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle)::Run()
 {
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
@@ -337,7 +334,7 @@ void CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut)::Run()
 {
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
@@ -414,10 +411,7 @@ void CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
 {
-    using SimplePoint = CommonEnvironment::SimplePoint;
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
-
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
@@ -510,15 +504,12 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 {
-    using SimplePoint = CommonEnvironment::SimplePoint;
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
-
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
+    pso->m_pixelShader = GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -531,7 +522,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
     Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
+    pso->m_vertexShader = GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
@@ -583,15 +574,15 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 {
-    using SimplePoint = CommonEnvironment::SimplePoint;
+    using SimplePoint = SimplePoint;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
 
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
+    pso->m_pixelShader = GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -604,7 +595,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
     Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
+    pso->m_vertexShader = GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
@@ -657,15 +648,15 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
 {
 
-    using SimplePoint = CommonEnvironment::SimplePoint;
+    using SimplePoint = SimplePoint;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
 
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
+    pso->m_pixelShader = GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -678,7 +669,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
     Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
+    pso->m_vertexShader = GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
@@ -734,15 +725,15 @@ void CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe)::Run()
 void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 {
 
-    using SimplePoint = CommonEnvironment::SimplePoint;
+    using SimplePoint = SimplePoint;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
 
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_cullFace = CullFace::COUNTER_CLOCK_WISE;
 
-    pso->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
+    pso->m_pixelShader = GetPixelShaderWithNormal();
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
 
@@ -755,7 +746,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     Transform trs = Transform::TRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f));
     Transform normalTrs = Transform::InverseTRS(vector3(-1.0f, 0.0f, -3.0f), vector3(pitch, yaw, roll), vector3(1.5f, 2.1f, 1.0f)).T();
 
-    pso->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormal(trs, perspect, normalTrs);
+    pso->m_vertexShader = GetVertexShaderWithNormal(trs, perspect, normalTrs);
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
@@ -809,14 +800,14 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
 {
-    using SimplePoint               = CommonEnvironment::SimplePoint;
-    using ConstantBufferForCamera   = CommonEnvironment::ConstantBufferForCamera;
-    using ConstantBufferForInstance = CommonEnvironment::ConstantBufferForInstance;
+    using SimplePoint               = SimplePoint;
+    using ConstantBufferForCamera   = ConstantBufferForCamera;
+    using ConstantBufferForInstance = ConstantBufferForInstance;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
 
     // build two frame, to render the scene in different view.
     const unsigned int CAM1 = 0, CAM2 = 1;
-    std::array<std::unique_ptr<CommonClass::Pipline>,           2> piplines = { pEnvironment->GetCommonPipline() , pEnvironment->GetCommonPipline() };
+    std::array<std::unique_ptr<CommonClass::Pipline>,           2> piplines = { GetCommonPipline() , GetCommonPipline() };
     std::array<std::shared_ptr<CommonClass::PiplineStateObject>,2> PSOs     = { piplines[CAM1]->GetPSO(),          piplines[CAM2]->GetPSO()};
 
     // perspective transformation
@@ -848,11 +839,11 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
 
     ConstantBufferForInstance instanceBufAgent;// agent buffer for setting instance data
     // two pipline will share the same instanceData, but with different Camera.
-    PSOs[CAM1]->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM1]);
-    PSOs[CAM2]->m_vertexShader = CommonEnvironment::GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM2]);
+    PSOs[CAM1]->m_vertexShader = GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM1]);
+    PSOs[CAM2]->m_vertexShader = GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM2]);
 
     // set pixel shader, two pipline will share the same pixel shader.
-    PSOs[CAM1]->m_pixelShader = CommonEnvironment::GetPixelShaderWithNormal();
+    PSOs[CAM1]->m_pixelShader = GetPixelShaderWithNormal();
     PSOs[CAM2]->m_pixelShader = PSOs[CAM1]->m_pixelShader;
 
     // build mesh data

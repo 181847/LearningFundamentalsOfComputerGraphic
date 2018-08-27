@@ -38,16 +38,16 @@ DECLARE_CASE_IN_RASTER_TRI_FOR(GeoSphereMesh, "render a geo sphere mesh builded 
 DECLARE_CASE_IN_RASTER_TRI_FOR(UsingCameraFrame, "render a geo sphere mesh builded by triangles");
 
 using SuitForRasterizeTriangle = SuitForPipline<
-    //CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
-    //CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),
-    //CASE_NAME_IN_RASTER_TRI(TriangleCut),
-    //CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle),
-    //CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut),
-    //CASE_NAME_IN_RASTER_TRI(CubeMesh),
-    //CASE_NAME_IN_RASTER_TRI(CylinderMesh),
-    //CASE_NAME_IN_RASTER_TRI(SphereMesh),
-    //CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe),
-    //CASE_NAME_IN_RASTER_TRI(GeoSphereMesh),
+    CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
+    CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),
+    CASE_NAME_IN_RASTER_TRI(TriangleCut),
+    CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle),
+    CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut),
+    CASE_NAME_IN_RASTER_TRI(CubeMesh),
+    CASE_NAME_IN_RASTER_TRI(CylinderMesh),
+    CASE_NAME_IN_RASTER_TRI(SphereMesh),
+    CASE_NAME_IN_RASTER_TRI(SphereMeshInWireframe),
+    CASE_NAME_IN_RASTER_TRI(GeoSphereMesh),
     CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)
 >;
 

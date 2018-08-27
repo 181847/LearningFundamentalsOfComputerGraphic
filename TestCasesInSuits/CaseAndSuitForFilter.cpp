@@ -47,10 +47,7 @@ void CASE_NAME_IN_FILTER(GenerateLocMap)::Run()
 
 void CASE_NAME_IN_FILTER(Exercise)::Run()
 {
-    using SimplePoint = CommonEnvironment::SimplePoint;
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
-
-    auto pipline = pEnvironment->GetCommonPipline();
+    auto pipline = GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     // the pixel shader will not work

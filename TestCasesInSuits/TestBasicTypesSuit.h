@@ -1507,9 +1507,9 @@ public:
 
         Viewport viewport;
         viewport.left = 0;
-        viewport.right = pEnvironment->COMMON_PIXEL_WIDTH - 1.0f;
+        viewport.right = COMMON_PIXEL_WIDTH - 1.0f;
         viewport.bottom = 0;
-        viewport.top = pEnvironment->COMMON_PIXEL_HEIGHT - 1.0f;
+        viewport.top = COMMON_PIXEL_HEIGHT - 1.0f;
         pso->SetViewport(viewport);
 
         // create and set a pipeline.
@@ -1518,8 +1518,8 @@ public:
 
         // set a backbuffer
         pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
-            pEnvironment->COMMON_PIXEL_WIDTH,
-            pEnvironment->COMMON_PIXEL_HEIGHT,
+            COMMON_PIXEL_WIDTH,
+            COMMON_PIXEL_HEIGHT,
             RGBA::WHITE));
 
         RandomTool::MTRandom mtr;

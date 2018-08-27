@@ -209,7 +209,7 @@ void CASE_NAME_IN_RAY_RENDER(InsideBoxesAndSphere)::Run()
     PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
 
     camera.SetFilm(std::make_unique<Film>(
-        pEnvironment->COMMON_PIXEL_WIDTH, pEnvironment->COMMON_PIXEL_HEIGHT,
+        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT,
         -0.5f, +0.5f,
         -0.5f, +0.5f));
 
