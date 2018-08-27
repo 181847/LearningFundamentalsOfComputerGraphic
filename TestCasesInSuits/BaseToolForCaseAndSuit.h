@@ -10,10 +10,14 @@
 using namespace CommonClass;
 
 /*!
-    \brief the common environment for pipline, for example: some useful pixel shader, pipline stateObject.
+    \brief base case class that have common function for and useful Environment for pipline testing.
+    for the Suit class, you should use SuitForPipline.
 */
-class CommonEnvironment
+class CaseForPipline : public TestSuit::Case
 {
+protected:
+    using Super = CaseForPipline;
+
 public:
     // temp struct for generous case
     struct SimplePoint
@@ -34,6 +38,7 @@ public:
             // empty
         }
     };
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "The size of SimplePoint is not matched for this case.");
 
     // constant buffer for instances
     struct ConstantBufferForInstance
@@ -50,144 +55,16 @@ public:
         Transform m_project;         // projection matrix
     };
 
-public:
+protected:
     // membbers
     int COMMON_PIXEL_WIDTH      = 512;
     int COMMON_PIXEL_HEIGHT     = 512;
 
     // render boundary can be used in orthographic camera.
-    float COMMON_RENDER_LEFT      = -3.0f;
-    float COMMON_RENDER_RIGHT     = +3.0f;
-    float COMMON_RENDER_BOTTOM    = -3.0f;
-    float COMMON_RENDER_TOP       = +3.0f;
-
-public:
-    CommonEnvironment()
-    {
-        // empty
-    }
-
-    /*!
-        \brief Build common PiplineStateObject for using.
-    */
-    std::unique_ptr<PiplineStateObject> GetCommonPSO()
-    {
-        auto pso = std::make_unique<PiplineStateObject>();
-        pso->m_primitiveType = PrimitiveType::LINE_LIST;
-        pso->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
-        pso->m_vertexLayout.pixelShaderInputSize = sizeof(SimplePoint);
-        pso->SetViewport(GetCommonViewport());
-
-        return std::move(pso);
-    }
-
-    /*!
-        \brief Build common viewport by the default view size defined in CommonEnvironment.
-    */
-    Viewport GetCommonViewport()
-    {
-        Viewport viewport;
-        viewport.left = 0.0f;
-        viewport.right = static_cast<Types::F32>(COMMON_PIXEL_WIDTH - 1);
-        viewport.bottom = 0.0f;
-        viewport.top = static_cast<Types::F32>(COMMON_PIXEL_HEIGHT - 1);
-        return viewport;
-    }
-
-    /*!
-        \brief Build common Pipline for drawing, 
-        all you need do is to set PixelShader/VertexShader, 
-        and call drawing function with mesh data.
-    */
-    std::unique_ptr<Pipline> GetCommonPipline()
-     {
-        // create and set a pipline.
-        auto pipline = std::make_unique<Pipline>();
-        pipline->SetPSO(std::move(GetCommonPSO()));
-
-        // set a back buffer
-        pipline->SetBackBuffer(std::make_unique<RasterizeImage>(
-            COMMON_PIXEL_WIDTH,
-            COMMON_PIXEL_HEIGHT,
-            RGBA::WHITE));
-
-        return std::move(pipline);
-    }
-
-    /*!
-        \brief pixel shader for vertex that have normal.
-    */
-    static std::function<RGBA(const ScreenSpaceVertexTemplate*)> GetPixelShaderWithNormal()
-    {
-        return [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-            const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
-            vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
-            
-            vector3 normal = pPoint->m_rayIndex.ToVector3();
-            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
-
-            RGB result = kw * RGB::BLUE + (1 - kw) * RGB::RED;
-            return Cast(result);
-        };
-    }
-
-    static typename std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormal(Transform& trs, Transform& perspect, Transform& normalTrs)
-    {
-        return [&trs, &perspect, &normalTrs](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
-            SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
-
-            hvector inViewPos = trs * pSrcH->m_position;
-
-            pDestH->m_position = perspect * inViewPos;
-            //pDestH->m_position = pSrcH->m_position;
-            hvector normal = pSrcH->m_rayIndex;
-            normal.m_w = 0.0f;
-            pDestH->m_rayIndex = normalTrs * normal;
-        };
-    }
-
-    /*!
-        \brief get a useful vertex shader that require a ConstantBuffer for transformations.
-    */
-    static std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormalAndConstantBuffer(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
-    {
-        return [&constBufInstance, &constBufCamera](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
-            SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
-
-            hvector world  = constBufInstance.m_toWorld * pSrcH->m_position;
-            hvector camera = constBufCamera.m_toCamera * world;
-
-            pDestH->m_position = constBufCamera.m_project * camera;
-            //pDestH->m_position = pSrcH->m_position;
-
-            hvector normal = pSrcH->m_rayIndex;
-            normal.m_w = 0.0f;// ensure translation will not affect calculations.
-            Transform transformNormalToCamera = (constBufInstance.m_toWorldInverse * constBufCamera.m_toCameraInverse).T();// take transposes
-            pDestH->m_rayIndex = transformNormalToCamera * normal;
-        };
-    }
-};
-
-/*!
-    \brief base case class that have common function for and useful Environment for pipline testing.
-    for the Suit class, you should use SuitForPipline.
-*/
-class CaseForPipline : public TestSuit::Case
-{
-protected:
-    using Super = CaseForPipline;
-
-public:
-    using SimplePoint = CommonEnvironment::SimplePoint;
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "The size of SimplePoint is not matched for this case.");
-
-protected:
-    /*!
-        \brief the environment pointer for configuration.
-    */
-    CommonEnvironment * pEnvironment;
+    float COMMON_RENDER_LEFT    = -3.0f;
+    float COMMON_RENDER_RIGHT   = +3.0f;
+    float COMMON_RENDER_BOTTOM  = -3.0f;
+    float COMMON_RENDER_TOP     = +3.0f;
 
     /*!
         \brief the random number generator.
@@ -202,11 +79,7 @@ protected:
 public:
     CaseForPipline(const std::string& caseName) : Case(caseName) {}
 
-    virtual void SetEnvironment(void * pEnvironment) override
-    {
-        assert(pEnvironment != nullptr);
-        this->pEnvironment = reinterpret_cast<CommonEnvironment*>(pEnvironment);
-    }
+    void Run() {}
 
     /*!
         \brief fill in the mesh data with sphere ray line list.
@@ -514,6 +387,106 @@ public:
     {
         pipline.m_backBuffer->SaveTo(GetSafeStoragePath() + nameOfImgAndWindow + L".png");
         BlockShowImg(pipline.m_backBuffer.get(), nameOfImgAndWindow);
+    }/*!
+        \brief Build common PiplineStateObject for using.
+    */
+    std::unique_ptr<PiplineStateObject> GetCommonPSO()
+    {
+        auto pso = std::make_unique<PiplineStateObject>();
+        pso->m_primitiveType = PrimitiveType::LINE_LIST;
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
+        pso->m_vertexLayout.pixelShaderInputSize = sizeof(SimplePoint);
+        pso->SetViewport(GetCommonViewport());
+
+        return std::move(pso);
+    }
+
+    /*!
+        \brief Build common viewport by the default view size defined in CommonEnvironment.
+    */
+    Viewport GetCommonViewport()
+    {
+        Viewport viewport;
+        viewport.left = 0.0f;
+        viewport.right = static_cast<Types::F32>(COMMON_PIXEL_WIDTH - 1);
+        viewport.bottom = 0.0f;
+        viewport.top = static_cast<Types::F32>(COMMON_PIXEL_HEIGHT - 1);
+        return viewport;
+    }
+
+    /*!
+        \brief Build common Pipline for drawing, 
+        all you need do is to set PixelShader/VertexShader, 
+        and call drawing function with mesh data.
+    */
+    std::unique_ptr<Pipline> GetCommonPipline()
+     {
+        // create and set a pipline.
+        auto pipline = std::make_unique<Pipline>();
+        pipline->SetPSO(std::move(GetCommonPSO()));
+
+        // set a back buffer
+        pipline->SetBackBuffer(std::make_unique<RasterizeImage>(
+            COMMON_PIXEL_WIDTH,
+            COMMON_PIXEL_HEIGHT,
+            RGBA::WHITE));
+
+        return std::move(pipline);
+    }
+
+    /*!
+        \brief pixel shader for vertex that have normal.
+    */
+    static std::function<RGBA(const ScreenSpaceVertexTemplate*)> GetPixelShaderWithNormal()
+    {
+        return [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
+            vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
+            
+            vector3 normal = pPoint->m_rayIndex.ToVector3();
+            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
+
+            RGB result = kw * RGB::BLUE + (1 - kw) * RGB::RED;
+            return Cast(result);
+        };
+    }
+
+    static typename std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormal(Transform& trs, Transform& perspect, Transform& normalTrs)
+    {
+        return [&trs, &perspect, &normalTrs](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
+            SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
+
+            hvector inViewPos = trs * pSrcH->m_position;
+
+            pDestH->m_position = perspect * inViewPos;
+            //pDestH->m_position = pSrcH->m_position;
+            hvector normal = pSrcH->m_rayIndex;
+            normal.m_w = 0.0f;
+            pDestH->m_rayIndex = normalTrs * normal;
+        };
+    }
+
+    /*!
+        \brief get a useful vertex shader that require a ConstantBuffer for transformations.
+    */
+    static std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormalAndConstantBuffer(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
+    {
+        return [&constBufInstance, &constBufCamera](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
+            SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
+
+            hvector world  = constBufInstance.m_toWorld * pSrcH->m_position;
+            hvector camera = constBufCamera.m_toCamera * world;
+
+            pDestH->m_position = constBufCamera.m_project * camera;
+            //pDestH->m_position = pSrcH->m_position;
+
+            hvector normal = pSrcH->m_rayIndex;
+            normal.m_w = 0.0f;// ensure translation will not affect calculations.
+            Transform transformNormalToCamera = (constBufInstance.m_toWorldInverse * constBufCamera.m_toCameraInverse).T();// take transposes
+            pDestH->m_rayIndex = transformNormalToCamera * normal;
+        };
     }
 };
 
@@ -525,16 +498,5 @@ template<typename ... CASE_TYPE_LIST>
 class SuitForPipline: public TestSuit::Suit<CASE_TYPE_LIST...>
 {
 public:
-    virtual void * PrepareBeforeEachCase(TestSuit::Case * pTheCase) override
-    {
-        CommonEnvironment * pNewEnv = new CommonEnvironment;
-        return pNewEnv;
-    }
-
-    virtual void FinishEachCase(TestSuit::Case * pTheCase, void * pEnvironment) override
-    {
-        delete reinterpret_cast<CommonEnvironment*>(pEnvironment);
-    }
-
 };
 
