@@ -373,7 +373,7 @@ public:
         auto path = GetStoragePath();
         if ( ! std::experimental::filesystem::exists(path))
         {
-            std::experimental::filesystem::create_directory(path);
+            std::experimental::filesystem::create_directories(path);
         }
         return path;
     }
