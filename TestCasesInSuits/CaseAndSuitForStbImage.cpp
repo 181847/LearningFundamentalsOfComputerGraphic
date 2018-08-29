@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 extern "C"
 {
-#include <stb_image.h>
+#include <stb/stb_image.h>
 }
 
 
