@@ -10,21 +10,15 @@
 #include "CaseAndSuitForFilter.h"
 #include "CaseAndSuitForStbImage.h"
 
-#ifdef _DEBUG // static library for debug
-#pragma comment(lib, "MyTools/lib/Debug/MyTool.lib")
-#endif
-
-#pragma comment(lib, "CommonClasses.lib")
-
 int main()
 {
     TestSuit::SuitQueueRunner<
-        //BasicTypesTestSuit_Runable, 
-        //SuitForCommonClasses,
-        //SuitForRayRender,
-        //SuitForRasterisation, 
+        BasicTypesTestSuit_Runable, 
+        SuitForCommonClasses,
+        SuitForRayRender,
+        SuitForRasterisation, 
         SuitForRasterizeTriangle,
-        //SuitForFilter,
+        SuitForFilter,
         SuitForStbImage
     > suitQueueRunner;
 
