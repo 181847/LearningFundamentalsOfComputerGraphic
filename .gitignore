@@ -243,3 +243,6 @@ ModelManifest.xml
 s
 # ignore all image files end with png which is the output image file type of this project.
 *.png
+
+# all result in './build' directory
+build/
