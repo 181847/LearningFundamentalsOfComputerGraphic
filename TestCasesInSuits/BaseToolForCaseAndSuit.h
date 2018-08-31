@@ -47,12 +47,25 @@ public:
         Transform m_toWorldInverse;  // inverse matrix to world
     };
 
-    // constant buffer for camera settings
+    /*!
+        \brief the buffer of light
+    */
+    struct Ligth
+    {
+        vector3 m_position;
+        vector3 m_color;
+    };
+
+    /*!
+        \brief constant buffer for camera settings
+    */
     struct ConstantBufferForCamera
     {
-        Transform m_toCamera;        // matrix to transform vertex to camera space
-        Transform m_toCameraInverse; // inverse matrix from world to camera
-        Transform m_project;         // projection matrix
+        Transform               m_toCamera;         // matrix to transform vertex to camera space
+        Transform               m_toCameraInverse;  // inverse matrix from world to camera
+        Transform               m_project;          // projection matrix
+        std::array<Light, 3>    m_lights;           // the lights in scene
+        int                     m_numLights;        // the number of light in the scene, less or equal m_lights.size().
     };
 
 protected:
