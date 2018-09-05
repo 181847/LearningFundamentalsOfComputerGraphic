@@ -800,9 +800,6 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
 {
-    using SimplePoint               = SimplePoint;
-    using ConstantBufferForCamera   = ConstantBufferForCamera;
-    using ConstantBufferForInstance = ConstantBufferForInstance;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
 
     // build two frame, to render the scene in different view.
@@ -899,4 +896,102 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
         BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
         depthImg.SaveTo(this->GetSafeStoragePath() + pictureNameWithNoExt + L"_depth.png");
     }
+}
+
+void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
+{
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
+
+    auto pipline = GetCommonPipline();
+    std::shared_ptr<CommonClass::PiplineStateObject> PSO = pipline->GetPSO();
+    PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
+    PSO->m_vertexLayout.pixelShaderInputSize = sizeof(PSIn);
+
+    // perspective transformation
+    const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);
+    Transform perspect = Transform::PerspectiveOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
+
+    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
+    std::array<ObjectInstance, 3> objInstances;
+    // 1
+    objInstances[0].m_position  = vector3(0.0f, 0.0f, 0.0f);
+    objInstances[0].m_rotation  = vector3(0, 0, 0);
+    objInstances[0].m_scale     = vector3(1.5f, 2.1f, 1.0f);
+    // 2
+    objInstances[1].m_position  = vector3(1.0f, 1.4f, 0.0f);
+    objInstances[1].m_rotation  = vector3(pitch, yaw + 3.14f / 3, roll);
+    objInstances[1].m_scale     = vector3(1.5f, 1.5f, 1.5f);
+    // 3
+    objInstances[2].m_position  = vector3(-1.0f, 2.8f, 0.0f);
+    objInstances[2].m_rotation  = vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f);
+    objInstances[2].m_scale     = vector3(0.8f, 0.8f, 0.8f);
+
+    std::array<ConstantBufferForInstance, 3> instanceBuffers;
+    for (unsigned int i = 0; i < instanceBuffers.size(); ++i)
+    {
+        instanceBuffers[i].m_toWorld        = Transform::       TRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
+        instanceBuffers[i].m_toWorldInverse = Transform::InverseTRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
+        instanceBuffers[i].m_material.m_diffuse = RGB::WHITE;
+    }// end for
+
+    std::wstring pictureIndex = L"007";
+    CameraFrame cameraFrames(vector3(0.0f, 0.0f, 1.0f) * 3.0f /* location */, vector3(0.0f, 0.0f, 0.0f) /* target */);
+    ConstantBufferForCamera cameraBuffer;
+    cameraBuffer.m_toCamera         = cameraFrames.WorldToLocal();
+    cameraBuffer.m_toCameraInverse  = cameraFrames.LocalToWorld();
+    cameraBuffer.m_project          = perspect;
+    cameraBuffer.m_numLights        = 1;
+    cameraBuffer.m_ambientColor     = RGB::RED;
+    cameraBuffer.m_lights[0]        = {vector3(5.0f, 0.0f, 5.0f), RGB(1.0f, 0.0f, 0.5f)};
+
+    ConstantBufferForInstance instanceBufAgent;// agent buffer for setting instance data
+    // set VS and PS
+    PSO->m_vertexShader = GetVertexShaderWithVSOut( instanceBufAgent, cameraBuffer);
+    PSO->m_pixelShader  = GetPixelShaderWithPSIn(   instanceBufAgent, cameraBuffer);
+
+    // build mesh data
+    std::vector<SimplePoint>  vertices;
+    std::vector<unsigned int> indices;
+    auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 8, 3, true);
+    indices = meshData.m_indices;
+    vertices.clear();
+    for (const auto& vertex : meshData.m_vertices)
+    {
+        vertices.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
+    }
+    auto vertexBuffer = std::make_unique<F32Buffer>(vertices.size() * sizeof(decltype(vertices)::value_type));
+    memcpy(vertexBuffer->GetBuffer(), vertices.data(), vertexBuffer->GetSizeOfByte());
+
+    
+    PSO->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
+    PSO->m_cullFace      = CullFace::CLOCK_WISE;
+    PSO->m_fillMode      = FillMode::SOLIDE;
+    instanceBufAgent     = instanceBuffers[0];
+    {
+        COUNT_DETAIL_TIME;
+        DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        pipline->DrawInstance(indices, vertexBuffer.get());
+    }
+
+    PSO->m_fillMode  = FillMode::SOLIDE;
+    instanceBufAgent = instanceBuffers[1];
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        pipline->DrawInstance(indices, vertexBuffer.get());
+    }
+
+    PSO->m_fillMode  = FillMode::WIREFRAME;
+    instanceBufAgent = instanceBuffers[2];
+    {
+        COUNT_DETAIL_TIME;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        pipline->DrawInstance(indices, vertexBuffer.get());
+    }
+
+    std::wstring pictureNameWithNoExt = L"geosphere_simpleEquation_" + pictureIndex;
+    SaveAndShowPiplineBackbuffer((*(pipline.get())), pictureNameWithNoExt);
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
+    BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
+    depthImg.SaveTo(this->GetSafeStoragePath() + pictureNameWithNoExt + L"_depth.png");
 }
