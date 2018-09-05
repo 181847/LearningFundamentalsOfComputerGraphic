@@ -40,20 +40,58 @@ public:
     };
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "The size of SimplePoint is not matched for this case.");
 
-    // constant buffer for instances
+    /*!
+        \brief output of the vertex shader. 
+    */
+    struct VSOut
+    {
+    public:
+        hvector m_posH;
+        hvector m_posW;
+        hvector m_normalW;
+    };
+    using PSIn = VSOut;
+    static_assert(sizeof(VSOut) == 3 * sizeof(hvector), "structure VSOut has wrong size.");
+
+    /*!
+        \brief a simple wrapper for object instance data.
+    */
+    struct ObjectInstance
+    {
+    public:
+        vector3 m_position;
+        vector3 m_rotation;
+        vector3 m_scale;
+    };
+
+    /*!
+        \brief buffer of simple material
+    */
+    struct MaterialBuffer
+    {
+    public:
+        RGB m_diffuse = RGB::WHITE;
+    };
+
+    /*!
+        \brief constant buffer for instances
+    */
     struct ConstantBufferForInstance
     {
-        Transform m_toWorld;         // matrix for objects to world
-        Transform m_toWorldInverse;  // inverse matrix to world
+    public:
+        Transform       m_toWorld;         // matrix for objects to world
+        Transform       m_toWorldInverse;  // inverse matrix to world
+        MaterialBuffer  m_material;   // material of the object
     };
 
     /*!
         \brief the buffer of light
     */
-    struct Ligth
+    struct LightBuffer
     {
-        vector3 m_position;
-        vector3 m_color;
+    public:
+        vector3 m_position = vector3::ZERO;
+        RGB     m_color    = RGB::WHITE;
     };
 
     /*!
@@ -61,11 +99,13 @@ public:
     */
     struct ConstantBufferForCamera
     {
-        Transform               m_toCamera;         // matrix to transform vertex to camera space
-        Transform               m_toCameraInverse;  // inverse matrix from world to camera
-        Transform               m_project;          // projection matrix
-        std::array<Light, 3>    m_lights;           // the lights in scene
-        int                     m_numLights;        // the number of light in the scene, less or equal m_lights.size().
+    public:
+        Transform                   m_toCamera;         // matrix to transform vertex to camera space
+        Transform                   m_toCameraInverse;  // inverse matrix from world to camera
+        Transform                   m_project;          // projection matrix
+        RGB                         m_ambientColor;     // ambientColor
+        int                         m_numLights;        // the number of light in the scene, less or equal m_lights.size().
+        std::array<LightBuffer, 3>  m_lights;           // the lights in scene
     };
 
 protected:
@@ -450,7 +490,7 @@ public:
     /*!
         \brief pixel shader for vertex that have normal.
     */
-    static std::function<RGBA(const ScreenSpaceVertexTemplate*)> GetPixelShaderWithNormal()
+    static auto GetPixelShaderWithNormal()
     {
         return [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
             const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
@@ -464,7 +504,10 @@ public:
         };
     }
 
-    static typename std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormal(Transform& trs, Transform& perspect, Transform& normalTrs)
+    /*!
+        \brief get a vertex shader with TRS/perspectCamera/normalTransformation
+    */
+    static auto GetVertexShaderWithNormal(Transform& trs, Transform& perspect, Transform& normalTrs)
     {
         return [&trs, &perspect, &normalTrs](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
@@ -483,7 +526,7 @@ public:
     /*!
         \brief get a useful vertex shader that require a ConstantBuffer for transformations.
     */
-    static std::function<void(const unsigned char *, ScreenSpaceVertexTemplate *)> GetVertexShaderWithNormalAndConstantBuffer(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
+    static auto GetVertexShaderWithNormalAndConstantBuffer(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
     {
         return [&constBufInstance, &constBufCamera](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
@@ -499,6 +542,49 @@ public:
             normal.m_w = 0.0f;// ensure translation will not affect calculations.
             Transform transformNormalToCamera = (constBufInstance.m_toWorldInverse * constBufCamera.m_toCameraInverse).T();// take transposes
             pDestH->m_rayIndex = transformNormalToCamera * normal;
+        };
+    }
+
+    /*!
+        \brief a vertex shader output a struct of VSOut
+    */
+    static auto GetVertexShaderWithVSOut(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
+    {
+        return [&constBufInstance, &constBufCamera](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
+            const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
+            VSOut* pDest = reinterpret_cast<VSOut*>(pDestV);
+            
+            pDest->m_posW = constBufInstance.m_toWorld * pSrcH->m_position;
+            hvector camera = constBufCamera.m_toCamera * pDest->m_posW;
+
+            pDest->m_posH = constBufCamera.m_project * camera;
+            //pDestH->m_position = pSrcH->m_position;
+
+            hvector normal = pSrcH->m_rayIndex;
+            normal.m_w = 0.0f;// ensure translation will not affect calculations.
+            Transform transformNormalToCamera = constBufInstance.m_toWorldInverse.T();// take transposes
+            pDest->m_normalW = Normalize((transformNormalToCamera * normal).ToVector3()).ToHvector();
+        };
+    }
+
+    /*!
+        \brief a pixel shader require VSOut as input
+    */
+    static auto GetPixelShaderWithPSIn(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
+    {
+        return [&constBufInstance, &constBufCamera](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
+
+            vector3 normal = pPoint->m_normalW.ToVector3();
+
+            /*vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
+            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
+            RGB color = kw * RGB::BLUE + (1 - kw) * RGB::RED;*/
+
+            vector3 toLight = Normalize(constBufCamera.m_lights[0].m_position - pPoint->m_posW.ToVector3());
+            RGB color = constBufInstance.m_material.m_diffuse * constBufCamera.m_lights[0].m_color * std::max(0.0f, dotProd(toLight, normal));
+
+            return Cast(color);
         };
     }
 };

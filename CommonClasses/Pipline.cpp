@@ -790,8 +790,6 @@ void Pipline::ClipTriangleList(
         FrustumCutTriangle(pv1, pv2, pv3, realVertexSize, &cutResults, cutPlanes);
     }// end for countIndex
 
-    DebugClient<DEBUG_CLIENT_CONF_TRIANGL>();
-
     int sumVertex = 0;
     for (auto & tri : cutResults)
     {

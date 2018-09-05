@@ -129,7 +129,13 @@ MeshData GeometryBuilder::BuildCylinder(
     const F32 deltaRadio = 2.0f * Constant::PI_F / slice; // delta radio in one circle
     const F32 deltaStack = height / stack;
     const U32 numSideVertex = slice * (stack + 1);
-
+    
+    // fix normal on sides
+    const F32 fixedNormalH = height, fixedNormalB = bottomRadius - topRadius;
+    const F32 recipcol_l = 1.0f / std::sqrt(fixedNormalH * fixedNormalH + fixedNormalB * fixedNormalB);
+    F32 fixedNormalRadius = fixedNormalH * recipcol_l;
+    F32 fixedNormalHeight = fixedNormalB * recipcol_l;
+    
     F32 radius = bottomRadius;
     F32 radio;
     F32 x, z;
@@ -143,7 +149,9 @@ MeshData GeometryBuilder::BuildCylinder(
             x = std::cosf(radio);
             z = - std::sinf(radio);
 
-            retData.m_vertices.push_back({ vector3(x * radius, y, z * radius), vector3(x, 0.0f, z) });
+            vector3 pos = vector3(x * radius, y, z * radius);
+            vector3 normal = vector3(x * fixedNormalRadius, fixedNormalHeight, z * fixedNormalRadius);
+            retData.m_vertices.push_back({ pos, normal });
 
             radio += deltaRadio;
         }
