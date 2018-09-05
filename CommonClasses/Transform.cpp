@@ -142,7 +142,7 @@ Transform Transform::Scale(const Types::F32 x, const Types::F32 y, const Types::
 
 Transform Transform::InverseScale(const Types::F32 x, const Types::F32 y, const Types::F32 z)
 {
-    return Scale(-x, -y, -z);
+    return Scale(1.0f / x, 1.0f / y, 1.0f / z);
 }
 
 Transform Transform::TRS(const vector3 & t, const vector3 & r, const vector3 & s)
