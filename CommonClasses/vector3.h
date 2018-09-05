@@ -26,6 +26,15 @@ public:
         \brief decide the precision of the almost equal floats
     */
     static const Types::I32 COMPARE_ULP = 8;
+    
+
+    /*!
+        \brief some useful constant values.
+    */
+    static const vector3 ZERO;
+    static const vector3 AXIS_X;
+    static const vector3 AXIS_Y;
+    static const vector3 AXIS_Z;
 
 public:
     vector3();
