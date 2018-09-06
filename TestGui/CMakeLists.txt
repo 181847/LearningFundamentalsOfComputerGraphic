@@ -1,0 +1,44 @@
+#build gui application for testing my rendering pipline
+cmake_minimum_required(VERSION 3.7.1)
+
+set(TEST_GUI_SOURCE_FILES
+	BaseFrame.cpp
+	App.cpp
+	ImguiWrapImageDX11.cpp
+	${MY_LIBRARY_PATH}/imgui/imgui.cpp
+	${MY_LIBRARY_PATH}/imgui/imgui_demo.cpp
+	${MY_LIBRARY_PATH}/imgui/imgui_draw.cpp
+	${MY_LIBRARY_PATH}/imgui/examples/imgui_impl_dx11.cpp
+	${MY_LIBRARY_PATH}/imgui/examples/imgui_impl_win32.cpp
+	../TestCasesInSuits/BaseToolForCaseAndSuit.h)
+	
+add_executable(TestGui ${TEST_GUI_SOURCE_FILES})
+
+# this application will have a build-in lua interpretor.
+find_library(LUA_LIB
+	NAMES lua
+	PATHS "${MY_LIBRARY_PATH}/Lua/Lua-5.3.4/dll")
+	
+# link lua library
+target_link_libraries(TestGui ${LUA_LIB})
+target_link_libraries(TestGui CommonClass)
+target_link_libraries(TestGui ${MY_TOOLS_STATIC_LIB})
+
+# include fundamental headers for "imgui"
+target_include_directories(TestGui PRIVATE ${MY_LIBRARY_PATH}/imgui)
+
+# initialization script for lua.
+get_target_property(
+	CONST_TEST_GUI_OUTPUT_PATH
+	TestGui
+	RUNTIME_OUTPUT_DIRECTORY
+	)
+message(STATUS "the output path of " ${FastCommandPrompt} " is " ${CONST_TEST_GUI_OUTPUT_PATH})
+message(STATUS " build type is  " ${CMAKE_BUILD_TYPE})
+# copy those script to the output path.
+file(
+	COPY initialize.lua controller.lua 
+	DESTINATION ${CONST_TEST_GUI_OUTPUT_PATH}
+)
+
+message(STATUS "source files = " "${FAST_COMMAND_PROMPT_SOURCE_FILES}")
