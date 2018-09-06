@@ -62,4 +62,9 @@ void Frame::RebuildByUV()
     m_w = crossProd(m_u, m_v);
 }
 
+CommonClass::vector3 Frame::GetOrigin() const
+{
+    return m_origin;
+}
+
 }// namespace CommonClass

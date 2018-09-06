@@ -49,6 +49,11 @@ public:
     */
     void RebuildByUV();
 
+    /*!
+        \brief get the origin location of the frame
+    */
+    vector3 GetOrigin() const;
+
 protected:
     /*!
         \brief the center of the frame in world space
