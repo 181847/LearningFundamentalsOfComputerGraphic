@@ -54,23 +54,48 @@ public:
     static_assert(sizeof(VSOut) == 3 * sizeof(hvector), "structure VSOut has wrong size.");
 
     /*!
-        \brief a simple wrapper for object instance data.
-    */
-    struct ObjectInstance
-    {
-    public:
-        vector3 m_position;
-        vector3 m_rotation;
-        vector3 m_scale;
-    };
-
-    /*!
         \brief buffer of simple material
     */
     struct MaterialBuffer
     {
     public:
         RGB m_diffuse = RGB::WHITE;
+        Types::F32 m_shiness = 1.0f;
+        RGB m_fresnelR0;
+
+        /*!
+            \brief compute FresnelR0 efficiency by reflection index.
+        */
+        static RGB FresnelR0_byReflectionIndex(const Types::U32 reflectIndex)
+        {
+            if (reflectIndex == 0)
+            {
+                throw std::exception("FresnelR0 computation error, reflection index should greater than Zero.");
+            }
+
+            Types::F32 component = (reflectIndex - 1) * 1.0f / (reflectIndex + 1);
+            component *= component; // take square
+            return RGB(component, component, component);
+        }
+
+        static RGB FresnelReflect(const Types::F32 cosAlpha, const Types::F32 cosTheta, const RGB& fresnelR0, const Types::F32 shiness)
+        {
+            RGB fresnelColor = fresnelR0 + (RGB::WHITE - fresnelR0) * std::pow(1 - cosAlpha, 5);
+            Types::F32 shinyPower = (shiness + 8.0f) / 8.0f * std::pow(cosTheta, shiness);
+            return fresnelColor * shinyPower;
+        }
+    };
+
+    /*!
+        \brief a simple wrapper for object instance data.
+    */
+    struct ObjectInstance
+    {
+    public:
+        vector3         m_position;
+        vector3         m_rotation;
+        vector3         m_scale;
+        MaterialBuffer  m_material;
     };
 
     /*!
@@ -103,6 +128,7 @@ public:
         Transform                   m_toCamera;         // matrix to transform vertex to camera space
         Transform                   m_toCameraInverse;  // inverse matrix from world to camera
         Transform                   m_project;          // projection matrix
+        vector3                     m_camPos;           // camera position
         RGB                         m_ambientColor;     // ambientColor
         int                         m_numLights;        // the number of light in the scene, less or equal m_lights.size().
         std::array<LightBuffer, 3>  m_lights;           // the lights in scene
@@ -575,14 +601,27 @@ public:
         return [&constBufInstance, &constBufCamera](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
             const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
-            vector3 normal = pPoint->m_normalW.ToVector3();
+            vector3 normal = Normalize(pPoint->m_normalW.ToVector3());
 
-            /*vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
+            vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
             Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
-            RGB color = kw * RGB::BLUE + (1 - kw) * RGB::RED;*/
+            RGB debugColor = kw * RGB::BLUE + (1 - kw) * RGB::RED;
+            //return Cast(debugColor);
 
-            vector3 toLight = Normalize(constBufCamera.m_lights[0].m_position - pPoint->m_posW.ToVector3());
-            RGB color = constBufInstance.m_material.m_diffuse * constBufCamera.m_lights[0].m_color * std::max(0.0f, dotProd(toLight, normal));
+            vector3 pixelPosW = pPoint->m_posW.ToVector3();
+
+            vector3 toLight = Normalize(constBufCamera.m_lights[0].m_position - pixelPosW);
+            vector3 toEye = Normalize(constBufCamera.m_camPos - pixelPosW);
+            vector3 halfVec = Normalize(toLight + toEye);
+            Types::F32 cosTheta = dotProd(normal, halfVec);
+            Types::F32 cosAlpha = dotProd(toEye, halfVec);
+            RGB fresnelReflect = MaterialBuffer::FresnelReflect(cosAlpha, cosTheta, constBufInstance.m_material.m_fresnelR0, constBufInstance.m_material.m_shiness);
+            RGB lightColor = constBufCamera.m_lights[0].m_color * std::max(0.0f, dotProd(toLight, normal));
+
+            RGB diffuse = constBufInstance.m_material.m_diffuse;
+            RGB ambient = constBufCamera.m_ambientColor;
+
+            RGB color = ambient * diffuse + lightColor * (diffuse + fresnelReflect);
 
             return Cast(color);
         };
