@@ -931,18 +931,21 @@ void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
     {
         instanceBuffers[i].m_toWorld        = Transform::       TRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
         instanceBuffers[i].m_toWorldInverse = Transform::InverseTRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
-        instanceBuffers[i].m_material.m_diffuse = RGB::WHITE;
+        instanceBuffers[i].m_material.m_diffuse = RGB::RED * 0.5f;
+        instanceBuffers[i].m_material.m_shiness = 1024.0f;
+        instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(4);
     }// end for
 
-    std::wstring pictureIndex = L"007";
+    std::wstring pictureIndex = L"023";
     CameraFrame cameraFrames(vector3(0.0f, 0.0f, 1.0f) * 3.0f /* location */, vector3(0.0f, 0.0f, 0.0f) /* target */);
     ConstantBufferForCamera cameraBuffer;
     cameraBuffer.m_toCamera         = cameraFrames.WorldToLocal();
     cameraBuffer.m_toCameraInverse  = cameraFrames.LocalToWorld();
+    cameraBuffer.m_camPos           = cameraFrames.GetOrigin();
     cameraBuffer.m_project          = perspect;
     cameraBuffer.m_numLights        = 1;
-    cameraBuffer.m_ambientColor     = RGB::RED;
-    cameraBuffer.m_lights[0]        = {vector3(5.0f, 0.0f, 5.0f), RGB(1.0f, 0.0f, 0.5f)};
+    cameraBuffer.m_ambientColor     = RGB::RED * RGB(0.05f, 0.05f, 0.05f);
+    cameraBuffer.m_lights[0]        = {vector3(5.0f, -1.0f, 2.0f), RGB(1.0f, 1.0f, 0.5f)};
 
     ConstantBufferForInstance instanceBufAgent;// agent buffer for setting instance data
     // set VS and PS
@@ -952,7 +955,8 @@ void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
     // build mesh data
     std::vector<SimplePoint>  vertices;
     std::vector<unsigned int> indices;
-    auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 8, 3, true);
+    //auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 32, 3, true);
+    auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
     indices = meshData.m_indices;
     vertices.clear();
     for (const auto& vertex : meshData.m_vertices)
@@ -991,7 +995,7 @@ void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
 
     std::wstring pictureNameWithNoExt = L"geosphere_simpleEquation_" + pictureIndex;
     SaveAndShowPiplineBackbuffer((*(pipline.get())), pictureNameWithNoExt);
-    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
-    BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
-    depthImg.SaveTo(this->GetSafeStoragePath() + pictureNameWithNoExt + L"_depth.png");
+    //Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / NEAR);
+    //BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
+    //depthImg.SaveTo(this->GetSafeStoragePath() + pictureNameWithNoExt + L"_depth.png");
 }
