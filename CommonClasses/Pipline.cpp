@@ -286,6 +286,7 @@ void Pipline::DrawTriangle(
 
                 if (rhw > m_depthBuffer->ValueAt(x, y))
                 {
+                    //DEBUG_CLIENT(DEBUG_CLIENT_CONF_TRIANGL, x == 307 && y == (512 - 217));
                     m_backBuffer->SetPixel(x, y, pixelShader(vertexPtr));
                     m_depthBuffer->Value(x, y) = rhw;// update depth value
                 }
