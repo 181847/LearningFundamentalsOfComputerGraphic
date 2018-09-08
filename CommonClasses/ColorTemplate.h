@@ -7,6 +7,24 @@
 
 namespace CommonClass
 {
+    
+/*!
+    \brief a small struct to store pixel information
+*/
+struct Pixel
+{
+public:
+    union
+    {
+        struct
+        {
+            Types::U8 m_r, m_g, m_b, m_a;
+        };
+        Types::U8 m_arr[4];
+    };
+
+    explicit Pixel(Types::U8 r = 0, Types::U8 g = 0, Types::U8 b = 0, Types::U8 a = 0);
+};
 
 /*!
     \brief a helper struct to assist the ColorTemplate to access individual channels of a color.
@@ -109,7 +127,7 @@ public:
         \param a alpha channel, default to be Opaque
     */
     template<typename T = Types::F32, typename std::enable_if<HAVE_ALPHA && std::is_same<T, Types::F32>::value>::type* = nullptr>
-    ColorTemplate(
+    explicit ColorTemplate(
         const T& r = MIN_CHANNEL_VALUE,
         const T& g = MIN_CHANNEL_VALUE,
         const T& b = MIN_CHANNEL_VALUE,
@@ -123,7 +141,7 @@ public:
         \param b blue channel, default to be zero
     */
     template<typename T = Types::F32, typename std::enable_if< ! HAVE_ALPHA && std::is_same<T, Types::F32>::value>::type* = nullptr>
-    ColorTemplate(
+    explicit ColorTemplate(
         const T& r = MIN_CHANNEL_VALUE,
         const T& g = MIN_CHANNEL_VALUE,
         const T& b = MIN_CHANNEL_VALUE);
@@ -410,6 +428,16 @@ ColorTemplate<false> Cast(const ColorTemplate<true>& color);
     \param alpha additional alpha channel default to be opaque
 */
 ColorTemplate<true> Cast(const ColorTemplate<false>& color, const Types::F32 alpha = ColorTemplate<true>::ALPHA_CHANNEL_OPAQUE);
+
+/*!
+    \brief cast color(0.0f ~ 1.0f) to raw pixel value(0 ~ 255).
+*/
+Pixel CastPixel(const ColorTemplate<true>& color);
+
+/*!
+    \brief cast raw pixel value(0 ~ 255) to color(0.0f ~ 1.0f).
+*/
+ColorTemplate<true> CastPixel(const Pixel& pixel);
 
 /*!
     \brief give the ColorTemplate names.

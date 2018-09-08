@@ -8,24 +8,7 @@ namespace CommonClass
 
 class Image
 {
-private:
-    /*!
-        \brief a small struct to store pixel information
-    */
-    struct Pixel
-    {
-    public:
-        union
-        {
-            struct
-            {
-                Types::U8 m_r, m_g, m_b, m_a;
-            };
-            Types::U8 m_arr[4];
-        };
-
-        Pixel(Types::U8 r = 0, Types::U8 g = 0, Types::U8 b = 0, Types::U8 a = 0);
-    };
+public:
 
 protected:
     /*!
@@ -64,6 +47,11 @@ public:
         this function will overwrite the file with same name.
     */
     void SaveTo(const std::string& filePath) const;
+
+    /*!
+        \brief clear all pixel color.
+    */
+    void ClearPixel(const Pixel& pixel);
 
     /*!
         \brief set one pixel with RGBA

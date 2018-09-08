@@ -74,6 +74,14 @@ void Image::SaveTo(const std::string& filePath) const
     fclose(outputFile);
 }
 
+void Image::ClearPixel(const Pixel& pixel)
+{
+    for (auto& innerPixel : m_canvas)
+    {
+        innerPixel = pixel;
+    }
+}
+
 const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) const
 {
     assert((0 <= x && x < m_width) && (0 <= y && y < m_height)
@@ -100,18 +108,23 @@ const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) con
 void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
 {
     Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
-    modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
+    modifiedPixel = CastPixel(pixel);
+    /*modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
     modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
     modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);
-    modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_chas.m_a * 255);
+    modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_chas.m_a * 255);*/
 }
 
 void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGB & pixel)
 {
     Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
-    modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
+    auto resultPixel = CastPixel(Cast(pixel));
+    modifiedPixel.m_r = resultPixel.m_r;
+    modifiedPixel.m_g = resultPixel.m_g;
+    modifiedPixel.m_b = resultPixel.m_b;
+    /*modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
     modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
-    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);
+    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);*/
 }
 
 void Image::SetAlpha(const Types::U32 x, const Types::U32 y, const Types::F32 & alpha)
@@ -123,17 +136,10 @@ RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 {
     const Pixel& returnedPixel = m_canvas[To1DArrIndex(x, y)];
 
-    const Types::F32 reciprocal8BitsOne = 1.0f / 255;
-    
-    const Types::F32 floatRed  (returnedPixel.m_r * reciprocal8BitsOne),
-                     floatGreen(returnedPixel.m_g * reciprocal8BitsOne),
-                     floatBlue (returnedPixel.m_b * reciprocal8BitsOne),
-                     floatAlpha(returnedPixel.m_a * reciprocal8BitsOne);
-
-    return RGBA(floatRed, floatGreen, floatBlue, floatAlpha);
+    return CastPixel(returnedPixel);
 }
 
-const Image::Pixel & Image::GetRawPixel(const Types::U32 x, const Types::U32 y) const
+const Pixel & Image::GetRawPixel(const Types::U32 x, const Types::U32 y) const
 {
     return m_canvas[To1DArrIndex(x, y)];
 }
@@ -141,12 +147,6 @@ const Image::Pixel & Image::GetRawPixel(const Types::U32 x, const Types::U32 y) 
 unsigned char * Image::GetRawData()
 {
     return reinterpret_cast<unsigned char*>(m_canvas.data());
-}
-
-Image::Pixel::Pixel(Types::U8 r, Types::U8 g, Types::U8 b, Types::U8 a)
-    :m_r(r), m_g(g), m_b(b), m_a(a)
-{
-    // empty
 }
 
 }// namespace CommonClass
