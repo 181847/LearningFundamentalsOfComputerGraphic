@@ -45,21 +45,17 @@ public:
     void CheckPerpendicular() const;
 
     /*!
-        \brief rebuild  the frame by axises of u/v, compute w.
+        \brief refresh detail.
     */
-    void RebuildByUV();
+    void RebuildFrameDetail();
 
-    /*!
-        \brief get the origin location of the frame
-    */
-    vector3 GetOrigin() const;
-
-protected:
+public:
     /*!
         \brief the center of the frame in world space
     */
     vector3 m_origin;
 
+protected:
     /*!
         \brief x axis in frame, right hand system.
     */

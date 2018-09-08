@@ -6,8 +6,7 @@ namespace CommonClass
 
 Frame::Frame(const vector3& origin, const vector3& u, const vector3& v) : m_origin(origin), m_u(u), m_v(v)
 {
-    RebuildByUV();
-    CheckPerpendicular();
+    RebuildFrameDetail();
 }
 
 Frame::Frame()
@@ -55,16 +54,12 @@ void Frame::CheckPerpendicular() const
     assert(AlmostPerpendicular(m_v, m_w));
 }
 
-void Frame::RebuildByUV()
+void Frame::RebuildFrameDetail()
 {
     m_u = Normalize(m_u);
     m_v = Normalize(m_v - m_u * dotProd(m_v, m_u));
     m_w = crossProd(m_u, m_v);
-}
-
-CommonClass::vector3 Frame::GetOrigin() const
-{
-    return m_origin;
+    CheckPerpendicular();
 }
 
 }// namespace CommonClass
