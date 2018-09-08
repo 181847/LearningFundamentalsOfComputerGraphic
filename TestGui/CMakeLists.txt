@@ -5,6 +5,7 @@ set(TEST_GUI_SOURCE_FILES
 	BaseFrame.cpp
 	App.cpp
 	ImguiWrapImageDX11.cpp
+	MinimalLuaInterpreter.cpp
 	${MY_LIBRARY_PATH}/imgui/imgui.cpp
 	${MY_LIBRARY_PATH}/imgui/imgui_demo.cpp
 	${MY_LIBRARY_PATH}/imgui/imgui_draw.cpp
