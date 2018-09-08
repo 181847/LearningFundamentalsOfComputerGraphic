@@ -32,6 +32,18 @@ void Pipline::SetBackBuffer(std::unique_ptr<RasterizeImage> backBuffer)
     m_depthBuffer->SetAll(0.0f);
 }
 
+void Pipline::ClearBackBuffer(const RGBA& background, const Types::F32& depthValue /*= 0*/)
+{
+    if (m_backBuffer != nullptr)
+    {
+        m_backBuffer->ClearPixel(CastPixel(background));
+    }
+    if (m_depthBuffer != nullptr)
+    {
+        m_depthBuffer->SetAll(0.0f);
+    }
+}
+
 void Pipline::SetPSO(std::shared_ptr<PiplineStateObject> pso)
 {
     m_pso = pso;

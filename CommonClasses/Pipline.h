@@ -49,6 +49,13 @@ public:
     void SetBackBuffer(std::unique_ptr<RasterizeImage> backBuffer);
 
     /*!
+        \brief clear back buffer color, and depth value.
+        \param background back color
+        \param depthValue the depthValue = 1/z where z is the world depth.
+    */
+    void ClearBackBuffer(const RGBA& background, const Types::F32& depthValue = 0);
+
+    /*!
         \brief set a pipline state object.
     */
     void SetPSO(std::shared_ptr<PiplineStateObject> pso);

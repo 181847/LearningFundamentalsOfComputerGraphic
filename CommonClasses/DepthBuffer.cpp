@@ -9,6 +9,7 @@ DepthBuffer::DepthBuffer(const Types::U32 width, const Types::U32 height)
 {
     assert(m_width * m_height != 0);
     m_pBuffer = new Types::F32[m_width * m_height];
+    SetAll(0.0f);
 }
 
 DepthBuffer::DepthBuffer(DepthBuffer && moveObj)
