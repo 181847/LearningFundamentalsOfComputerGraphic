@@ -43,35 +43,52 @@ bool ImguiWrapImageDX11::SetImageRawData(ID3D11Device* pDevice, const unsigned c
     Desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     Desc.SampleDesc.Count = 1;
     Desc.SampleDesc.Quality = 0;
-    Desc.Usage = D3D11_USAGE_DEFAULT;
+    Desc.Usage = D3D11_USAGE_DYNAMIC;
     Desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    Desc.CPUAccessFlags = 0;
+    Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     Desc.MiscFlags = 0;
     D3D11_SUBRESOURCE_DATA InitializeData;
     InitializeData.pSysMem = pRawData;
     InitializeData.SysMemPitch = Desc.Width * PIXEL_SIZE;
     InitializeData.SysMemSlicePitch = Desc.Width * Desc.Height * PIXEL_SIZE;
-    if (FAILED(pDevice->CreateTexture2D(&Desc, &InitializeData, &m_pTexture)))
-    {
-        throw std::exception("create texture failed");
-        return false;
-    }
+    ThrowIfFailed(pDevice->CreateTexture2D(&Desc, &InitializeData, &m_pTexture));
 
     D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
     viewDesc.Format = Desc.Format;
     viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     viewDesc.Texture2D.MipLevels = 1;
     viewDesc.Texture2D.MostDetailedMip = 0;
-    if (FAILED(pDevice->CreateShaderResourceView(m_pTexture, &viewDesc, &m_pSRV)))
-    {
-        m_pTexture->Release();
-        throw std::exception("create shader resource view of texture failed");
-        return false;
-    }
+    ThrowIfFailed(pDevice->CreateShaderResourceView(m_pTexture, &viewDesc, &m_pSRV));
 
     m_width = WIDTH;
     m_height = HEIGHT;
+
+    m_isValide = true;
+    
     return true;
+}
+
+void ImguiWrapImageDX11::UpdateImageRowData(ID3D11DeviceContext* pDeviceContext, const unsigned char * pRawData, unsigned int WIDTH, unsigned int HEIGHT)
+{
+    assert(
+        pDeviceContext 
+        && pRawData 
+        && 0 < WIDTH  && WIDTH  <= m_width
+        && 0 < HEIGHT && HEIGHT <= m_height);
+
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    ThrowIfFailed(pDeviceContext->Map(m_pTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+
+    unsigned int rowSpan = WIDTH * m_sizePerPixel;
+    unsigned char * mappedData = reinterpret_cast<unsigned char*>(mappedResource.pData);
+    for (UINT i = 0; i < HEIGHT; ++i)
+    {
+        memcpy(mappedData, pRawData, rowSpan);
+        mappedData += mappedResource.RowPitch;
+        pRawData += rowSpan;
+    }
+
+    pDeviceContext->Unmap(m_pTexture, 0);
 }
 
 ID3D11ShaderResourceView * ImguiWrapImageDX11::GetSRV()
