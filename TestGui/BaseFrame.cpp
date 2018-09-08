@@ -130,8 +130,6 @@ int main(int, char**)
 
     // register hot key
     RegisterHotKey(NULL, 1, MOD_CONTROL, VK_BACK);
-    App::ConsoleHwnd = GetConsoleWindow();
-    App::NativeHwnd = hwnd;
     //App::HideConsoleWindow();
 
     // Show the window
@@ -146,7 +144,8 @@ int main(int, char**)
 
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
-    App::pd3dDevice = g_pd3dDevice;
+
+    App::Init(GetConsoleWindow(), hwnd, g_pd3dDevice, g_pd3dDeviceContext);
 
     // Setup style
     ImGui::StyleColorsDark();
@@ -195,6 +194,7 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        // application main gui arrangement.
         App::Main();
 
         // Rendering

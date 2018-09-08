@@ -9,8 +9,6 @@ namespace App
 extern HWND ConsoleHwnd;
 extern HWND NativeHwnd;
 extern bool IsNativeWindowHiden;
-extern bool ToBeHiden;
-extern bool NextBeHiden;
 
 extern unsigned int MainWindowHeight;
 extern unsigned int MainWindowWidth;
@@ -18,11 +16,14 @@ extern unsigned int MainWindowWidth;
 extern ID3D11Device* pd3dDevice;
 
 /*!
+    \brief initialize the applications.
+*/
+void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11DeviceContext* pDeviceContext);
+
+/*!
     \brief hide the console window
 */
 void HideConsoleWindow();
-
-void ToggleNativeWindow();
 
 void HideNativeWindow();
 
