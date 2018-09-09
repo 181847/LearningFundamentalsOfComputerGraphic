@@ -18,7 +18,7 @@ add_executable(TestGui ${TEST_GUI_SOURCE_FILES})
 # this application will have a build-in lua interpretor.
 find_library(LUA_LIB
 	NAMES lua
-	PATHS "${MY_LIBRARY_PATH}/Lua/Lua-5.3.4/dll")
+	PATHS "${MY_LIBRARY_PATH}/Lua/Lua-5.3.4/dll/Debug")
 	
 # link lua library
 target_link_libraries(TestGui ${LUA_LIB})
