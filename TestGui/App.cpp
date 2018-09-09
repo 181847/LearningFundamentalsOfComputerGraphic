@@ -95,7 +95,7 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
     // 3
     objInstances[2].m_position = vector3(-1.0f, 2.8f, 0.0f);
     objInstances[2].m_rotation = vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f);
-    objInstances[2].m_scale = vector3(0.8f, 0.8f, 0.8f);
+    objInstances[2].m_scale = vector3(1.8f, 1.8f, 1.8f);
     // initialized instances buffer
     for (unsigned int i = 0; i < instanceBuffers.size(); ++i)
     {
@@ -177,14 +177,23 @@ void ShowNativeWindow()
     EnableWindow(NativeHwnd, TRUE);
 }
 
-void ImguiUpdateRenderData()
+/*!
+    \brief draw Imgui widgets and setting new data from the widget
+    \return true for some data has been updated.
+*/
+bool ImguiUpdateRenderData()
 {
+    bool isDirtyData = false;
+
     // widget for camera location
-    if (ImGui::DragFloat3("camera location", cameraFrames.m_origin.m_arr, 0.1f, -10.0f, 10.0f))
+    if (ImGui::DragFloat3("camera location", cameraFrames.m_origin.m_arr, 0.001f, -10.0f, 10.0f))
     {
         cameraFrames.RebuildFrameDetail();
         UpdateCameraBuffer();
+        isDirtyData = true;
     }
+
+    return isDirtyData;
 }
 
 /*!
@@ -253,10 +262,12 @@ int Main()
 
     }
 
-    ImguiUpdateRenderData();
+    if (ImguiUpdateRenderData())
+    {
+        // render the main image each frame.
+        RenderMainImage();
+    }
 
-    // render the main image each frame.
-    RenderMainImage();
 
     // put other widget here.
     ImGui::Image(App::MainImage.GetSRV(), ImVec2(static_cast<float>(MainImage.m_width), static_cast<float>(MainImage.m_height)));
