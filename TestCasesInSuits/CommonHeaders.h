@@ -34,5 +34,6 @@
 #include "../CommonClasses/GeomentryBuilder.h"
 #include "../CommonClasses/Filter.h"
 #include "../CommonClasses/CameraFrame.h"
+#include "../CommonClasses/Texture.h"
 
 #include "BaseToolForCaseAndSuit.h"

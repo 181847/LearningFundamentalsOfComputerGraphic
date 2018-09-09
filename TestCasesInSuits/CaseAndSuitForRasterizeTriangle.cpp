@@ -941,7 +941,7 @@ void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
     ConstantBufferForCamera cameraBuffer;
     cameraBuffer.m_toCamera         = cameraFrames.WorldToLocal();
     cameraBuffer.m_toCameraInverse  = cameraFrames.LocalToWorld();
-    cameraBuffer.m_camPos           = cameraFrames.GetOrigin();
+    cameraBuffer.m_camPos           = cameraFrames.m_origin;
     cameraBuffer.m_project          = perspect;
     cameraBuffer.m_numLights        = 1;
     cameraBuffer.m_ambientColor     = RGB::RED * RGB(0.05f, 0.05f, 0.05f);

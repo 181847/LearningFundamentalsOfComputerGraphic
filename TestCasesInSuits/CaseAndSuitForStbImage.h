@@ -18,8 +18,14 @@ protected:\
     const std::wstring SUB_FOLDER = L"StbImg/";\
 }
 
-DECLARE_CASE_IN_STB_IMG_FOR(BasicTest, "load image using stb_image.h");
+//DECLARE_CASE_IN_STB_IMG_FOR(BasicTest, "load image using stb_image.h");
+
+DECLARE_CASE_IN_STB_IMG_FOR(TextureLoad, "load texture by file");
+
+DECLARE_CASE_IN_STB_IMG_FOR(TextureSample, "load texture by file");
 
 using SuitForStbImage = SuitForPipline<
-    CASE_NAME_IN_STB_IMG(BasicTest)
+    //CASE_NAME_IN_STB_IMG(BasicTest),
+    CASE_NAME_IN_STB_IMG(TextureLoad),
+    CASE_NAME_IN_STB_IMG(TextureSample)
 >;
