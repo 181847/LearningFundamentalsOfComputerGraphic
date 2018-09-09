@@ -6,14 +6,14 @@
 
 ## RayTracing效果图
 
-![效果图1](OutputTestImage\ForCommonClasses\ThisIsForSceneRayColor06.png)
-![效果图2](OutputTestImage\RayRender\InsideBox29.png)
+![效果图1](OutputTestImage/ForCommonClasses/ThisIsForSceneRayColor06.png)
+![效果图2](OutputTestImage/RayRender/InsideBox29.png)
 
 ## 光栅化效果图
 
-![Cool-to-Warm Shading](OutputTestImage\RasterizeTriangle\sphere_wireframe_001.png)
-![深度缓冲](OutputTestImage\RasterizeTriangle\sphere_wireframe_001_depth.png)
-![简单的材质渲染](OutputTestImage\RasterizeTriangle\geosphere_simpleEquation_023.png)
+![Cool-to-Warm Shading](./OutputTestImage/RasterizeTriangle/sphere_wireframe_001.png)
+![深度缓冲](OutputTestImage/RasterizeTriangle/sphere_wireframe_001_depth.png)
+![简单的材质渲染](OutputTestImage/RasterizeTriangle/geosphere_simpleEquation_023.png)
 
 ## 运行项目
 
