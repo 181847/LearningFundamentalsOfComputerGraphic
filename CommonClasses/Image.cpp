@@ -6,16 +6,8 @@ namespace CommonClass
 {
 
 Image::Image(const Types::U32 width, const Types::U32 height, const RGBA& initColor)
-    :m_width(width), m_height(height), m_canvas(width * height)
 {
-    // set all pixel to solid black
-    for (auto & pixel : m_canvas)
-    {
-        pixel.m_r = static_cast<Types::U8>(initColor.m_chas.m_r * 255);
-        pixel.m_g = static_cast<Types::U8>(initColor.m_chas.m_g * 255);
-        pixel.m_b = static_cast<Types::U8>(initColor.m_chas.m_b * 255);
-        pixel.m_a = static_cast<Types::U8>(initColor.m_chas.m_a * 255);
-    }
+    Init(width, height, initColor);
 }
 
 Image::Image(Image && moveObj)
@@ -25,9 +17,46 @@ Image::Image(Image && moveObj)
     this->m_canvas = std::move(moveObj.m_canvas);
 }
 
+Image::Image()
+    :m_width(0), m_height(0), m_canvas(0)
+{
+    // empty
+}
+
+Image& Image::operator=(const Image&& moveObj)
+{
+    this->m_height = moveObj.m_height;
+    this->m_width = moveObj.m_width;
+    this->m_canvas = std::move(moveObj.m_canvas);
+    return *this;
+}
+
 Image::~Image()
 {
     // empty
+}
+
+void Image::Init(const Types::U32 width, const Types::U32 height, const RGBA& initColor /*= RGBA::BLACK*/)
+{
+    assert(width > 0 && height > 0);
+
+    m_width = width;
+    m_height = height;
+    m_canvas.resize(m_width * m_height);
+
+    auto initPixel = CastPixel(initColor);
+    // set all pixel to solid black
+    for (auto & pixel : m_canvas)
+    {
+        pixel = initPixel;
+    }
+}
+
+bool Image::IsValid() const
+{
+    return m_width > 0 
+        && m_height > 0 
+        && !m_canvas.empty();
 }
 
 void Image::SaveTo(const std::wstring & filePath) const

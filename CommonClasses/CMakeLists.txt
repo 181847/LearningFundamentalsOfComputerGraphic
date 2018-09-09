@@ -42,7 +42,8 @@ set (COMMON_CLASS_SOURCE_FILES
 	Transform.cpp
 	Triangle.cpp
 	vector2.cpp
-	vector3.cpp)
+	vector3.cpp
+	Texture.cpp)
 
 # set the CommonClass directory
 add_library(CommonClass ${COMMON_CLASS_SOURCE_FILES})

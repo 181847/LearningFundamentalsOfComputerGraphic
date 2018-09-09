@@ -29,10 +29,17 @@ public:
         \param height height of the image
     */
     Image(const Types::U32 width, const Types::U32 height, const RGBA& initColor = RGBA::BLACK);
+    Image();
     Image(const Image&) = delete;
     Image(Image&& moveObj);
     Image& operator=(const Image&) = delete;
+    Image& operator=(const Image&&);
     ~Image();
+
+    /*!
+        \brief is this image contain validate data.
+    */
+    bool IsValid() const;
     
     /*!
         \brief save the image to the file unicode version
@@ -101,6 +108,13 @@ public:
     unsigned char * GetRawData();
 
 protected:
+    /*!
+        \brief reset the image.
+        \param width width of the image
+        \param height height of the image
+    */
+    void Init(const Types::U32 width, const Types::U32 height, const RGBA& initColor = RGBA::BLACK);
+
     /*!
         \brief convert 2D indices into 1D index to search pixels in the m_canvas.
         \param x horizontal value from left to right
