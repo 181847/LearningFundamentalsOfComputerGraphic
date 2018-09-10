@@ -32,13 +32,14 @@ public:
             z = 1 means it's end point
         */
         hvector m_rayIndex;
-        explicit SimplePoint(const hvector& pos = hvector(), const hvector& normal = hvector())
-            :m_position(pos), m_rayIndex(normal)
+        vector2 m_uv;
+        explicit SimplePoint(const hvector& pos = hvector(), const hvector& normal = hvector(), const vector2& uv = vector2())
+            :m_position(pos), m_rayIndex(normal), m_uv(uv)
         {
             // empty
         }
     };
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "The size of SimplePoint is not matched for this case.");
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector) + 2 * sizeof(Types::F32), "The size of SimplePoint is not matched for this case.");
 
     /*!
         \brief output of the vertex shader. 
@@ -49,9 +50,10 @@ public:
         hvector m_posH;
         hvector m_posW;
         hvector m_normalW;
+        vector2 m_uv;
     };
     using PSIn = VSOut;
-    static_assert(sizeof(VSOut) == 3 * sizeof(hvector), "structure VSOut has wrong size.");
+    static_assert(sizeof(VSOut) == 3 * sizeof(hvector) + 2 * sizeof(Types::F32), "structure VSOut has wrong size.");
 
     /*!
         \brief buffer of simple material
@@ -579,6 +581,8 @@ public:
         return [&constBufInstance, &constBufCamera](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
             const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
             VSOut* pDest = reinterpret_cast<VSOut*>(pDestV);
+
+            pDest->m_uv = pSrcH->m_uv;
             
             pDest->m_posW = constBufInstance.m_toWorld * pSrcH->m_position;
             hvector camera = constBufCamera.m_toCamera * pDest->m_posW;
@@ -603,9 +607,9 @@ public:
 
             vector3 normal = Normalize(pPoint->m_normalW.ToVector3());
 
-            vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
+            /*vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
             Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
-            RGB debugColor = kw * RGB::BLUE + (1 - kw) * RGB::RED;
+            RGB debugColor = kw * RGB::BLUE + (1 - kw) * RGB::RED;*/
             //return Cast(debugColor);
 
             vector3 pixelPosW = pPoint->m_posW.ToVector3();
@@ -620,6 +624,46 @@ public:
 
             RGB diffuse = constBufInstance.m_material.m_diffuse;
             RGB ambient = constBufCamera.m_ambientColor;
+
+            RGB color = ambient * diffuse + lightColor * (diffuse + fresnelReflect);
+
+            return Cast(color);
+        };
+    }
+
+    /*!
+        \brief a pixel shader require one texture.
+    */
+    static auto GetPixelShaderWithPSInAndTexture(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, std::shared_ptr<Texture>& texture)
+    {
+        return [&constBufInstance, &constBufCamera, &texture](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            assert(texture->IsValid());
+
+            const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
+
+            vector3 normal = Normalize(pPoint->m_normalW.ToVector3());
+
+            /*vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
+            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
+            RGB debugColor = kw * RGB::BLUE + (1 - kw) * RGB::RED;*/
+            //return Cast(debugColor);
+
+            vector3 pixelPosW = pPoint->m_posW.ToVector3();
+
+            vector3 toLight = Normalize(constBufCamera.m_lights[0].m_position - pixelPosW);
+            vector3 toEye = Normalize(constBufCamera.m_camPos - pixelPosW);
+            vector3 halfVec = Normalize(toLight + toEye);
+            Types::F32 cosTheta = dotProd(normal, halfVec);
+            Types::F32 cosAlpha = dotProd(toEye, halfVec);
+            RGB fresnelReflect = MaterialBuffer::FresnelReflect(cosAlpha, cosTheta, constBufInstance.m_material.m_fresnelR0, constBufInstance.m_material.m_shiness);
+            RGB lightColor = constBufCamera.m_lights[0].m_color * std::max(0.0f, dotProd(toLight, normal));
+
+            RGB ambient = constBufCamera.m_ambientColor;
+
+            // sample texture to get diffuse color.
+            vector2 uv = pPoint->m_uv;
+            RGBA sampleColor = texture->Sample(uv.m_x, uv.m_y);
+            RGB diffuse = Cast(sampleColor);
 
             RGB color = ambient * diffuse + lightColor * (diffuse + fresnelReflect);
 

@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "vector3.h"
+#include "vector2.h"
 /*!
     \brief this file declare some tools for generate basic geometries like cube, sphere, grid
 */
@@ -13,8 +14,9 @@ struct MeshData
 
     struct Vertex
     {
-        vector3 m_pos;
-        vector3 m_normal;
+        vector3 m_pos       = vector3();
+        vector3 m_normal    = vector3::AXIS_Y;
+        vector2 m_uv        = vector2();
     };
 
     std::vector<Vertex> m_vertices;
@@ -32,6 +34,11 @@ public:
         the count-clockwise is the front face.
     */
     static void BuildCube(const Types::F32& oneSide, std::vector<CommonClass::vector3> * outVertices, std::vector<unsigned int> * outIndices);
+
+    /*!
+        \brief build a cube by three dimension
+    */
+    static MeshData BuildCube(const Types::F32 width, const Types::F32 height, const Types::F32 depth);
 
     /*!
         \brief build cylinder

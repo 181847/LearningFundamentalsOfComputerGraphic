@@ -36,11 +36,11 @@ void GeometryBuilder::BuildCube(const Types::F32 & oneSide, std::vector<CommonCl
        |  top   |   \
        |start   V    \
       [0]<-----[3]    V
-       \      [5]------>[6]
-        \      A         |
-         \     |   bottom|
-          \    |start    V
-           V  [4]<------[7]
+       \     [5]------>[6]
+        \     A         |
+         \    |   bottom|
+          \   |start    V
+           V [4]<------[7]
     */
     
     // set positions
@@ -107,6 +107,106 @@ void GeometryBuilder::BuildCube(const Types::F32 & oneSide, std::vector<CommonCl
     outIndices->push_back(5);
     outIndices->push_back(6);
 
+}
+
+CommonClass::MeshData GeometryBuilder::BuildCube(const Types::F32 width, const Types::F32 height, const Types::F32 depth)
+{
+    using namespace Types;
+    MeshData retData;
+
+    vector3 halfVec(std::abs(width), std::abs(height), std::abs(depth));
+    halfVec = halfVec * 0.5f;
+
+    vector3 normal;
+    vector3 pos;
+
+    // top
+    normal = vector3::AXIS_Y;
+    pos = halfVec;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.50f) });
+    pos.m_z *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.75f) });
+    pos.m_x *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.75f) });
+    pos.m_z *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.50f) });
+
+    // bottom
+    normal = -1.0f * vector3::AXIS_Y;
+    pos = -1.0f * halfVec;
+    pos.m_x *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.00f) });
+    pos.m_z *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.25f) });
+    pos.m_x *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.25f) });
+    pos.m_z *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.00f) });
+
+    // left
+    normal = -1.0f * vector3::AXIS_X;
+    pos = -1.0f * halfVec;
+    pos.m_z *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.25f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.50f) });
+    pos.m_z *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.25f, 0.50f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.25f, 0.25f) });
+
+    // right
+    normal = vector3::AXIS_X;
+    pos = -1.0f * halfVec;
+    pos.m_x *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(1.00f, 0.25f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(1.00f, 0.50f) });
+    pos.m_z *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.50f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.25f) });
+
+    // front
+    normal = vector3::AXIS_Z;
+    pos = halfVec;
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.25f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.75f, 0.50f) });
+    pos.m_x *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.50f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.50f, 0.25f) });
+
+    // back
+    normal = vector3::AXIS_Z;
+    pos = -1.0f * halfVec;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.25f, 0.25f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.25f, 0.50f) });
+    pos.m_x *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.00f, 0.50f) });
+    pos.m_y *= -1.0f;
+    retData.m_vertices.push_back({ pos, normal, vector2(0.00f, 0.25f) });
+
+    for (U32 face = 0; face < 6; ++face)
+    {
+        U32 baseIndex = face * 4;
+
+        // first tri in quad
+        retData.m_indices.push_back(baseIndex);
+        retData.m_indices.push_back(baseIndex + 1);
+        retData.m_indices.push_back(baseIndex + 2);
+
+        // second tri in quad
+        retData.m_indices.push_back(baseIndex);
+        retData.m_indices.push_back(baseIndex + 2);
+        retData.m_indices.push_back(baseIndex + 3);
+    }
+
+    assert(retData.m_vertices.size() == 24 && retData.m_indices.size() == 36);
+    return retData;
 }
 
 MeshData GeometryBuilder::BuildCylinder(
