@@ -32,8 +32,6 @@ using ObjectInstance            = CaseForPipline::ObjectInstance;
 using ConstantBufferForInstance = CaseForPipline::ConstantBufferForInstance;
 using ConstantBufferForCamera   = CaseForPipline::ConstantBufferForCamera;
 using MaterialBuffer            = CaseForPipline::MaterialBuffer;
-static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
-
 
 ImguiWrapImageDX11                                  MainImage;  // the render image for application display.
 CaseForPipline                                      HelpPiplineCase("a help struct for pipline");   // preparations for pipline
