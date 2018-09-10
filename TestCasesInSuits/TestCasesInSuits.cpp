@@ -13,12 +13,12 @@
 int main()
 {
     TestSuit::SuitQueueRunner<
-        BasicTypesTestSuit_Runable, 
-        SuitForCommonClasses,
-        SuitForRayRender,
-        SuitForRasterisation, 
-        SuitForRasterizeTriangle,
-        SuitForFilter,
+        //BasicTypesTestSuit_Runable, 
+        //SuitForCommonClasses,
+        //SuitForRayRender,
+        //SuitForRasterisation, 
+        //SuitForRasterizeTriangle,
+        //SuitForFilter,
         SuitForStbImage
     > suitQueueRunner;
 

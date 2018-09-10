@@ -1,28 +1,5 @@
 #include "CaseAndSuitForStbImage.h"
 
-//void CASE_NAME_IN_STB_IMG(BasicTest)::Run()
-//{
-//    int x, y, n = 4;
-//    //std::string imagePath = LOAD_IMAGE_PATH + "InsideBox29.png";
-//    std::string imagePath = LOAD_IMAGE_PATH + "OldImgs/RenderReflect/ThisIsForSceneRayColor06.png";
-//    unsigned char *data = stbi_load(imagePath.c_str(), &x, &y, &n, 0);
-//
-//    if (!data)
-//    {
-//        printf("Error!, cannot load image: %s\n", imagePath.c_str());
-//        return;
-//    }
-//
-//    Image restoreImage(x, y);
-//    unsigned char * restoreAddr = restoreImage.GetRawData();
-//
-//    memcpy(restoreAddr, data, x * y * 4);
-//    
-//    BlockShowImg(&restoreImage, L"restored image");
-//
-//    stbi_image_free(data);
-//}
-
 void CASE_NAME_IN_STB_IMG(TextureLoad)::Run()
 {
     Texture tex;
@@ -51,6 +28,9 @@ void CASE_NAME_IN_STB_IMG(TextureSample)::Run()
         for (Types::U32 y = 0; y < CHEIGHT; ++y)
         {
             Types::F32 u(x * 1.0f / CWIDTH), v(y * 1.0f / CHEIGHT);
+
+            u = u * 3.0f - 1.0f;
+            v = v * 2.0f;
 
             samplingResult.SetPixel(x, y, tex.Sample(u, v));
         }
