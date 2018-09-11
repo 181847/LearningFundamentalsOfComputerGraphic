@@ -1,5 +1,7 @@
 #pragma once
 #include "Image.h"
+#include "vector2.h"
+#include "vector3.h"
 
 namespace CommonClass
 {
@@ -40,6 +42,16 @@ public:
         \brief sample by uv
     */
     RGBA Sample(const Types::F32 u, const Types::F32 v, const SampleState& sampleState = SampleState());
+
+    /*!
+        \brief perlin noise sampled by three dimension, you can also use this as 1D or 2D noise generator.
+        \param x sampling parameter, if the noise value is relative to time, you can set time to x.
+        \param y same as param x
+        \param z same as param x
+    */
+    static Types::F32 PerlinNoise(const Types::F32 x, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f);
+    static Types::F32 PerlinNoise(const CommonClass::vector2 xy, const Types::F32 z = 0.0f);
+    static Types::F32 PerlinNoise(const CommonClass::vector3 xyz);
 
 };// class Texture
 
