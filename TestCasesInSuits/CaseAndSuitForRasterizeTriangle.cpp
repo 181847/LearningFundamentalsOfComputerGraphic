@@ -526,7 +526,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
     std::vector<SimplePoint> points;
     std::vector<unsigned int> indices;
-    auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 50, 1, true);
+    auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 8, 3, true);
     indices = meshData.m_indices;
     points.clear();
 
@@ -539,7 +539,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     memcpy(vertexBuffer->GetBuffer(), points.data(), vertexBuffer->GetSizeOfByte());
 
     pso->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
-    pso->m_cullFace = CullFace::CLOCK_WISE;
+    pso->m_cullFace = CullFace::NONE;
     {
         COUNT_DETAIL_TIME;
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
@@ -557,6 +557,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
     // change the trs matrix and draw same cube with different instance
     trs = Transform::TRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(1.2f, 2.0f, 1.4f));
+    pso->m_fillMode = FillMode::WIREFRAME;
     normalTrs = Transform::InverseTRS(vector3(0.4f, 0.6f, -3.0f), vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f), vector3(1.2f, 2.0f, 1.4f)).T();
     {
         COUNT_DETAIL_TIME;
@@ -993,7 +994,7 @@ void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(TextureMapping)::Run()
 {
-
+    using namespace Types;
     static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector) + 2 * sizeof(Types::F32), "SimplePoint size is wrong");
 
     auto pipline = GetCommonPipline();
@@ -1030,7 +1031,7 @@ void CASE_NAME_IN_RASTER_TRI(TextureMapping)::Run()
         instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(4);
     }// end for
 
-    std::wstring pictureIndex = L"001";
+    std::wstring pictureIndex = L"003";
     CameraFrame cameraFrames(vector3(0.0f, 0.0f, 1.0f) * 3.0f /* location */, vector3(0.0f, 0.0f, 0.0f) /* target */);
     ConstantBufferForCamera cameraBuffer;
     cameraBuffer.m_toCamera = cameraFrames.WorldToLocal();
@@ -1049,9 +1050,13 @@ void CASE_NAME_IN_RASTER_TRI(TextureMapping)::Run()
 
     // build mesh data
     std::vector<SimplePoint>  vertices;
-    std::vector<unsigned int> indices;
-    //auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 32, 3, true);
-    auto meshData = GeometryBuilder::BuildCube(1.0f, 0.8f, 1.2f);
+    std::vector<U32> indices;
+    std::wstring geometryName;
+    
+    //auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 32, 3, true);  geometryName = L"cylinder";
+    //auto meshData = GeometryBuilder::BuildCube(1.0f, 0.8f, 1.2f);                   geometryName = L"cube";
+    //auto meshData = GeometryBuilder::BuildSphere(0.8f, 16, 16);                     geometryName = L"sphere";
+    auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);                       geometryName = L"geoSphere";
     indices = meshData.m_indices;
     vertices.clear();
     for (const auto& vertex : meshData.m_vertices)
@@ -1094,6 +1099,6 @@ void CASE_NAME_IN_RASTER_TRI(TextureMapping)::Run()
         pipline->DrawInstance(indices, vertexBuffer.get());
     }
 
-    std::wstring pictureNameWithNoExt = L"texture_mapping_" + pictureIndex;
+    std::wstring pictureNameWithNoExt = L"texture_mapping_" + pictureIndex + L"_" + geometryName;
     SaveAndShowPiplineBackbuffer((*(pipline.get())), pictureNameWithNoExt);
 }

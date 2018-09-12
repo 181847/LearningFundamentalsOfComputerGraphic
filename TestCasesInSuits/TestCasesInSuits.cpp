@@ -17,9 +17,9 @@ int main()
         //SuitForCommonClasses,
         //SuitForRayRender,
         //SuitForRasterisation, 
-        //SuitForRasterizeTriangle,
+        SuitForRasterizeTriangle//,
         //SuitForFilter,
-        SuitForStbImage//
+        //SuitForStbImage
     > suitQueueRunner;
 
     suitQueueRunner.StartBatch();
