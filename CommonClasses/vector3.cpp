@@ -4,8 +4,9 @@
 
 namespace CommonClass
 {
-
+    
 const CommonClass::vector3 vector3::ZERO   = vector3(0.0f, 0.0f, 0.0f);
+const CommonClass::vector3 vector3::UNIT   = vector3(1.0f, 1.0f, 1.0f);
 const CommonClass::vector3 vector3::AXIS_X = vector3(1.0f, 0.0f, 0.0f);
 const CommonClass::vector3 vector3::AXIS_Y = vector3(0.0f, 1.0f, 0.0f);
 const CommonClass::vector3 vector3::AXIS_Z = vector3(0.0f, 0.0f, 1.0f);

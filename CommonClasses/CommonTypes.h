@@ -19,7 +19,8 @@ namespace Constant
 /*!
     \brief the constant Pi in float
 */
-const float  PI_F = 3.14159265358979f;
+const float  PI_F  = 3.14159265358979f;
+const float  PI2_F = 6.28318530717958f;
 
 /*!
     \brief a positive float number close to zero.

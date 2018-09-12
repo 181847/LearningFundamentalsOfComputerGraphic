@@ -32,12 +32,13 @@ public:
         \brief some useful constant values.
     */
     static const vector3 ZERO;
+    static const vector3 UNIT;
     static const vector3 AXIS_X;
     static const vector3 AXIS_Y;
     static const vector3 AXIS_Z;
 
 public:
-    vector3();
+    explicit vector3();
     explicit vector3(const Types::F32 & x, const Types::F32 & y, const Types::F32 & z);
     explicit vector3(const Types::F32* pArr);
     ~vector3();

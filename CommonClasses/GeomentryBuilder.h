@@ -24,6 +24,7 @@ struct MeshData
 };
 
 MeshData::Vertex operator + (const MeshData::Vertex& v1, const MeshData::Vertex& v2);
+MeshData::Vertex operator * (const MeshData::Vertex& v1, const Types::F32& prod);
 
 class GeometryBuilder
 {

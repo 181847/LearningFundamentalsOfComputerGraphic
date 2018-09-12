@@ -224,7 +224,7 @@ MeshData GeometryBuilder::BuildCylinder(
     retData.m_vertices.clear();
 
 
-    // push vetex
+    // push vertex
     const F32 deltaRadius = (topRadius - bottomRadius) / stack; // radius diff between stacks
     const F32 deltaRadio = 2.0f * Constant::PI_F / slice; // delta radio in one circle
     const F32 deltaStack = height / stack;
@@ -235,6 +235,10 @@ MeshData GeometryBuilder::BuildCylinder(
     const F32 recipcol_l = 1.0f / std::sqrt(fixedNormalH * fixedNormalH + fixedNormalB * fixedNormalB);
     F32 fixedNormalRadius = fixedNormalH * recipcol_l;
     F32 fixedNormalHeight = fixedNormalB * recipcol_l;
+
+    // delta UV
+    const F32 deltaU = 1.0f / slice;
+    const F32 deltaV = 1.0f / (2 + stack);// top and bottom belong to the cap circule.
     
     F32 radius = bottomRadius;
     F32 radio;
@@ -244,14 +248,16 @@ MeshData GeometryBuilder::BuildCylinder(
     {
 
         radio = 0.0f;
-        for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+        for (U32 sliceIndex = 0; sliceIndex <= slice; ++sliceIndex)
         {
             x = std::cosf(radio);
             z = - std::sinf(radio);
 
-            vector3 pos = vector3(x * radius, y, z * radius);
-            vector3 normal = vector3(x * fixedNormalRadius, fixedNormalHeight, z * fixedNormalRadius);
-            retData.m_vertices.push_back({ pos, normal });
+            vector3 pos(x * radius, y, z * radius);
+            vector3 normal(x * fixedNormalRadius, fixedNormalHeight, z * fixedNormalRadius);
+            vector2 uv(sliceIndex * deltaU, (stackIndex + 1) * deltaV); // v should skip the first deltaV, which is for bottom cap.
+
+            retData.m_vertices.push_back({ pos, normal, uv });
 
             radio += deltaRadio;
         }
@@ -277,16 +283,9 @@ MeshData GeometryBuilder::BuildCylinder(
     {
         for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
         {
-            if (sliceIndex == slice - 1)
-            {
-                a = (stackIndex + 1) * slice + sliceIndex;      b = a - sliceIndex;
-                c = stackIndex * slice + sliceIndex;            d = c - sliceIndex;
-            }
-            else
-            {
-                a = (stackIndex + 1) * slice + sliceIndex;      b = a + 1;
-                c = stackIndex * slice + sliceIndex;            d = c + 1;
-            }
+            // notice: the number of vertices in one circle is slice + 1, if slice is 4, then there should be 5 vertex (one circle) the head overlap the tail.
+            a = (stackIndex + 1) * (slice + 1) + sliceIndex;      b = a + 1;
+            c = stackIndex * (slice + 1) + sliceIndex;            d = c + 1;
 
             // counter clockwise
             retData.m_indices.push_back(a);
@@ -309,23 +308,25 @@ MeshData GeometryBuilder::BuildCylinder(
 
     // cap vertices
     radio = 0.0f;
-    for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+    for (U32 sliceIndex = 0; sliceIndex <= slice; ++sliceIndex)
     {
         x = std::cosf(radio);
         z = -std::sinf(radio);
 
         // top
-        retData.m_vertices.push_back({ vector3(x * topRadius,     height, z * topRadius   ), vector3(0.0f, +1.0f, 0.0f) });
+        retData.m_vertices.push_back({ vector3(x * topRadius,     height, z * topRadius   ), vector3(0.0f, +1.0f, 0.0f), vector2(sliceIndex * deltaU, 1.0f - deltaV)});
         // bottom
-        retData.m_vertices.push_back({ vector3(x * bottomRadius,    0.0f, z * bottomRadius), vector3(0.0f, -1.0f, 0.0f) });
+        retData.m_vertices.push_back({ vector3(x * bottomRadius,    0.0f, z * bottomRadius), vector3(0.0f, -1.0f, 0.0f), vector2(sliceIndex * deltaU, deltaV)       });
         
         radio += deltaRadio;
     }// end for
 
     const U32 topCenter = retData.m_vertices.size();
     const U32 bottomCenter = topCenter + 1;
-    retData.m_vertices.push_back({ vector3(0.0f, height, 0.0f), vector3(0.0f, +1.0f, 0.0f) });
-    retData.m_vertices.push_back({ vector3(0.0f, 0.0f,   0.0f), vector3(0.0f, -1.0f, 0.0f) });
+    // top center
+    retData.m_vertices.push_back({ vector3(0.0f, height, 0.0f), vector3(0.0f, +1.0f, 0.0f), vector2(0.5f, 1.0f)});
+    // bottom center
+    retData.m_vertices.push_back({ vector3(0.0f, 0.0f,   0.0f), vector3(0.0f, -1.0f, 0.0f), vector2(0.5f, 0.0f)});
 
     //   topCenter
     //     /\                         
@@ -346,16 +347,8 @@ MeshData GeometryBuilder::BuildCylinder(
     // cap indices
     for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
     {
-        if (sliceIndex == slice - 1)
-        {
-            a = accumulateIndex + sliceIndex * 2 + 0;   b = a - sliceIndex * 2;
-            c = accumulateIndex + sliceIndex * 2 + 1;   d = c - sliceIndex * 2;
-        }
-        else
-        {
-            a = accumulateIndex + sliceIndex * 2 + 0;   b = a + 2;
-            c = accumulateIndex + sliceIndex * 2 + 1;   d = c + 2;
-        }
+        a = accumulateIndex + sliceIndex * 2 + 0;   b = a + 2;
+        c = accumulateIndex + sliceIndex * 2 + 1;   d = c + 2;
 
         retData.m_indices.push_back(topCenter);
         retData.m_indices.push_back(a);
@@ -379,6 +372,10 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     const F32 DELTA_SLICE_RADIO = Constant::PI_F * 2.0f / slice;
     const F32 DELTA_STACK_RADIO = Constant::PI_F / stack;
     const F32 usingRightHand = -1.0f;
+
+    // delta UV
+    const F32 deltaU = 1.0f / slice;
+    const F32 deltaV = 1.0f / (2 + stack);// top and bottom belong to the cap circule.
 
     F32 x, y, z;
 
@@ -407,14 +404,16 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
 
         horizontalRadio = 0.0f;
         horizontalRadius = std::sinf(verticalRadio); // stack radius
-        for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
+        for (U32 sliceIndex = 0; sliceIndex <= slice; ++sliceIndex)
         {
             x = std::cosf(horizontalRadio) * horizontalRadius;  // unit x
             z = - std::sinf(horizontalRadio) * horizontalRadius; // unit z
 
             retData.m_vertices.push_back(
                 {   vector3(x, y, z) * radius,  // stretch position by radius
-                    vector3(x,y,z) });          // normal
+                    vector3(x,y,z),             // normal
+                    vector2(sliceIndex * deltaU, (stackIndex + 1) * deltaV) // uv
+                });
 
             horizontalRadio += DELTA_SLICE_RADIO;
         }
@@ -423,8 +422,8 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     }// end for stackIndex
 
     // extra two vertex
-    retData.m_vertices.push_back({ vector3(0.0f, -radius, 0.0f), vector3(0.0f, -1.0f, 0.0f) }); // push bottom vertex
-    retData.m_vertices.push_back({ vector3(0.0f, +radius, 0.0f), vector3(0.0f, +1.0f, 0.0f) }); // push top vertex
+    retData.m_vertices.push_back({ vector3(0.0f, -radius, 0.0f), vector3(0.0f, -1.0f, 0.0f), vector2(0.5f, 0.0f) }); // push bottom vertex
+    retData.m_vertices.push_back({ vector3(0.0f, +radius, 0.0f), vector3(0.0f, +1.0f, 0.0f), vector2(0.5f, 1.0f) }); // push top vertex
 
      // push indices
      // a ----b
@@ -442,16 +441,8 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     {
         for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
         {
-            if (sliceIndex == slice - 1)
-            {
-                a = (stackIndex + 1) * slice + sliceIndex;      b = a - sliceIndex;
-                c = stackIndex * slice + sliceIndex;            d = c - sliceIndex;
-            }
-            else
-            {
-                a = (stackIndex + 1) * slice + sliceIndex;      b = a + 1;
-                c = stackIndex * slice + sliceIndex;            d = c + 1;
-            }
+            a = (stackIndex + 1) * (slice + 1) + sliceIndex;      b = a + 1;
+            c = stackIndex * (slice + 1) + sliceIndex;            d = c + 1;
 
             // counter clockwise
             retData.m_indices.push_back(a);
@@ -465,7 +456,7 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     }// end for stacks
 
     // cap bottom and top
-    U32 accumulateIndex = retData.m_vertices.size() - 2; // substract top and bottom vertex
+    U32 accumulateIndex = retData.m_vertices.size() - 2; // subtract top and bottom vertex
     const U32 bottomCenter = accumulateIndex;
     const U32 topCenter    = accumulateIndex + 1;
 
@@ -485,19 +476,12 @@ CommonClass::MeshData GeometryBuilder::BuildSphere(const Types::F32& radius, con
     //     \ /                        
     //    bottomCenter                        
 
+    accumulateIndex -= (slice + 1);
     // cap indices
     for (U32 sliceIndex = 0; sliceIndex < slice; ++sliceIndex)
     {
-        if (sliceIndex == slice - 1)
-        {
-            a = accumulateIndex - slice + sliceIndex;   b = a - slice;
-            c = sliceIndex;                             d = 0;
-        }
-        else
-        {
-            a = accumulateIndex - slice + sliceIndex;   b = a + 1;
-            c = sliceIndex;                             d = c + 1;
-        }
+        a = accumulateIndex + sliceIndex;   b = a + 1;
+        c = sliceIndex;                             d = c + 1;
 
         retData.m_indices.push_back(topCenter);
         retData.m_indices.push_back(a);
@@ -551,6 +535,14 @@ CommonClass::MeshData GeometryBuilder::BuildGeoSphere(const Types::F32& radius, 
     // and fix the normal to unit.
     for (auto& vertex : retData.m_vertices)
     {
+        F32 theta = std::atan2(- vertex.m_pos.m_z, vertex.m_pos.m_x);// make uv surround by counter clock wise, so flip the z value.
+        if (theta < 0.0f)
+        {
+            theta += Types::Constant::PI2_F;
+        }
+        F32 phi = acosf( - vertex.m_pos.m_y); // currently, position is still in unit sphere, so just use y value as cos(phi) and ensure bottom have a degree of zero, that is the reason -y is used..
+
+        vertex.m_uv = vector2(theta / Types::Constant::PI2_F, phi / Types::Constant::PI_F);
         vertex.m_pos = Normalize(vertex.m_pos) * radius;
         vertex.m_normal = Normalize(vertex.m_normal);
     }
@@ -582,15 +574,9 @@ void GeometryBuilder::Subdivide(MeshData & target)
         MeshData::Vertex v1, v2, v3;
 
         // new vertex
-        v1 = (Vertices[I2] + Vertices[I3]);
-        v2 = (Vertices[I1] + Vertices[I3]);
-        v3 = (Vertices[I1] + Vertices[I2]);
-        v1.m_pos = v1.m_pos * 0.5f;
-        v2.m_pos = v2.m_pos * 0.5f;
-        v3.m_pos = v3.m_pos * 0.5f;
-        v1.m_normal = v1.m_normal * 0.5f;
-        v2.m_normal = v2.m_normal * 0.5f;
-        v3.m_normal = v3.m_normal * 0.5f;
+        v1 = (Vertices[I2] + Vertices[I3]) * 0.5f;
+        v2 = (Vertices[I1] + Vertices[I3]) * 0.5f;
+        v3 = (Vertices[I1] + Vertices[I2]) * 0.5f;
 
         // new corresponding index
         newI1 = Vertices.size();
@@ -634,7 +620,12 @@ void GeometryBuilder::Subdivide(MeshData & target)
 
 CommonClass::MeshData::Vertex operator+(const MeshData::Vertex& v1, const MeshData::Vertex& v2)
 {
-    return {v1.m_pos + v2.m_pos, v1.m_normal + v2.m_normal};
+    return {v1.m_pos + v2.m_pos, v1.m_normal + v2.m_normal, v1.m_uv + v2.m_uv};
+}
+
+CommonClass::MeshData::Vertex operator*(const MeshData::Vertex& v1, const Types::F32& prod)
+{
+    return {v1.m_pos * prod, v1.m_normal * prod, v1.m_uv * prod};
 }
 
 }// namespace CommonClass
