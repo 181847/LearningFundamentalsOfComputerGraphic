@@ -54,8 +54,8 @@ RGBA Texture::Sample(const Types::F32 u, const Types::F32 v, const SampleState& 
     sampleState.FixUV(u, v, fu, fv);
 
     U32 sx, sy;
-    sx = static_cast<U32>(m_width  * fu);
-    sy = static_cast<U32>(m_height * fv);
+    sx = static_cast<U32>((m_width - 1)  * fu);
+    sy = static_cast<U32>((m_height - 1) * fv);
 
     std::array<RGBA, 4> colors = {RGBA(), RGBA() ,RGBA(), RGBA()};
     std::array<F32,  4> comps;
@@ -199,14 +199,80 @@ Types::F32 Texture::PerlinNoise(const Types::F32 x, const Types::F32 y /*= 0.0f*
 #undef CORNER_VALUE
 }
 
-Types::F32 Texture::PerlinNoise(const CommonClass::vector2 xy, const Types::F32 z)
+Types::F32 Texture::PerlinNoise(const CommonClass::vector2& xy, const Types::F32 z /*= 0.0f*/)
 {
     return PerlinNoise(xy.m_x, xy.m_y, z);
 }
 
-Types::F32 Texture::PerlinNoise(const CommonClass::vector3 xyz)
+Types::F32 Texture::PerlinNoise(const CommonClass::vector3& xyz)
 {
     return PerlinNoise(xyz.m_x, xyz.m_y, xyz.m_z);
+}
+
+CommonClass::vector3 Texture::NoiseVector3(const Types::F32 x, const Types::F32 y /*= 0.0f*/, const Types::F32 z /*= 0.0f*/)
+{
+    using namespace Types;
+    U32 lx = static_cast<U32>(x);
+    U32 ly = static_cast<U32>(y);
+    U32 lz = static_cast<U32>(z);
+    vector3 sampleLoc(x, y, z);
+    vector3 tVec(x - lx, y - ly, z - lz);
+
+    for (U32 i = 0; i < 3; ++i)
+    {
+        F32 t = tVec.m_arr[i];
+        tVec.m_arr[i] = t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
+    }
+
+    std::array<vector3, 8> cornerVecs;
+    // help to get value of corner by three component(0/1)
+#define CORNER_VEC(cix, ciy, ciz) cornerVecs[((cix << 2) + (ciy << 1) + ciz)]
+
+    for (U32 dx = 0; dx < 2; ++dx)
+    {
+        for (U32 dy = 0; dy < 2; ++dy)
+        {
+            for (U32 dz = 0; dz < 2; ++dz)
+            {
+                vector3 cornerLoc = vector3(static_cast<F32>(lx + dx), static_cast<F32>(ly + dy), static_cast<F32>(lz + dz));
+                vector3 randomVec = GammaVector(lx + dx, ly + dy, lz + dz);
+                vector3 deltaLoc = sampleLoc - cornerLoc;
+                CORNER_VEC(dx, dy, dz) = dotProd(randomVec, deltaLoc) * randomVec;
+            }// end for
+        }// end for
+    }// end for
+
+     //  |\ Y+   /| Z+
+     //  |      /                              
+     //  |     /                               
+     //  |    /                                
+     //  |   /                                 
+     //  |  /                                  
+     //  | /                                   
+     //  O------------->  X+ 
+    return
+        MathTool::Lerp(// lerp z
+            MathTool::Lerp(// lerp y
+                MathTool::Lerp(CORNER_VEC(0, 0, 0), CORNER_VEC(1, 0, 0), tVec.m_x),
+                MathTool::Lerp(CORNER_VEC(0, 1, 0), CORNER_VEC(1, 1, 0), tVec.m_x),
+                tVec.m_y),
+            MathTool::Lerp(// lerp y
+                MathTool::Lerp(CORNER_VEC(0, 0, 1), CORNER_VEC(1, 0, 1), tVec.m_x),
+                MathTool::Lerp(CORNER_VEC(0, 1, 1), CORNER_VEC(1, 1, 1), tVec.m_x),
+                tVec.m_y),
+            tVec.m_z);
+
+#undef CORNER_VEC
+}
+
+vector3 Texture::NoiseVector3(const CommonClass::vector2& xy, const Types::F32 z /*= 0.0f*/)
+{
+    return NoiseVector3(xy.m_x, xy.m_y, z);
+}
+
+CommonClass::vector3 Texture::NoiseVector3(const CommonClass::vector3& xyz)
+{
+    return NoiseVector3(xyz.m_x, xyz.m_y, xyz.m_z);
 }
 
 }// namespace CommonClass

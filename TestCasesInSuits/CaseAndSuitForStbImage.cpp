@@ -40,8 +40,6 @@ void CASE_NAME_IN_STB_IMG(TextureSample)::Run()
     samplingResult.SaveTo(GetSafeStoragePath() + L"resamplingImage.png");
 }
 
-
-
 void CASE_NAME_IN_STB_IMG(PerlinNoiseTexture)::Run()
 {
     using namespace Types;
@@ -79,4 +77,37 @@ void CASE_NAME_IN_STB_IMG(PerlinNoiseTexture)::Run()
 
     this->BlockShowImg(&img, L"noise texture");
     img.SaveTo(GetSafeStoragePath() + L"perlinNoise_04.png");
+}
+
+void CASE_NAME_IN_STB_IMG(NoiseVecTexture)::Run()
+{
+    using namespace Types;
+    Image img(512, 512);
+
+    {
+        COUNT_DETAIL_TIME;
+        for (U32 x = 0; x < 512; ++x)
+        {
+            for (U32 y = 0; y < 512; ++y)
+            {
+                vector3 p(x * 1.0f, y / 1.0f, 0.0f);
+                /*F32 noiseIntensity =
+                    std::sin(
+                        p.m_x + std::abs(
+                            Texture::PerlinNoise(p) +
+                            0.5f   * Texture::PerlinNoise(2.0f * p) +
+                            0.25f  * Texture::PerlinNoise(4.0f * p) +
+                            0.125f * Texture::PerlinNoise(8.0f * p)));*/
+                p = p * (1.0f / 32.0f);
+
+                vector3 noiseVec = Texture::NoiseVector3(p);// + 0.5f * Texture::NoiseVector3(2.0f * p) + 0.25f * Texture::NoiseVector3(4.0f * p) + 0.125f * Texture::NoiseVector3(8.0f * p);
+                noiseVec = 0.5f * (noiseVec + vector3::UNIT);
+                RGB noiseColor(noiseVec.m_x, noiseVec.m_y, noiseVec.m_z);
+                img.SetPixel(x, y, noiseColor);
+            }
+        }
+    }
+
+    this->BlockShowImg(&img, L"noise vector3 texture");
+    img.SaveTo(GetSafeStoragePath() + L"noiseVector3_06.png");
 }

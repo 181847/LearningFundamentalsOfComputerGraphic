@@ -50,8 +50,15 @@ public:
         \param z same as param x
     */
     static Types::F32 PerlinNoise(const Types::F32 x, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f);
-    static Types::F32 PerlinNoise(const CommonClass::vector2 xy, const Types::F32 z = 0.0f);
-    static Types::F32 PerlinNoise(const CommonClass::vector3 xyz);
+    static Types::F32 PerlinNoise(const CommonClass::vector2& xy, const Types::F32 z = 0.0f);
+    static Types::F32 PerlinNoise(const CommonClass::vector3& xyz);
+
+    /*!
+    `   \brief noise vector3(unit)
+    */
+    static vector3 NoiseVector3(const Types::F32 x, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f);
+    static vector3 NoiseVector3(const CommonClass::vector2& xy, const Types::F32 z = 0.0f);
+    static vector3 NoiseVector3(const CommonClass::vector3& xyz);
 
 };// class Texture
 

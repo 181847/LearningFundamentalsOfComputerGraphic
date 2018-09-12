@@ -26,8 +26,11 @@ DECLARE_CASE_IN_STB_IMG_FOR(TextureSample, "load texture by file");
 
 DECLARE_CASE_IN_STB_IMG_FOR(PerlinNoiseTexture, "perlin noise texture");
 
+DECLARE_CASE_IN_STB_IMG_FOR(NoiseVecTexture, "perlin noise texture");
+
 using SuitForStbImage = SuitForPipline<
     //CASE_NAME_IN_STB_IMG(TextureLoad),
     CASE_NAME_IN_STB_IMG(TextureSample),
-    CASE_NAME_IN_STB_IMG(PerlinNoiseTexture)
+    CASE_NAME_IN_STB_IMG(PerlinNoiseTexture),
+    CASE_NAME_IN_STB_IMG(NoiseVecTexture)
 >;
