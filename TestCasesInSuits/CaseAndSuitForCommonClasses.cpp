@@ -800,13 +800,13 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
                     vector3 toEye = -viewRay.m_direction;
                     vector3 halfVec = Normalize(toEye + toLight);
 
-                    RGB lightStrength = pointLight.m_color * std::max(0.0f, hitRec.m_normal * toLight);
+                    RGB lightStrength = pointLight.m_color * std::max(0.0f, dotProd(hitRec.m_normal, toLight));
 
                     const Types::F32 m = hitRec.m_material.m_shinness;
 
-                    Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(halfVec * hitRec.m_normal, m);
+                    Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(dotProd(halfVec, hitRec.m_normal), m);
 
-                    color = color + lightStrength * (hitRec.m_material.m_kDiffuse + hitRec.m_material.RFresnel(toEye * hitRec.m_normal) * shinnessSthrength);
+                    color = color + lightStrength * (hitRec.m_material.m_kDiffuse + hitRec.m_material.RFresnel(dotProd(toEye, hitRec.m_normal)) * shinnessSthrength);
                 }
 
                 camera.IncomeLight(i, j, color);

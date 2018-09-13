@@ -5,6 +5,7 @@
 
 #include "CommonHeaders.h"
 #include <filesystem>
+#include <functional>
 #undef RGB
 
 using namespace CommonClass;
@@ -19,6 +20,8 @@ protected:
     using Super = CaseForPipline;
 
 public:
+    using PixelShaderSig = std::function<RGBA(const ScreenSpaceVertexTemplate*)>;
+
     // temp struct for generous case
     struct SimplePoint
     {
@@ -54,7 +57,21 @@ public:
     };
     using PSIn = VSOut;
     static_assert(sizeof(VSOut) == 3 * sizeof(hvector) + 2 * sizeof(Types::F32), "structure VSOut has wrong size.");
+    
 
+    /*!
+        \brief the buffer of light
+    */
+    struct LightBuffer
+    {
+    public:
+        vector3     m_position      = vector3::ZERO;
+        RGB         m_color         = RGB::WHITE;
+        vector3     m_direction     = vector3::AXIS_Y;
+        Types::F32  m_fadeoffStart  = 0.0f;
+        Types::F32  m_fadeoffEnd    = 10.0f;
+        Types::F32  m_spotPower     = 1.0f;
+    };
     /*!
         \brief buffer of simple material
     */
@@ -80,11 +97,77 @@ public:
             return RGB(component, component, component);
         }
 
-        static RGB FresnelReflect(const Types::F32 cosAlpha, const Types::F32 cosTheta, const RGB& fresnelR0, const Types::F32 shiness)
+        static vector3 SchlickFresnel(const vector3& r0, const vector3& normal, const vector3& toLight)
         {
-            RGB fresnelColor = fresnelR0 + (RGB::WHITE - fresnelR0) * std::pow(1 - cosAlpha, 5);
-            Types::F32 shinyPower = (shiness + 8.0f) / 8.0f * std::pow(cosTheta, shiness);
-            return fresnelColor * shinyPower;
+            using namespace Types;
+            F32 cosIncidentAngle = MathTool::Saturate(dotProd(normal, toLight));
+            F32 f0 = 1.0f - cosIncidentAngle;
+            vector3 reflectPercent = r0 + (vector3::UNIT - r0) * (f0 * f0 * f0 * f0 * f0);
+            return reflectPercent;
+        }
+
+        static vector3 BlinnPhone(const vector3& lightStrength, const vector3& diffuseAlbedo, const vector3& fresnelR0, const Types::F32 shiness, const vector3& toLight, const vector3& toEye, const vector3& normal)
+        {
+            using namespace Types;
+            F32 m = shiness * 256.0f;
+            vector3 halfVec = Normalize(toEye + toLight);
+            F32 roughnessFactor = (m + 8.0f) * std::pow(std::max(dotProd(halfVec, normal), 0.0f), m);
+            vector3 fresnelFactor = SchlickFresnel(vector3(fresnelR0.m_arr), normal, toLight);
+
+            vector3 specAlbedo = fresnelFactor * roughnessFactor;
+            specAlbedo = specAlbedo / (specAlbedo + vector3::UNIT);
+
+            return (diffuseAlbedo + specAlbedo) * lightStrength;
+        }
+
+        static vector3 ComputePointLight(const LightBuffer& L, const vector3& diffuseAlbedo, const vector3& fresnelR0, const Types::F32 shiness, const vector3& posW, const vector3 normal, const vector3 toEye)
+        {
+            using namespace Types;
+            vector3 toLight = L.m_position - posW;
+            F32 toLightLength = Length(toLight);
+            
+            if (toLightLength > L.m_fadeoffEnd)
+            {
+                return vector3::ZERO;
+            }
+            toLight = toLight / toLightLength;
+
+            // cosine law
+            F32 ndotl = std::max(dotProd(toLight, normal), 0.0f);
+            vector3 lightStrength = vector3(L.m_color.m_arr) * ndotl;
+
+            // fade effect
+            F32 att = MathTool::Attenuation(toLightLength, L.m_fadeoffStart, L.m_fadeoffEnd);
+            lightStrength = lightStrength * att;
+
+            return BlinnPhone(lightStrength, diffuseAlbedo, fresnelR0, shiness, toLight, toEye, normal);
+        }
+
+        static vector3 ComputeSpotLight(const LightBuffer& L, const vector3& diffuseAlbedo, const vector3& fresnelR0, const Types::F32 shiness, const vector3& posW, const vector3 normal, const vector3 toEye)
+        {
+            using namespace Types;
+            vector3 toLight = L.m_position - posW;
+            F32 toLightLength = Length(toLight);
+
+            if (toLightLength > L.m_fadeoffEnd)
+            {
+                return vector3::ZERO;
+            }
+            toLight = toLight / toLightLength;
+
+            // cosine law
+            F32 ndotl = std::max(dotProd(toLight, normal), 0.0f);
+            vector3 lightStrength = vector3(L.m_color.m_arr) * ndotl;
+
+            // fade effect
+            F32 att = MathTool::Attenuation(toLightLength, L.m_fadeoffStart, L.m_fadeoffEnd);
+            lightStrength = lightStrength * att;
+
+            // spot power
+            F32 spotFactor = std::pow(std::max(dotProd(-toLight, L.m_direction), 0.0f), L.m_spotPower);
+            lightStrength = lightStrength * spotFactor;
+
+            return BlinnPhone(lightStrength, diffuseAlbedo, fresnelR0, shiness, toLight, toEye, normal);
         }
     };
 
@@ -112,16 +195,6 @@ public:
     };
 
     /*!
-        \brief the buffer of light
-    */
-    struct LightBuffer
-    {
-    public:
-        vector3 m_position = vector3::ZERO;
-        RGB     m_color    = RGB::WHITE;
-    };
-
-    /*!
         \brief constant buffer for camera settings
     */
     struct ConstantBufferForCamera
@@ -134,6 +207,142 @@ public:
         RGB                         m_ambientColor;     // ambientColor
         int                         m_numLights;        // the number of light in the scene, less or equal m_lights.size().
         std::array<LightBuffer, 3>  m_lights;           // the lights in scene
+    };
+
+    /*!
+        \brief this kind of structure will have pre build data for rendering, for example: TRS of prebuilded instance, camera buffer...
+    */
+    struct CommonRenderingBuffer
+    {
+    public:
+        /*!
+            \brief the mesh data can be directly drawn.
+        */
+        struct SpecializedMeshData
+        {
+            std::unique_ptr<F32Buffer> vertexBuffer;
+            std::vector<Types::U32> indices;
+        };
+        const Types::F32 
+            LEFT_F      = -1.0f, RIGHT_F    = 1.0f, 
+            BOTTOM_F    = -1.0f, TOP_F      = 1.0f, 
+            NEAR_F      = -1.0f, FAR_F      = -10.0f;
+        Transform perspect;
+        std::array<ObjectInstance, 3> objInstances;
+        std::array<ConstantBufferForInstance, 3> instanceBuffers;
+        CameraFrame cameraFrame;
+        ConstantBufferForCamera cameraBuffer;
+
+        enum
+        {
+            M_CUBE = 0,
+            M_CYLINDER,
+            M_SPHERE,
+            M_GEOSPHERE,
+            NUM_SUPPORTED_MESH
+        };
+        std::array<SpecializedMeshData, NUM_SUPPORTED_MESH> prebuildMeshData;
+
+        CommonRenderingBuffer()
+        {
+            perspect = Transform::PerspectiveOG(LEFT_F, RIGHT_F, BOTTOM_F, TOP_F, NEAR_F, FAR_F);
+
+            Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
+            // 1
+            objInstances[0].m_position = vector3(0.0f, 0.0f, 0.0f);
+            objInstances[0].m_rotation = vector3(0, 0, 0);
+            objInstances[0].m_scale = vector3(2.0f, 2.0f, 2.0f);
+            // 2
+            objInstances[1].m_position = vector3(1.0f, 1.4f, 0.0f);
+            objInstances[1].m_rotation = vector3(pitch, yaw + 3.14f / 3, roll);
+            objInstances[1].m_scale = vector3(1.5f, 1.5f, 1.5f);
+            // 3
+            objInstances[2].m_position = vector3(-1.0f, 2.8f, 0.0f);
+            objInstances[2].m_rotation = vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f);
+            objInstances[2].m_scale = vector3(0.8f, 0.8f, 0.8f);
+
+            RebuildInstanceBuffer();
+
+            cameraFrame.m_origin = vector3(0.0f, 0.0f, 1.0f) * 3.0f;
+            cameraFrame.m_lookAt = vector3::ZERO;
+            RebuildCameraBuffer();
+
+            // pre build meshes.
+            BuildMeshDatas();
+        }
+
+        /*!
+            \brief rebuild instanceBuffers from objInstances.
+        */
+        void RebuildInstanceBuffer()
+        {
+            for (unsigned int i = 0; i < instanceBuffers.size(); ++i)
+            {
+                instanceBuffers[i].m_toWorld = Transform::TRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
+                instanceBuffers[i].m_toWorldInverse = Transform::InverseTRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
+                instanceBuffers[i].m_material.m_diffuse = RGB::WHITE;// *0.5f;
+                instanceBuffers[i].m_material.m_shiness = 16.0f;
+                instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(4);
+            }// end for
+        }
+
+        /*!
+            \brief rebuild camera buffer by camera frame.
+        */
+        void RebuildCameraBuffer()
+        {
+            cameraFrame.RebuildFrameDetail();
+            cameraBuffer.m_toCamera = cameraFrame.WorldToLocal();
+            cameraBuffer.m_toCameraInverse = cameraFrame.LocalToWorld();
+            cameraBuffer.m_camPos = cameraFrame.m_origin;
+            cameraBuffer.m_project = perspect;
+            cameraBuffer.m_numLights = 1;
+            cameraBuffer.m_ambientColor = RGB::WHITE * RGB(0.05f, 0.05f, 0.05f);
+            cameraBuffer.m_lights[0] = { vector3(0.0f, 10.0f, 0.0f), RGB::WHITE };
+        }
+
+        /*1
+            \brief build mesh data for drawing.
+        */
+        void BuildMeshDatas()
+        {
+            for (unsigned int i = 0; i < NUM_SUPPORTED_MESH; ++i)
+            {
+                MeshData rawData;
+                switch (i)
+                {
+                case M_CUBE:
+                    rawData = GeometryBuilder::BuildCube(2.0f, 2.0f, 2.0f);
+                    break;
+
+                case M_CYLINDER:
+                    rawData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 8, 3, true);
+                    break;
+
+                case M_SPHERE:
+                    rawData = GeometryBuilder::BuildSphere(0.8f, 16, 16);
+                    break;
+
+                case M_GEOSPHERE:
+                    rawData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
+                    break;
+
+                default:
+                    throw std::exception("unsupported prebuild mesh type");
+                    break;
+                }
+
+                // transfer raw data to specialized mesh data.
+                std::vector<SimplePoint> vertices;
+                for (const auto& vertex : rawData.m_vertices)
+                {
+                    vertices.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f), vertex.m_uv * 3.0f));
+                }
+                prebuildMeshData[i].indices = rawData.m_indices;
+                prebuildMeshData[i].vertexBuffer = std::make_unique<F32Buffer>(vertices.size() * sizeof(decltype(vertices)::value_type));
+                memcpy(prebuildMeshData[i].vertexBuffer->GetBuffer(), vertices.data(), prebuildMeshData[i].vertexBuffer->GetSizeOfByte());
+            }
+        }
     };
 
 protected:
@@ -516,23 +725,6 @@ public:
     }
 
     /*!
-        \brief pixel shader for vertex that have normal.
-    */
-    static auto GetPixelShaderWithNormal()
-    {
-        return [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-            const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
-            vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
-            
-            vector3 normal = pPoint->m_rayIndex.ToVector3();
-            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
-
-            RGB result = kw * RGB::BLUE + (1 - kw) * RGB::RED;
-            return Cast(result);
-        };
-    }
-
-    /*!
         \brief get a vertex shader with TRS/perspectCamera/normalTransformation
     */
     static auto GetVertexShaderWithNormal(Transform& trs, Transform& perspect, Transform& normalTrs)
@@ -598,6 +790,31 @@ public:
     }
 
     /*!
+        \brief cold to warm color shading.
+        \param normal the normal of the pixel
+        \param WarmDirection the warmest normal direction
+    */
+    static RGBA ColdToWarm(const vector3& normal, const vector3& WarmDirection = Normalize(vector3::UNIT))
+    {
+        Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
+        RGB color = kw * RGB::BLUE + (1 - kw) * RGB::RED;
+        return Cast(color);
+    }
+
+    /*!
+        \brief pixel shader for vertex that have normal.
+    */
+    static auto GetPixelShaderWithNormal()
+    {
+        return [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
+            vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
+            vector3 normal = pPoint->m_rayIndex.ToVector3();
+            return ColdToWarm(normal);
+        };
+    }
+
+    /*!
         \brief a pixel shader require VSOut as input
     */
     static auto GetPixelShaderWithPSIn(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
@@ -605,29 +822,23 @@ public:
         return [&constBufInstance, &constBufCamera](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
             const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
-            vector3 normal = Normalize(pPoint->m_normalW.ToVector3());
+            
 
-            /*vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
-            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
-            RGB debugColor = kw * RGB::BLUE + (1 - kw) * RGB::RED;*/
-            //return Cast(debugColor);
+            vector3 normal      = Normalize(pPoint->m_normalW.ToVector3());
+            vector3 pixelPosW   = pPoint->m_posW.ToVector3();
+            vector3 toEye       = Normalize(constBufCamera.m_camPos - pixelPosW);
 
-            vector3 pixelPosW = pPoint->m_posW.ToVector3();
+            vector3 blinn = MaterialBuffer::ComputePointLight(
+                constBufCamera.m_lights[0],
+                vector3(constBufInstance.m_material.m_diffuse.m_arr),
+                vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+                constBufInstance.m_material.m_shiness,
+                pixelPosW, 
+                normal, 
+                toEye);
 
-            vector3 toLight = Normalize(constBufCamera.m_lights[0].m_position - pixelPosW);
-            vector3 toEye = Normalize(constBufCamera.m_camPos - pixelPosW);
-            vector3 halfVec = Normalize(toLight + toEye);
-            Types::F32 cosTheta = dotProd(normal, halfVec);
-            Types::F32 cosAlpha = dotProd(toEye, halfVec);
-            RGB fresnelReflect = MaterialBuffer::FresnelReflect(cosAlpha, cosTheta, constBufInstance.m_material.m_fresnelR0, constBufInstance.m_material.m_shiness);
-            RGB lightColor = constBufCamera.m_lights[0].m_color * std::max(0.0f, dotProd(toLight, normal));
-
-            RGB diffuse = constBufInstance.m_material.m_diffuse;
-            RGB ambient = constBufCamera.m_ambientColor;
-
-            RGB color = ambient * diffuse + lightColor * (diffuse + fresnelReflect);
-
-            return Cast(color);
+            RGBA color(blinn.m_arr);
+            return color;
         };
     }
 
@@ -638,36 +849,77 @@ public:
     {
         return [&constBufInstance, &constBufCamera, &texture](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
             assert(texture->IsValid());
-
             const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
             vector3 normal = Normalize(pPoint->m_normalW.ToVector3());
-
-            /*vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
-            Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
-            RGB debugColor = kw * RGB::BLUE + (1 - kw) * RGB::RED;*/
-            //return Cast(debugColor);
-
             vector3 pixelPosW = pPoint->m_posW.ToVector3();
-
-            vector3 toLight = Normalize(constBufCamera.m_lights[0].m_position - pixelPosW);
             vector3 toEye = Normalize(constBufCamera.m_camPos - pixelPosW);
-            vector3 halfVec = Normalize(toLight + toEye);
-            Types::F32 cosTheta = dotProd(normal, halfVec);
-            Types::F32 cosAlpha = dotProd(toEye, halfVec);
-            RGB fresnelReflect = MaterialBuffer::FresnelReflect(cosAlpha, cosTheta, constBufInstance.m_material.m_fresnelR0, constBufInstance.m_material.m_shiness);
-            RGB lightColor = constBufCamera.m_lights[0].m_color * std::max(0.0f, dotProd(toLight, normal));
-
-            RGB ambient = constBufCamera.m_ambientColor;
 
             // sample texture to get diffuse color.
             vector2 uv = pPoint->m_uv;
             RGBA sampleColor = texture->Sample(uv.m_x, uv.m_y);
             RGB diffuse = Cast(sampleColor);
 
-            RGB color = ambient * diffuse + lightColor * (diffuse + fresnelReflect);
+            vector3 resultColor = MaterialBuffer::ComputePointLight(
+                constBufCamera.m_lights[0],
+                vector3(diffuse.m_arr),
+                vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+                constBufInstance.m_material.m_shiness,
+                pixelPosW,
+                normal,
+                toEye);
 
-            return Cast(color);
+            if (constBufCamera.m_numLights == 2)
+            {
+                vector3 blinnSpot = MaterialBuffer::ComputeSpotLight(
+                constBufCamera.m_lights[1],
+                vector3(diffuse.m_arr),
+                vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+                constBufInstance.m_material.m_shiness,
+                pixelPosW,
+                normal,
+                toEye);
+                resultColor = resultColor + blinnSpot;
+            }
+
+            RGBA color(resultColor.m_arr);
+            return color;
+        };
+    }
+
+    /*!
+        \brief a pixel shader require one texture, whose sampling color will be used to disturb the normal of original geometry.
+    */
+    static auto GetPixelShaderWithNoiseBumpMap(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, std::shared_ptr<Texture>& texture)
+    {
+        return [&constBufInstance, &constBufCamera, &texture](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+            assert(texture->IsValid());
+            const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
+
+            // get noise normal from texture.
+            vector2 uv = pPoint->m_uv;
+            RGBA sampleColor = texture->Sample(uv.m_x, uv.m_y);
+            vector3 noiseNormal(sampleColor.m_chas.m_r, sampleColor.m_chas.m_g, sampleColor.m_chas.m_b);
+            // channels of noise color all lay in [0,1], map them to [-1, 1]
+            noiseNormal = noiseNormal * 2.0f - vector3::UNIT;
+            noiseNormal = Normalize(noiseNormal);
+            //noiseNormal = noiseNormal * 2.0f;// enhance the noise power.
+            vector3 normal = Normalize(noiseNormal + pPoint->m_normalW.ToVector3());
+
+            vector3 pixelPosW = pPoint->m_posW.ToVector3();
+            vector3 toEye = Normalize(constBufCamera.m_camPos - pixelPosW);
+
+            vector3 blinn = MaterialBuffer::ComputePointLight(
+                constBufCamera.m_lights[0],
+                vector3(constBufInstance.m_material.m_diffuse.m_arr),
+                vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+                constBufInstance.m_material.m_shiness,
+                pixelPosW,
+                normal,
+                toEye);
+
+            RGBA color(blinn.m_arr);
+            return color;
         };
     }
 };
