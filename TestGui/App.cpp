@@ -45,6 +45,13 @@ std::array<ConstantBufferForInstance, 3>            instanceBuffers;
 ConstantBufferForInstance                           instanceBufAgent;// agent buffer for setting instance data
 CameraFrame                                         cameraFrames(vector3(0.0f, 0.0f, 1.0f) * 3.0f /* location */, vector3(0.0f, 0.0f, 0.0f) /* target */);
 ConstantBufferForCamera                             cameraBuffer;
+std::shared_ptr<Texture>                            textureAgent;// texture agent for pixel shader.
+CaseForPipline::PixelShaderSig                      pixelShaderNoTexture;
+CaseForPipline::PixelShaderSig                      pixelShaderTexture;
+CaseForPipline::PixelShaderSig                      pixelShaderNoiseNormalTexture;
+std::shared_ptr<Texture>                            texture1 = std::make_shared<Texture>();
+std::shared_ptr<Texture>                            texture2 = std::make_shared<Texture>();
+std::shared_ptr<Texture>                            texture3 = std::make_shared<Texture>();
 
 void UpdateCameraBuffer()
 {
@@ -64,10 +71,10 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
 {
     assert(consoleHwnd && nativeHwnd && pDevice && pDeviceContext);
 
-    ConsoleHwnd = consoleHwnd;
-    NativeHwnd = nativeHwnd;
-    pd3dDevice = pDevice;
-    pd3dDeviceContex = pDeviceContext;
+    ConsoleHwnd         = consoleHwnd;
+    NativeHwnd          = nativeHwnd;
+    pd3dDevice          = pDevice;
+    pd3dDeviceContex    = pDeviceContext;
 
     //auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 32, 3, true);
     auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
@@ -75,7 +82,7 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
     MainVertices.clear();
     for (const auto& vertex : meshData.m_vertices)
     {
-        MainVertices.push_back(CaseForPipline::SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
+        MainVertices.push_back(CaseForPipline::SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f), vertex.m_uv));
     }
     MainVertexBuffer = std::make_unique<F32Buffer>(MainVertices.size() * sizeof(decltype(MainVertices)::value_type));
     memcpy(MainVertexBuffer->GetBuffer(), MainVertices.data(), MainVertexBuffer->GetSizeOfByte());
@@ -85,7 +92,7 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
     // 1
     objInstances[0].m_position = vector3(0.0f, 0.0f, 0.0f);
     objInstances[0].m_rotation = vector3(0, 0, 0);
-    objInstances[0].m_scale = vector3(1.5f, 2.1f, 1.0f);
+    objInstances[0].m_scale = vector3(2.1f, 2.1f, 2.1f);
     // 2
     objInstances[1].m_position = vector3(1.0f, 1.4f, 0.0f);
     objInstances[1].m_rotation = vector3(pitch, yaw + 3.14f / 3, roll);
@@ -100,16 +107,28 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
         instanceBuffers[i].m_toWorld = Transform::TRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
         instanceBuffers[i].m_toWorldInverse = Transform::InverseTRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
         instanceBuffers[i].m_material.m_diffuse = RGB::RED * 0.5f;
-        instanceBuffers[i].m_material.m_shiness = 1024.0f;
-        instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(4);
+        instanceBuffers[i].m_material.m_shiness = 32.0f;
+        instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(8);
     }// end for
 
     // camera settings.
     UpdateCameraBuffer();
 
+    // load textures
+    texture1->LoadFile("d:\\GitHub\\C_C++\\LearningFundamentalsOfComputerGraphic\\build\\OutputTestImage\\StbImg\\noiseVector3_03.png");
+    texture2->LoadFile("d:\\GitHub\\C_C++\\LearningFundamentalsOfComputerGraphic\\build\\OutputTestImage\\StbImg\\noiseVector3_06.png");
+    texture3->LoadFile("d:\\picture\\Maria\\sideShowToy\\bloodborne-lady-maria-of-the-astral-clocktower-statue-prime1-studio-902974-04.jpg");
+    textureAgent = texture3;
+
+    // pre store pixel shaders.
+    pixelShaderNoTexture            = HelpPiplineCase.GetPixelShaderWithPSIn(instanceBufAgent, cameraBuffer);
+    pixelShaderTexture              = HelpPiplineCase.GetPixelShaderWithPSInAndTexture(instanceBufAgent, cameraBuffer, textureAgent);
+    pixelShaderNoiseNormalTexture   = HelpPiplineCase.GetPixelShaderWithNoiseBumpMap(instanceBufAgent, cameraBuffer, textureAgent);
+
     // set VS and PS
     PSO->m_vertexShader = HelpPiplineCase.GetVertexShaderWithVSOut(instanceBufAgent, cameraBuffer);
-    PSO->m_pixelShader  = HelpPiplineCase.GetPixelShaderWithPSIn(instanceBufAgent, cameraBuffer);
+    //PSO->m_pixelShader  = pixelShaderNoiseNormalTexture;
+    PSO->m_pixelShader  = pixelShaderTexture;
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     PSO->m_vertexLayout.pixelShaderInputSize  = sizeof(PSIn);
 }
@@ -188,6 +207,11 @@ bool ImguiUpdateRenderData()
     {
         cameraFrames.RebuildFrameDetail();
         UpdateCameraBuffer();
+        isDirtyData = true;
+    }
+
+    if (ImGui::DragFloat3("light position", cameraBuffer.m_lights[0].m_position.m_arr, 0.01f, -10.0f, 10.0f))
+    {
         isDirtyData = true;
     }
 
