@@ -22,8 +22,8 @@ bool Sphere::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitR
 
     // next code reference from "Real-Time Rendering 3rd"
     vector3 l = m_center - ray.m_origin;
-    Types::F32 s = l * ray.m_direction;
-    Types::F32 squareL = l * l;
+    Types::F32 s = dotProd(l, ray.m_direction);
+    Types::F32 squareL = dotProd(l, l);
     Types::F32 squareR = m_radius * m_radius;
 
     // whether the ray starts outside the sphere, and point outside the sphere.

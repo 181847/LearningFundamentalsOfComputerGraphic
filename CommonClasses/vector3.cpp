@@ -65,9 +65,9 @@ bool operator!=(const vector3 & a, const vector3 & b)
         || a.m_z != b.m_z;
 }
 
-Types::F32 operator*(const vector3 & a, const vector3 & b)
+vector3 operator*(const vector3 & a, const vector3 & b)
 {
-    return (a.m_x * b.m_x + a.m_y * b.m_y + a.m_z * b.m_z);
+    return vector3(a.m_x * b.m_x, a.m_y * b.m_y, a.m_z * b.m_z);
 }
 
 vector3 operator*(const vector3 & a, const Types::F32 bFloat)
@@ -83,6 +83,16 @@ vector3 operator*(const Types::F32 bFloat, const vector3 & a)
 vector3 operator-(const vector3 & a)
 {
     return vector3(-a.m_x, -a.m_y, -a.m_z);
+}
+
+CommonClass::vector3 operator/(const vector3 & a, const vector3 & b)
+{
+    return vector3(a.m_x / b.m_x, a.m_y / b.m_y, a.m_z / b.m_z);
+}
+
+CommonClass::vector3 operator/(const vector3 & a, const Types::F32 bFloat)
+{
+    return vector3(a.m_x / bFloat, a.m_y / bFloat, a.m_z / bFloat);
 }
 
 Types::F32 dotProd(const vector3 & a, const vector3 & b)

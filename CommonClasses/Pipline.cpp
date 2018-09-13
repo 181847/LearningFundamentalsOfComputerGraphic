@@ -287,7 +287,7 @@ void Pipline::DrawTriangle(
                 / f31.eval(pv2->m_posH.            m_x,   pv2->m_posH.            m_y);
             const float gamma = 1.0f - alpha - beta;
 
-            if (alpha > 0.0f && beta > 0.0f && gamma > 0.0f)
+            if (alpha >= 0.0f && beta >= 0.0f && gamma >= 0.0f)
             {
                 Interpolate3(   pv1,    pv2,    pv3,    vertexPtr,
                                 alpha,  beta,   gamma,  realVertexSizeBytes);

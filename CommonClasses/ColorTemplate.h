@@ -133,6 +133,10 @@ public:
         const T& b = MIN_CHANNEL_VALUE,
         const T& a = ALPHA_CHANNEL_OPAQUE);
 
+    /*!
+        \brief build rgb(a) color from an array, alpha value default to be opaque.
+    */
+    explicit ColorTemplate(const Types::F32 arr[]);
     
     /*!
         \brief a constructor only for ColorTemplate<false> or RGB
@@ -161,6 +165,19 @@ public:
     */
     static Types::F32 ClampChannel(const Types::F32 & value);
 };
+
+template<bool HAVE_ALPHA>
+CommonClass::ColorTemplate<HAVE_ALPHA>::ColorTemplate(const Types::F32 arr[])
+{
+    for (unsigned int i = 0; i < 3; ++i)
+    {
+        this->m_arr[i] = ClampChannel(arr[i]);
+    }
+    if (HAVE_ALPHA)
+    {
+        this->m_arr[3] = ColorTemplate<HAVE_ALPHA>::ALPHA_CHANNEL_OPAQUE;
+    }
+}
 
 /*!
     \brief is all component is excatly the same?

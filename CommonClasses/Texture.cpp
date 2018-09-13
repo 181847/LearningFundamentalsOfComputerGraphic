@@ -54,8 +54,8 @@ RGBA Texture::Sample(const Types::F32 u, const Types::F32 v, const SampleState& 
     sampleState.FixUV(u, v, fu, fv);
 
     U32 sx, sy;
-    sx = static_cast<U32>((m_width - 1)  * fu);
-    sy = static_cast<U32>((m_height - 1) * fv);
+    sx = static_cast<U32>((m_width - 2)  * fu);
+    sy = static_cast<U32>((m_height - 2) * fv);
 
     std::array<RGBA, 4> colors = {RGBA(), RGBA() ,RGBA(), RGBA()};
     std::array<F32,  4> comps;

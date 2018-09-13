@@ -105,13 +105,13 @@ RGB Scene::LightColor(const Ray & viewRay, const HitRecord & hitRec) const
             vector3 toEye = -viewRay.m_direction;
             vector3 halfVec = Normalize(toEye + toLight);
 
-            RGB lightStrength = light->m_color * std::max(0.0f, hitRec.m_normal * toLight);
+            RGB lightStrength = light->m_color * std::max(0.0f, dotProd(hitRec.m_normal, toLight));
 
             const Types::F32 m = hitRec.m_material.m_shinness;
 
-            Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(halfVec * hitRec.m_normal, m);
+            Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(dotProd(halfVec, hitRec.m_normal), m);
 
-            RGB fresnelCoefficient = hitRec.m_material.RFresnel(toEye * hitRec.m_normal);
+            RGB fresnelCoefficient = hitRec.m_material.RFresnel(dotProd(toEye, hitRec.m_normal));
 
             lightColor = lightColor +
                 lightStrength

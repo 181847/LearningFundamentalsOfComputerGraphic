@@ -37,7 +37,9 @@ vector2    operator * (const vector2&       a, const Types::F32&    s);
 vector2    operator * (const Types::F32&    s, const vector2&       b);
 bool       operator ==(const vector2&       a, const vector2&       b);
 bool       operator !=(const vector2&       a, const vector2&       b);
-Types::F32 operator * (const vector2&       a, const vector2&       b);
+vector2    operator * (const vector2&       a, const vector2&       b);
+vector2    operator / (const vector2&       a, const vector2&       b);
+vector2    operator / (const vector2&       a, const Types::F32&    s);
 
 /*!
     \brief compute the dot product of two vector

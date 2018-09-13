@@ -52,9 +52,11 @@ vector3    operator + (const vector3 & a, const vector3 & b);
 vector3    operator - (const vector3 & a, const vector3 & b);
 bool       operator ==(const vector3 & a, const vector3 & b);
 bool       operator !=(const vector3 & a, const vector3 & b);
-Types::F32 operator * (const vector3 & a, const vector3 & b);
+vector3       operator * (const vector3 & a, const vector3 & b);
+vector3       operator / (const vector3 & a, const vector3 & b);
 vector3       operator * (const vector3 & a, const Types::F32 bFloat);
 vector3       operator * (const Types::F32 bFloat, const vector3 & a);
+vector3       operator / (const vector3 & a, const Types::F32 bFloat);
 vector3       operator - (const vector3 & a);
 
 /*!

@@ -7,7 +7,7 @@ namespace CommonClass
 class CameraFrame : public Frame
 {
 public:
-    explicit CameraFrame(const vector3& origin, const vector3& lookAt, const vector3& lookUp = vector3(0.0f, 1.0f, 0.0f));
+    explicit CameraFrame(const vector3& origin = vector3::UNIT, const vector3& lookAt = vector3::ZERO, const vector3& lookUp = vector3::AXIS_Y);
     ~CameraFrame();
 
     /*!

@@ -13,7 +13,7 @@ Polygon::Polygon(const vector3 & p0, const vector3 & p1, const vector3 & p2)
 
     m_normal = Normalize(crossProd(p1 - p0, p2 - p0));
 
-    m_d = -(m_normal * p0);
+    m_d = -dotProd(m_normal, p0);
 
 
     if (std::fabsf(m_normal.m_z) > std::fabsf(m_normal.m_x) && std::fabsf(m_normal.m_z) > std::fabsf(m_normal.m_y))
@@ -43,7 +43,7 @@ void Polygon::AddPoint(const vector3 & p)
 {
     vector3 projectP;
 
-    Types::F32 dist = m_normal * p + m_d;
+    Types::F32 dist = dotProd(m_normal, p) + m_d;
 
     // TODO: Here may add point without projection.
 
