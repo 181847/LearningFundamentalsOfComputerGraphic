@@ -79,7 +79,7 @@ public:
             TEST_ASSERT(
                 (cmp1 * cmp2)
                 ==
-                (comf1 * comf3 + comf2 * comf4));
+                vector2(comf1 * comf3, comf2 * comf4));
 
             TEST_ASSERT(
                 (CommonClass::dotProd(cmp1, cmp2))
@@ -125,7 +125,7 @@ public:
             TEST_ASSERT(
                 (cmp1 * cmp2)
                 ==
-                (comfArr[0] * comfArr[3] + comfArr[1] * comfArr[4] + comfArr[2] * comfArr[5]));
+                vector3(comfArr[0] * comfArr[3], comfArr[1] * comfArr[4], comfArr[2] * comfArr[5]));
 
             // cmp1 * cmp2
             TEST_ASSERT(
