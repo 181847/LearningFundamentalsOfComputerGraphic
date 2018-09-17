@@ -245,7 +245,11 @@ public:
 
         CommonRenderingBuffer()
         {
-            perspect = Transform::PerspectiveOG(LEFT_F, RIGHT_F, BOTTOM_F, TOP_F, NEAR_F, FAR_F);
+            // pre build meshes.
+            BuildMeshDatas();
+
+            //perspect = Transform::PerspectiveOG(LEFT_F, RIGHT_F, BOTTOM_F, TOP_F, NEAR_F, FAR_F);
+            perspect = Transform::PerspectiveFOV(Types::Constant::PI_F * 0.5f, 1.0f, 1.0f, 10.0f);
 
             Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
             // 1
@@ -261,14 +265,21 @@ public:
             objInstances[2].m_rotation = vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f);
             objInstances[2].m_scale = vector3(0.8f, 0.8f, 0.8f);
 
-            RebuildInstanceBuffer();
 
             cameraFrame.m_origin = vector3(0.0f, 0.0f, 1.0f) * 3.0f;
             cameraFrame.m_lookAt = vector3::ZERO;
-            RebuildCameraBuffer();
 
-            // pre build meshes.
-            BuildMeshDatas();
+            // first set the constant buffer.
+            UpdateConstantBuffer();
+        }
+
+        /*!
+            \brief apply adjustment to the constant buffer, which is the data that will be read from shaders.
+        */
+        void UpdateConstantBuffer()
+        {
+            RebuildInstanceBuffer();
+            RebuildCameraBuffer();
         }
 
         /*!

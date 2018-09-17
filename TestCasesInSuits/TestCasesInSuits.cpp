@@ -16,7 +16,7 @@ int main()
         //BasicTypesTestSuit_Runable, 
         //SuitForCommonClasses,
         //SuitForRayRender,
-        //SuitForRasterisation, 
+        SuitForRasterisation, 
         SuitForRasterizeTriangle//,
         //SuitForFilter,
         //SuitForStbImage
