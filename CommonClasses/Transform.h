@@ -176,6 +176,15 @@ public:
         const Types::F32 top,
         const Types::F32 near,
         const Types::F32 far);
+
+    /*!
+        \brief perspective projection matrix determined by field of view
+        \param fovAngleY vertical angle for field of view
+        \param aspectRadio width : height
+        \param near near plane distance to projection plane, only positive value avaliable.
+        \param far far plane distance to projection plane, only positive value avaliable.
+    */
+    static Transform PerspectiveFOV(const Types::F32 fovAngleY, const Types::F32 aspectRatio, const Types::F32 near, const Types::F32 far);
 };
 // ensurance
 static_assert(sizeof(Transform) == 16 * sizeof(Types::F32), "size of transform is wrong");

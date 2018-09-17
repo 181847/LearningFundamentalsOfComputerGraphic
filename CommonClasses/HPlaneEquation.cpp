@@ -189,4 +189,14 @@ Types::F32 WZeroHPlaneEquation::cutCoefficient(const hvector & point1, const hve
     return - w1 / (w2 - w1);
 }
 
+Types::F32 ZeroNearPlaneEquation::eval(const hvector & pointH)
+{
+    return pointH.m_z;
+}
+
+Types::F32 ZeroNearPlaneEquation::cutCoefficient(const hvector & point1, const hvector & point2)
+{
+    return point1.m_z / (point1.m_z - point2.m_z);
+}
+
 }// namespace CommonClass

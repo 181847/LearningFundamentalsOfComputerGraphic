@@ -13,7 +13,8 @@ Pipline::Pipline()
     m_frustumCutPlanes.push_back(std::make_unique<WZeroHPlaneEquation>());
 
     // please keep those cut planes for drawing wire frame for triangles.
-    m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<NEAR_FRUSTUM_PLANE>>());
+    //m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<NEAR_FRUSTUM_PLANE>>());
+    m_frustumCutPlanes.push_back(std::make_unique<ZeroNearPlaneEquation>());
     m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<FAR_FRUSTUM_PLANE>>());
     m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<LEFT_FRUSTUM_PLANE>>());
     m_frustumCutPlanes.push_back(std::make_unique<FrustumHPlaneEquation<RIGHT_FRUSTUM_PLANE>>());
@@ -470,14 +471,14 @@ bool Pipline::ClipLineInHomogenousClipSpace(
     p[1] = deltaX - deltaW;
     p[2] = -(deltaY + deltaW);
     p[3] = deltaY - deltaW;
-    p[4] = -(deltaZ + deltaW);
+    p[4] = -(deltaZ);// + deltaW);
     p[5] = deltaZ - deltaW;
 
     q[0] = pv1->m_posH.m_x + pv1->m_posH.m_w;
     q[1] = pv1->m_posH.m_w - pv1->m_posH.m_x;
     q[2] = pv1->m_posH.m_y + pv1->m_posH.m_w;
     q[3] = pv1->m_posH.m_w - pv1->m_posH.m_y;
-    q[4] = pv1->m_posH.m_z + pv1->m_posH.m_w;
+    q[4] = pv1->m_posH.m_z;// +pv1->m_posH.m_w;
     q[5] = pv1->m_posH.m_w - pv1->m_posH.m_z;
 
     for (unsigned int i = 0; i < 6; ++i)

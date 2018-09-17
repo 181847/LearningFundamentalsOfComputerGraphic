@@ -143,6 +143,16 @@ public:
 };
 
 /*!
+    \brief near frustum plane cut equation, this assume all the hvector have a positive w.
+*/
+class ZeroNearPlaneEquation : public HPlaneEquation
+{
+public:
+    Types::F32 eval(const hvector& pointH) override;
+    Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override;
+};
+
+/*!
     \brief ChooseSign is used for compile time sign choose.
     for example:
         ChooseSign<true>::Sign() will return +1.0f in compile time.
@@ -175,21 +185,21 @@ public:
 #define RIGHT_FRUSTUM_PLANE   0, false
 #define BOTTOM_FRUSTUM_PLANE  1, true
 #define TOP_FRUSTUM_PLANE     1, false
-#define FAR_FRUSTUM_PLANE     2, true
-#define NEAR_FRUSTUM_PLANE    2, false
+#define NEAR_FRUSTUM_PLANE    2, true
+#define FAR_FRUSTUM_PLANE     2, false
 /*!
     \brief each plane of the frustum in the homogeneous space.
     \templateParam XYZ, choose the plane is perpendicular to which axis.X(0), Y(1), Z(2)
     \templateParam B_LEFT_BOTTOM_FAR is the plane left/bottom/far plane?
 */
-template<unsigned short XYZ, bool B_LEFT_BOTTOM_FAR>
+template<unsigned short XYZ, bool B_LEFT_BOTTOM_NEAR>
 class FrustumHPlaneEquation : public HPlaneEquation
 {
 public:
     /*
         \brief if the plane is the higher bound, return 
     */
-    const float SIGN = ChooseSign<B_LEFT_BOTTOM_FAR>::Sign();
+    const float SIGN = ChooseSign<B_LEFT_BOTTOM_NEAR>::Sign();
 
     /*!
         \brief which axis is choose in the plane,

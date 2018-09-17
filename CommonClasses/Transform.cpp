@@ -187,32 +187,53 @@ Transform Transform::OrthographicTransOG(const Types::F32 left, const Types::F32
 
 Transform Transform::PerspectiveOG(const Types::F32 left, const Types::F32 right, const Types::F32 bottom, const Types::F32 top, const Types::F32 near, const Types::F32 far)
 {
-    // bigger one minus small one, should result in a positive number.
+    // by default, this project using right hand system, and axis Z point out of the screen,
+    // but the NDC space map Z to 0(near) and 1(far),
+    // so here the Z value should be flipped, and mapped to [0, 1] after perspective dividing. 
+    const Types::F32 absNear = std::abs(near), absFar = std::abs(far);
     const Types::F32 
         RECIPO_WIDTH (1.0f / (right - left)),
         RECIPO_HEIGHT(1.0f / (top - bottom)),
-        RECIPO_DIST  (1.0f / (near - far));        // notice that current coordinate system is right hand system, the Z axis point out the screen, and [ far < near < 0 ]
+        RECIPO_DIST  (1.0f / (absNear - absFar));
 
-    const Types::F32 absNear = std::abs(near), absFar = std::abs(far);
-
-    // a special version of perspective view transformation matrix.
-    //Reference from : <Fundemantals Of Compute Graphics, 3rd> page.155
-    // I have modify the matrix a little bit in the third row, in which I flip the sign of last two elements.
-    // when you perform perspective divide, the relative position of x/y will remains,
-    // but z will be flipped, and the relationship between near and far is [ 0 < near < far ]
     return Transform(
-        - 2.0f * near * RECIPO_WIDTH,   0.0f,                           (left + right) * RECIPO_WIDTH,       0.0f,
-        0.0f,                          -2.0f * near * RECIPO_HEIGHT,    (bottom + top) * RECIPO_HEIGHT,      0.0f,
-        0.0f,                           0.0f,                           -(far + near)  * RECIPO_DIST,        2.0f * far * near * RECIPO_DIST,
+        2.0f * absNear * RECIPO_WIDTH,  0.0f,                           (left + right) * RECIPO_WIDTH,       0.0f,
+        0.0f,                           2.0f * absNear * RECIPO_HEIGHT, (bottom + top) * RECIPO_HEIGHT,      0.0f,
+        0.0f,                           0.0f,                           absFar * RECIPO_DIST,                absFar * absNear * RECIPO_DIST,
         0.0f,                           0.0f,                           -1.0f,                               0.0f
     );
-
+    
+    //original version
     /*return Transform(
         2.0f * near * RECIPO_WIDTH, 0.0f,                           (left + right) * -RECIPO_WIDTH,     0.0f,
         0.0f,                       2.0f * near * RECIPO_HEIGHT,    (bottom + top) * -RECIPO_HEIGHT,    0.0f,
         0.0f,                       0.0f,                           (far + near) * RECIPO_DIST,         2.0f * far * near * -RECIPO_DIST,
         0.0f,                       0.0f,                           1.0f,                               0.0f
     );*/
+}
+
+Transform Transform::PerspectiveFOV(const Types::F32 fovAngleY, const Types::F32 aspectRatio, const Types::F32 near, const Types::F32 far)
+{
+    // z will be mapped to [0, 1] after perspective dividing.
+    if (fovAngleY < 0.0f
+        || aspectRatio < 0.0f
+        || near < 0.0f
+        || far < 0.0f
+        || near > far)
+    {
+        throw std::exception("perspective matrix of field of view error, arguments invalid.");
+    }
+
+    const Types::F32 RECIPO_ASPECT_RATIO   = 1.0f / aspectRatio;
+    const Types::F32 RECIPO_TAN_ANGLE      = 1.0f / std::tan(fovAngleY * 0.5f);
+    const Types::F32 RECIPO_FAR_NEAR_DIST  = 1.0f / (near - far);
+
+    return Transform(
+        RECIPO_ASPECT_RATIO * RECIPO_TAN_ANGLE, 0.0f,                 0.0f,                       0.0f,
+        0.0f,                                   RECIPO_TAN_ANGLE,     0.0f,                       0.0f,
+        0.0f,                                   0.0f,                 far * RECIPO_FAR_NEAR_DIST, near * far * RECIPO_FAR_NEAR_DIST,
+        0.0f,                                   0.0f,                 -1.0f,                      0.0f);
+    
 }
 
 bool operator==(const Transform & m1, const Transform & m2)
