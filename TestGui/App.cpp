@@ -43,7 +43,7 @@ std::vector<unsigned int>                           MainIndices;
 std::array<ObjectInstance, 3>                       objInstances;
 std::array<ConstantBufferForInstance, 3>            instanceBuffers;
 ConstantBufferForInstance                           instanceBufAgent;// agent buffer for setting instance data
-CameraFrame                                         cameraFrames(vector3(0.0f, 0.0f, 1.0f) * 3.0f /* location */, vector3(0.0f, 0.0f, 0.0f) /* target */);
+CameraFrame                                         cameraFrames;
 ConstantBufferForCamera                             cameraBuffer;
 std::shared_ptr<Texture>                            textureAgent;// texture agent for pixel shader.
 CaseForPipline::PixelShaderSig                      pixelShaderNoTexture;
@@ -55,6 +55,7 @@ std::shared_ptr<Texture>                            texture3 = std::make_shared<
 
 void UpdateCameraBuffer()
 {
+    cameraFrames.RebuildFrameDetail();
     // perspective transformation
     const Types::F32 V_LEFT(-1.0f), V_RIGHT(1.0f), V_BOTTOM(-1.0f), V_TOP(1.0f), V_NEAR(-1.0f), V_FAR(-10.0f);
     Transform perspect = Transform::PerspectiveOG(V_LEFT, V_RIGHT, V_BOTTOM, V_TOP, V_NEAR, V_FAR);
@@ -111,6 +112,7 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
         instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(8);
     }// end for
 
+    cameraFrames.m_origin = vector3(0.0f, 0.0f, 1.0f) * 3.0f;
     // camera settings.
     UpdateCameraBuffer();
 
