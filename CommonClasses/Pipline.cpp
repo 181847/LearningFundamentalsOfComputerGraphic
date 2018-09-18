@@ -26,7 +26,7 @@ Pipline::~Pipline()
 {
 }
 
-void Pipline::SetBackBuffer(std::unique_ptr<RasterizeImage> backBuffer)
+void Pipline::SetBackBuffer(std::shared_ptr<Image> backBuffer)
 {
     m_backBuffer = std::move(backBuffer);
     m_depthBuffer = std::make_unique<DepthBuffer>(m_backBuffer->GetWidth(), m_backBuffer->GetHeight());

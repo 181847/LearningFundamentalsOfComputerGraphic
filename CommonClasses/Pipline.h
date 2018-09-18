@@ -24,7 +24,7 @@ protected:
     /*!
         \brief store the pixels.
     */
-    std::unique_ptr<RasterizeImage> m_backBuffer;
+    std::shared_ptr<Image> m_backBuffer;
 
     /*!
         \brief depth buffer which will store 1/z
@@ -46,7 +46,7 @@ public:
     /*!
         \brief bind a back buffer to the pipline to store the rasterized image.
     */
-    void SetBackBuffer(std::unique_ptr<RasterizeImage> backBuffer);
+    void SetBackBuffer(std::shared_ptr<Image> backBuffer);
 
     /*!
         \brief clear back buffer color, and depth value.

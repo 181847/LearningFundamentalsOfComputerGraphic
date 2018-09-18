@@ -740,7 +740,7 @@ void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
     instanceBufAgent = renderingBuffer.instanceBuffers[0];
     {
         COUNT_DETAIL_TIME;
-        DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
         pipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
     }
 
@@ -797,7 +797,7 @@ void CASE_NAME_IN_RASTER_TRI(TextureMapping)::Run()
     instanceBufAgent = renderingBuffer.instanceBuffers[0];
     {
         COUNT_DETAIL_TIME;
-        DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
         pipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
     }
 
@@ -827,13 +827,13 @@ void CASE_NAME_IN_RASTER_TRI(NoiseBumpMap)::Run()
 
     auto pipline = GetCommonPipline();
     pipline->ClearBackBuffer(RGBA::WHITE * 0.5f);
-    std::shared_ptr<CommonClass::PiplineStateObject> PSO = pipline->GetPSO();
+    auto PSO = pipline->GetPSO();
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     PSO->m_vertexLayout.pixelShaderInputSize = sizeof(PSIn);
 
     CommonRenderingBuffer renderingBuffer;
 
-    std::wstring pictureIndex = L"008";
+    std::wstring pictureIndex = L"009";
     ConstantBufferForInstance   instanceBufAgent;
     std::shared_ptr<Texture>    textureAgent;
     PSO->m_vertexShader = GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
@@ -854,7 +854,7 @@ void CASE_NAME_IN_RASTER_TRI(NoiseBumpMap)::Run()
     instanceBufAgent = renderingBuffer.instanceBuffers[0];
     {
         COUNT_DETAIL_TIME;
-        DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+        //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
         pipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
     }
 

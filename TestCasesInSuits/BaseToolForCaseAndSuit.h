@@ -232,6 +232,7 @@ public:
         std::array<ConstantBufferForInstance, 3> instanceBuffers;
         CameraFrame cameraFrame;
         ConstantBufferForCamera cameraBuffer;
+        ConstantBufferForCamera lightCameraBuffer;  // a rendering constant buffer for spot light.
 
         enum
         {
@@ -245,6 +246,11 @@ public:
 
         CommonRenderingBuffer()
         {
+            Init();
+        }
+
+        void Init()
+        {
             // pre build meshes.
             BuildMeshDatas();
 
@@ -256,18 +262,39 @@ public:
             objInstances[0].m_position = vector3(0.0f, 0.0f, 0.0f);
             objInstances[0].m_rotation = vector3(0, 0, 0);
             objInstances[0].m_scale = vector3(2.0f, 2.0f, 2.0f);
+            objInstances[0].m_material.m_diffuse = RGB::WHITE;
+            objInstances[0].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(6);
+            objInstances[0].m_material.m_shiness = 64.0f;
             // 2
             objInstances[1].m_position = vector3(1.0f, 1.4f, 0.0f);
             objInstances[1].m_rotation = vector3(pitch, yaw + 3.14f / 3, roll);
             objInstances[1].m_scale = vector3(1.5f, 1.5f, 1.5f);
+            objInstances[1].m_material.m_diffuse = RGB::WHITE;
+            objInstances[1].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(6);
+            objInstances[1].m_material.m_shiness = 64.0f;
             // 3
             objInstances[2].m_position = vector3(-1.0f, 2.8f, 0.0f);
             objInstances[2].m_rotation = vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f);
             objInstances[2].m_scale = vector3(0.8f, 0.8f, 0.8f);
-
+            objInstances[2].m_material.m_diffuse = RGB::WHITE;
+            objInstances[2].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(6);
+            objInstances[2].m_material.m_shiness = 64.0f;
 
             cameraFrame.m_origin = vector3(0.0f, 0.0f, 1.0f) * 3.0f;
             cameraFrame.m_lookAt = vector3::ZERO;
+
+            cameraBuffer.m_numLights = 2;
+            cameraBuffer.m_ambientColor = RGB::WHITE * RGB(0.05f, 0.05f, 0.05f);
+            cameraBuffer.m_lights[0] = { vector3(0.0f, 5.0f, 0.0f), RGB::WHITE };
+            LightBuffer spotLight;
+            spotLight.m_color = RGB::RED;
+            spotLight.m_direction = Normalize(vector3(-1.0f, 1.0f, -1.0f));
+            spotLight.m_fadeoffStart = 1.0f;
+            spotLight.m_fadeoffEnd = 10.0f;
+            spotLight.m_position = 5.0f * vector3(1.0f, -1.0f, 1.0f);
+            spotLight.m_spotPower = 5.0f;
+            cameraBuffer.m_lights[1] = spotLight;
+
 
             // first set the constant buffer.
             UpdateConstantBuffer();
@@ -291,9 +318,7 @@ public:
             {
                 instanceBuffers[i].m_toWorld = Transform::TRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
                 instanceBuffers[i].m_toWorldInverse = Transform::InverseTRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
-                instanceBuffers[i].m_material.m_diffuse = RGB::WHITE;// *0.5f;
-                instanceBuffers[i].m_material.m_shiness = 16.0f;
-                instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(4);
+                instanceBuffers[i].m_material = objInstances[i].m_material;
             }// end for
         }
 
@@ -307,9 +332,6 @@ public:
             cameraBuffer.m_toCameraInverse = cameraFrame.LocalToWorld();
             cameraBuffer.m_camPos = cameraFrame.m_origin;
             cameraBuffer.m_project = perspect;
-            cameraBuffer.m_numLights = 1;
-            cameraBuffer.m_ambientColor = RGB::WHITE * RGB(0.05f, 0.05f, 0.05f);
-            cameraBuffer.m_lights[0] = { vector3(0.0f, 10.0f, 0.0f), RGB::WHITE };
         }
 
         /*1
@@ -907,6 +929,8 @@ public:
             assert(texture->IsValid());
             const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
+
+            DEBUG_CLIENT(DEBUG_CLIENT_CONF_TRIANGL);
             // get noise normal from texture.
             vector2 uv = pPoint->m_uv;
             RGBA sampleColor = texture->Sample(uv.m_x, uv.m_y);
@@ -916,6 +940,9 @@ public:
             noiseNormal = Normalize(noiseNormal);
             //noiseNormal = noiseNormal * 2.0f;// enhance the noise power.
             vector3 normal = Normalize(noiseNormal + pPoint->m_normalW.ToVector3());
+
+            // ignore noise normal
+            normal = Normalize(pPoint->m_normalW.ToVector3());
 
             vector3 pixelPosW = pPoint->m_posW.ToVector3();
             vector3 toEye = Normalize(constBufCamera.m_camPos - pixelPosW);
@@ -928,6 +955,19 @@ public:
                 pixelPosW,
                 normal,
                 toEye);
+
+            if (constBufCamera.m_numLights == 2)
+            {
+                vector3 blinnSpot = MaterialBuffer::ComputeSpotLight(
+                    constBufCamera.m_lights[1],
+                    vector3(constBufInstance.m_material.m_diffuse.m_arr),
+                    vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+                    constBufInstance.m_material.m_shiness,
+                    pixelPosW,
+                    normal,
+                    toEye);
+                blinn = blinn + blinnSpot;
+            }
 
             RGBA color(blinn.m_arr);
             return color;

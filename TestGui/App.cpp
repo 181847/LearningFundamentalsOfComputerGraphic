@@ -33,18 +33,13 @@ using ConstantBufferForInstance = CaseForPipline::ConstantBufferForInstance;
 using ConstantBufferForCamera   = CaseForPipline::ConstantBufferForCamera;
 using MaterialBuffer            = CaseForPipline::MaterialBuffer;
 
+using CommonRenderingBuffer = CaseForPipline::CommonRenderingBuffer;
 ImguiWrapImageDX11                                  MainImage;  // the render image for application display.
 CaseForPipline                                      HelpPiplineCase("a help struct for pipline");   // preparations for pipline
-auto                                                MainPipline = HelpPiplineCase.GetCommonPipline();
-std::shared_ptr<CommonClass::PiplineStateObject>    PSO = MainPipline->GetPSO();
-std::vector<SimplePoint>                            MainVertices;
-std::unique_ptr<F32Buffer>                          MainVertexBuffer;
-std::vector<unsigned int>                           MainIndices;
-std::array<ObjectInstance, 3>                       objInstances;
-std::array<ConstantBufferForInstance, 3>            instanceBuffers;
+std::unique_ptr<Pipline>                            MainPipline;
+std::shared_ptr<CommonClass::PiplineStateObject>    PSO;
+CommonRenderingBuffer                               renderingBuffer;
 ConstantBufferForInstance                           instanceBufAgent;// agent buffer for setting instance data
-CameraFrame                                         cameraFrames;
-ConstantBufferForCamera                             cameraBuffer;
 std::shared_ptr<Texture>                            textureAgent;// texture agent for pixel shader.
 CaseForPipline::PixelShaderSig                      pixelShaderNoTexture;
 CaseForPipline::PixelShaderSig                      pixelShaderTexture;
@@ -52,21 +47,6 @@ CaseForPipline::PixelShaderSig                      pixelShaderNoiseNormalTextur
 std::shared_ptr<Texture>                            texture1 = std::make_shared<Texture>();
 std::shared_ptr<Texture>                            texture2 = std::make_shared<Texture>();
 std::shared_ptr<Texture>                            texture3 = std::make_shared<Texture>();
-
-void UpdateCameraBuffer()
-{
-    cameraFrames.RebuildFrameDetail();
-    // perspective transformation
-    const Types::F32 V_LEFT(-1.0f), V_RIGHT(1.0f), V_BOTTOM(-1.0f), V_TOP(1.0f), V_NEAR(-1.0f), V_FAR(-10.0f);
-    Transform perspect = Transform::PerspectiveOG(V_LEFT, V_RIGHT, V_BOTTOM, V_TOP, V_NEAR, V_FAR);
-    cameraBuffer.m_toCamera = cameraFrames.WorldToLocal();
-    cameraBuffer.m_toCameraInverse = cameraFrames.LocalToWorld();
-    cameraBuffer.m_camPos = cameraFrames.m_origin;
-    cameraBuffer.m_project = perspect;
-    cameraBuffer.m_ambientColor = RGB::RED * RGB(0.05f, 0.05f, 0.05f);
-    cameraBuffer.m_numLights = 1;
-    cameraBuffer.m_lights[0] = { vector3(5.0f, -1.0f, 2.0f), RGB(1.0f, 1.0f, 0.5f) };
-}
 
 void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11DeviceContext* pDeviceContext)
 {
@@ -77,44 +57,10 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
     pd3dDevice          = pDevice;
     pd3dDeviceContex    = pDeviceContext;
 
-    //auto meshData = GeometryBuilder::BuildCylinder(0.6f, 0.8f, 0.8f, 32, 3, true);
-    auto meshData = GeometryBuilder::BuildGeoSphere(0.8f, 2);
-    MainIndices = meshData.m_indices;
-    MainVertices.clear();
-    for (const auto& vertex : meshData.m_vertices)
-    {
-        MainVertices.push_back(CaseForPipline::SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f), vertex.m_uv));
-    }
-    MainVertexBuffer = std::make_unique<F32Buffer>(MainVertices.size() * sizeof(decltype(MainVertices)::value_type));
-    memcpy(MainVertexBuffer->GetBuffer(), MainVertices.data(), MainVertexBuffer->GetSizeOfByte());
+    renderingBuffer.Init();
 
-    // initialize instances data
-    Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
-    // 1
-    objInstances[0].m_position = vector3(0.0f, 0.0f, 0.0f);
-    objInstances[0].m_rotation = vector3(0, 0, 0);
-    objInstances[0].m_scale = vector3(2.1f, 2.1f, 2.1f);
-    // 2
-    objInstances[1].m_position = vector3(1.0f, 1.4f, 0.0f);
-    objInstances[1].m_rotation = vector3(pitch, yaw + 3.14f / 3, roll);
-    objInstances[1].m_scale = vector3(1.5f, 1.5f, 1.5f);
-    // 3
-    objInstances[2].m_position = vector3(-1.0f, 2.8f, 0.0f);
-    objInstances[2].m_rotation = vector3(pitch, yaw + 3.14f / 2.f, roll + 3.14f / 8.f);
-    objInstances[2].m_scale = vector3(1.8f, 1.8f, 1.8f);
-    // initialized instances buffer
-    for (unsigned int i = 0; i < instanceBuffers.size(); ++i)
-    {
-        instanceBuffers[i].m_toWorld = Transform::TRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
-        instanceBuffers[i].m_toWorldInverse = Transform::InverseTRS(objInstances[i].m_position, objInstances[i].m_rotation, objInstances[i].m_scale);
-        instanceBuffers[i].m_material.m_diffuse = RGB::RED * 0.5f;
-        instanceBuffers[i].m_material.m_shiness = 32.0f;
-        instanceBuffers[i].m_material.m_fresnelR0 = MaterialBuffer::FresnelR0_byReflectionIndex(8);
-    }// end for
-
-    cameraFrames.m_origin = vector3(0.0f, 0.0f, 1.0f) * 3.0f;
-    // camera settings.
-    UpdateCameraBuffer();
+    MainPipline = HelpPiplineCase.GetCommonPipline();
+    PSO = MainPipline->GetPSO();
 
     // load textures
     texture1->LoadFile("d:\\GitHub\\C_C++\\LearningFundamentalsOfComputerGraphic\\build\\OutputTestImage\\StbImg\\noiseVector3_03.png");
@@ -123,14 +69,14 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
     textureAgent = texture3;
 
     // pre store pixel shaders.
-    pixelShaderNoTexture            = HelpPiplineCase.GetPixelShaderWithPSIn(instanceBufAgent, cameraBuffer);
-    pixelShaderTexture              = HelpPiplineCase.GetPixelShaderWithPSInAndTexture(instanceBufAgent, cameraBuffer, textureAgent);
-    pixelShaderNoiseNormalTexture   = HelpPiplineCase.GetPixelShaderWithNoiseBumpMap(instanceBufAgent, cameraBuffer, textureAgent);
+    pixelShaderNoTexture            = HelpPiplineCase.GetPixelShaderWithPSIn(instanceBufAgent, renderingBuffer.cameraBuffer);
+    pixelShaderTexture              = HelpPiplineCase.GetPixelShaderWithPSInAndTexture(instanceBufAgent, renderingBuffer.cameraBuffer, textureAgent);
+    pixelShaderNoiseNormalTexture   = HelpPiplineCase.GetPixelShaderWithNoiseBumpMap(instanceBufAgent, renderingBuffer.cameraBuffer, textureAgent);
 
     // set VS and PS
-    PSO->m_vertexShader = HelpPiplineCase.GetVertexShaderWithVSOut(instanceBufAgent, cameraBuffer);
+    PSO->m_vertexShader = HelpPiplineCase.GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
     //PSO->m_pixelShader  = pixelShaderNoiseNormalTexture;
-    PSO->m_pixelShader  = pixelShaderTexture;
+    PSO->m_pixelShader  = pixelShaderNoiseNormalTexture;
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     PSO->m_vertexLayout.pixelShaderInputSize  = sizeof(PSIn);
 }
@@ -205,15 +151,20 @@ bool ImguiUpdateRenderData()
     bool isDirtyData = false;
 
     // widget for camera location
-    if (ImGui::DragFloat3("camera location", cameraFrames.m_origin.m_arr, 0.001f, -10.0f, 10.0f))
+    if (ImGui::SliderFloat3("camera location", renderingBuffer.cameraFrame.m_origin.m_arr, -10.0f, 10.0f))
     {
-        cameraFrames.RebuildFrameDetail();
-        UpdateCameraBuffer();
+        renderingBuffer.RebuildCameraBuffer();
         isDirtyData = true;
     }
 
-    if (ImGui::DragFloat3("light position", cameraBuffer.m_lights[0].m_position.m_arr, 0.01f, -10.0f, 10.0f))
+    if (ImGui::SliderFloat3("light position", renderingBuffer.cameraBuffer.m_lights[0].m_position.m_arr, -10.0f, 10.0f))
     {
+        isDirtyData = true;
+    }
+
+    if (ImGui::SliderFloat("first object shiness", &renderingBuffer.objInstances[0].m_material.m_shiness, 0.0f, 20.0f))
+    {
+        renderingBuffer.RebuildInstanceBuffer();
         isDirtyData = true;
     }
 
@@ -230,24 +181,26 @@ void RenderMainImage()
     PSO->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
     PSO->m_cullFace = CullFace::CLOCK_WISE;
     PSO->m_fillMode = FillMode::SOLIDE;
-    instanceBufAgent = instanceBuffers[0];
+    const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_GEOSPHERE];
+
+    instanceBufAgent = renderingBuffer.instanceBuffers[0];
     {
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
-        MainPipline->DrawInstance(MainIndices, MainVertexBuffer.get());
+        MainPipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
     }
 
     PSO->m_fillMode = FillMode::SOLIDE;
-    instanceBufAgent = instanceBuffers[1];
+    instanceBufAgent = renderingBuffer.instanceBuffers[1];
     {
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
-        MainPipline->DrawInstance(MainIndices, MainVertexBuffer.get());
+        MainPipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
     }
 
     PSO->m_fillMode = FillMode::WIREFRAME;
-    instanceBufAgent = instanceBuffers[2];
+    instanceBufAgent = renderingBuffer.instanceBuffers[2];
     {
         //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
-        MainPipline->DrawInstance(MainIndices, MainVertexBuffer.get());
+        MainPipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
     }
 
     // set image data.
@@ -290,6 +243,19 @@ int Main()
     {
         // render the main image each frame.
         RenderMainImage();
+    }
+
+
+    static char InputImagePath[256];
+    // if rendering has complete at least once, draw a button that can save this image,
+    // save process is done by the back buffer of MainPipline.
+    if (MainImage.m_isValide)
+    {
+        ImGui::InputText("save path", InputImagePath, sizeof(InputImagePath));
+        if (ImGui::Button("save current image"))
+        {
+            MainPipline->m_backBuffer->SaveTo("");
+        }
     }
 
 
