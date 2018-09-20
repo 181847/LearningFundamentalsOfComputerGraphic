@@ -10,6 +10,7 @@
 // include test target code
 #include "../CommonClasses/vector2.h"
 #include "../CommonClasses/vector3.h"
+#include "../CommonClasses/hvector.h"
 #include "../CommonClasses/Image.h"
 #include "../CommonClasses/OrthographicCamera.h"
 #include "../CommonClasses/Ray.h"
@@ -35,5 +36,6 @@
 #include "../CommonClasses/Filter.h"
 #include "../CommonClasses/CameraFrame.h"
 #include "../CommonClasses/Texture.h"
+#include "../CommonClasses/GraphicToolSet.h"
 
 #include "BaseToolForCaseAndSuit.h"

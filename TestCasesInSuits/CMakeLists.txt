@@ -8,6 +8,7 @@ set (TEST_CODE_SOURCE_FILES
 	CaseAndSuitForRasterizeTriangle.cpp
 	CaseAndSuitForRayRender.h.cpp
 	CaseAndSuitForStbImage.cpp
+	BaseToolForCaseAndSuit.cpp
 	TestCasesInSuits.cpp)
 
 add_executable(TestCasesInSuits ${TEST_CODE_SOURCE_FILES})
