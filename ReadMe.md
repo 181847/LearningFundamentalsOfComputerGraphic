@@ -6,21 +6,22 @@
 
 ## RayTracing效果图
 
-![效果图1](OutputTestImage/ForCommonClasses/ThisIsForSceneRayColor06.png)
+![效果图1](OutputTestImage/ForCommonClasses/ThisIsForSceneRayColor06.png)  
+
 ![效果图2](OutputTestImage/RayRender/InsideBox29.png)
 
 ## 光栅化效果图
 
-Cool-to-Warm Shading:
+Cool-to-Warm Shading:  
 ![Cool-to-Warm Shading](./OutputTestImage/RasterizeTriangle/sphere_wireframe_001.png)
 
-深度缓冲:
+深度缓冲:  
 ![深度缓冲](OutputTestImage/RasterizeTriangle/sphere_wireframe_001_depth.png)
 
-多光源:
+多光源:  
 ![多光源](OutputTestImage/Runtime/savePicture3.png)
 
-贴图映射：
+贴图映射：  
 ![贴图映射](OutputTestImage/RasterizeTriangle/texture_mapping_001.png)
 
 ## 运行项目
