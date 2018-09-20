@@ -11,9 +11,17 @@
 
 ## 光栅化效果图
 
+Cool-to-Warm Shading:
 ![Cool-to-Warm Shading](./OutputTestImage/RasterizeTriangle/sphere_wireframe_001.png)
+
+深度缓冲:
 ![深度缓冲](OutputTestImage/RasterizeTriangle/sphere_wireframe_001_depth.png)
-![简单的材质渲染](OutputTestImage/RasterizeTriangle/geosphere_simpleEquation_023.png)
+
+多光源:
+![多光源](OutputTestImage/Runtime/savePicture3.png)
+
+贴图映射：
+![贴图映射](OutputTestImage/RasterizeTriangle/texture_mapping_001.png)
 
 ## 运行项目
 
