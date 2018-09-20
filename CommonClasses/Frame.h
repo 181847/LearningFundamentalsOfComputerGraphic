@@ -32,12 +32,12 @@ public:
     /*!
         \brief get the transform to world space.
     */
-    Transform LocalToWorld();
+    Transform LocalToWorld() const;
 
     /*!
         \brief get transform from World to Local.
     */
-    Transform WorldToLocal();
+    Transform WorldToLocal() const;
 
     /*!
         \brief check the three axises are perpendicular to each other.

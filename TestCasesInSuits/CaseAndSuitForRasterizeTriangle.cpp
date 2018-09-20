@@ -877,3 +877,81 @@ void CASE_NAME_IN_RASTER_TRI(NoiseBumpMap)::Run()
     std::wstring pictureNameWithNoExt = L"noise_normal_" + pictureIndex + L"_" + geometryName;
     SaveAndShowPiplineBackbuffer((*(pipline.get())), pictureNameWithNoExt);
 }
+
+void CASE_NAME_IN_RASTER_TRI(ShadowMap)::Run()
+{
+    using namespace Types;
+
+    auto pipline = graphicToolSet.GetCommonPipline();
+    pipline->ClearBackBuffer(RGBA::WHITE * 0.5f);
+
+    auto PSO_backbuffer = pipline->GetPSO();
+    PSO_backbuffer->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
+    PSO_backbuffer->m_vertexLayout.pixelShaderInputSize = sizeof(GraphicToolSet::PSIn);
+
+    auto PSO_shadowMap = graphicToolSet.GetCommonPSO();
+    PSO_shadowMap->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
+    PSO_shadowMap->m_vertexLayout.pixelShaderInputSize = sizeof(GraphicToolSet::PSIn);
+
+    // extend the spot light fading distance.
+    CommonRenderingBuffer renderingBuffer;
+    renderingBuffer.cameraBuffer.m_lights[1].m_fadeoffEnd = 10.0f;
+    renderingBuffer.objInstances[2].m_scale = 2.0f * vector3::UNIT;
+    renderingBuffer.cameraBuffer.m_lights[0].m_position = vector3(-5.0f, 5.0f, 5.0f);
+    renderingBuffer.cameraBuffer.m_lights[0].m_fadeoffEnd = 10.0f;
+    renderingBuffer.UpdateConstantBuffer();
+
+    GraphicToolSet::ConstantBufferForInstance   instanceBufAgent;
+
+    auto backbuffer = std::make_shared<Image>(graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT);
+    auto shadowMap  = std::make_shared<Texture>();
+    shadowMap->Init(graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT);
+
+    std::wstring pictureIndex = L"015";
+    PSO_backbuffer->m_vertexShader = graphicToolSet.GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
+    PSO_backbuffer->m_pixelShader  = graphicToolSet.GetPixelShaderForShadowEffect(instanceBufAgent, renderingBuffer.cameraBuffer, renderingBuffer.lightCameraBuffer, shadowMap);
+    PSO_shadowMap-> m_vertexShader = graphicToolSet.GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.lightCameraBuffer);// notice, lightCameraBuffer is used.
+    PSO_shadowMap-> m_pixelShader  = graphicToolSet.GetPixelShaderForShadowMap(instanceBufAgent, renderingBuffer.lightCameraBuffer);
+
+    std::wstring geometryName;
+    const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_GEOSPHERE];    geometryName = L"geoSphere";
+
+    PSO_backbuffer->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
+    PSO_backbuffer->m_cullFace      = CullFace::CLOCK_WISE;
+    PSO_backbuffer->m_fillMode      = FillMode::SOLIDE;
+    PSO_shadowMap ->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
+    PSO_shadowMap ->m_cullFace      = CullFace::CLOCK_WISE;
+    PSO_shadowMap ->m_fillMode      = FillMode::SOLIDE;
+
+    // rendering depth map from the view of one spot light.
+    pipline->SetPSO(PSO_shadowMap);
+    pipline->SetBackBuffer(shadowMap);
+    for (int i = 0; i < 3; ++i)
+    {
+        instanceBufAgent = renderingBuffer.instanceBuffers[i];
+        {
+            COUNT_DETAIL_TIME;
+            //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+            pipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
+        }
+    }
+
+    // rendering to back buffer.
+    pipline->SetPSO(PSO_backbuffer);
+    pipline->SetBackBuffer(backbuffer);
+    for (int i = 0; i < 3; ++i)
+    {
+        instanceBufAgent = renderingBuffer.instanceBuffers[i];
+        {
+            COUNT_DETAIL_TIME;
+            //DebugGuard<DEBUG_CLIENT_CONF_TRIANGL> openDebugMode;
+            pipline->DrawInstance(mesh.indices, mesh.vertexBuffer.get());
+        }
+    }
+
+    std::wstring pictureNameWithNoExt = L"shadowMap_backbuffer_" + pictureIndex + L"_" + geometryName;
+    SaveAndShow(*backbuffer, pictureNameWithNoExt);
+
+    std::wstring shadowMapNameWithNoExt = L"shadowMap_shadowMap_" + pictureIndex + L"_" + geometryName;
+    SaveAndShow(*shadowMap, shadowMapNameWithNoExt);
+}

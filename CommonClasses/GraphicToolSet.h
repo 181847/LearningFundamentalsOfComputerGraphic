@@ -123,6 +123,11 @@ public:
         RGB                         m_ambientColor;     // ambientColor
         int                         m_numLights;        // the number of light in the scene, less or equal m_lights.size().
         std::array<LightBuffer, 3>  m_lights;           // the lights in scene
+
+        /*!
+            \brief set transform matrix about camera.
+        */
+        void SetCameraMatrix(const CameraFrame& cameraFrame);
     };
 
     /*!
@@ -176,12 +181,13 @@ public:
         const Types::F32                                        RIGHT_F     =  1.0f;
         const Types::F32                                        BOTTOM_F    = -1.0f;
         const Types::F32                                        TOP_F       =  1.0f;
-        const Types::F32                                        NEAR_F      = -1.0f;
-        const Types::F32                                        FAR_F       = -10.0f;
+        const Types::F32                                        NEAR_F      = 1.0f;
+        const Types::F32                                        FAR_F       = 30.0f;
         Transform                                               perspect;
         std::array<ObjectInstance, 3>                           objInstances;
         std::array<ConstantBufferForInstance, 3>                instanceBuffers;
         CameraFrame                                             cameraFrame;
+        CameraFrame                                             lightCameraFrame;
         ConstantBufferForCamera                                 cameraBuffer;
         ConstantBufferForCamera                                 lightCameraBuffer;  // a rendering constant buffer for spot light.
         std::array<SpecializedMeshData, NUM_SUPPORTED_MESH>     prebuildMeshData;
@@ -190,7 +196,7 @@ public:
     /*!
         \brief Build common PiplineStateObject for using.
     */
-    std::unique_ptr<PiplineStateObject> GetCommonPSO();
+    std::shared_ptr<PiplineStateObject> GetCommonPSO();
 
     /*!
         \brief Build common viewport by the default view size defined in CommonEnvironment.
@@ -238,6 +244,18 @@ public:
         \brief a pixel shader require one texture, whose sampling color will be used to disturb the normal of original geometry.
     */
     static PixelShaderSig GetPixelShaderWithNoiseBumpMap(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, std::shared_ptr<Texture>& texture);
+
+    /*!
+        \brief a pixel shader return pixel depth value, this is for shadowing map.
+        \param lightCamera store the light position/direction...
+    */
+    static PixelShaderSig GetPixelShaderForShadowMap(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& lightCamera);
+
+    /*!
+        \brief a pixel shader return pixel depth value, this is for shadowing map.
+        \param lightCamera store the light position/direction...
+    */
+    static PixelShaderSig GetPixelShaderForShadowEffect(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, ConstantBufferForCamera& lightCamera, std::shared_ptr<Texture>& shadowMap);
 
     /*!
         \brief compute FresnelR0 efficiency by reflection index.

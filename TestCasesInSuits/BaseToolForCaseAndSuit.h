@@ -117,7 +117,7 @@ public:
         \param pImg the image to be shown
         \param title the title of the window
     */
-    void BlockShowImg(Image * pImg, const std::wstring title) const;
+    void BlockShowImg(const Image * pImg, const std::wstring title) const;
 
     /*!
         \brief create a quad poly.
@@ -184,6 +184,7 @@ public:
     */
     void SaveAndShowPiplineBackbuffer(const Pipline & pipline, const std::wstring& nameOfImgAndWindow) const;
     
+    void SaveAndShow(const Image& img, const std::wstring& nameWithOutExt) const;
 };
 
 /*!

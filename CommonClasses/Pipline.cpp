@@ -87,6 +87,7 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
     std::unique_ptr<F32Buffer> clippedLineData;  // the vertex data that has been clipped.
     
     // process each vertex with vertexShader
+    DEBUG_CLIENT(DEBUG_CLIENT_CONF_TRIANGL);
     std::unique_ptr<F32Buffer> vsOutputStream = VertexShaderTransform(vertices, vsInputStride, psInputStride);
 
     if (m_pso->m_primitiveType == PrimitiveType::LINE_LIST)
@@ -108,9 +109,7 @@ void Pipline::DrawInstance(const std::vector<unsigned int>& indices, const F32Bu
         // the byte size of vertex data after clipping
         const unsigned int numBytes = clippedLineData->GetSizeOfByte();
 
-        // now the pipline is not complete, so for the simplification, we assume all the vertex for each shader is in the same size.
-        assert(vsInputStride == psInputStride);
-        assert(numBytes % vsInputStride == 0 && "vertices data error, cannot ensure every vertex data is complete.");
+        assert(numBytes % psInputStride == 0 && "vertices data error, cannot ensure each vertex is complete.");
 
         auto viewportTransData = ViewportTransformVertexStream(std::move(clippedLineData), psInputStride);
 

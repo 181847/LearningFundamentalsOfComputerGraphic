@@ -26,8 +26,9 @@ public:
     static const Types::I32 COMPARE_ULP = 8;
 
 public:
-    vector2();
+    explicit vector2();
     explicit vector2(const Types::F32 & x, const Types::F32 & y);
+    explicit vector2(const Types::F32 * arr);
     ~vector2();
 };
 

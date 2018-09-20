@@ -107,7 +107,6 @@ public:
     */
     unsigned char * GetRawData();
 
-protected:
     /*!
         \brief reset the image.
         \param width width of the image
@@ -115,6 +114,7 @@ protected:
     */
     void Init(const Types::U32 width, const Types::U32 height, const RGBA& initColor = RGBA::BLACK);
 
+protected:
     /*!
         \brief convert 2D indices into 1D index to search pixels in the m_canvas.
         \param x horizontal value from left to right

@@ -18,6 +18,12 @@ vector2::vector2(const Types::F32 & x, const Types::F32 & y)
 }
 
 
+vector2::vector2(const Types::F32 * arr)
+    :m_x(arr[0]), m_y(arr[1])
+{
+    // empty
+}
+
 vector2::~vector2()
 {
     // empty

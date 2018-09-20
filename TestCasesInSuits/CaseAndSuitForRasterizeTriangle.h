@@ -41,6 +41,8 @@ DECLARE_CASE_IN_RASTER_TRI_FOR(TextureMapping, "mapping texture to cube");
 
 DECLARE_CASE_IN_RASTER_TRI_FOR(NoiseBumpMap, "noise normal from a texture");
 
+DECLARE_CASE_IN_RASTER_TRI_FOR(ShadowMap, "noise normal from a texture");
+
 using SuitForRasterizeTriangle = SuitForPipline<
     //CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace),
     //CASE_NAME_IN_RASTER_TRI(SphereRayTriangle),
@@ -54,6 +56,7 @@ using SuitForRasterizeTriangle = SuitForPipline<
     //CASE_NAME_IN_RASTER_TRI(UsingCameraFrame),
     //CASE_NAME_IN_RASTER_TRI(PixelShading),
     //CASE_NAME_IN_RASTER_TRI(TextureMapping),
-    CASE_NAME_IN_RASTER_TRI(NoiseBumpMap)
+    //CASE_NAME_IN_RASTER_TRI(NoiseBumpMap),
+    CASE_NAME_IN_RASTER_TRI(ShadowMap)
 >;
 

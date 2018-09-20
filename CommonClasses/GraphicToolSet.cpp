@@ -18,7 +18,7 @@ void GraphicToolSet::CommonRenderingBuffer::Init()
     BuildMeshDatas();
 
     //perspect = Transform::PerspectiveOG(LEFT_F, RIGHT_F, BOTTOM_F, TOP_F, NEAR_F, FAR_F);
-    perspect = Transform::PerspectiveFOV(Types::Constant::PI_F * 0.5f, 1.0f, 1.0f, 10.0f);
+    perspect = Transform::PerspectiveFOV(Types::Constant::PI_F * 0.5f, 1.0f, NEAR_F, FAR_F);
 
     Types::F32 pitch(3.14f * 3.f / 4.f), yaw(3.14f / 4.f), roll(0.f * 3.14f / 3.f);
     // 1
@@ -43,9 +43,7 @@ void GraphicToolSet::CommonRenderingBuffer::Init()
     objInstances[2].m_material.m_fresnelR0 = FresnelR0_byReflectionIndex(6);
     objInstances[2].m_material.m_shiness = 64.0f;
 
-    cameraFrame.m_origin = vector3(0.0f, 0.0f, 1.0f) * 3.0f;
-    cameraFrame.m_lookAt = vector3::ZERO;
-
+    LightBuffer pointLight;
     cameraBuffer.m_numLights = 2;
     cameraBuffer.m_ambientColor = RGB::WHITE * RGB(0.05f, 0.05f, 0.05f);
     cameraBuffer.m_lights[0] = { vector3(0.0f, 5.0f, 0.0f), RGB::WHITE };
@@ -54,10 +52,16 @@ void GraphicToolSet::CommonRenderingBuffer::Init()
     spotLight.m_direction = Normalize(vector3(-1.0f, 1.0f, -1.0f));
     spotLight.m_fadeoffStart = 1.0f;
     spotLight.m_fadeoffEnd = 10.0f;
-    spotLight.m_position = 5.0f * vector3(1.0f, -1.0f, 1.0f);
-    spotLight.m_spotPower = 5.0f;
+    spotLight.m_position = 2.0f * vector3(1.0f, -1.0f, 1.0f);
+    spotLight.m_spotPower = 1.0f;
     cameraBuffer.m_lights[1] = spotLight;
 
+    cameraFrame.m_origin = vector3(0.0f, 0.0f, 1.0f) * 4.0f;
+    cameraFrame.m_lookAt = vector3::ZERO;
+
+    // camera frame for shadow map
+    lightCameraFrame.m_origin = cameraBuffer.m_lights[1].m_position;
+    lightCameraFrame.m_lookAt = lightCameraFrame.m_origin + cameraBuffer.m_lights[1].m_direction;
 
     // first set the constant buffer.
     UpdateConstantBuffer();
@@ -82,10 +86,13 @@ void GraphicToolSet::CommonRenderingBuffer::RebuildInstanceBuffer()
 void GraphicToolSet::CommonRenderingBuffer::RebuildCameraBuffer()
 {
     cameraFrame.RebuildFrameDetail();
-    cameraBuffer.m_toCamera = cameraFrame.WorldToLocal();
-    cameraBuffer.m_toCameraInverse = cameraFrame.LocalToWorld();
-    cameraBuffer.m_camPos = cameraFrame.m_origin;
+    lightCameraFrame.RebuildFrameDetail();
+
+    cameraBuffer.SetCameraMatrix(cameraFrame);
     cameraBuffer.m_project = perspect;
+
+    lightCameraBuffer.SetCameraMatrix(lightCameraFrame);
+    lightCameraBuffer.m_project = perspect;
 }
 
 void GraphicToolSet::CommonRenderingBuffer::BuildMeshDatas()
@@ -129,15 +136,15 @@ void GraphicToolSet::CommonRenderingBuffer::BuildMeshDatas()
 }
 
 
-std::unique_ptr<CommonClass::PiplineStateObject> GraphicToolSet::GetCommonPSO()
+std::shared_ptr<CommonClass::PiplineStateObject> GraphicToolSet::GetCommonPSO()
 {
-    auto pso = std::make_unique<PiplineStateObject>();
+    auto pso = std::make_shared<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::LINE_LIST;
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     pso->m_vertexLayout.pixelShaderInputSize = sizeof(SimplePoint);
     pso->SetViewport(GetCommonViewport());
 
-    return std::move(pso);
+    return pso;
 }
 
 CommonClass::Viewport GraphicToolSet::GetCommonViewport()
@@ -154,7 +161,7 @@ std::unique_ptr<CommonClass::Pipline> GraphicToolSet::GetCommonPipline()
 {
     // create and set a pipline.
     auto pipline = std::make_unique<Pipline>();
-    pipline->SetPSO(std::move(GetCommonPSO()));
+    pipline->SetPSO(GetCommonPSO());
 
     // set a back buffer
     pipline->SetBackBuffer(std::make_unique<RasterizeImage>(
@@ -256,6 +263,19 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithPSIn(ConstantBu
             normal,
             toEye);
 
+        if (constBufCamera.m_numLights == 2)
+        {
+            vector3 blinnSpot = ComputeSpotLight(
+                constBufCamera.m_lights[1],
+                vector3(constBufInstance.m_material.m_diffuse.m_arr),
+                vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+                constBufInstance.m_material.m_shiness,
+                pixelPosW,
+                normal,
+                toEye);
+            blinn = blinn + blinnSpot;
+        }
+
         RGBA color(blinn.m_arr);
         return color;
     };
@@ -353,6 +373,78 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithNoiseBumpMap(Co
     };
 }
 
+GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForShadowMap(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& lightCamera)
+{
+    static float minNdcZ = 1.0f, maxNdcZ = 0.0f;
+    return [&constBufInstance, &lightCamera](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
+        
+        Types::F32 ndcZ = pPoint->m_posH.m_z;
+
+        if (ndcZ < minNdcZ)
+        {
+            minNdcZ = ndcZ;
+        }
+
+        if (ndcZ > maxNdcZ)
+        {
+            maxNdcZ = ndcZ;
+        }
+
+        printf("minNdcZ = %.7f, maxNdcZ = %.7f\r", minNdcZ, maxNdcZ);
+
+        assert(0.0f <= ndcZ && ndcZ <= 1.0f);
+
+        return RGBA(ndcZ, ndcZ, ndcZ);
+    };
+}
+
+CommonClass::GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForShadowEffect(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, ConstantBufferForCamera& lightCamera, std::shared_ptr<Texture>& shadowMap)
+{
+    return [&constBufInstance, &constBufCamera, &lightCamera, &shadowMap](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+        assert(shadowMap->IsValid());
+        const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
+
+        vector3 normal = Normalize(pPoint->m_normalW.ToVector3());
+        vector3 pixelPosW = pPoint->m_posW.ToVector3();
+        vector3 toEye = Normalize(constBufCamera.m_camPos - pixelPosW);
+
+        vector3 resultColor = ComputePointLight(
+            constBufCamera.m_lights[0],
+            vector3(constBufInstance.m_material.m_diffuse.m_arr),
+            vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+            constBufInstance.m_material.m_shiness,
+            pixelPosW,
+            normal,
+            toEye);
+
+        if (constBufCamera.m_numLights == 2)
+        {
+            // consider shadow effect only of spot light.
+            hvector inLightCameraH = lightCamera.m_project * lightCamera.m_toCamera * pPoint->m_posW;
+            vector3 inLightCamera = inLightCameraH.ToVector3();
+            inLightCamera = inLightCamera * (1.0f / inLightCameraH.m_w);
+            auto sampledDepth = shadowMap->Sample(0.5f + 0.5f * inLightCamera.m_x, 0.5f + 0.5f * inLightCamera.m_y);
+
+            if ((sampledDepth.m_chas.m_r + 0.01) > inLightCamera.m_z)
+            {
+                vector3 blinnSpot = ComputeSpotLight(
+                    constBufCamera.m_lights[1],
+                    vector3(constBufInstance.m_material.m_diffuse.m_arr),
+                    vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
+                    constBufInstance.m_material.m_shiness,
+                    pixelPosW,
+                    normal,
+                    toEye);
+                resultColor = resultColor + blinnSpot;
+            }
+        }
+
+        RGBA color(resultColor.m_arr);
+        return color;
+    };
+}
+
 GraphicToolSet::SimplePoint::SimplePoint(const hvector& pos /*= hvector()*/, const hvector& normal /*= hvector()*/, const vector2& uv /*= vector2()*/)
     :m_position(pos), m_rayIndex(normal), m_uv(uv) 
 {
@@ -442,6 +534,13 @@ CommonClass::vector3 GraphicToolSet::ComputeSpotLight(const LightBuffer& L, cons
     lightStrength = lightStrength * spotFactor;
 
     return BlinnPhone(lightStrength, diffuseAlbedo, fresnelR0, shiness, toLight, toEye, normal);
+}
+
+void GraphicToolSet::ConstantBufferForCamera::SetCameraMatrix(const CameraFrame& cameraFrame)
+{
+    m_toCamera          = cameraFrame.WorldToLocal();
+    m_toCameraInverse   = cameraFrame.LocalToWorld();
+    m_camPos            = cameraFrame.m_origin;
 }
 
 }// namespace CommonClass

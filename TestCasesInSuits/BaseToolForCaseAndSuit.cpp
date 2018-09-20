@@ -1,4 +1,5 @@
 #include "BaseToolForCaseAndSuit.h"
+#include "BaseToolForCaseAndSuit.h"
 
 using namespace CommonClass;
 
@@ -102,7 +103,7 @@ Types::F32 CaseForPipline::RandomFloatNotZero(const Types::F32 MAX_RADIUS /*= 20
     return ret;
 }
 
-void CaseForPipline::BlockShowImg(Image * pImg, const std::wstring title) const
+void CaseForPipline::BlockShowImg(const Image * pImg, const std::wstring title) const
 {
     assert(pImg != nullptr);
     ImageWindow imgWnd(pImg, title);
@@ -188,6 +189,11 @@ std::wstring CaseForPipline::GetSafeStoragePath() const
 
 void CaseForPipline::SaveAndShowPiplineBackbuffer(const Pipline & pipline, const std::wstring& nameOfImgAndWindow) const
 {
-    pipline.m_backBuffer->SaveTo(GetSafeStoragePath() + nameOfImgAndWindow + L".png");
-    BlockShowImg(pipline.m_backBuffer.get(), nameOfImgAndWindow);
+    SaveAndShow(*(pipline.m_backBuffer), nameOfImgAndWindow);
+}
+
+void CaseForPipline::SaveAndShow(const Image & img, const std::wstring & nameWithOutExt) const
+{
+    img.SaveTo(GetSafeStoragePath() + nameWithOutExt + L".png");
+    BlockShowImg(&img, nameWithOutExt);
 }

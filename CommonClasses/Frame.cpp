@@ -25,7 +25,7 @@ Frame::~Frame()
 {
 }
 
-CommonClass::Transform Frame::LocalToWorld()
+CommonClass::Transform Frame::LocalToWorld() const
 {
     return Transform(
         m_u.m_x, m_v.m_x, m_w.m_x, m_origin.m_x,
@@ -34,7 +34,7 @@ CommonClass::Transform Frame::LocalToWorld()
            0.0f,    0.0f,    0.0f,         1.0f);
 }
 
-CommonClass::Transform Frame::WorldToLocal()
+CommonClass::Transform Frame::WorldToLocal() const
 {
     Transform inverseRotation = Transform(
         m_u.m_x, m_v.m_x, m_w.m_x, 0.0f,
