@@ -25,25 +25,25 @@ char            StatusText[255];
 MinimalLuaInpterpreter MainLuaInterpreter;
 
 // type aliases
-using SimplePoint               = CaseForPipline::SimplePoint;
-using PSIn                      = CaseForPipline::PSIn;
-using VSOut                     = CaseForPipline::VSOut;
-using ObjectInstance            = CaseForPipline::ObjectInstance;
-using ConstantBufferForInstance = CaseForPipline::ConstantBufferForInstance;
-using ConstantBufferForCamera   = CaseForPipline::ConstantBufferForCamera;
-using MaterialBuffer            = CaseForPipline::MaterialBuffer;
+using SimplePoint               = GraphicToolSet::SimplePoint;
+using PSIn                      = GraphicToolSet::PSIn;
+using VSOut                     = GraphicToolSet::VSOut;
+using ObjectInstance            = GraphicToolSet::ObjectInstance;
+using ConstantBufferForInstance = GraphicToolSet::ConstantBufferForInstance;
+using ConstantBufferForCamera   = GraphicToolSet::ConstantBufferForCamera;
+using MaterialBuffer            = GraphicToolSet::MaterialBuffer;
 
-using CommonRenderingBuffer = CaseForPipline::CommonRenderingBuffer;
+using CommonRenderingBuffer = GraphicToolSet::CommonRenderingBuffer;
 ImguiWrapImageDX11                                  MainImage;  // the render image for application display.
-CaseForPipline                                      HelpPiplineCase("a help struct for pipline");   // preparations for pipline
+GraphicToolSet                                      HelpPiplineCase;   // preparations for pipline
 std::unique_ptr<Pipline>                            MainPipline;
 std::shared_ptr<CommonClass::PiplineStateObject>    PSO;
 CommonRenderingBuffer                               renderingBuffer;
 ConstantBufferForInstance                           instanceBufAgent;// agent buffer for setting instance data
 std::shared_ptr<Texture>                            textureAgent;// texture agent for pixel shader.
-CaseForPipline::PixelShaderSig                      pixelShaderNoTexture;
-CaseForPipline::PixelShaderSig                      pixelShaderTexture;
-CaseForPipline::PixelShaderSig                      pixelShaderNoiseNormalTexture;
+GraphicToolSet::PixelShaderSig                      pixelShaderNoTexture;
+GraphicToolSet::PixelShaderSig                      pixelShaderTexture;
+GraphicToolSet::PixelShaderSig                      pixelShaderNoiseNormalTexture;
 std::shared_ptr<Texture>                            texture1 = std::make_shared<Texture>();
 std::shared_ptr<Texture>                            texture2 = std::make_shared<Texture>();
 std::shared_ptr<Texture>                            texture3 = std::make_shared<Texture>();
@@ -162,7 +162,7 @@ bool ImguiUpdateRenderData()
         isDirtyData = true;
     }
 
-    if (ImGui::SliderFloat("first object shiness", &renderingBuffer.objInstances[0].m_material.m_shiness, 0.0f, 20.0f))
+    if (ImGui::SliderFloat("first object shiness", &renderingBuffer.objInstances[0].m_material.m_shiness, 0.0f, 1.0f))
     {
         renderingBuffer.RebuildInstanceBuffer();
         isDirtyData = true;
@@ -247,14 +247,35 @@ int Main()
 
 
     static char InputImagePath[256];
+    static char InputImageName[256] = "savePicture";
     // if rendering has complete at least once, draw a button that can save this image,
     // save process is done by the back buffer of MainPipline.
     if (MainImage.m_isValide)
     {
-        ImGui::InputText("save path", InputImagePath, sizeof(InputImagePath));
-        if (ImGui::Button("save current image"))
+        // init saved path
+        if (InputImagePath[0] == 0)
         {
-            MainPipline->m_backBuffer->SaveTo("");
+            strcpy_s(InputImagePath, ExePath().c_str());
+        }
+
+        ImGui::InputText("save path", InputImagePath, sizeof(InputImagePath));
+
+        if (ImGui::InputText(".png, save file name", InputImageName, sizeof(InputImageName), ImGuiInputTextFlags_EnterReturnsTrue))
+        {
+            std::string fullPath = std::string(InputImagePath) + "\\" + InputImageName + ".png";
+
+            try
+            {
+                MainPipline->m_backBuffer->SaveTo(fullPath);
+                std::string resultMsg = "save success: ";
+                resultMsg += InputImageName;
+                strcpy_s(StatusText, resultMsg.c_str());
+            }
+            catch (std::exception e)
+            {
+                memset(StatusText, 0, sizeof(StatusText));
+                strcpy_s(StatusText, e.what());
+            }
         }
     }
 

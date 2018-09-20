@@ -2,7 +2,7 @@
 
 void CASE_NAME_IN_COMMON_CLASSES(BasicImage)::Run()
 {
-    const Types::U32 WIDTH(COMMON_PIXEL_WIDTH), HEIGHT(COMMON_PIXEL_HEIGHT);
+    const Types::U32 WIDTH(graphicToolSet.COMMON_PIXEL_WIDTH), HEIGHT(graphicToolSet.COMMON_PIXEL_HEIGHT);
     CommonClass::Image testImage(WIDTH, HEIGHT);
 
     RGBA pixelSetterT;
@@ -221,12 +221,12 @@ void CASE_NAME_IN_COMMON_CLASSES(RayFromOrthoCamera)::Run()
     vector3 camLookUp = Normalize(GetRandomVector3(false));
     OrthographicCamera orthoCamera(camOrigin, camLookAt, camLookUp);
     orthoCamera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH, 
-        COMMON_PIXEL_HEIGHT,
-        COMMON_RENDER_LEFT, 
-        COMMON_RENDER_RIGHT, 
-        COMMON_RENDER_BOTTOM, 
-        COMMON_RENDER_TOP));
+        graphicToolSet.COMMON_PIXEL_WIDTH, 
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_RENDER_LEFT, 
+        graphicToolSet.COMMON_RENDER_RIGHT, 
+        graphicToolSet.COMMON_RENDER_BOTTOM, 
+        graphicToolSet.COMMON_RENDER_TOP));
 
     for (unsigned int i = 0; i < orthoCamera.m_film->GetWidth(); ++i)
     {
@@ -311,12 +311,12 @@ void CASE_NAME_IN_COMMON_CLASSES(OrthoCameraAndSphere)::Run()
 
     OrthographicCamera orthoCamera(camPosition, camTarget, camLookUp);
     orthoCamera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH,
-        COMMON_PIXEL_HEIGHT,
-        COMMON_RENDER_LEFT,
-        COMMON_RENDER_RIGHT,
-        COMMON_RENDER_BOTTOM,
-        COMMON_RENDER_TOP));
+        graphicToolSet.COMMON_PIXEL_WIDTH,
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_RENDER_LEFT,
+        graphicToolSet.COMMON_RENDER_RIGHT,
+        graphicToolSet.COMMON_RENDER_BOTTOM,
+        graphicToolSet.COMMON_RENDER_TOP));
 
     HitRecord hitRec;
 
@@ -431,7 +431,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PerspectiveCameraAndSphere)::Run()
 
     PerspectiveCamera perspectCamera(focalLength, camPosition, camTarget, camLookUp);
     perspectCamera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT,
         -0.5f, +0.5f,
         -0.5f, +0.5f));
 
@@ -495,7 +495,7 @@ void CASE_NAME_IN_COMMON_CLASSES(TriangleAndRay)::Run()
     Types::F32 focalLength = 0.5f;
     PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
     camera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT,
         -0.5f, +0.5f,
         -0.5f, +0.5f));
 
@@ -582,7 +582,7 @@ void CASE_NAME_IN_COMMON_CLASSES(SceneAndRay)::Run()
     Types::F32 focalLength = 0.5f;
     PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
     camera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT,
         -0.5f, +0.5f,
         -0.5f, +0.5f));
 
@@ -640,7 +640,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PolygoneAndRay)::Run()
     Types::F32 focalLength = 0.5f;
     PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
     camera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT,
         -0.5f, +0.5f,
         -0.5f, +0.5f));
 
@@ -765,7 +765,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
     PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
 
     camera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT,
         -0.5f, +0.5f,
         -0.5f, +0.5f));
 
@@ -910,7 +910,7 @@ void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
     PerspectiveCamera camera(focalLength, camPosition, camTarget, camLookUp);
 
     camera.SetFilm(std::make_unique<Film>(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT,
         -0.5f, +0.5f,
         -0.5f, +0.5f));
 

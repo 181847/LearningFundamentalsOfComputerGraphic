@@ -47,7 +47,7 @@ void CASE_NAME_IN_FILTER(GenerateLocMap)::Run()
 
 void CASE_NAME_IN_FILTER(Exercise)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     // the pixel shader will not work

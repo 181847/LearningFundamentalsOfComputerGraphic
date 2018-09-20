@@ -2,7 +2,7 @@
 
 void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
 
     auto pso = pipline->GetPSO();
 
@@ -13,9 +13,9 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
     Viewport viewport;
     viewport.left = 0;
-    viewport.right = COMMON_PIXEL_WIDTH - 1.0f;
+    viewport.right = graphicToolSet.COMMON_PIXEL_WIDTH - 1.0f;
     viewport.bottom = 0;
-    viewport.top = COMMON_PIXEL_HEIGHT - 1.0f;
+    viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.0f;
     pso->SetViewport(viewport);
 
     std::array<hvector, 3> triv = {
@@ -38,7 +38,7 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
         
     // the pixel shader will not work
@@ -150,7 +150,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
 void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
 {
     // create and set a pipline.
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     // create and config pipeline state object
     auto pso = pipline->GetPSO();
 
@@ -229,7 +229,7 @@ void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
@@ -334,7 +334,7 @@ void CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
@@ -411,7 +411,7 @@ void CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     CommonRenderingBuffer renderingBuffer;
@@ -422,8 +422,8 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
     }
     renderingBuffer.RebuildInstanceBuffer();
     Transform trsAgent, normalTrsAgent;
-    pso->m_pixelShader  = GetPixelShaderWithNormal();
-    pso->m_vertexShader = GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
+    pso->m_pixelShader  = graphicToolSet.GetPixelShaderWithNormal();
+    pso->m_vertexShader = graphicToolSet.GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
 
     const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_CUBE];
 
@@ -467,7 +467,7 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     CommonRenderingBuffer renderingBuffer;
@@ -478,8 +478,8 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     }
     renderingBuffer.RebuildInstanceBuffer();
     Transform trsAgent, normalTrsAgent;
-    pso->m_pixelShader  = GetPixelShaderWithNormal();
-    pso->m_vertexShader = GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
+    pso->m_pixelShader  = graphicToolSet.GetPixelShaderWithNormal();
+    pso->m_vertexShader = graphicToolSet.GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
 
     const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_CYLINDER];
 
@@ -523,7 +523,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     CommonRenderingBuffer renderingBuffer;
@@ -534,8 +534,8 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     }
     renderingBuffer.RebuildInstanceBuffer();
     Transform trsAgent, normalTrsAgent;
-    pso->m_pixelShader  = GetPixelShaderWithNormal();
-    pso->m_vertexShader = GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
+    pso->m_pixelShader  = graphicToolSet.GetPixelShaderWithNormal();
+    pso->m_vertexShader = graphicToolSet.GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
 
     const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_SPHERE];
     
@@ -579,7 +579,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
     CommonRenderingBuffer renderingBuffer;
@@ -590,8 +590,8 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     }
     renderingBuffer.RebuildInstanceBuffer();
     Transform trsAgent, normalTrsAgent;
-    pso->m_pixelShader  = GetPixelShaderWithNormal();
-    pso->m_vertexShader = GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
+    pso->m_pixelShader  = graphicToolSet.GetPixelShaderWithNormal();
+    pso->m_vertexShader = graphicToolSet.GetVertexShaderWithNormal(trsAgent, renderingBuffer.perspect, normalTrsAgent);
 
     const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_GEOSPHERE];
     
@@ -637,7 +637,7 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
 {
     // build two frame, to render the scene in different view.
     const unsigned int CAM1 = 0, CAM2 = 1;
-    std::array<std::unique_ptr<CommonClass::Pipline>,           2> piplines = { GetCommonPipline() , GetCommonPipline() };
+    std::array<std::unique_ptr<CommonClass::Pipline>,           2> piplines = { graphicToolSet.GetCommonPipline() , graphicToolSet.GetCommonPipline() };
     std::array<std::shared_ptr<CommonClass::PiplineStateObject>,2> PSOs     = { piplines[CAM1]->GetPSO(),          piplines[CAM2]->GetPSO()};
 
     CommonRenderingBuffer renderingBuffer;
@@ -646,7 +646,7 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
     std::array<CameraFrame, 2> cameraFrames = {
         CameraFrame(vector3(1.0f, 0.0f, 1.0f) * 3.0f, vector3(0.0f, 0.0f, 0.0f)),
         CameraFrame(vector3(1.0f, 0.5f, -1.0f) * 4.0f, vector3(0.0f, 0.0f, 0.0f))};
-    std::array<ConstantBufferForCamera, 2> cameraBuffer;
+    std::array<GraphicToolSet::ConstantBufferForCamera, 2> cameraBuffer;
     cameraBuffer[CAM1].m_toCamera           = cameraFrames[CAM1].WorldToLocal();
     cameraBuffer[CAM1].m_toCameraInverse    = cameraFrames[CAM1].LocalToWorld();
     cameraBuffer[CAM1].m_project            = renderingBuffer.perspect;
@@ -654,13 +654,13 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
     cameraBuffer[CAM2].m_toCameraInverse    = cameraFrames[CAM2].LocalToWorld();
     cameraBuffer[CAM2].m_project            = renderingBuffer.perspect;
 
-    ConstantBufferForInstance instanceBufAgent;// agent buffer for setting instance data
+    GraphicToolSet::ConstantBufferForInstance instanceBufAgent;// agent buffer for setting instance data
     // two pipline will share the same instanceData, but with different Camera.
-    PSOs[CAM1]->m_vertexShader = GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM1]);
-    PSOs[CAM2]->m_vertexShader = GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM2]);
+    PSOs[CAM1]->m_vertexShader = graphicToolSet.GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM1]);
+    PSOs[CAM2]->m_vertexShader = graphicToolSet.GetVertexShaderWithNormalAndConstantBuffer(instanceBufAgent, cameraBuffer[CAM2]);
 
     // set pixel shader, two pipline will share the same pixel shader.
-    PSOs[CAM1]->m_pixelShader = GetPixelShaderWithNormal();
+    PSOs[CAM1]->m_pixelShader = graphicToolSet.GetPixelShaderWithNormal();
     PSOs[CAM2]->m_pixelShader = PSOs[CAM1]->m_pixelShader;
 
     // build mesh data
@@ -720,17 +720,17 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
 
 void CASE_NAME_IN_RASTER_TRI(PixelShading)::Run()
 {
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     std::shared_ptr<CommonClass::PiplineStateObject> PSO = pipline->GetPSO();
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
-    PSO->m_vertexLayout.pixelShaderInputSize = sizeof(PSIn);
+    PSO->m_vertexLayout.pixelShaderInputSize = sizeof(GraphicToolSet::PSIn);
 
     CommonRenderingBuffer renderingBuffer;
 
     std::wstring pictureIndex = L"008";
-    ConstantBufferForInstance   instanceBufAgent;
-    PSO->m_vertexShader = GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
-    PSO->m_pixelShader = GetPixelShaderWithPSIn(instanceBufAgent, renderingBuffer.cameraBuffer);
+    GraphicToolSet::ConstantBufferForInstance   instanceBufAgent;
+    PSO->m_vertexShader = graphicToolSet.GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
+    PSO->m_pixelShader = graphicToolSet.GetPixelShaderWithPSIn(instanceBufAgent, renderingBuffer.cameraBuffer);
 
     const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_GEOSPHERE];
 
@@ -768,18 +768,18 @@ void CASE_NAME_IN_RASTER_TRI(TextureMapping)::Run()
 {
     using namespace Types;
 
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     std::shared_ptr<CommonClass::PiplineStateObject> PSO = pipline->GetPSO();
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
-    PSO->m_vertexLayout.pixelShaderInputSize = sizeof(PSIn);
+    PSO->m_vertexLayout.pixelShaderInputSize = sizeof(GraphicToolSet::PSIn);
 
     CommonRenderingBuffer renderingBuffer;
 
     std::wstring pictureIndex = L"008";
-    ConstantBufferForInstance   instanceBufAgent;
+    GraphicToolSet::ConstantBufferForInstance   instanceBufAgent;
     std::shared_ptr<Texture>    textureAgent;
-    PSO->m_vertexShader = GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
-    PSO->m_pixelShader = GetPixelShaderWithPSInAndTexture(instanceBufAgent, renderingBuffer.cameraBuffer, textureAgent);
+    PSO->m_vertexShader = graphicToolSet.GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
+    PSO->m_pixelShader = graphicToolSet.GetPixelShaderWithPSInAndTexture(instanceBufAgent, renderingBuffer.cameraBuffer, textureAgent);
 
     std::wstring geometryName;
     const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_GEOSPHERE];    geometryName = L"geoSphere";
@@ -825,19 +825,19 @@ void CASE_NAME_IN_RASTER_TRI(NoiseBumpMap)::Run()
 {
     using namespace Types;
 
-    auto pipline = GetCommonPipline();
+    auto pipline = graphicToolSet.GetCommonPipline();
     pipline->ClearBackBuffer(RGBA::WHITE * 0.5f);
     auto PSO = pipline->GetPSO();
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
-    PSO->m_vertexLayout.pixelShaderInputSize = sizeof(PSIn);
+    PSO->m_vertexLayout.pixelShaderInputSize = sizeof(GraphicToolSet::PSIn);
 
     CommonRenderingBuffer renderingBuffer;
 
     std::wstring pictureIndex = L"009";
-    ConstantBufferForInstance   instanceBufAgent;
+    GraphicToolSet::ConstantBufferForInstance   instanceBufAgent;
     std::shared_ptr<Texture>    textureAgent;
-    PSO->m_vertexShader = GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
-    PSO->m_pixelShader = GetPixelShaderWithNoiseBumpMap(instanceBufAgent, renderingBuffer.cameraBuffer, textureAgent);
+    PSO->m_vertexShader = graphicToolSet.GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
+    PSO->m_pixelShader = graphicToolSet.GetPixelShaderWithNoiseBumpMap(instanceBufAgent, renderingBuffer.cameraBuffer, textureAgent);
 
     std::wstring geometryName;
     const auto& mesh = renderingBuffer.prebuildMeshData[CommonRenderingBuffer::M_GEOSPHERE];    geometryName = L"geoSphere";

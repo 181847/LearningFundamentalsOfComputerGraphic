@@ -3,7 +3,7 @@
 void CASE_NAME_IN_RASTERISATION(WuXiaolinLines)::Run()
 {
     RasterizeImage defaultImg(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT, 
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT, 
         RGBA::WHITE);
 
     const Types::F32 
@@ -27,7 +27,7 @@ void CASE_NAME_IN_RASTERISATION(BresenhamLine)::Run()
 {
 
     RasterizeImage defaultImg(
-        COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT, 
+        graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT, 
         RGBA::WHITE);
 
     const Types::F32 
@@ -54,7 +54,7 @@ void CASE_NAME_IN_RASTERISATION(BresenhamLine)::Run()
 
 void CASE_NAME_IN_RASTERISATION(2DLineClip)::Run()
 {
-    RasterizeImage defaultImg(COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+    RasterizeImage defaultImg(graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
     const Types::F32 CENTER_X = 0.5,
         CENTER_Y = 0.5;
@@ -90,7 +90,7 @@ void CASE_NAME_IN_RASTERISATION(2DLineClip)::Run()
 
 void CASE_NAME_IN_RASTERISATION(FlagBottomTriangle)::Run()
 {
-    RasterizeImage defaultImg(COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+    RasterizeImage defaultImg(graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
     const Types::F32 CENTER_X = defaultImg.GetWidth() / 2.0f,
         CENTER_Y = defaultImg.GetHeight() / 2.0f;
@@ -119,7 +119,7 @@ void CASE_NAME_IN_RASTERISATION(FlagBottomTriangle)::Run()
 
 void CASE_NAME_IN_RASTERISATION(GeneralTriangle)::Run()
 {
-    RasterizeImage defaultImg(COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT, RGBA::WHITE);
+    RasterizeImage defaultImg(graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT, RGBA::WHITE);
 
     const Types::F32 CENTER_X = defaultImg.GetWidth() / 2.0f,
         CENTER_Y = defaultImg.GetHeight() / 2.0f;
@@ -178,9 +178,9 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
 
     Viewport viewport;
     viewport.left = 0.f;
-    viewport.right = COMMON_PIXEL_WIDTH - 1.f;
+    viewport.right = graphicToolSet.COMMON_PIXEL_WIDTH - 1.f;
     viewport.bottom = 0.f;
-    viewport.top = COMMON_PIXEL_HEIGHT - 1.f;
+    viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -189,8 +189,8 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
 
     // set a backbuffer
     pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
-        COMMON_PIXEL_WIDTH,
-        COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH,
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
 
     std::vector<SimplePoint> points;
@@ -263,9 +263,9 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
 
     Viewport viewport;
     viewport.left = 0.f;
-    viewport.right = COMMON_PIXEL_WIDTH - 1.f;
+    viewport.right = graphicToolSet.COMMON_PIXEL_WIDTH - 1.f;
     viewport.bottom = 0.f;
-    viewport.top = COMMON_PIXEL_HEIGHT - 1.f;
+    viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -274,8 +274,8 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
 
     // set a backbuffer
     pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
-        COMMON_PIXEL_WIDTH,
-        COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH,
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
 
     std::vector<SimplePoint> points;
@@ -364,9 +364,9 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
 
     Viewport viewport;
     viewport.left = 0.f;
-    viewport.right = COMMON_PIXEL_WIDTH - 1.f;
+    viewport.right = graphicToolSet.COMMON_PIXEL_WIDTH - 1.f;
     viewport.bottom = 0.f;
-    viewport.top = COMMON_PIXEL_HEIGHT - 1.f;
+    viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -375,8 +375,8 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
 
     // set a backbuffer
     pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
-        COMMON_PIXEL_WIDTH,
-        COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH,
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
 
     std::vector<SimplePoint> points;
@@ -460,9 +460,9 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
 
     Viewport viewport;
     viewport.left = 0.f;
-    viewport.right = COMMON_PIXEL_WIDTH - 1.f;
+    viewport.right = graphicToolSet.COMMON_PIXEL_WIDTH - 1.f;
     viewport.bottom = 0.f;
-    viewport.top = COMMON_PIXEL_HEIGHT - 1.f;
+    viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -471,8 +471,8 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
 
     // set a backbuffer
     pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
-        COMMON_PIXEL_WIDTH,
-        COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH,
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
 
     std::vector<SimplePoint> points;
@@ -565,9 +565,9 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
 
     Viewport viewport;
     viewport.left = 0.f;
-    viewport.right = COMMON_PIXEL_WIDTH - 1.f;
+    viewport.right = graphicToolSet.COMMON_PIXEL_WIDTH - 1.f;
     viewport.bottom = 0.f;
-    viewport.top = COMMON_PIXEL_HEIGHT - 1.f;
+    viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -576,8 +576,8 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
 
     // set a backbuffer
     pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
-        COMMON_PIXEL_WIDTH,
-        COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH,
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
 
     std::vector<SimplePoint> points;
@@ -690,9 +690,9 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
 
     Viewport viewport;
     viewport.left = 0.f;
-    viewport.right = COMMON_PIXEL_WIDTH - 1.f;
+    viewport.right = graphicToolSet.COMMON_PIXEL_WIDTH - 1.f;
     viewport.bottom = 0.f;
-    viewport.top = COMMON_PIXEL_HEIGHT - 1.f;
+    viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.f;
     pso->SetViewport(viewport);
 
     // create and set a pipline.
@@ -701,8 +701,8 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
 
     // set a backbuffer
     pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
-        COMMON_PIXEL_WIDTH,
-        COMMON_PIXEL_HEIGHT,
+        graphicToolSet.COMMON_PIXEL_WIDTH,
+        graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
 
     std::vector<SimplePoint> points;

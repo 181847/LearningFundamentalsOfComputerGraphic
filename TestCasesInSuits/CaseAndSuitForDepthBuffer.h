@@ -9,7 +9,7 @@ public:
     virtual void Run() override
     {
         
-        DepthBuffer dpbuffer(COMMON_PIXEL_WIDTH, COMMON_PIXEL_HEIGHT);
+        DepthBuffer dpbuffer(graphicToolSet.COMMON_PIXEL_WIDTH, graphicToolSet.COMMON_PIXEL_HEIGHT);
         dpbuffer.SetAll(0.75f);
 
         auto img = ToImage(dpbuffer, 1.0f);
