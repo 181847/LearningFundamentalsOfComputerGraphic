@@ -13,13 +13,13 @@
 int main()
 {
     TestSuit::SuitQueueRunner<
-        //BasicTypesTestSuit_Runable, 
-        //SuitForCommonClasses,
-        //SuitForRayRender,
-        //SuitForRasterisation, 
-        SuitForRasterizeTriangle//,
-        //SuitForFilter,
-        //SuitForStbImage
+        BasicTypesTestSuit_Runable, 
+        SuitForCommonClasses,
+        SuitForRayRender,
+        SuitForRasterisation, 
+        SuitForRasterizeTriangle,
+        SuitForFilter,
+        SuitForStbImage
     > suitQueueRunner;
 
     suitQueueRunner.StartBatch();

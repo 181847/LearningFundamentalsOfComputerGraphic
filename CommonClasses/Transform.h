@@ -1,6 +1,6 @@
 #pragma once
 #include "CommonTypes.h"
-#include "hvector.h"
+#include "vector4.h"
 #include "vector3.h"
 
 /*!
@@ -31,7 +31,7 @@ public:
         /*!
             \brief transform are defined by 4 column vectors.
         */
-        hvector m_column[4];
+        vector4 m_column[4];
 
         struct
         {
@@ -200,9 +200,9 @@ bool operator == (const Transform& m1, const Transform& m2);
 bool operator != (const Transform& m1, const Transform& m2);
 
 /*!
-    \brief apply matrix transformation on the hvector, return an new instance.
+    \brief apply matrix transformation on the vector4, return an new instance.
 */
-hvector operator * (const Transform& m, const hvector& v);
+vector4 operator * (const Transform& m, const vector4& v);
 
 /*!
     \brief combine two transformation together

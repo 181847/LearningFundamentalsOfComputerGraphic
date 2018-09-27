@@ -118,7 +118,7 @@ private:
         \param pointH the position in the homogeneous coordinate
         generally speaking, the positive result mean that inside the plane.
     */
-    virtual Types::F32 eval(const hvector& pointH) = 0;
+    virtual Types::F32 eval(const vector4& pointH) = 0;
 
     /*!
         \brief calculate the interpolate coefficient
@@ -127,7 +127,7 @@ private:
         because the coefficient should be calculated only by that the segment is acrossing the plane.
 
     */
-    virtual Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) = 0;
+    virtual Types::F32 cutCoefficient(const vector4& point1, const vector4& point2) = 0;
 };
 
 /*!
@@ -137,19 +137,19 @@ private:
 class WZeroHPlaneEquation : public HPlaneEquation
 {
 public:
-    Types::F32 eval(const hvector& pointH) override;
+    Types::F32 eval(const vector4& pointH) override;
     
-    Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override;
+    Types::F32 cutCoefficient(const vector4& point1, const vector4& point2) override;
 };
 
 /*!
-    \brief near frustum plane cut equation, this assume all the hvector have a positive w.
+    \brief near frustum plane cut equation, this assume all the vector4 have a positive w.
 */
 class ZeroNearPlaneEquation : public HPlaneEquation
 {
 public:
-    Types::F32 eval(const hvector& pointH) override;
-    Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override;
+    Types::F32 eval(const vector4& pointH) override;
+    Types::F32 cutCoefficient(const vector4& point1, const vector4& point2) override;
 };
 
 /*!
@@ -203,18 +203,18 @@ public:
 
     /*!
         \brief which axis is choose in the plane,
-        if XYZ = 0, the axis means X, so we will get the value of pointX.m_x, whose index inside the hvector is 0.
+        if XYZ = 0, the axis means X, so we will get the value of pointX.m_x, whose index inside the vector4 is 0.
         and so on.
     */
     const unsigned short CHOOSE_AXIS = XYZ;
 
-    Types::F32 eval(const hvector& pointH) override
+    Types::F32 eval(const vector4& pointH) override
     {
         const Types::F32 axis(pointH.m_arr[CHOOSE_AXIS]);
         return pointH.m_w + SIGN * axis;
     }
 
-    Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override
+    Types::F32 cutCoefficient(const vector4& point1, const vector4& point2) override
     {
         Types::F32 w1(point1.m_w),                  w2(point2.m_w);
 

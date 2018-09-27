@@ -18,10 +18,10 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
     viewport.top = graphicToolSet.COMMON_PIXEL_HEIGHT - 1.0f;
     pso->SetViewport(viewport);
 
-    std::array<hvector, 3> triv = {
-        hvector(2.0f, 400.0f),
-        hvector(200.0f,  10.0f),
-        hvector(400.0f, 300.0f)
+    std::array<vector4, 3> triv = {
+        vector4(2.0f, 400.0f),
+        vector4(200.0f,  10.0f),
+        vector4(400.0f, 300.0f)
     };
 
     std::array<ScreenSpaceVertexTemplate*, 3> vInScreen;
@@ -30,7 +30,7 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
         vInScreen[i] = reinterpret_cast<ScreenSpaceVertexTemplate*>(&triv[i]);
     }
 
-    pipline->DrawTriangle(vInScreen[0], vInScreen[2], vInScreen[1], sizeof(hvector));
+    pipline->DrawTriangle(vInScreen[0], vInScreen[2], vInScreen[1], sizeof(vector4));
 
     std::wstring pictureIndex = L"001";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"screenSpaceTriangle_" + pictureIndex);
@@ -86,7 +86,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
         const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
         SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-        hvector inViewPos = toView * pSrcH->m_position;
+        vector4 inViewPos = toView * pSrcH->m_position;
 
         pDestH->m_position = perspect * inViewPos;
         //pDestH->m_position = pSrcH->m_position;
@@ -102,21 +102,21 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
 
         //if (lineIndex == 32)
         {
-            SimplePoint p0(hvector(x0, y0, 0.0f));
+            SimplePoint p0(vector4(x0, y0, 0.0f));
             p0.m_rayIndex.m_x = roundIndex * 1.0f;
             p0.m_rayIndex.m_y = lineIndex * 1.0f;
             p0.m_rayIndex.m_z = 0.0f;
             points.push_back(p0);
             indices.push_back(numIndices++);
 
-            SimplePoint p1(hvector(x1, y1, 0.0f));
+            SimplePoint p1(vector4(x1, y1, 0.0f));
             p1.m_rayIndex.m_x = roundIndex * 1.0f;
             p1.m_rayIndex.m_y = lineIndex * 1.0f;
             p1.m_rayIndex.m_z = 1.0f;
             points.push_back(p1);
             indices.push_back(numIndices++);
 
-            SimplePoint p2(hvector(x2, y2, 0.0f));
+            SimplePoint p2(vector4(x2, y2, 0.0f));
             p2.m_rayIndex.m_x = roundIndex * 1.0f;
             p2.m_rayIndex.m_y = lineIndex * 1.0f;
             p2.m_rayIndex.m_z = 1.0f;
@@ -158,12 +158,12 @@ void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
         return RGBA::BLACK;
     };
 
-    std::array<hvector, 3> triv = {
-        hvector(  2.0f, 400.0f, 1.0f),
-        hvector(200.0f,  10.0f, 2.0f),
-        hvector(400.0f, 300.0f, -1.0f)
+    std::array<vector4, 3> triv = {
+        vector4(  2.0f, 400.0f, 1.0f),
+        vector4(200.0f,  10.0f, 2.0f),
+        vector4(400.0f, 300.0f, -1.0f)
     };
-    const size_t VERTEX_SIZE = sizeof(hvector);
+    const size_t VERTEX_SIZE = sizeof(vector4);
 
     std::array<ScreenSpaceVertexTemplate*, 3> vInScreen;
     for (size_t i = 0; i < vInScreen.size(); ++i)
@@ -175,12 +175,12 @@ void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
     class PositiveZPlane : public HPlaneEquation
     {
     public:
-        Types::F32 eval(const hvector& pointH) override
+        Types::F32 eval(const vector4& pointH) override
         {
             return pointH.m_z;
         }
 
-        Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override
+        Types::F32 cutCoefficient(const vector4& point1, const vector4& point2) override
         {
             return (0.0f - point1.m_z) / (point2.m_z - point1.m_z);
         }
@@ -236,12 +236,12 @@ void CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle)::Run()
         return RGBA::BLACK;
     };
 
-    std::array<hvector, 3> triv = {
-        hvector(  2.0f, 400.0f, 1.0f),
-        hvector(200.0f,  10.0f, 2.0f),
-        hvector(400.0f, 300.0f, -1.0f)
+    std::array<vector4, 3> triv = {
+        vector4(  2.0f, 400.0f, 1.0f),
+        vector4(200.0f,  10.0f, 2.0f),
+        vector4(400.0f, 300.0f, -1.0f)
     };
-    const size_t VERTEX_SIZE = sizeof(hvector);
+    const size_t VERTEX_SIZE = sizeof(vector4);
 
     std::array<ScreenSpaceVertexTemplate*, 3> vInScreen;
     for (size_t i = 0; i < vInScreen.size(); ++i)
@@ -262,12 +262,12 @@ void CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle)::Run()
             // empty
         }
 
-        Types::F32 eval(const hvector& pointH) override
+        Types::F32 eval(const vector4& pointH) override
         {
             return m_A * pointH.m_x + m_B * pointH.m_y + m_C;
         }
 
-        Types::F32 cutCoefficient(const hvector& point1, const hvector& point2) override
+        Types::F32 cutCoefficient(const vector4& point1, const vector4& point2) override
         {
             float x1(point1.m_x), y1(point1.m_y), x2(point2.m_x), y2(point2.m_y);
             float numerator = - (m_A * x1 + m_B * y1 + m_C);
@@ -341,12 +341,12 @@ void CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut)::Run()
         return RGBA::BLACK;
     };
 
-    std::array<hvector, 3> triv = {
-        hvector(  2.0f, 400.0f,  2.0f, 1.0f),
-        hvector(200.0f,  10.0f,  1.0f, 1.0f),
-        hvector(400.0f, 300.0f, -3.0f, -1.0f)
+    std::array<vector4, 3> triv = {
+        vector4(  2.0f, 400.0f,  2.0f, 1.0f),
+        vector4(200.0f,  10.0f,  1.0f, 1.0f),
+        vector4(400.0f, 300.0f, -3.0f, -1.0f)
     };
-    const size_t VERTEX_SIZE = sizeof(hvector);
+    const size_t VERTEX_SIZE = sizeof(vector4);
 
     std::array<ScreenSpaceVertexTemplate*, 3> vInScreen;
     for (size_t i = 0; i < vInScreen.size(); ++i)
@@ -671,7 +671,7 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
     vertices.clear();
     for (const auto& vertex : meshData.m_vertices)
     {
-        vertices.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f)));
+        vertices.push_back(SimplePoint(vertex.m_pos.Tovector4(), vertex.m_normal.Tovector4(0.0f)));
     }
     auto vertexBuffer = std::make_unique<F32Buffer>(vertices.size() * sizeof(SimplePoint));
     memcpy(vertexBuffer->GetBuffer(), vertices.data(), vertexBuffer->GetSizeOfByte());

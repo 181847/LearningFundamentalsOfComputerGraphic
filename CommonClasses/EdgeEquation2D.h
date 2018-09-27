@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CommonTypes.h"
-#include "hvector.h"
+#include "vector4.h"
 
 namespace CommonClass
 {
@@ -19,7 +19,7 @@ public:
         \brief construct the equation by two point, we will only used the x\y to build the equation
         \param p1p2 two point on the line, here we only care about the x\y
     */
-    EdgeEquation2D(const hvector& p1, const hvector& p2);
+    EdgeEquation2D(const vector4& p1, const vector4& p2);
     ~EdgeEquation2D();
 
     /*!

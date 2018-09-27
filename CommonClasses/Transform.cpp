@@ -7,10 +7,10 @@ namespace CommonClass
 Transform::Transform()
 {
     // NOTICE: vectors are column vector
-    m_column[0] = hvector(1.0f, 0.0f, 0.0f, 0.0f);
-    m_column[1] = hvector(0.0f, 1.0f, 0.0f, 0.0f);
-    m_column[2] = hvector(0.0f, 0.0f, 1.0f, 0.0f);
-    m_column[3] = hvector(0.0f, 0.0f, 0.0f, 1.0f);
+    m_column[0] = vector4(1.0f, 0.0f, 0.0f, 0.0f);
+    m_column[1] = vector4(0.0f, 1.0f, 0.0f, 0.0f);
+    m_column[2] = vector4(0.0f, 0.0f, 1.0f, 0.0f);
+    m_column[3] = vector4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 
@@ -22,25 +22,25 @@ Transform::Transform(
 {
     // NOTICE: vectors are column vector
 
-    m_column[0] = hvector(
+    m_column[0] = vector4(
         m11, 
         m21,
         m31,
         m41);
 
-    m_column[1] = hvector(
+    m_column[1] = vector4(
         m12,
         m22,
         m32,
         m42);
 
-    m_column[2] = hvector(
+    m_column[2] = vector4(
         m13,
         m23,
         m33,
         m43);
 
-    m_column[3] = hvector(
+    m_column[3] = vector4(
         m14,
         m24,
         m34,
@@ -266,14 +266,14 @@ bool operator!=(const Transform & m1, const Transform & m2)
     return false;
 }
 
-hvector operator*(const Transform & m, const hvector & v)
+vector4 operator*(const Transform & m, const vector4 & v)
 {
     const Types::F32 column1 = m.m_column[0].m_arr[0] * v.m_arr[0] + m.m_column[1].m_arr[0] * v.m_arr[1] + m.m_column[2].m_arr[0] * v.m_arr[2] + m.m_column[3].m_arr[0] * v.m_arr[3];
     const Types::F32 column2 = m.m_column[0].m_arr[1] * v.m_arr[0] + m.m_column[1].m_arr[1] * v.m_arr[1] + m.m_column[2].m_arr[1] * v.m_arr[2] + m.m_column[3].m_arr[1] * v.m_arr[3];
     const Types::F32 column3 = m.m_column[0].m_arr[2] * v.m_arr[0] + m.m_column[1].m_arr[2] * v.m_arr[1] + m.m_column[2].m_arr[2] * v.m_arr[2] + m.m_column[3].m_arr[2] * v.m_arr[3];
     const Types::F32 column4 = m.m_column[0].m_arr[3] * v.m_arr[0] + m.m_column[1].m_arr[3] * v.m_arr[1] + m.m_column[2].m_arr[3] * v.m_arr[2] + m.m_column[3].m_arr[3] * v.m_arr[3];
 
-    return hvector(
+    return vector4(
         column1, 
         column2, 
         column3, 

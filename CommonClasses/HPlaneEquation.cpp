@@ -177,24 +177,24 @@ TrianglePair HPlaneEquation::CutTriangle(
     return TrianglePair(TrianglePair::ZERO, realVertexSizeBytes);
 }
 
-Types::F32 WZeroHPlaneEquation::eval(const hvector & pointH)
+Types::F32 WZeroHPlaneEquation::eval(const vector4 & pointH)
 {
     return pointH.m_w;
 }
 
-Types::F32 WZeroHPlaneEquation::cutCoefficient(const hvector & point1, const hvector & point2)
+Types::F32 WZeroHPlaneEquation::cutCoefficient(const vector4 & point1, const vector4 & point2)
 {
     Types::F32 w1(point1.m_w), w2(point2.m_w);
 
     return - w1 / (w2 - w1);
 }
 
-Types::F32 ZeroNearPlaneEquation::eval(const hvector & pointH)
+Types::F32 ZeroNearPlaneEquation::eval(const vector4 & pointH)
 {
     return pointH.m_z;
 }
 
-Types::F32 ZeroNearPlaneEquation::cutCoefficient(const hvector & point1, const hvector & point2)
+Types::F32 ZeroNearPlaneEquation::cutCoefficient(const vector4 & point1, const vector4 & point2)
 {
     return point1.m_z / (point1.m_z - point2.m_z);
 }

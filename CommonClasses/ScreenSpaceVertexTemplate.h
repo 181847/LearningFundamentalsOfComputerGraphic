@@ -1,22 +1,22 @@
 #pragma once
-#include "hvector.h"
+#include "vector4.h"
 
 namespace CommonClass
 {
 
 /*!
     \brief ScreenSpaceVertexTemplate is used in the rasterization stage.
-    It was designed to have one hvector (the location in screen space), and a F32 array,
+    It was designed to have one vector4 (the location in screen space), and a F32 array,
     the F32 array is for user access rest float data that will be interpolated before the pixel shader.
 */
 struct ScreenSpaceVertexTemplate
 {
 public:
-    CommonClass::hvector m_posH;
+    CommonClass::vector4 m_posH;
     Types::F32 m_restDates[1];
 
     /*!
-        \brief return how many floats are left besides m_posH (hvector)
+        \brief return how many floats are left besides m_posH (vector4)
     */
     static unsigned int NumRestFloat(const unsigned int realVertexSizeInBytes);
 };

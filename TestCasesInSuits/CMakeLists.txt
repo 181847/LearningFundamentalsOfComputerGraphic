@@ -1,12 +1,20 @@
 # test codes about CommonClass
 cmake_minimum_required(VERSION 3.7.1)
 
-set (TEST_CODE_SOURCE_FILES 
+set (TEST_CODE_SOURCE_FILES
+	CommonHeaders.h
+	CaseAndSuitForCommonClasses.h
+	CaseAndSuitForFilter.h
+	CaseAndSuitForRasterisation.h
+	CaseAndSuitForRasterizeTriangle.h
+	CaseAndSuitForRayRender.h
+	CaseAndSuitForStbImage.h
+	BaseToolForCaseAndSuit.h
 	CaseAndSuitForCommonClasses.cpp
 	CaseAndSuitForFilter.cpp
 	CaseAndSuitForRasterisation.cpp
 	CaseAndSuitForRasterizeTriangle.cpp
-	CaseAndSuitForRayRender.h.cpp
+	CaseAndSuitForRayRender.cpp
 	CaseAndSuitForStbImage.cpp
 	BaseToolForCaseAndSuit.cpp
 	TestCasesInSuits.cpp)

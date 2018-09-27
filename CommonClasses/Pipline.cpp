@@ -449,7 +449,7 @@ bool Pipline::ClipLineInHomogenousClipSpace(
 
     // whether to cut the vector to be in the exact visible region
     // when some number error resist in the last cutting result.
-//#define MANUALLY_CUT_HVECTOR
+//#define MANUALLY_CUT_vector4
 
      // whether to reinforce the checks on xyz component in the last step of this function
 //#define MANUALLY_CHECK_XYZ_BOUNDg.
@@ -521,13 +521,13 @@ bool Pipline::ClipLineInHomogenousClipSpace(
         } // end else if p[i] > 0.0f
     }// end else for
     
-#ifdef MANUALLY_CUT_HVECTOR
+#ifdef MANUALLY_CUT_vector4
     // the function is a temporary solution for the clipped point will outside of the boundary
-    // prefix the hvector for homogeneous clip
+    // prefix the vector4 for homogeneous clip
     // for example, if w == -2.3, and x == -2.4,
     // after the perspective divide, the x will be 1.04... which is greater than one,
     // to prevent this overflowing error, just make x = equal to w.
-    auto CutHvector = [](hvector & vec)->void {
+    auto Cutvector4 = [](vector4 & vec)->void {
 
         if (vec.m_w > 0.0f) 
         {
@@ -588,9 +588,9 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             }
         } // end else if vec.m_w > 0.0f
 
-    }; // lambda CutHvector
+    }; // lambda Cutvector4
 
-#endif // MANUALLY_CUT_HVECTOR
+#endif // MANUALLY_CUT_vector4
 
     if (t0 == 0.0f)
     {
@@ -604,9 +604,9 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             static_cast<Types::F32>(t0),
             realVertexSize);
 
-#ifdef MANUALLY_CUT_HVECTOR
-        CutHvector(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
-#endif // MANUALLY_CUT_HVECTOR
+#ifdef MANUALLY_CUT_vector4
+        Cutvector4(pOutV1->m_posH);     // fix numeric issue when the clipped point will out of the frustum
+#endif // MANUALLY_CUT_vector4
 
     }
     
@@ -623,9 +623,9 @@ bool Pipline::ClipLineInHomogenousClipSpace(
             static_cast<Types::F32>(t1),
             realVertexSize);
 
-#ifdef MANUALLY_CUT_HVECTOR
-        CutHvector(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
-#endif // MANUALLY_CUT_HVECTOR
+#ifdef MANUALLY_CUT_vector4
+        Cutvector4(pOutV2->m_posH);     // fix numeric issue when the clipped point will out of the frustum
+#endif // MANUALLY_CUT_vector4
 
     }
 

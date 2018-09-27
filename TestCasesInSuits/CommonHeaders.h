@@ -10,7 +10,7 @@
 // include test target code
 #include "../CommonClasses/vector2.h"
 #include "../CommonClasses/vector3.h"
-#include "../CommonClasses/hvector.h"
+#include "../CommonClasses/vector4.h"
 #include "../CommonClasses/Image.h"
 #include "../CommonClasses/OrthographicCamera.h"
 #include "../CommonClasses/Ray.h"

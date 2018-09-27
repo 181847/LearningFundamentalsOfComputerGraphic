@@ -3,7 +3,7 @@
 namespace CommonClass
 {
 
-EdgeEquation2D::EdgeEquation2D(const hvector & p1, const hvector & p2)
+EdgeEquation2D::EdgeEquation2D(const vector4 & p1, const vector4 & p2)
     :m_A(p1.m_y - p2.m_y), m_B(p2.m_x - p1.m_x), m_C(p1.m_x * p2.m_y - p2.m_x * p1.m_y)
 {
 }

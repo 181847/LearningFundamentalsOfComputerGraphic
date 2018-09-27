@@ -1,7 +1,7 @@
 #pragma once
 #include "vector2.h"
 #include "vector3.h"
-#include "hvector.h"
+#include "vector4.h"
 #include "ColorTemplate.h"
 #include "Transform.h"
 #include "ScreenSpaceVertexTemplate.h"
@@ -31,10 +31,10 @@ public:
     struct SimplePoint
     {
     public:
-        explicit SimplePoint(const hvector& pos = hvector(), const hvector& normal = hvector(), const vector2& uv = vector2());
+        explicit SimplePoint(const vector4& pos = vector4(), const vector4& normal = vector4(), const vector2& uv = vector2());
 
     public:
-        hvector m_position;
+        vector4 m_position;
         /*!
             \brief used to store the sphere ray location information
             x - round index
@@ -42,10 +42,10 @@ public:
             z = 0 means it's start point
             z = 1 means it's end point
         */
-        hvector m_rayIndex;
+        vector4 m_rayIndex;
         vector2 m_uv;
     };
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector) + 2 * sizeof(Types::F32), "The size of SimplePoint is not matched for this case.");
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(vector4) + 2 * sizeof(Types::F32), "The size of SimplePoint is not matched for this case.");
 
     /*!
         \brief output of the vertex shader. 
@@ -53,13 +53,13 @@ public:
     struct VSOut
     {
     public:
-        hvector m_posH;
-        hvector m_posW;
-        hvector m_normalW;
+        vector4 m_posH;
+        vector4 m_posW;
+        vector4 m_normalW;
         vector2 m_uv;
     };
     using PSIn = VSOut;
-    static_assert(sizeof(VSOut) == 3 * sizeof(hvector) + 2 * sizeof(Types::F32), "structure VSOut has wrong size.");
+    static_assert(sizeof(VSOut) == 3 * sizeof(vector4) + 2 * sizeof(Types::F32), "structure VSOut has wrong size.");
     
     /*!
         \brief the buffer of light

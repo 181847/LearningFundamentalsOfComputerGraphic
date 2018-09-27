@@ -483,7 +483,7 @@ public:
 class CaseForHvector : public CaseForPipline
 {
 public:
-    CaseForHvector() :CaseForPipline("hvector operation tests") {}
+    CaseForHvector() :CaseForPipline("vector4 operation tests") {}
 
     virtual void Run() override
     {
@@ -516,11 +516,11 @@ public:
                 }
             }
 
-            hvector cmp1(comfArr[0], comfArr[1], comfArr[2], comfArr[3]);
-            hvector cmp2(comfArr[4], comfArr[5], comfArr[6], comfArr[7]);
+            vector4 cmp1(comfArr[0], comfArr[1], comfArr[2], comfArr[3]);
+            vector4 cmp2(comfArr[4], comfArr[5], comfArr[6], comfArr[7]);
 
-            // declare some hvector for result comparison
-            hvector 
+            // declare some vector4 for result comparison
+            vector4 
                 h_plus_h(comfArr[0] + comfArr[4], comfArr[1] + comfArr[5], comfArr[2] + comfArr[6], comfArr[3]),
                 h_minu_h(comfArr[0] - comfArr[4], comfArr[1] - comfArr[5], comfArr[2] - comfArr[6], comfArr[3]),
                 h_mult_h(comfArr[0] * comfArr[4], comfArr[1] * comfArr[5], comfArr[2] * comfArr[6], comfArr[3]),
@@ -537,7 +537,7 @@ public:
 
             TEST_ASSERT((cmp1 / cmp2) == h_dive_h);
 
-            hvector temp = cmp1;
+            vector4 temp = cmp1;
             temp += cmp2;
             TEST_ASSERT(temp == h_plus_h);
 
@@ -553,22 +553,22 @@ public:
             temp /= cmp2;
             TEST_ASSERT(temp == h_dive_h);
 
-            // Next codes is about operations between hvector and scalar
-            // hvector * scalar
+            // Next codes is about operations between vector4 and scalar
+            // vector4 * scalar
             TEST_ASSERT((cmp1 * comfArr[8]) == h_mult_s);
 
-            // scalar * hvector
+            // scalar * vector4
             TEST_ASSERT((comfArr[8] * cmp1) == s_mult_h);
 
-            // hvector / scalar
+            // vector4 / scalar
             TEST_ASSERT((cmp1 / comfArr[8]) == h_dive_s);
 
-            // hvector *= scalar
+            // vector4 *= scalar
             temp = cmp1;
             temp *= comfArr[8];
             TEST_ASSERT(temp == h_mult_s);
 
-            // hvector /= scalar
+            // vector4 /= scalar
             temp = cmp1;
             temp /= comfArr[8];
             TEST_ASSERT(temp == h_dive_s);
@@ -656,33 +656,33 @@ public:
 
             Transform viewt = Transform::Viewport(static_cast<Types::F32>(left), static_cast<Types::F32>(right), static_cast<Types::F32>(bottom), static_cast<Types::F32>(top));
 
-            // build nine hvector for view port transformation test.
-            std::array<hvector, 9> normalizedPos;
+            // build nine vector4 for view port transformation test.
+            std::array<vector4, 9> normalizedPos;
             std::array<Types::F32, 3> constFloats = { -1.0f, 0.0f, 1.0f };
             for (int i = 0; i < 3; ++i)
             {
                 for (int j = 0; j < 3; ++j)
                 {
-                    normalizedPos[i * 3 + j] = hvector(constFloats[i], constFloats[j], 0.0f, 1.0f);
+                    normalizedPos[i * 3 + j] = vector4(constFloats[i], constFloats[j], 0.0f, 1.0f);
                 }
             }
 
-            // build nine hvector which should be the vectors transformed by the Viewport transformation.
-            std::array<hvector, 9> screenPos;
+            // build nine vector4 which should be the vectors transformed by the Viewport transformation.
+            std::array<vector4, 9> screenPos;
             std::array<Types::F32, 3> horizontalPoses = {left - 0.5f, (left + right) * 0.5f , right + 0.5f};
             std::array<Types::F32, 3> verticalPoses   = {bottom - 0.5f, (bottom + top) * 0.5f , top + 0.5f};
             for (int i = 0; i < 3; ++i)
             {
                 for (int j = 0; j < 3; ++j)
                 {
-                    screenPos[i * 3 + j] = hvector(horizontalPoses[i], verticalPoses[j], 0.0f, 1.0f);
+                    screenPos[i * 3 + j] = vector4(horizontalPoses[i], verticalPoses[j], 0.0f, 1.0f);
                 }
             }
 
             // check whether it is true that "normalizedPos" can be transformed to "screenPos" by "viewt"
             for (int i = 0; i < 9; ++i)
             {
-                hvector convertToViewport(viewt * normalizedPos[i]);
+                vector4 convertToViewport(viewt * normalizedPos[i]);
                 TEST_ASSERT(AlmostEqual(screenPos[i], convertToViewport));
             }// end for int
         }// end for big loop test
@@ -692,7 +692,7 @@ public:
 class CaseForTranslateAndRotateHvector : public CaseForPipline
 {
 public:
-    CaseForTranslateAndRotateHvector() : CaseForPipline("translate and rotate hvector") {}
+    CaseForTranslateAndRotateHvector() : CaseForPipline("translate and rotate vector4") {}
     
     virtual void Run() override 
     {
@@ -706,10 +706,10 @@ public:
 
             Transform trl = Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);    // translation matrix
 
-            hvector vt(comfArr[4], comfArr[5], comfArr[6]);    // the vector used to test translation matrix 
+            vector4 vt(comfArr[4], comfArr[5], comfArr[6]);    // the vector used to test translation matrix 
 
             TEST_ASSERT(
-                hvector(comfArr[4] + comfArr[0], comfArr[5] + comfArr[1], comfArr[6] + comfArr[2])
+                vector4(comfArr[4] + comfArr[0], comfArr[5] + comfArr[1], comfArr[6] + comfArr[2])
                 == (trl * vt));
 
             const Types::F32 pi_div_2 = Types::Constant::PI_F * 0.5f;
@@ -722,7 +722,7 @@ public:
             std::array<Transform, 3> rotations = { rotX, rotY, rotZ }; // each one rotate pi/2 about x,y,z
 
 
-            std::array<hvector, 8> midVs;   // eight vector point at eight quadrants of the space.
+            std::array<vector4, 8> midVs;   // eight vector point at eight quadrants of the space.
             for (unsigned int i = 0; i < midVs.size(); ++i)
             {
                 Types::F32 cx, cy, cz;
@@ -731,7 +731,7 @@ public:
                 cy = (i & 2) ? +1.0f : -1.0f;
                 cz = (i & 1) ? +1.0f : -1.0f;
 
-                midVs[i] = hvector(cx, cy, cz, 1.0f);
+                midVs[i] = vector4(cx, cy, cz, 1.0f);
             }
 
 
@@ -763,17 +763,17 @@ public:
                     TEST_ASSERT(AlmostEqual(rotations[j] * midVs[i], midVs[preRotOrder[i][j]], 1e-7f));
 
                     // ensure the test not always return true;
-                    TEST_ASSERT(!AlmostEqual(rotations[j] * midVs[i] + hvector(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
+                    TEST_ASSERT(!AlmostEqual(rotations[j] * midVs[i] + vector4(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
                 }
             }
 
             // old rotations tests, just rotate axis x/y/z and get the results of x -> y -> z -> x...
-            hvector axisx(1.0f, 0.0f, 0.0f, 1.0f);
-            hvector axisy(0.0f, 1.0f, 0.0f, 1.0f);
-            hvector axisz(0.0f, 0.0f, 1.0f, 1.0f);
-            hvector axisx_compare = rotY * axisz;
-            hvector axisy_compare = rotZ * axisx;
-            hvector axisz_compare = rotX * axisy;
+            vector4 axisx(1.0f, 0.0f, 0.0f, 1.0f);
+            vector4 axisy(0.0f, 1.0f, 0.0f, 1.0f);
+            vector4 axisz(0.0f, 0.0f, 1.0f, 1.0f);
+            vector4 axisx_compare = rotY * axisz;
+            vector4 axisy_compare = rotZ * axisx;
+            vector4 axisz_compare = rotX * axisy;
 
             TEST_ASSERT(AlmostEqual(axisx, axisx_compare, 1e-7f));
             TEST_ASSERT(AlmostEqual(axisy, axisy_compare, 1e-7f));
@@ -791,7 +791,7 @@ public:
 class CaseForF32Buffer : public CaseForPipline
 {
 public:
-    CaseForF32Buffer() : CaseForPipline("translate and rotate hvector") {}
+    CaseForF32Buffer() : CaseForPipline("translate and rotate vector4") {}
 
     virtual void Run() override
     {
@@ -902,8 +902,8 @@ public:
                 Y_NDC = { -1.0f, 0.0f, +1.0f },
                 Z_NDC = {  0.0f, 0.5f, +1.0f };// notice: Z_NDC, +1.0f is for near plane, negative is for far plane
 
-            std::array<hvector, 27> testHvectors;   // the vectors to be transformed
-            std::array<hvector, 27> expectedVec;    // the expected result of the transformation result
+            std::array<vector4, 27> testHvectors;   // the vectors to be transformed
+            std::array<vector4, 27> expectedVec;    // the expected result of the transformation result
         
             for (unsigned int i = 0; i < testHvectors.size(); ++i)
             {
@@ -912,18 +912,18 @@ public:
                     indexY = (i / 3) % 3,
                     indexZ = (i / 9) % 3;
 
-                testHvectors[i] = hvector(X_VALUES[indexX], Y_VALUES[indexY], Z_VALUES[indexZ]);
-                expectedVec[i]  = hvector(X_NDC[indexX],    Y_NDC[indexY],    Z_NDC[indexZ]);
+                testHvectors[i] = vector4(X_VALUES[indexX], Y_VALUES[indexY], Z_VALUES[indexZ]);
+                expectedVec[i]  = vector4(X_NDC[indexX],    Y_NDC[indexY],    Z_NDC[indexZ]);
             }// end for build hvectors
 
             for (unsigned int i = 0; i < testHvectors.size(); ++i)
             {
-                hvector transResult(orthTransformation * testHvectors[i]);
+                vector4 transResult(orthTransformation * testHvectors[i]);
                 TEST_ASSERT(AlmostEqual(transResult, expectedVec[i], 1e-6f));
 
-                // transform another hvector, but check with the same expectedVec[i]
+                // transform another vector4, but check with the same expectedVec[i]
                 // CREATE AN ERROR
-                hvector mustFailResult(orthTransformation * testHvectors[(i + 4) % testHvectors.size()]);
+                vector4 mustFailResult(orthTransformation * testHvectors[(i + 4) % testHvectors.size()]);
 
                 // ensure the result is not always success
                 TEST_ASSERT( ! AlmostEqual(mustFailResult, expectedVec[i], 1e-6f));
@@ -954,10 +954,10 @@ public:
             // NOTICE, when build those matrix, multiply them by the unit matrix.
             Transform trl = UNIT_MATRIX * Transform::Translation(comfArr[0], comfArr[1], comfArr[2]);    // translation matrix
 
-            hvector vt(comfArr[4], comfArr[5], comfArr[6]);    // the vector used to test translation matrix 
+            vector4 vt(comfArr[4], comfArr[5], comfArr[6]);    // the vector used to test translation matrix 
 
             TEST_ASSERT(
-                hvector(comfArr[4] + comfArr[0], comfArr[5] + comfArr[1], comfArr[6] + comfArr[2]) 
+                vector4(comfArr[4] + comfArr[0], comfArr[5] + comfArr[1], comfArr[6] + comfArr[2]) 
                 == (trl * vt));
             
             const Types::F32 pi_div_2 = Types::Constant::PI_F * 0.5f;
@@ -972,7 +972,7 @@ public:
             std::array<Transform, 3> rotations = { rotX, rotY, rotZ }; // each one rotate pi/2 about x,y,z
 
 
-            std::array<hvector, 8> midVs;   // eight vector point at eight quadrants of the space.
+            std::array<vector4, 8> midVs;   // eight vector point at eight quadrants of the space.
             for (unsigned int i = 0; i < midVs.size(); ++i)
             {
                 Types::F32 cx, cy, cz;
@@ -981,7 +981,7 @@ public:
                 cy = (i & 2) ? +1.0f : -1.0f;
                 cz = (i & 1) ? +1.0f : -1.0f;
 
-                midVs[i] = hvector(cx, cy, cz, 1.0f);
+                midVs[i] = vector4(cx, cy, cz, 1.0f);
             }
 
             
@@ -1013,17 +1013,17 @@ public:
                     TEST_ASSERT(AlmostEqual(rotations[j] * midVs[i], midVs[preRotOrder[i][j]], 1e-7f));
 
                     // ensure the test not always return true;
-                    TEST_ASSERT( ! AlmostEqual(rotations[j] * midVs[i] + hvector(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
+                    TEST_ASSERT( ! AlmostEqual(rotations[j] * midVs[i] + vector4(0.5f, 0.0f, 0.0f), midVs[preRotOrder[i][j]], 1e-7f));
                 }
             }
             
             // old rotations tests, just rotate axis x/y/z and get the results of x -> y -> z -> x...
-            hvector axisx(1.0f, 0.0f, 0.0f, 1.0f);
-            hvector axisy(0.0f, 1.0f, 0.0f, 1.0f);
-            hvector axisz(0.0f, 0.0f, 1.0f, 1.0f);
-            hvector axisx_compare = rotY * axisz;
-            hvector axisy_compare = rotZ * axisx;
-            hvector axisz_compare = rotX * axisy;
+            vector4 axisx(1.0f, 0.0f, 0.0f, 1.0f);
+            vector4 axisy(0.0f, 1.0f, 0.0f, 1.0f);
+            vector4 axisz(0.0f, 0.0f, 1.0f, 1.0f);
+            vector4 axisx_compare = rotY * axisz;
+            vector4 axisy_compare = rotZ * axisx;
+            vector4 axisz_compare = rotX * axisy;
 
             TEST_ASSERT(AlmostEqual(axisx, axisx_compare, 1e-7f));
             TEST_ASSERT(AlmostEqual(axisy, axisy_compare, 1e-7f));
@@ -1478,8 +1478,8 @@ public:
         struct SimplePoint
         {
         public:
-            hvector m_position;
-            SimplePoint(const hvector& pos)
+            vector4 m_position;
+            SimplePoint(const vector4& pos)
                 :m_position(pos)
             {
                 // empty
@@ -1488,8 +1488,8 @@ public:
         // create and config pipeline state object
         auto pso = std::make_unique<PiplineStateObject>();
         pso->m_primitiveType = PrimitiveType::LINE_LIST;
-        pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
-        pso->m_vertexLayout.pixelShaderInputSize = sizeof(hvector);
+        pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
+        pso->m_vertexLayout.pixelShaderInputSize = sizeof(vector4);
 
         pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
             return RGBA::RED;
@@ -1539,7 +1539,7 @@ public:
             // |               |
             // X               |
             // -----------------
-            hvector
+            vector4
                 v1(viewport.left + RandomScale(),
                     viewport.top + RandomScale()),
                 v2(viewport.right + RandomScale(),
@@ -1587,15 +1587,15 @@ public:
 
         for (int numLoop = 0; numLoop < 40; ++numLoop)
         {
-            hvector p1(RandomXY(), RandomXY()), p2(RandomXY(), RandomXY());
+            vector4 p1(RandomXY(), RandomXY()), p2(RandomXY(), RandomXY());
             EdgeEquation2D f12(p1, p2);
 
             // get the left side point, and right side point.
-            hvector direction = p2 - p1;
-            hvector perpendicular = direction;
+            vector4 direction = p2 - p1;
+            vector4 perpendicular = direction;
             std::swap(perpendicular.m_x, perpendicular.m_y);
 
-            std::array<hvector, 2> LRPerp = { perpendicular, perpendicular };
+            std::array<vector4, 2> LRPerp = { perpendicular, perpendicular };
             const int left = 0, right = 1;
             LRPerp[left].m_x *= -1.0f;
             LRPerp[right].m_y *= -1.0f;
@@ -1605,7 +1605,7 @@ public:
                 for (int i = 0; i < numPoints; ++i)
                 {
                     const float along((mtr.Random() - 0.5f) * 4.0f), side(4.0f * mtr.Random() + 0.001f);
-                    hvector point = p1 + along * direction + side * LRPerp[chooseSide];
+                    vector4 point = p1 + along * direction + side * LRPerp[chooseSide];
                     if (chooseSide == left)
                     {
                         TEST_ASSERT(f12.eval(point.m_x, point.m_y) > 0.0f);

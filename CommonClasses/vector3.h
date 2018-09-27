@@ -4,7 +4,7 @@
 namespace CommonClass
 {
 
-class hvector;
+class vector4;
 
 /*!
     \brief a vector in 2D space
@@ -43,7 +43,7 @@ public:
     explicit vector3(const Types::F32* pArr);
     ~vector3();
 
-    hvector ToHvector(const Types::F32& w = 1.0f) const;
+    vector4 Tovector4(const Types::F32& w = 1.0f) const;
 };
 /*! ensurance */
 static_assert(sizeof(vector3) == 3 * sizeof(Types::F32), "size of vector3 is wrong");

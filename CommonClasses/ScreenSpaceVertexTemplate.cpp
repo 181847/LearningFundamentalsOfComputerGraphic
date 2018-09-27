@@ -22,7 +22,7 @@ void Interpolate2(const ScreenSpaceVertexTemplate * pv1, const ScreenSpaceVertex
     const Types::F32 v = 1.0f - t;
 
     // interpolate screen space coordinate.
-    // WARNING!! (scalar * hvector) or (hvector * scalar) will not affect w component, so we multiply their components manually.
+    // WARNING!! (scalar * vector4) or (vector4 * scalar) will not affect w component, so we multiply their components manually.
     //pResult->m_posH = t * pv1->m_posH + v * pv2->m_posH;
     for (int i = 0; i < 4; ++i)
     {

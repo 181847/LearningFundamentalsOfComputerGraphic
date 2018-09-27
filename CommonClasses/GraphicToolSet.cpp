@@ -127,7 +127,7 @@ void GraphicToolSet::CommonRenderingBuffer::BuildMeshDatas()
         std::vector<SimplePoint> vertices;
         for (const auto& vertex : rawData.m_vertices)
         {
-            vertices.push_back(SimplePoint(vertex.m_pos.ToHvector(), vertex.m_normal.ToHvector(0.0f), vertex.m_uv * 3.0f));
+            vertices.push_back(SimplePoint(vertex.m_pos.Tovector4(), vertex.m_normal.Tovector4(0.0f), vertex.m_uv * 3.0f));
         }
         prebuildMeshData[i].indices = rawData.m_indices;
         prebuildMeshData[i].vertexBuffer = std::make_unique<F32Buffer>(vertices.size() * sizeof(decltype(vertices)::value_type));
@@ -178,11 +178,11 @@ GraphicToolSet::VertexShaderSig GraphicToolSet::GetVertexShaderWithNormal(Transf
         const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
         SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-        hvector inViewPos = trs * pSrcH->m_position;
+        vector4 inViewPos = trs * pSrcH->m_position;
 
         pDestH->m_position = perspect * inViewPos;
         //pDestH->m_position = pSrcH->m_position;
-        hvector normal = pSrcH->m_rayIndex;
+        vector4 normal = pSrcH->m_rayIndex;
         normal.m_w = 0.0f;
         pDestH->m_rayIndex = normalTrs * normal;
     };
@@ -194,13 +194,13 @@ GraphicToolSet::VertexShaderSig GraphicToolSet::GetVertexShaderWithNormalAndCons
         const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
         SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-        hvector world = constBufInstance.m_toWorld * pSrcH->m_position;
-        hvector camera = constBufCamera.m_toCamera * world;
+        vector4 world = constBufInstance.m_toWorld * pSrcH->m_position;
+        vector4 camera = constBufCamera.m_toCamera * world;
 
         pDestH->m_position = constBufCamera.m_project * camera;
         //pDestH->m_position = pSrcH->m_position;
 
-        hvector normal = pSrcH->m_rayIndex;
+        vector4 normal = pSrcH->m_rayIndex;
         normal.m_w = 0.0f;// ensure translation will not affect calculations.
         Transform transformNormalToCamera = (constBufInstance.m_toWorldInverse * constBufCamera.m_toCameraInverse).T();// take transposes
         pDestH->m_rayIndex = transformNormalToCamera * normal;
@@ -216,15 +216,15 @@ GraphicToolSet::VertexShaderSig GraphicToolSet::GetVertexShaderWithVSOut(Constan
         pDest->m_uv = pSrcH->m_uv;
 
         pDest->m_posW = constBufInstance.m_toWorld * pSrcH->m_position;
-        hvector camera = constBufCamera.m_toCamera * pDest->m_posW;
+        vector4 camera = constBufCamera.m_toCamera * pDest->m_posW;
 
         pDest->m_posH = constBufCamera.m_project * camera;
         //pDestH->m_position = pSrcH->m_position;
 
-        hvector normal = pSrcH->m_rayIndex;
+        vector4 normal = pSrcH->m_rayIndex;
         normal.m_w = 0.0f;// ensure translation will not affect calculations.
         Transform transformNormalToCamera = constBufInstance.m_toWorldInverse.T();// take transposes
-        pDest->m_normalW = Normalize((transformNormalToCamera * normal).ToVector3()).ToHvector();
+        pDest->m_normalW = Normalize((transformNormalToCamera * normal).ToVector3()).Tovector4();
     };
 }
 
@@ -421,7 +421,7 @@ CommonClass::GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForSha
         if (constBufCamera.m_numLights == 2)
         {
             // consider shadow effect only of spot light.
-            hvector inLightCameraH = lightCamera.m_project * lightCamera.m_toCamera * pPoint->m_posW;
+            vector4 inLightCameraH = lightCamera.m_project * lightCamera.m_toCamera * pPoint->m_posW;
             vector3 inLightCamera = inLightCameraH.ToVector3();
             inLightCamera = inLightCamera * (1.0f / inLightCameraH.m_w);
             auto sampledDepth = shadowMap->Sample(0.5f + 0.5f * inLightCamera.m_x, 0.5f + 0.5f * inLightCamera.m_y);
@@ -445,7 +445,7 @@ CommonClass::GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForSha
     };
 }
 
-GraphicToolSet::SimplePoint::SimplePoint(const hvector& pos /*= hvector()*/, const hvector& normal /*= hvector()*/, const vector2& uv /*= vector2()*/)
+GraphicToolSet::SimplePoint::SimplePoint(const vector4& pos /*= vector4()*/, const vector4& normal /*= vector4()*/, const vector2& uv /*= vector2()*/)
     :m_position(pos), m_rayIndex(normal), m_uv(uv) 
 {
     // empty

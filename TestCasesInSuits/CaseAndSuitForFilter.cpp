@@ -74,7 +74,7 @@ void CASE_NAME_IN_FILTER(Exercise)::Run()
         const SimplePoint* pSrcH = reinterpret_cast<const SimplePoint*>(pSrcVertex);
         SimplePoint* pDestH = reinterpret_cast<SimplePoint*>(pDestV);
 
-        hvector inViewPos = trs * pSrcH->m_position;
+        vector4 inViewPos = trs * pSrcH->m_position;
 
         pDestH->m_position = perspect * inViewPos;
         //pDestH->m_position = pSrcH->m_position;
@@ -92,8 +92,8 @@ void CASE_NAME_IN_FILTER(Exercise)::Run()
     int count = 0;
     for (const auto& pos : positions)
     {
-        SimplePoint sp(hvector(pos.m_x, pos.m_y, pos.m_z));
-        sp.m_rayIndex = hvector(
+        SimplePoint sp(vector4(pos.m_x, pos.m_y, pos.m_z));
+        sp.m_rayIndex = vector4(
             static_cast<Types::F32>((count >> 2) % 2),
             static_cast<Types::F32>((count) % 2),
             static_cast<Types::F32>((count >> 1) % 2));

@@ -24,7 +24,7 @@ void CaseForPipline::BuildSphereRayLineData(std::vector<SimplePoint>& outVertexD
         //if (lineIndex == theIndexOfOneLine)
         //{
         // add start vertex and its index
-        SimplePoint start(hvector(x0, y0, 0.0f));
+        SimplePoint start(vector4(x0, y0, 0.0f));
         start.m_rayIndex.m_x = static_cast<Types::F32>(roundIndex);
         start.m_rayIndex.m_y = static_cast<Types::F32>(lineIndex);
         start.m_rayIndex.m_z = 0.0f;
@@ -32,7 +32,7 @@ void CaseForPipline::BuildSphereRayLineData(std::vector<SimplePoint>& outVertexD
         outIndices.push_back(numIndices++);
 
         // add end vertex and its index
-        SimplePoint end(hvector(x1, y1, 0.0f));
+        SimplePoint end(vector4(x1, y1, 0.0f));
         end.m_rayIndex.m_x = static_cast<Types::F32>(roundIndex);
         end.m_rayIndex.m_y = static_cast<Types::F32>(lineIndex);
         end.m_rayIndex.m_z = 1.0f;

@@ -148,8 +148,8 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
     struct SimplePoint
     {
     public:
-        hvector m_position;
-        SimplePoint(const hvector& pos)
+        vector4 m_position;
+        SimplePoint(const vector4& pos)
             :m_position(pos)
         {
             // empty
@@ -160,8 +160,8 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
     // create and config pipline state object
     auto pso = std::make_unique<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::LINE_LIST;
-    pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
-    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+    pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
+    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
 
@@ -201,11 +201,11 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
     SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
         // add start vertex and its index
-        points.push_back(SimplePoint(hvector(x0, y0)));
+        points.push_back(SimplePoint(vector4(x0, y0)));
         indices.push_back(numIndices++);
 
         // add end vertex and its index
-        points.push_back(SimplePoint(hvector(x1, y1)));
+        points.push_back(SimplePoint(vector4(x1, y1)));
         indices.push_back(numIndices++);
     }, 
         0.0f, 0.0f, // center location
@@ -235,8 +235,8 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
     struct SimplePoint
     {
     public:
-        hvector m_position;
-        SimplePoint(const hvector& pos)
+        vector4 m_position;
+        SimplePoint(const vector4& pos)
             :m_position(pos)
         {
             // empty
@@ -245,8 +245,8 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
     // create and config pipline state object
     auto pso = std::make_unique<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::LINE_LIST;
-    pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
-    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+    pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
+    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
 
@@ -286,11 +286,11 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
     SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
         // add start vertex and its index
-        points.push_back(SimplePoint(hvector(x0, y0)));
+        points.push_back(SimplePoint(vector4(x0, y0)));
         indices.push_back(numIndices++);
 
         // add end vertex and its index
-        points.push_back(SimplePoint(hvector(x1, y1)));
+        points.push_back(SimplePoint(vector4(x1, y1)));
         indices.push_back(numIndices++);
     }, 
         0.8f, 0.0f, // center location
@@ -319,8 +319,8 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
     struct SimplePoint
     {
     public:
-        hvector m_position;
-        SimplePoint(const hvector& pos)
+        vector4 m_position;
+        SimplePoint(const vector4& pos)
             :m_position(pos)
         {
             // empty
@@ -329,8 +329,8 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
     // create and config pipline state object
     auto pso = std::make_unique<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::LINE_LIST;
-    pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
-    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+    pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
+    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
 
@@ -356,8 +356,8 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
     Transform toWorld = coordFrm.GetTransformLocalToWorld();
 
     pso->m_vertexShader = [&toWorld](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-        const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
-        hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+        const vector4* pSrcH = reinterpret_cast<const vector4*>(pSrcVertex);
+        vector4* pDestH = reinterpret_cast<vector4*>(pDestV);
             
         *pDestH = toWorld * (*pSrcH);
     };
@@ -387,11 +387,11 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
     SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
         // add start vertex and its index
-        points.push_back(SimplePoint(hvector(x0, y0)));
+        points.push_back(SimplePoint(vector4(x0, y0)));
         indices.push_back(numIndices++);
 
         // add end vertex and its index
-        points.push_back(SimplePoint(hvector(x1, y1)));
+        points.push_back(SimplePoint(vector4(x1, y1)));
         indices.push_back(numIndices++);
     }, 
         0.8f, 0.0f, // center location
@@ -420,8 +420,8 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     struct SimplePoint
     {
     public:
-        hvector m_position;
-        SimplePoint(const hvector& pos)
+        vector4 m_position;
+        SimplePoint(const vector4& pos)
             :m_position(pos)
         {
             // empty
@@ -430,8 +430,8 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     // create and config pipline state object
     auto pso = std::make_unique<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::LINE_LIST;
-    pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
-    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(hvector);
+    pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
+    pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
 
@@ -452,8 +452,8 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     Transform orthTrans = Transform::OrthographicTransOG(LEFT, RIGHT, BOTTOM, TOP, NEAR, FAR);
 
     pso->m_vertexShader = [& orthTrans](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-        const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
-        hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+        const vector4* pSrcH = reinterpret_cast<const vector4*>(pSrcVertex);
+        vector4* pDestH = reinterpret_cast<vector4*>(pDestV);
             
         *pDestH = orthTrans * (*pSrcH);
     };
@@ -483,11 +483,11 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
         // add start vertex and its index
-        points.push_back(SimplePoint(hvector(x0, y0)));
+        points.push_back(SimplePoint(vector4(x0, y0)));
         indices.push_back(numIndices++);
 
         // add end vertex and its index
-        points.push_back(SimplePoint(hvector(x1, y1)));
+        points.push_back(SimplePoint(vector4(x1, y1)));
         indices.push_back(numIndices++);
     }, 
         0.0f, 0.0f, // center location
@@ -522,8 +522,8 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
     struct SimplePoint
     {
     public:
-        hvector m_position;
-        SimplePoint(const hvector& pos)
+        vector4 m_position;
+        SimplePoint(const vector4& pos)
             :m_position(pos)
         {
             // empty
@@ -532,8 +532,8 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
     // create and config pipline state object
     auto pso = std::make_unique<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::LINE_LIST;
-    pso->m_vertexLayout.vertexShaderInputSize = sizeof(hvector);
-    pso->m_vertexLayout.pixelShaderInputSize = sizeof(hvector);
+    pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
+    pso->m_vertexLayout.pixelShaderInputSize = sizeof(vector4);
 
     pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
         const Types::F32 depth = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
@@ -557,8 +557,8 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
     Transform mat = perTrans * pushInto * rotateZ * rotateY;
 
     pso->m_vertexShader = [&mat](const unsigned char * pSrcVertex, ScreenSpaceVertexTemplate * pDestV)->void {
-        const hvector* pSrcH = reinterpret_cast<const hvector*>(pSrcVertex);
-        hvector* pDestH = reinterpret_cast<hvector*>(pDestV);
+        const vector4* pSrcH = reinterpret_cast<const vector4*>(pSrcVertex);
+        vector4* pDestH = reinterpret_cast<vector4*>(pDestV);
 
         *pDestH = mat * (*pSrcH);
     };
@@ -588,11 +588,11 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
     SphereRay([&numIndices, &points, &indices](HELP_SPHERE_RAY_LAMBDA_PARAMETERS)->void {
 
         // add start vertex and its index
-        points.push_back(SimplePoint(hvector(x0, y0, 0.0f)));
+        points.push_back(SimplePoint(vector4(x0, y0, 0.0f)));
         indices.push_back(numIndices++);
 
         // add end vertex and its index
-        points.push_back(SimplePoint(hvector(x1, y1, 0.0f)));
+        points.push_back(SimplePoint(vector4(x1, y1, 0.0f)));
         indices.push_back(numIndices++);
     },
         0.0f, 0.0f, // center location
@@ -620,7 +620,7 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
     struct SimplePoint
     {
     public:
-        hvector m_position;
+        vector4 m_position;
         /*!
         \brief used to store the sphere ray location information
         x - round index
@@ -628,15 +628,15 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
         z = 0 means it's start point
         z = 1 means it's end point
         */
-        hvector m_rayIndex;
-        explicit SimplePoint(const hvector& pos)
+        vector4 m_rayIndex;
+        explicit SimplePoint(const vector4& pos)
             :m_position(pos)
         {
             // empty
         }
     };
 
-    static_assert(sizeof(SimplePoint) == 2 * sizeof(hvector), "SimplePoint size is wrong");
+    static_assert(sizeof(SimplePoint) == 2 * sizeof(vector4), "SimplePoint size is wrong");
     // create and config pipline state object
     auto pso = std::make_unique<PiplineStateObject>();
     pso->m_primitiveType = PrimitiveType::LINE_LIST;
@@ -682,7 +682,7 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
 
         //DebugClient<DEBUG_CLIENT_CONF_LINE_CLIP_ERROR_ANALYSIS>(pSrcH->m_rayIndex.m_x == 7.0f && pSrcH->m_rayIndex.m_y == 34.0f);
 
-        hvector inViewPos = toView * pSrcH->m_position;
+        vector4 inViewPos = toView * pSrcH->m_position;
 
         pDestH->m_position = perspect * inViewPos;
         pDestH->m_rayIndex = pSrcH->m_rayIndex;
@@ -717,7 +717,7 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
         //if (lineIndex == theIndexOfOneLine)
         //{
         // add start vertex and its index
-        SimplePoint start(hvector(x0, y0, 0.0f));
+        SimplePoint start(vector4(x0, y0, 0.0f));
         start.m_rayIndex.m_x = roundIndex * 1.0f;
         start.m_rayIndex.m_y = lineIndex * 1.0f;
         start.m_rayIndex.m_z = 0.f;
@@ -725,7 +725,7 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
         indices.push_back(numIndices++);
 
         // add end vertex and its index
-        SimplePoint end(hvector(x1, y1, 0.0f));
+        SimplePoint end(vector4(x1, y1, 0.0f));
         end.m_rayIndex.m_x = roundIndex * 1.0f;
         end.m_rayIndex.m_y = lineIndex * 1.0f;
         end.m_rayIndex.m_z = 1.f;
