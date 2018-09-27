@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 
-#include "RasterizeImage.h"
 #include "PiplineStateObject.h"
 #include "ScreenSpaceVertexTemplate.h"
 #include "F32Buffer.h"
@@ -53,7 +52,7 @@ public:
         \param background back color
         \param depthValue the depthValue = 1/z where z is the world depth.
     */
-    void ClearBackBuffer(const RGBA& background, const Types::F32& depthValue = 0);
+    void ClearBackBuffer(const vector4& background, const Types::F32& depthValue = 0);
 
     /*!
         \brief set a pipline state object.

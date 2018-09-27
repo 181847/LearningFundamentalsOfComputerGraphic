@@ -250,15 +250,16 @@ void ImageWindow::FillInBMP(void * pBitMapMemory)
 {
     const int WIDTH = m_pImg->GetWidth(), HEIGHT = m_pImg->GetHeight();
     BMPSetterAgent bmp(pBitMapMemory, WIDTH, HEIGHT);
+    Pixel bytePixel;
 
     for (int y = 0; y < HEIGHT; ++y)
     {
         for (int x = 0; x < WIDTH; ++x)
         {
-            auto const & pixel = m_pImg->GetRawPixel(x, y);
-            bmp.SetChannel<BMPSetterAgent::B>(x, y, pixel.m_b);
-            bmp.SetChannel<BMPSetterAgent::G>(x, y, pixel.m_g);
-            bmp.SetChannel<BMPSetterAgent::R>(x, y, pixel.m_r);
+            bytePixel = m_pImg->GetPixel(x, y);
+            bmp.SetChannel<BMPSetterAgent::B>(x, y, bytePixel.m_b);
+            bmp.SetChannel<BMPSetterAgent::G>(x, y, bytePixel.m_g);
+            bmp.SetChannel<BMPSetterAgent::R>(x, y, bytePixel.m_r);
         }
     }
 }

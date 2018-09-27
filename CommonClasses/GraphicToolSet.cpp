@@ -164,7 +164,7 @@ std::unique_ptr<CommonClass::Pipline> GraphicToolSet::GetCommonPipline()
     pipline->SetPSO(GetCommonPSO());
 
     // set a back buffer
-    pipline->SetBackBuffer(std::make_unique<RasterizeImage>(
+    pipline->SetBackBuffer(std::make_unique<Image>(
         COMMON_PIXEL_WIDTH,
         COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
@@ -228,16 +228,16 @@ GraphicToolSet::VertexShaderSig GraphicToolSet::GetVertexShaderWithVSOut(Constan
     };
 }
 
-CommonClass::RGBA GraphicToolSet::ColdToWarm(const vector3& normal, const vector3& WarmDirection /*= Normalize(vector3::UNIT)*/)
+vector4 GraphicToolSet::ColdToWarm(const vector3& normal, const vector3& WarmDirection /*= Normalize(vector3::UNIT)*/)
 {
     Types::F32 kw = 0.5f * (1 + dotProd(normal, WarmDirection));
-    RGB color = kw * RGB::BLUE + (1 - kw) * RGB::RED;
-    return Cast(color);
+    auto color = kw * vector4::BLUE + (1 - kw) * vector4::RED;
+    return color;
 }
 
 GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithNormal()
 {
-    return [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    return [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
         vector3 WarmDirection = Normalize(vector3(1.0f, 1.0f, 0.0f));
         vector3 normal = pPoint->m_rayIndex.ToVector3();
@@ -247,7 +247,7 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithNormal()
 
 GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithPSIn(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera)
 {
-    return [&constBufInstance, &constBufCamera](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    return [&constBufInstance, &constBufCamera](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
         vector3 normal = Normalize(pPoint->m_normalW.ToVector3());
@@ -276,14 +276,15 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithPSIn(ConstantBu
             blinn = blinn + blinnSpot;
         }
 
-        RGBA color(blinn.m_arr);
-        return color;
+        vector4 retColor = vector4::BLACK;
+        retColor = blinn;
+        return retColor;
     };
 }
 
 GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithPSInAndTexture(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, std::shared_ptr<Texture>& texture)
 {
-    return [&constBufInstance, &constBufCamera, &texture](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    return [&constBufInstance, &constBufCamera, &texture](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         assert(texture->IsValid());
         const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
@@ -293,12 +294,11 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithPSInAndTexture(
 
         // sample texture to get diffuse color.
         vector2 uv = pPoint->m_uv;
-        RGBA sampleColor = texture->Sample(uv.m_x, uv.m_y);
-        RGB diffuse = Cast(sampleColor);
+        vector3 diffuse(texture->Sample(uv.m_x, uv.m_y));
 
         vector3 resultColor = ComputePointLight(
             constBufCamera.m_lights[0],
-            vector3(diffuse.m_arr),
+            diffuse,
             vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
             constBufInstance.m_material.m_shiness,
             pixelPosW,
@@ -309,7 +309,7 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithPSInAndTexture(
         {
             vector3 blinnSpot = ComputeSpotLight(
                 constBufCamera.m_lights[1],
-                vector3(diffuse.m_arr),
+                diffuse,
                 vector3(constBufInstance.m_material.m_fresnelR0.m_arr),
                 constBufInstance.m_material.m_shiness,
                 pixelPosW,
@@ -318,22 +318,22 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithPSInAndTexture(
             resultColor = resultColor + blinnSpot;
         }
 
-        RGBA color(resultColor.m_arr);
-        return color;
+        vector4 retColor = vector4::BLACK;
+        retColor = resultColor;
+        return retColor;
     };
 }
 
 GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithNoiseBumpMap(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, std::shared_ptr<Texture>& texture)
 {
-    return [&constBufInstance, &constBufCamera, &texture](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    return [&constBufInstance, &constBufCamera, &texture](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         assert(texture->IsValid());
         const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
         DEBUG_CLIENT(DEBUG_CLIENT_CONF_TRIANGL);
         // get noise normal from texture.
         vector2 uv = pPoint->m_uv;
-        RGBA sampleColor = texture->Sample(uv.m_x, uv.m_y);
-        vector3 noiseNormal(sampleColor.m_chas.m_r, sampleColor.m_chas.m_g, sampleColor.m_chas.m_b);
+        vector3 noiseNormal(texture->Sample(uv.m_x, uv.m_y));
         // channels of noise color all lay in [0,1], map them to [-1, 1]
         noiseNormal = noiseNormal * 2.0f - vector3::UNIT;
         noiseNormal = Normalize(noiseNormal);
@@ -368,7 +368,8 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithNoiseBumpMap(Co
             blinn = blinn + blinnSpot;
         }
 
-        RGBA color(blinn.m_arr);
+        vector4 color = vector4::BLACK;
+        color = blinn;
         return color;
     };
 }
@@ -376,7 +377,7 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderWithNoiseBumpMap(Co
 GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForShadowMap(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& lightCamera)
 {
     static float minNdcZ = 1.0f, maxNdcZ = 0.0f;
-    return [&constBufInstance, &lightCamera](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    return [&constBufInstance, &lightCamera](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
         
         Types::F32 ndcZ = pPoint->m_posH.m_z;
@@ -395,13 +396,13 @@ GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForShadowMap(Consta
 
         assert(0.0f <= ndcZ && ndcZ <= 1.0f);
 
-        return RGBA(ndcZ, ndcZ, ndcZ);
+        return vector4(ndcZ, ndcZ, ndcZ, 1.0f);
     };
 }
 
 CommonClass::GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForShadowEffect(ConstantBufferForInstance& constBufInstance, ConstantBufferForCamera& constBufCamera, ConstantBufferForCamera& lightCamera, std::shared_ptr<Texture>& shadowMap)
 {
-    return [&constBufInstance, &constBufCamera, &lightCamera, &shadowMap](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    return [&constBufInstance, &constBufCamera, &lightCamera, &shadowMap](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         assert(shadowMap->IsValid());
         const PSIn* pPoint = reinterpret_cast<const PSIn*>(pVertex);
 
@@ -426,7 +427,7 @@ CommonClass::GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForSha
             inLightCamera = inLightCamera * (1.0f / inLightCameraH.m_w);
             auto sampledDepth = shadowMap->Sample(0.5f + 0.5f * inLightCamera.m_x, 0.5f + 0.5f * inLightCamera.m_y);
 
-            if ((sampledDepth.m_chas.m_r + 0.01) > inLightCamera.m_z)
+            if ((sampledDepth.m_x + 0.01) > inLightCamera.m_z)
             {
                 vector3 blinnSpot = ComputeSpotLight(
                     constBufCamera.m_lights[1],
@@ -440,7 +441,8 @@ CommonClass::GraphicToolSet::PixelShaderSig GraphicToolSet::GetPixelShaderForSha
             }
         }
 
-        RGBA color(resultColor.m_arr);
+        vector4 color = vector4::BLACK;
+        color = resultColor;
         return color;
     };
 }

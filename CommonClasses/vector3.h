@@ -36,11 +36,40 @@ public:
     static const vector3 AXIS_X;
     static const vector3 AXIS_Y;
     static const vector3 AXIS_Z;
+    static const vector3 RED;
+    static const vector3 GREEN;
+    static const vector3 BLUE;
+    static const vector3 YELLOW;
+    static const vector3 CYAN;
+    static const vector3 MAGENTA;
+    static const vector3 WHITE;
+    static const vector3 BLACK;
 
 public:
     explicit vector3();
     explicit vector3(const Types::F32 & x, const Types::F32 & y, const Types::F32 & z);
     explicit vector3(const Types::F32* pArr);
+
+
+    template<typename EqualType>
+    explicit vector3(const EqualType& v)
+    {
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), sizeof(v.m_arr)>::value >> 2); ++i)
+        {
+            m_arr[i] = v.m_arr[i];
+        }
+    }
+    
+    template<typename EqualType>
+    vector3& operator = (const EqualType& v)
+    {
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), sizeof(v.m_arr)>::value >> 2); ++i)
+        {
+            m_arr[i] = v.m_arr[i];
+        }
+        return *this;
+    }
+
     ~vector3();
 
     vector4 Tovector4(const Types::F32& w = 1.0f) const;

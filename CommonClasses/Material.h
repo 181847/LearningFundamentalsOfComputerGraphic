@@ -1,5 +1,6 @@
 #pragma once
 #include "ColorTemplate.h"
+#include "vector3.h"
 
 namespace CommonClass
 {
@@ -13,19 +14,19 @@ public:
     /*!
         \brief diffuse coefficient
     */
-    RGB     m_kDiffuse;
+    vector3     m_kDiffuse;
 
     /*!
         \brief fresnel coefficient when the degree is 0.
     */
-    RGB     m_rFresnel_0;
+    vector3     m_rFresnel_0;
 
     Types::F32 m_shinness = 2;
 
 public:
     Material();
-    Material(const RGB& kDiffuse, const RGB& rFresnel_0, const Types::F32 shinness = 2.0f);
-    Material(const RGB& kDiffuse, const unsigned int& reflectIndex, const Types::F32 shinness = 2.0f);
+    Material(const vector3& kDiffuse, const vector3& rFresnel_0, const Types::F32 shinness = 2.0f);
+    Material(const vector3& kDiffuse, const unsigned int& reflectIndex, const Types::F32 shinness = 2.0f);
     ~Material();
 
     /*!
@@ -45,7 +46,7 @@ public:
         -------------
         
     */
-    RGB RFresnel(const Types::F32& cosTheta) const;
+    vector3 RFresnel(const Types::F32& cosTheta) const;
 };
 
 } // namespace CommonClass

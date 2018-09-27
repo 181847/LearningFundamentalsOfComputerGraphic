@@ -17,6 +17,7 @@ protected:\
     const std::wstring SUB_FOLDER = L"Rasterisation/";\
 }
 
+#ifdef RasterizeImage
 DECLARE_CASE_IN_RASTERISATION_FOR(WuXiaolinLines, "draw WuXiaolin lines");
 
 DECLARE_CASE_IN_RASTERISATION_FOR(BresenhamLine, "draw bresenham lines");
@@ -28,6 +29,7 @@ DECLARE_CASE_IN_RASTERISATION_FOR(FlagBottomTriangle, "draw triangle flat bottom
 DECLARE_CASE_IN_RASTERISATION_FOR(GeneralTriangle, "draw general triangle");
 
 DECLARE_CASE_IN_RASTERISATION_FOR(LineInPipline, "draw general triangle");
+#endif // define RasterizeImage class
 
 DECLARE_CASE_IN_RASTERISATION_FOR(LineClipping, "draw general triangle");
 
@@ -40,12 +42,14 @@ DECLARE_CASE_IN_RASTERISATION_FOR(PerspectTransform, "perspective view transform
 DECLARE_CASE_IN_RASTERISATION_FOR(LineClippingErrorAnalysis, "line clipping analysis");
 
 using SuitForRasterisation = SuitForPipline<
+#ifdef RasterizeImage
     CASE_NAME_IN_RASTERISATION(WuXiaolinLines),
     CASE_NAME_IN_RASTERISATION(BresenhamLine),
     CASE_NAME_IN_RASTERISATION(2DLineClip),
     CASE_NAME_IN_RASTERISATION(FlagBottomTriangle),
     CASE_NAME_IN_RASTERISATION(GeneralTriangle),
     CASE_NAME_IN_RASTERISATION(LineInPipline),
+#endif // define RasterizeImage class
     CASE_NAME_IN_RASTERISATION(LineClipping),
     CASE_NAME_IN_RASTERISATION(VertexTransform),
     CASE_NAME_IN_RASTERISATION(OrthoTransform),

@@ -5,20 +5,29 @@
 namespace CommonClass
 {
 
+const vector4 vector4::RED     = vector4(1.0f, 0.0f, 0.0f, 1.0f);
+const vector4 vector4::GREEN   = vector4(0.0f, 1.0f, 0.0f, 1.0f);
+const vector4 vector4::BLUE    = vector4(0.0f, 0.0f, 1.0f, 1.0f);
+const vector4 vector4::YELLOW  = vector4(1.0f, 1.0f, 0.0f, 1.0f);
+const vector4 vector4::CYAN    = vector4(0.0f, 1.0f, 1.0f, 1.0f);
+const vector4 vector4::MAGENTA = vector4(1.0f, 0.0f, 1.0f, 1.0f);
+const vector4 vector4::WHITE   = vector4(1.0f, 1.0f, 1.0f, 1.0f);
+const vector4 vector4::BLACK   = vector4(0.0f, 0.0f, 0.0f, 1.0f);
+
 vector4::vector4(const Types::F32 x, const Types::F32 y, const Types::F32 z, const Types::F32 w)
     :m_x(x), m_y(y), m_z(z), m_w(w)
 {
     // empty
 }
 
-vector4 & vector4::operator=(const vector4 & v)
-{
-    m_x = v.m_x;
-    m_y = v.m_y;
-    m_z = v.m_z;
-    m_w = v.m_w;
-    return *this;
-}
+//vector4 & vector4::operator=(const vector4 & v)
+//{
+//    m_x = v.m_x;
+//    m_y = v.m_y;
+//    m_z = v.m_z;
+//    m_w = v.m_w;
+//    return *this;
+//}
 
 vector4::~vector4()
 {

@@ -69,7 +69,7 @@ void CASE_NAME_IN_STB_IMG(PerlinNoiseTexture)::Run()
 
                     const F32 colorScale = (noiseIntensity + 1.0f) * 0.5f;
 
-                    img.SetPixel(x, y, RGB::WHITE * colorScale);
+                    img.SetPixel(x, y, vector3::WHITE * colorScale);
                 }
             }
         }
@@ -102,7 +102,7 @@ void CASE_NAME_IN_STB_IMG(NoiseVecTexture)::Run()
 
                 vector3 noiseVec = Texture::NoiseVector3(p);// + 0.5f * Texture::NoiseVector3(2.0f * p) + 0.25f * Texture::NoiseVector3(4.0f * p) + 0.125f * Texture::NoiseVector3(8.0f * p);
                 noiseVec = 0.5f * (noiseVec + vector3::UNIT);
-                RGB noiseColor(noiseVec.m_x, noiseVec.m_y, noiseVec.m_z);
+                vector3 noiseColor(noiseVec.m_x, noiseVec.m_y, noiseVec.m_z);
                 img.SetPixel(x, y, noiseColor);
             }
         }

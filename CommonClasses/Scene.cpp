@@ -59,12 +59,12 @@ bool Scene::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, HitRe
     return isHit;
 }
 
-RGB Scene::RayColor(const Ray & ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex) const
+CommonClass::vector3 Scene::RayColor(const Ray& ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex /*= 3*/) const
 {
     HitRecord hitRec, shadowHitRec;
     if (this->Hit(ray, t0, t1, &hitRec))
     {
-        RGB color;
+        vector3 color;
 
         // ambient light
         color = hitRec.m_material.m_kDiffuse * this->m_ambient;
@@ -86,9 +86,9 @@ RGB Scene::RayColor(const Ray & ray, const Types::F32 t0, const Types::F32 t1, u
     }
 }
 
-RGB Scene::LightColor(const Ray & viewRay, const HitRecord & hitRec) const
+CommonClass::vector3 Scene::LightColor(const Ray& viewRay, const HitRecord& hitRec) const
 {
-    RGB lightColor = RGB::BLACK;
+    vector3 lightColor = vector3::BLACK;
 
     for (auto & light : m_lights)
     {
@@ -105,13 +105,13 @@ RGB Scene::LightColor(const Ray & viewRay, const HitRecord & hitRec) const
             vector3 toEye = -viewRay.m_direction;
             vector3 halfVec = Normalize(toEye + toLight);
 
-            RGB lightStrength = light->m_color * std::max(0.0f, dotProd(hitRec.m_normal, toLight));
+            vector3 lightStrength = light->m_color * std::max(0.0f, dotProd(hitRec.m_normal, toLight));
 
             const Types::F32 m = hitRec.m_material.m_shinness;
 
             Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(dotProd(halfVec, hitRec.m_normal), m);
 
-            RGB fresnelCoefficient = hitRec.m_material.RFresnel(dotProd(toEye, hitRec.m_normal));
+            vector3 fresnelCoefficient = hitRec.m_material.RFresnel(dotProd(toEye, hitRec.m_normal));
 
             lightColor = lightColor +
                 lightStrength

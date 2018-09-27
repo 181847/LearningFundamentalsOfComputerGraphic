@@ -19,20 +19,20 @@ void CASE_NAME_IN_RAY_RENDER(InsideBoxesAndSphere)::Run()
     /*!
         \brief make up materials.
     */
-    Material sphereMat      (RGB(0.5f, 0.2f, 1.0f),              8,  16.0f);
-    Material triMat         (RGB::YELLOW,           8,  1.0f);
-    Material polyMat        (RGB(0.3f, 0.5f, 0.9f), 8,  1.0f);
-    Material polyMat_left   (RGB::RED,              8,  1.0f);
-    Material polyMat_right  (RGB::GREEN,            8,  1.0f);
-    Material polyMat_top    (RGB::WHITE * 0.6f,            8,  3.0f);
-    Material polyMat_bottom (RGB::WHITE * 0.6f,            8,  3.0f);
-    Material polyMat_back   (RGB::WHITE * 0.6f,            8,  3.0f);
-    Material box_1_Mat      (RGB::WHITE * 0.8f,            8,  2.0f);
-    Material box_2_Mat      (RGB::WHITE * 0.8f,            8,  2.0f);
+    Material sphereMat      (vector3(0.5f, 0.2f, 1.0f),              8,  16.0f);
+    Material triMat         (vector3::YELLOW,           8,  1.0f);
+    Material polyMat        (vector3(0.3f, 0.5f, 0.9f), 8,  1.0f);
+    Material polyMat_left   (vector3::RED,              8,  1.0f);
+    Material polyMat_right  (vector3::GREEN,            8,  1.0f);
+    Material polyMat_top    (vector3::WHITE * 0.6f,            8,  3.0f);
+    Material polyMat_bottom (vector3::WHITE * 0.6f,            8,  3.0f);
+    Material polyMat_back   (vector3::WHITE * 0.6f,            8,  3.0f);
+    Material box_1_Mat      (vector3::WHITE * 0.8f,            8,  2.0f);
+    Material box_2_Mat      (vector3::WHITE * 0.8f,            8,  2.0f);
 
 
     vector3 pointLightPosition(0.0f, 5.0f, 0.0f);
-    RGB pointLightColor = RGB::WHITE;
+    vector3 pointLightColor = vector3::WHITE;
     auto pointLight1 = std::make_unique<Light>(pointLightPosition, pointLightColor * 0.5f);
     auto pointLight2 = std::make_unique<Light>(vector3(2.2f, 2.7f, 0.0f), pointLightColor * 0.2f);
     auto pointLight3 = std::make_unique<Light>(vector3(-2.2f, 2.7f, 0.0f), pointLightColor * 0.2f);

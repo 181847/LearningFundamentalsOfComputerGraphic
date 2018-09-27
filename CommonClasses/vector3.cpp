@@ -5,11 +5,19 @@
 namespace CommonClass
 {
     
-const CommonClass::vector3 vector3::ZERO   = vector3(0.0f, 0.0f, 0.0f);
-const CommonClass::vector3 vector3::UNIT   = vector3(1.0f, 1.0f, 1.0f);
-const CommonClass::vector3 vector3::AXIS_X = vector3(1.0f, 0.0f, 0.0f);
-const CommonClass::vector3 vector3::AXIS_Y = vector3(0.0f, 1.0f, 0.0f);
-const CommonClass::vector3 vector3::AXIS_Z = vector3(0.0f, 0.0f, 1.0f);
+const vector3 vector3::ZERO    = vector3(0.0f, 0.0f, 0.0f);
+const vector3 vector3::UNIT    = vector3(1.0f, 1.0f, 1.0f);
+const vector3 vector3::AXIS_X  = vector3(1.0f, 0.0f, 0.0f);
+const vector3 vector3::AXIS_Y  = vector3(0.0f, 1.0f, 0.0f);
+const vector3 vector3::AXIS_Z  = vector3(0.0f, 0.0f, 1.0f);
+const vector3 vector3::RED     = vector3(1.0f, 0.0f, 0.0f);
+const vector3 vector3::GREEN   = vector3(0.0f, 1.0f, 0.0f);
+const vector3 vector3::BLUE    = vector3(0.0f, 0.0f, 1.0f);
+const vector3 vector3::YELLOW  = vector3(1.0f, 1.0f, 0.0f);
+const vector3 vector3::CYAN    = vector3(0.0f, 1.0f, 1.0f);
+const vector3 vector3::MAGENTA = vector3(1.0f, 0.0f, 1.0f);
+const vector3 vector3::WHITE   = vector3(1.0f, 1.0f, 1.0f);
+const vector3 vector3::BLACK   = vector3(0.0f, 0.0f, 0.0f);
 
 
 vector3::vector3()

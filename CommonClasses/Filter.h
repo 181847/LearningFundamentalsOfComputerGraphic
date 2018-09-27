@@ -88,13 +88,13 @@ protected:
                it can extend the image size, take the location as the left bottom corner
                of the filter and filter once of the img.
     */
-    virtual RGBA Step(const Image& img, const Loc& location);
+    virtual vector4 Step(const Image& img, const Loc& location);
 
     /*!
         \brief try to get the pixel color of the img, if location is out of the boundary,
         return some padding value, this function can be override by sub classes.
     */
-    virtual RGBA TryGetPixel(const Image& img, const Loc& location);
+    virtual vector4 TryGetPixel(const Image& img, const Loc& location);
 
     /*!
         \brief calculate the convolution result image size.

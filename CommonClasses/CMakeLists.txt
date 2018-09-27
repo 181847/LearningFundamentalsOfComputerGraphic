@@ -32,7 +32,6 @@ set (COMMON_CLASS_SOURCE_FILES
 	Pipline.h
 	PiplineStateObject.h
 	Polygon.h
-	RasterizeImage.h
 	Ray.h
 	Scene.h
 	ScreenSpaceVertexTemplate.h
@@ -73,7 +72,6 @@ set (COMMON_CLASS_SOURCE_FILES
 	Pipline.cpp
 	PiplineStateObject.cpp
 	Polygon.cpp
-	RasterizeImage.cpp
 	Ray.cpp
 	Scene.cpp
 	ScreenSpaceVertexTemplate.cpp

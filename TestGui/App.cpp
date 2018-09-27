@@ -76,7 +76,7 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
     // set VS and PS
     PSO->m_vertexShader = HelpPiplineCase.GetVertexShaderWithVSOut(instanceBufAgent, renderingBuffer.cameraBuffer);
     //PSO->m_pixelShader  = pixelShaderNoiseNormalTexture;
-    PSO->m_pixelShader  = pixelShaderNoiseNormalTexture;
+    PSO->m_pixelShader  = pixelShaderNoTexture;
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     PSO->m_vertexLayout.pixelShaderInputSize  = sizeof(PSIn);
 }
@@ -176,7 +176,7 @@ bool ImguiUpdateRenderData()
 */
 void RenderMainImage()
 {
-    MainPipline->ClearBackBuffer(RGBA::WHITE);
+    MainPipline->ClearBackBuffer(vector4::WHITE);
 
     PSO->m_primitiveType = PrimitiveType::TRIANGLE_LIST;
     PSO->m_cullFace = CullFace::CLOCK_WISE;
@@ -206,11 +206,15 @@ void RenderMainImage()
     // set image data.
     if (MainImage.m_isValide)
     {
+        // update float pixel to byte pixel
+        MainPipline->m_backBuffer->FloatPixelToBytePixel();
         // only update resource when image is valide
         MainImage.UpdateImageRowData(pd3dDeviceContex, MainPipline->m_backBuffer->GetRawData(), MainPipline->m_backBuffer->GetWidth(), MainPipline->m_backBuffer->GetHeight());
     }
     else
     {
+        // update float pixel to byte pixel
+        MainPipline->m_backBuffer->FloatPixelToBytePixel();
         // else set a new image data, in the mean time, create all ID3D11* resources.
         MainImage.SetImageRawData(pd3dDevice, MainPipline->m_backBuffer->GetRawData(), MainPipline->m_backBuffer->GetWidth(), MainPipline->m_backBuffer->GetHeight());
     }// end else

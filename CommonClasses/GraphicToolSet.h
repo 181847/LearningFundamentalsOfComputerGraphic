@@ -24,7 +24,7 @@ namespace CommonClass
 class GraphicToolSet
 {
 public:
-    using PixelShaderSig  = std::function<RGBA(const ScreenSpaceVertexTemplate*)>;
+    using PixelShaderSig  = std::function<vector4(const ScreenSpaceVertexTemplate*)>;
     using VertexShaderSig = std::function<void(const unsigned char * , ScreenSpaceVertexTemplate * pDestV)>;
 
     // temp struct for generous case
@@ -267,7 +267,7 @@ public:
         \param normal the normal of the pixel
         \param WarmDirection the warmest normal direction
     */
-    static RGBA ColdToWarm(const vector3& normal, const vector3& WarmDirection = Normalize(vector3::UNIT));
+    static vector4 ColdToWarm(const vector3& normal, const vector3& WarmDirection = Normalize(vector3::UNIT));
 
     static vector3 SchlickFresnel(const vector3& r0, const vector3& normal, const vector3& toLight);
 

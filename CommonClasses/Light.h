@@ -20,7 +20,7 @@ public:
     /*!
         \brief the diffuse color of the color.
     */
-    RGB     m_color;
+    vector3     m_color;
     
 public:
     /*!
@@ -28,7 +28,7 @@ public:
         \param position where the light is
         \param diffuse the diffuse color of the light.
     */
-    Light(const vector3& position, const RGB& color);
+    Light(const vector3& position, const vector3& color);
     ~Light();
 
     /*

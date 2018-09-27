@@ -44,10 +44,13 @@ bool Texture::LoadFile(const std::string& file)
     unsigned char * restoreAddr = GetRawData(); // get destination ptr
     memcpy(restoreAddr, data, x * y * 4);
     stbi_image_free(data);
+
+    // update byte pixels to float pixels.
+    this->BytePixelToFloatPixel();
     return true;
 }
 
-RGBA Texture::Sample(const Types::F32 u, const Types::F32 v, const SampleState& sampleState /*= SampleState()*/)
+CommonClass::vector4 Texture::Sample(const Types::F32 u, const Types::F32 v, const SampleState& sampleState /*= SampleState()*/)
 {
     using namespace Types;
     F32 fu, fv;
@@ -57,8 +60,7 @@ RGBA Texture::Sample(const Types::F32 u, const Types::F32 v, const SampleState& 
     sx = static_cast<U32>((m_width - 2)  * fu);
     sy = static_cast<U32>((m_height - 2) * fv);
 
-    std::array<RGBA, 4> colors = {RGBA(), RGBA() ,RGBA(), RGBA()};
-    std::array<F32,  4> comps;
+    std::array<vector4, 4> colors;
 
     colors[0] = this->GetPixel(sx,      sy      );
     colors[1] = this->GetPixel(sx + 1,  sy      );
@@ -69,21 +71,17 @@ RGBA Texture::Sample(const Types::F32 u, const Types::F32 v, const SampleState& 
     uInp = m_width  * u - std::floor(m_width  * u);
     vInp = m_height * v - std::floor(m_height * v);
 
+    vector4 sampledResult;
     for (unsigned int i = 0; i < 4; ++i)
     {
-        comps[i] = 
-                (1.0f - uInp)   * (1.0f - vInp) * colors[0].m_arr[i] 
-            +   uInp            * (1.0f - vInp) * colors[1].m_arr[i] 
-            +   (1.0f - uInp)   * vInp          * colors[2].m_arr[i] 
-            +   uInp            * vInp          * colors[3].m_arr[i];
+        sampledResult = 
+                (1.0f - uInp)   * (1.0f - vInp) * colors[0] 
+            +   uInp            * (1.0f - vInp) * colors[1]
+            +   (1.0f - uInp)   * vInp          * colors[2]
+            +   uInp            * vInp          * colors[3];
     }// end for
     
-    RGBA retRgba;
-    retRgba.SetChannel<0>(comps[0]);
-    retRgba.SetChannel<1>(comps[1]);
-    retRgba.SetChannel<2>(comps[2]);
-    retRgba.SetChannel<3>(comps[3]);
-    return retRgba;
+    return sampledResult;
 }
 
 /*!

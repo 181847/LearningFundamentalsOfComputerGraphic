@@ -24,6 +24,34 @@ public:
     };
 
     explicit Pixel(Types::U8 r = 0, Types::U8 g = 0, Types::U8 b = 0, Types::U8 a = 0);
+
+    /*!
+        \brief set value from float array(should have a member m_arr whose type is float[]).
+        mapping 0.0~1.0f to 0~255
+    */
+    template<typename FloatArrType>
+    Pixel& operator = (const FloatArrType& v)
+    {
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), (sizeof(v.m_arr) >> 2) >::value ); ++i)
+        {
+            m_arr[i] = static_cast<Types::U8>(255.0f * v.m_arr[i]);
+        }
+        return *this;
+    }
+
+    /*!
+        \brief convert Pixel to any other type who have a member m_arr (float[]).
+    */
+    template<typename FloatArrType>
+    FloatArrType ToVector()
+    {
+        FloatArrType v;
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), (sizeof(v.m_arr) >> 2) >::value); ++i)
+        {
+            v.m_arr[i] = (m_arr[i] * 1.0f) / 255.0f;
+        }
+        return v;
+    }
 };
 
 /*!

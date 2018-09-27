@@ -1,5 +1,6 @@
 #pragma once
 #include "CommonTypes.h"
+#include <array>
 
 namespace CommonClass
 {
@@ -22,14 +23,43 @@ public:
             Types::F32 m_z;
             Types::F32 m_w;
         };
-        Types::F32 m_arr[4];
+        std::array<Types::F32, 4> m_arr;
     };
+
+    static const vector4 RED;
+    static const vector4 GREEN;
+    static const vector4 BLUE;
+    static const vector4 YELLOW;
+    static const vector4 CYAN;
+    static const vector4 MAGENTA;
+    static const vector4 WHITE;
+    static const vector4 BLACK;
 public:
+
     /*!
         \brief construct a homogeneous vector, default to be (0, 0, 0, 1)
     */
     explicit vector4(const Types::F32 x = 0.0f, const Types::F32 y = 0.0f, const Types::F32 z = 0.0f, const Types::F32 w = 1.0f);
-    vector4& operator = (const vector4& v);
+
+    template<typename EqualType>
+    explicit vector4(const EqualType& v)
+    {
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), sizeof(v.m_arr)>::value >> 2); ++i)
+        {
+            m_arr[i] = v.m_arr[i];
+        }
+    }
+
+    template<typename EqualType>
+    vector4& operator = (const EqualType& v)
+    {
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), sizeof(v.m_arr)>::value >> 2); ++i)
+        {
+            m_arr[i] = v.m_arr[i];
+        }
+        return *this;
+    }
+
     ~vector4();
 
     /*!

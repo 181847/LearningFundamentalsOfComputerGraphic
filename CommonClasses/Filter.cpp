@@ -44,37 +44,30 @@ Image Filter::Convolve(const Image & img)
     return convolutionResult;
 }
 
-RGBA Filter::Step(const Image& img, const Loc& location)
+CommonClass::vector4 Filter::Step(const Image& img, const Loc& location)
 {
     auto sampleLocs = GenerateSampleLocations(location);
 
-    std::array<float, 4> channels = {0.0f, 0.0f, 0.0f, 0.0f};
+    vector4 accumulate = vector4(0.0f, 0.0f, 0.0f, 0.0f);
 
     for (auto const& pos : sampleLocs)
     {
         auto sample = TryGetPixel(img, pos);
-
-        for (int i = 0; i < 4; ++i)
-        {
-            channels[i] += sample.m_arr[i];
-        }
+        accumulate += sample;
     }
     
-    const int numSamples = sampleLocs.size();
-    for (auto& ch : channels)
-    {
-        ch /= numSamples;
-    }
+    auto numSamples = static_cast<Types::F32>(sampleLocs.size());
+    accumulate = accumulate / numSamples;
     
-    return RGBA(channels[0], channels[1], channels[2], channels[3]);
+    return accumulate;
 }
 
-RGBA Filter::TryGetPixel(const Image& img, const Loc& location)
+CommonClass::vector4 Filter::TryGetPixel(const Image& img, const Loc& location)
 {
     const Loc IMG_S = { static_cast<int>(img.GetWidth()), static_cast<int>(img.GetHeight()) };
     if (!IMG_S.IsInclude(location)) // if out of boundary
     {
-        return RGBA::BLACK;
+        return vector4(0.0f, 0.0f, 0.0f, 0.0f);
     }
     else
     {

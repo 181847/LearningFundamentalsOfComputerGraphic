@@ -33,11 +33,11 @@ void Pipline::SetBackBuffer(std::shared_ptr<Image> backBuffer)
     m_depthBuffer->SetAll(0.0f);
 }
 
-void Pipline::ClearBackBuffer(const RGBA& background, const Types::F32& depthValue /*= 0*/)
+void Pipline::ClearBackBuffer(const vector4& background, const Types::F32& depthValue /*= 0*/)
 {
     if (m_backBuffer != nullptr)
     {
-        m_backBuffer->ClearPixel(CastPixel(background));
+        m_backBuffer->ClearPixel(background);
     }
     if (m_depthBuffer != nullptr)
     {
@@ -946,8 +946,10 @@ bool Pipline::IsCulled(const ScreenSpaceVertexTemplate* pv1, const ScreenSpaceVe
     if (m_pso->m_cullFace != CullFace::NONE)
     {
         // cull face
-        vector3 edgeV2((pv2->m_posH - pv1->m_posH).m_arr);
-        vector3 edgeV3((pv3->m_posH - pv1->m_posH).m_arr);
+        vector3 edgeV2;
+        edgeV2 = (pv2->m_posH - pv1->m_posH);
+        vector3 edgeV3;
+        edgeV3 = (pv3->m_posH - pv1->m_posH);
         edgeV2.m_z = edgeV3.m_z = 0;
         vector3 directionV = crossProd(edgeV2, edgeV3);
         if ((directionV.m_z > 0 && m_pso->m_cullFace == CullFace::COUNTER_CLOCK_WISE)

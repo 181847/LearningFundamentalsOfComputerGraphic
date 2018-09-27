@@ -69,6 +69,11 @@ CommonClass::RGB CaseForPipline::GetRandomRGB()
     return CommonClass::RGB(mtr.Random(), mtr.Random(), mtr.Random());
 }
 
+CommonClass::vector3 CaseForPipline::GetRandomVector3ForRGB()
+{
+    return vector3(mtr.Random(), mtr.Random(), mtr.Random());
+}
+
 CommonClass::vector3 CaseForPipline::GetRandomVector3(bool allowZeroVector /*= true*/, const int MAX_INT /*= 200*/)
 {
     CommonClass::vector3 randVec;
@@ -192,7 +197,7 @@ void CaseForPipline::SaveAndShowPiplineBackbuffer(const Pipline & pipline, const
     SaveAndShow(*(pipline.m_backBuffer), nameOfImgAndWindow);
 }
 
-void CaseForPipline::SaveAndShow(const Image & img, const std::wstring & nameWithOutExt) const
+void CaseForPipline::SaveAndShow(Image& img, const std::wstring& nameWithOutExt) const
 {
     img.SaveTo(GetSafeStoragePath() + nameWithOutExt + L".png");
     BlockShowImg(&img, nameWithOutExt);

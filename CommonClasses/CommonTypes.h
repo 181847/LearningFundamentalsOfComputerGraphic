@@ -1,5 +1,6 @@
 #pragma once
 #include <limits>
+#include <type_traits>
 
 namespace Types
 {
@@ -15,6 +16,15 @@ using I32 = int;
 */
 namespace Constant
 {
+
+/*!
+    \brief min value in compile time.
+*/
+template<int A, int B>
+struct MIN
+{
+    enum { value = A < B ? A : B };
+};
 
 /*!
     \brief the constant Pi in float

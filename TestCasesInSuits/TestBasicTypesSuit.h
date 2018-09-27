@@ -426,16 +426,16 @@ public:
 
         for (int i = 0; i < 20; ++i)
         {
-            RGB color = GetRandomRGB();
-            RGB rFresnel0 = GetRandomRGB();
+            vector3 color = GetRandomVector3ForRGB();
+            vector3 rFresnel0 = GetRandomVector3ForRGB();
             unsigned int randomReflectIndex = 1 + mtr.Random(MAX_REFLECT_INDEX - 1);
 
             Material mat1;                              // default mat, white color, fresnel coefficient is zero
             Material mat2(color, rFresnel0);            // specific the fresnel coefficient with RGB.
             Material mat3(color, randomReflectIndex);   // calculate fresnel coefficient using reflect index.
 
-            TEST_ASSERT(mat1.m_kDiffuse            == RGB::WHITE);
-            TEST_ASSERT(mat1.m_rFresnel_0        == RGB::BLACK);
+            TEST_ASSERT(mat1.m_kDiffuse            == vector3::WHITE);
+            TEST_ASSERT(mat1.m_rFresnel_0        == vector3::BLACK);
 
             TEST_ASSERT(mat2.m_kDiffuse            == color);
             TEST_ASSERT(mat2.m_rFresnel_0        == rFresnel0);
@@ -445,7 +445,7 @@ public:
             reflectIndexToFresnel0 *= reflectIndexToFresnel0;
 
             TEST_ASSERT(mat3.m_kDiffuse            == color);
-            TEST_ASSERT(mat3.m_rFresnel_0        == RGB(reflectIndexToFresnel0, reflectIndexToFresnel0, reflectIndexToFresnel0));
+            TEST_ASSERT(mat3.m_rFresnel_0        == vector3(reflectIndexToFresnel0, reflectIndexToFresnel0, reflectIndexToFresnel0));
 
         }
     }
@@ -1491,8 +1491,8 @@ public:
         pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
         pso->m_vertexLayout.pixelShaderInputSize = sizeof(vector4);
 
-        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-            return RGBA::RED;
+        pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
+            return vector4::RED;
         };
 
         vector3 localU(1.0f, 0.0f, 1.0f);
@@ -1517,7 +1517,7 @@ public:
         pipline.SetPSO(std::move(pso));
 
         // set a backbuffer
-        pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+        pipline.SetBackBuffer(std::make_shared<Image>(
             graphicToolSet.COMMON_PIXEL_WIDTH,
             graphicToolSet.COMMON_PIXEL_HEIGHT,
             RGBA::WHITE));

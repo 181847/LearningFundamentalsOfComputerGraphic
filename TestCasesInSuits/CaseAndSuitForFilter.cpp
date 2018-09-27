@@ -52,10 +52,10 @@ void CASE_NAME_IN_FILTER(Exercise)::Run()
 
     // the pixel shader will not work
     // due to the imcompletation of the triangle pipeline.
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
 
-        return RGBA(pPoint->m_rayIndex.m_x, pPoint->m_rayIndex.m_y, pPoint->m_rayIndex.m_z);
+        return vector4(pPoint->m_rayIndex.m_x, pPoint->m_rayIndex.m_y, pPoint->m_rayIndex.m_z, 1.0f);
     };
 
     const Types::F32 LEFT(-1.0f), RIGHT(1.0f), BOTTOM(-1.0f), TOP(1.0f), NEAR(-1.0f), FAR(-10.0f);

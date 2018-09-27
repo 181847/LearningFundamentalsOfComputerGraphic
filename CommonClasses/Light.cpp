@@ -3,7 +3,7 @@
 namespace CommonClass
 {
 
-Light::Light(const vector3 & position, const RGB & color)
+Light::Light(const vector3 & position, const vector3 & color)
     :m_position(position), m_color(color)
 {
 }

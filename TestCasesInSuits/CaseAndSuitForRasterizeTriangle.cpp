@@ -6,8 +6,8 @@ void CASE_NAME_IN_RASTER_TRI(DrawTriInScreenSpace)::Run()
 
     auto pso = pipline->GetPSO();
 
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        return RGBA::BLACK;
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
+        return vector4::BLACK;
     };
 
     // set viewport, because in the triangle rasterization, we need viewport to limit the triangle boundary.
@@ -43,7 +43,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
         
     // the pixel shader will not work
     // due to the imcompletation of the triangle pipeline.
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         const Types::F32   depth      = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
         const SimplePoint* pPoint     = reinterpret_cast<const SimplePoint*>(pVertex);
 
@@ -59,7 +59,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereRayTriangle)::Run()
             red = 0.0f;
         }
 
-        RGBA               color     (red, 0.0f, 0.0f, 1.0f);
+        vector4            color     (red, 0.0f, 0.0f, 1.0f);
         return color;
     };
 
@@ -154,8 +154,8 @@ void CASE_NAME_IN_RASTER_TRI(TriangleCut)::Run()
     // create and config pipeline state object
     auto pso = pipline->GetPSO();
 
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        return RGBA::BLACK;
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
+        return vector4::BLACK;
     };
 
     std::array<vector4, 3> triv = {
@@ -232,8 +232,8 @@ void CASE_NAME_IN_RASTER_TRI(MultipleCutTriangle)::Run()
     auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        return RGBA::BLACK;
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
+        return vector4::BLACK;
     };
 
     std::array<vector4, 3> triv = {
@@ -337,8 +337,8 @@ void CASE_NAME_IN_RASTER_TRI(AbstractFrustrumCut)::Run()
     auto pipline = graphicToolSet.GetCommonPipline();
     auto pso = pipline->GetPSO();
 
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
-        return RGBA::BLACK;
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
+        return vector4::BLACK;
     };
 
     std::array<vector4, 3> triv = {
@@ -460,7 +460,7 @@ void CASE_NAME_IN_RASTER_TRI(CubeMesh)::Run()
     std::wstring pictureIndex = L"010";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"cube_" + pictureIndex);
 
-    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / renderingBuffer.NEAR_F);
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), 1 / renderingBuffer.NEAR_F);
     BlockShowImg(&depthImg, L"the depth buffer of previous cube");
     depthImg.SaveTo(this->GetSafeStoragePath() + L"cube_" + pictureIndex + L"_depth.png");
 }
@@ -516,7 +516,7 @@ void CASE_NAME_IN_RASTER_TRI(CylinderMesh)::Run()
     std::wstring pictureIndex = L"002";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"cylinder_" + pictureIndex);
 
-    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / renderingBuffer.NEAR_F);
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), 1 / renderingBuffer.NEAR_F);
     BlockShowImg(&depthImg, L"the depth buffer of previous cylinder");
     depthImg.SaveTo(this->GetSafeStoragePath() + L"cylinder_" + pictureIndex + L"_depth.png");
 }
@@ -572,7 +572,7 @@ void CASE_NAME_IN_RASTER_TRI(SphereMesh)::Run()
     std::wstring pictureIndex = L"002";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"sphere_" + pictureIndex);
 
-    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / renderingBuffer.NEAR_F);
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), 1 / renderingBuffer.NEAR_F);
     BlockShowImg(&depthImg, L"the depth buffer of previous sphere");
     depthImg.SaveTo(this->GetSafeStoragePath() + L"sphere_" + pictureIndex + L"_depth.png");
 }
@@ -628,7 +628,7 @@ void CASE_NAME_IN_RASTER_TRI(GeoSphereMesh)::Run()
     std::wstring pictureIndex = L"001";
     SaveAndShowPiplineBackbuffer((*(pipline.get())), L"geosphere_" + pictureIndex);
 
-    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), -1 / renderingBuffer.NEAR_F);
+    Image depthImg = ToImage(*(pipline->m_depthBuffer.get()), 1 / renderingBuffer.NEAR_F);
     BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
     depthImg.SaveTo(this->GetSafeStoragePath() + L"geosphere_" + pictureIndex + L"_depth.png");
 }
@@ -712,7 +712,7 @@ void CASE_NAME_IN_RASTER_TRI(UsingCameraFrame)::Run()
     {
         std::wstring pictureNameWithNoExt = L"geosphere_" + pictureIndex + L"_cam" + std::to_wstring(i);
         SaveAndShowPiplineBackbuffer((*(piplines[i].get())), pictureNameWithNoExt);
-        Image depthImg = ToImage(*(piplines[i]->m_depthBuffer.get()), -1 / renderingBuffer.NEAR_F);
+        Image depthImg = ToImage(*(piplines[i]->m_depthBuffer.get()), 1 / renderingBuffer.NEAR_F);
         BlockShowImg(&depthImg, L"the depth buffer of previous geosphere");
         depthImg.SaveTo(this->GetSafeStoragePath() + pictureNameWithNoExt + L"_depth.png");
     }
@@ -826,7 +826,7 @@ void CASE_NAME_IN_RASTER_TRI(NoiseBumpMap)::Run()
     using namespace Types;
 
     auto pipline = graphicToolSet.GetCommonPipline();
-    pipline->ClearBackBuffer(RGBA::WHITE * 0.5f);
+    pipline->ClearBackBuffer(vector4::WHITE * 0.5f);
     auto PSO = pipline->GetPSO();
     PSO->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     PSO->m_vertexLayout.pixelShaderInputSize = sizeof(GraphicToolSet::PSIn);
@@ -883,7 +883,7 @@ void CASE_NAME_IN_RASTER_TRI(ShadowMap)::Run()
     using namespace Types;
 
     auto pipline = graphicToolSet.GetCommonPipline();
-    pipline->ClearBackBuffer(RGBA::WHITE * 0.5f);
+    pipline->ClearBackBuffer(vector4::WHITE * 0.5f);
 
     auto PSO_backbuffer = pipline->GetPSO();
     PSO_backbuffer->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);

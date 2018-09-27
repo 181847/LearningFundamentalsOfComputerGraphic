@@ -18,13 +18,13 @@ public:
     /*!
         \brief ambient color.
     */
-    RGB     m_ambient = RGB::WHITE * 0.3f;
+    vector3     m_ambient = vector3::WHITE * 0.3f;
 
     /*!
         \brief background color for rendering.
         default to be black.
     */
-    const RGB     m_background = RGB::BLACK;
+    const vector3     m_background = vector3::BLACK;
 
 private:
     std::vector<std::unique_ptr<Surface>> m_surfaces;
@@ -69,7 +69,7 @@ public:
         \param reflectLayerIndex reflectLayerIndex is used to prevent deep recursion to compute specular color,
                                 only if reflectLayerIndex greater than 0, then generate another ray to compute specular color with RayColor(..., reflectLayerIndex - 1).
     */
-    RGB RayColor(const Ray& ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex = 3) const;
+    vector3 RayColor(const Ray& ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex = 3) const;
 
     /*!
         \brief evaluate the light of this point.
@@ -77,7 +77,7 @@ public:
         \param hitRec the properties of hit position
         this will take multiple light into account.
     */
-    RGB LightColor(const Ray& viewRay, const HitRecord& hitRec) const;
+    vector3 LightColor(const Ray& viewRay, const HitRecord& hitRec) const;
 };
 
 } // namespace CommonClass

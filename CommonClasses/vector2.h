@@ -29,6 +29,26 @@ public:
     explicit vector2();
     explicit vector2(const Types::F32 & x, const Types::F32 & y);
     explicit vector2(const Types::F32 * arr);
+
+    template<typename EqualType>
+    explicit vector2(const EqualType& v)
+    {
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), sizeof(v.m_arr)>::value >> 2); ++i)
+        {
+            m_arr[i] = v.m_arr[i];
+        }
+    }
+
+    template<typename EqualType>
+    vector2& operator = (const EqualType& v)
+    {
+        for (int i = 0; i < (Types::Constant::MIN<sizeof(m_arr), sizeof(v.m_arr)>::value >> 2); ++i)
+        {
+            m_arr[i] = v.m_arr[i];
+        }
+        return *this;
+    }
+
     ~vector2();
 };
 

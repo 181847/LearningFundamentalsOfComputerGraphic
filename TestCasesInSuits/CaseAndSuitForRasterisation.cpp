@@ -1,5 +1,7 @@
 #include "CaseAndSuitForRasterisation.h"
 
+#ifdef RasterizeImage
+
 void CASE_NAME_IN_RASTERISATION(WuXiaolinLines)::Run()
 {
     RasterizeImage defaultImg(
@@ -163,11 +165,11 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
     pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
 
-        RGBA color;
-        color.m_chas.m_r = pVertex->m_posH.m_x * 1.0f / 512;
-        color.m_chas.m_g = pVertex->m_posH.m_y * 1.0f / 512;
+        vector4 color;
+        color.m_x = pVertex->m_posH.m_x * 1.0f / 512;
+        color.m_y = pVertex->m_posH.m_y * 1.0f / 512;
 
         return color;
     };
@@ -188,7 +190,7 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
     pipline.SetPSO(std::move(pso));
 
     // set a backbuffer
-    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+    pipline.SetBackBuffer(std::make_shared<Image>(
         graphicToolSet.COMMON_PIXEL_WIDTH,
         graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
@@ -224,6 +226,8 @@ void CASE_NAME_IN_RASTERISATION(LineInPipline)::Run()
     SaveAndShowPiplineBackbuffer(pipline, L"drawLines");
 }
 
+#endif // define RasterizeImage class
+
 void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
 {
     // skip this test due to the bug of clipping line function.
@@ -248,11 +252,11 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
     pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
 
-        RGBA color;
-        color.m_chas.m_r = pVertex->m_posH.m_x * 1.0f / 512;
-        color.m_chas.m_g = pVertex->m_posH.m_y * 1.0f / 512;
+        vector4 color;
+        color.m_x = pVertex->m_posH.m_x * 1.0f / 512;
+        color.m_y = pVertex->m_posH.m_y * 1.0f / 512;
 
         return color;
     };
@@ -273,7 +277,7 @@ void CASE_NAME_IN_RASTERISATION(LineClipping)::Run()
     pipline.SetPSO(std::move(pso));
 
     // set a backbuffer
-    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+    pipline.SetBackBuffer(std::make_shared<Image>(
         graphicToolSet.COMMON_PIXEL_WIDTH,
         graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
@@ -332,9 +336,9 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
     pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
 
-        RGBA color(RGBA::WHITE);
+        vector4 color(vector4::WHITE);
         //color.SetChannel<RGBA::R>(pVertex->m_posH.m_x * 1.0f / 512);
         //color.SetChannel<RGBA::G>(pVertex->m_posH.m_y * 1.0f / 512);
 
@@ -342,9 +346,7 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
         const Types::F32 gamma = 4.0f;
         chanV = std::powf(chanV, gamma);
         chanV = 1.0f - chanV;
-        color.SetChannel<RGBA::B>(chanV);
-        color.SetChannel<RGBA::R>(chanV);
-        color.SetChannel<RGBA::G>(chanV);
+        color = vector3::UNIT * chanV;
 
         return color;
     };
@@ -374,7 +376,7 @@ void CASE_NAME_IN_RASTERISATION(VertexTransform)::Run()
     pipline.SetPSO(std::move(pso));
 
     // set a backbuffer
-    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+    pipline.SetBackBuffer(std::make_unique<Image>(
         graphicToolSet.COMMON_PIXEL_WIDTH,
         graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
@@ -433,9 +435,9 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
     pso->m_vertexLayout.pixelShaderInputSize  = sizeof(vector4);
         
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
 
-        return RGBA::BLACK;
+        return vector4::BLACK;
     };
 
     // using MARCO BEFORE TO select two output of images,
@@ -470,7 +472,7 @@ void CASE_NAME_IN_RASTERISATION(OrthoTransform)::Run()
     pipline.SetPSO(std::move(pso));
 
     // set a backbuffer
-    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+    pipline.SetBackBuffer(std::make_shared<Image>(
         graphicToolSet.COMMON_PIXEL_WIDTH,
         graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
@@ -535,9 +537,9 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(vector4);
     pso->m_vertexLayout.pixelShaderInputSize = sizeof(vector4);
 
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         const Types::F32 depth = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
-        RGBA color(depth, depth, depth, 1.0f);
+        vector4 color(depth, depth, depth, 1.0f);
         return color;
     };
 
@@ -575,7 +577,7 @@ void CASE_NAME_IN_RASTERISATION(PerspectTransform)::Run()
     pipline.SetPSO(std::move(pso));
 
     // set a backbuffer
-    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+    pipline.SetBackBuffer(std::make_shared<Image>(
         graphicToolSet.COMMON_PIXEL_WIDTH,
         graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));
@@ -643,7 +645,7 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
     pso->m_vertexLayout.vertexShaderInputSize = sizeof(SimplePoint);
     pso->m_vertexLayout.pixelShaderInputSize = sizeof(SimplePoint);
 
-    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->RGBA {
+    pso->m_pixelShader = [](const ScreenSpaceVertexTemplate* pVertex)->vector4 {
         const Types::F32   depth = (pVertex->m_posH.m_z + 1.0f) * 0.5f;
         const SimplePoint* pPoint = reinterpret_cast<const SimplePoint*>(pVertex);
         const Types::F32   red = pPoint->m_rayIndex.m_z;
@@ -653,7 +655,7 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
         //const Types::F32   isTheOne   = 22 < lineIndex && lineIndex < 34 ? 1.0f : 0.0f;
         const Types::F32   isTheOne = roundIndex == 7 && 34 <= lineIndex && lineIndex <= 34 ? 1.0f : 0.0f;
 
-        RGBA               color(isTheOne, 0.0f, 0.0f, 1.0f);
+        vector4            color(isTheOne, 0.0f, 0.0f, 1.0f);
         return color;
     };
 
@@ -700,7 +702,7 @@ void CASE_NAME_IN_RASTERISATION(LineClippingErrorAnalysis)::Run()
     pipline.SetPSO(std::move(pso));
 
     // set a backbuffer
-    pipline.SetBackBuffer(std::make_unique<RasterizeImage>(
+    pipline.SetBackBuffer(std::make_shared<Image>(
         graphicToolSet.COMMON_PIXEL_WIDTH,
         graphicToolSet.COMMON_PIXEL_HEIGHT,
         RGBA::WHITE));

@@ -63,6 +63,11 @@ public:
     CommonClass::RGB GetRandomRGB();
 
     /*!
+        \brief random vector, all component is in [0.0, 1.0], this can be used as a color.
+    */
+    vector3 GetRandomVector3ForRGB();
+
+    /*!
         \brief get random vector3.
         if you want to set the seed, try mtr.SetRandomSeed(...);
     */
@@ -184,7 +189,7 @@ public:
     */
     void SaveAndShowPiplineBackbuffer(const Pipline & pipline, const std::wstring& nameOfImgAndWindow) const;
     
-    void SaveAndShow(const Image& img, const std::wstring& nameWithOutExt) const;
+    void SaveAndShow(Image& img, const std::wstring& nameWithOutExt) const;
 };
 
 /*!

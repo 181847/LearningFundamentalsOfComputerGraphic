@@ -12,9 +12,10 @@ Image::Image(const Types::U32 width, const Types::U32 height, const RGBA& initCo
 
 Image::Image(Image && moveObj)
 {
-    this->m_height = moveObj.m_height;
-    this->m_width = moveObj.m_width;
-    this->m_canvas = std::move(moveObj.m_canvas);
+    this->m_height      = moveObj.m_height;
+    this->m_width       = moveObj.m_width;
+    this->m_canvas      = std::move(moveObj.m_canvas);
+    this->m_floatCanvas = std::move(moveObj.m_floatCanvas);
 }
 
 Image::Image()
@@ -25,9 +26,10 @@ Image::Image()
 
 Image& Image::operator=(const Image&& moveObj)
 {
-    this->m_height = moveObj.m_height;
-    this->m_width = moveObj.m_width;
-    this->m_canvas = std::move(moveObj.m_canvas);
+    this->m_height      = moveObj.m_height;
+    this->m_width       = moveObj.m_width;
+    this->m_canvas      = std::move(moveObj.m_canvas);
+    this->m_floatCanvas = std::move(moveObj.m_floatCanvas);
     return *this;
 }
 
@@ -43,12 +45,19 @@ void Image::Init(const Types::U32 width, const Types::U32 height, const RGBA& in
     m_width = width;
     m_height = height;
     m_canvas.resize(m_width * m_height);
+    m_floatCanvas.resize(m_width * m_height);
+    vector4 initFloatPixel = vector4::WHITE;
 
     auto initPixel = CastPixel(initColor);
     // set all pixel to solid black
     for (auto & pixel : m_canvas)
     {
         pixel = initPixel;
+    }
+
+    for (auto & pixel : m_floatCanvas)
+    {
+        pixel = initFloatPixel;
     }
 }
 
@@ -59,7 +68,7 @@ bool Image::IsValid() const
         && !m_canvas.empty();
 }
 
-void Image::SaveTo(const std::wstring & filePath) const
+void Image::SaveTo(const std::wstring & filePath)
 {
     FILE * outputFile;
     // Warning!! Must open the file with the Binary mode, or the image will be broken.
@@ -76,12 +85,14 @@ void Image::SaveTo(const std::wstring & filePath) const
         throw std::exception("PngImage openning image file failed - unicode version");
     }
 
+    // update byte pixels for output.
+    FloatPixelToBytePixel();
     svpng(outputFile, m_width, m_height, reinterpret_cast<const unsigned char *>(m_canvas.data()), 1);
 
     fclose(outputFile);
 }
 
-void Image::SaveTo(const std::string& filePath) const
+void Image::SaveTo(const std::string& filePath)
 {
     FILE * outputFile;
     // Warning!! Must open the file with the Binary mode, or the image will be broken.
@@ -98,14 +109,24 @@ void Image::SaveTo(const std::string& filePath) const
         throw std::exception("PngImage openning image file failed - ascii version");
     }
 
+    // update byte pixels for output.
+    FloatPixelToBytePixel();
     svpng(outputFile, m_width, m_height, reinterpret_cast<const unsigned char *>(m_canvas.data()), 1);
 
     fclose(outputFile);
 }
 
-void Image::ClearPixel(const Pixel& pixel)
+//void Image::ClearPixel(const Pixel& pixel)
+//{
+//    for (auto& innerPixel : m_canvas)
+//    {
+//        innerPixel = pixel;
+//    }
+//}
+
+void Image::ClearPixel(const vector4& pixel)
 {
-    for (auto& innerPixel : m_canvas)
+    for (auto& innerPixel : m_floatCanvas)
     {
         innerPixel = pixel;
     }
@@ -134,43 +155,68 @@ const Types::U32 Image::To1DArrIndex(const Types::U32 x, const Types::U32 y) con
     return (m_height - 1 - y) * m_width + x;
 }
 
-void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
+void Image::FloatPixelToBytePixel()
 {
-    Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
-    modifiedPixel = CastPixel(pixel);
-    /*modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
-    modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
-    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);
-    modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_chas.m_a * 255);*/
+    for (int i = m_floatCanvas.size() - 1; i >= 0; --i)
+    {
+        m_canvas[i] = m_floatCanvas[i];
+    }
 }
 
-void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGB & pixel)
+void Image::BytePixelToFloatPixel()
 {
-    Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
-    auto resultPixel = CastPixel(Cast(pixel));
-    modifiedPixel.m_r = resultPixel.m_r;
-    modifiedPixel.m_g = resultPixel.m_g;
-    modifiedPixel.m_b = resultPixel.m_b;
-    /*modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
-    modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
-    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);*/
+    for (int i = m_floatCanvas.size() - 1; i >= 0; --i)
+    {
+        m_floatCanvas[i] = m_canvas[i].ToVector<vector4>();
+    }
+}
+
+//void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGBA & pixel)
+//{
+//    Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
+//    modifiedPixel = CastPixel(pixel);
+//    /*modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
+//    modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
+//    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);
+//    modifiedPixel.m_a = static_cast<Types::U8>(pixel.m_chas.m_a * 255);*/
+//}
+//
+//void Image::SetPixel(const Types::U32 x, const Types::U32 y, const RGB & pixel)
+//{
+//    Pixel& modifiedPixel = m_canvas[To1DArrIndex(x, y)];
+//    auto resultPixel = CastPixel(Cast(pixel));
+//    modifiedPixel.m_r = resultPixel.m_r;
+//    modifiedPixel.m_g = resultPixel.m_g;
+//    modifiedPixel.m_b = resultPixel.m_b;
+//    /*modifiedPixel.m_r = static_cast<Types::U8>(pixel.m_chas.m_r * 255);
+//    modifiedPixel.m_g = static_cast<Types::U8>(pixel.m_chas.m_g * 255);
+//    modifiedPixel.m_b = static_cast<Types::U8>(pixel.m_chas.m_b * 255);*/
+//}
+
+void Image::SetPixel(const Types::U32 x, const Types::U32 y, const vector4& pixel)
+{
+    vector4& modifiedPixel = m_floatCanvas[To1DArrIndex(x, y)];
+    modifiedPixel = pixel;
+    ClampChannels(modifiedPixel);
+}
+
+void Image::SetPixel(const Types::U32 x, const Types::U32 y, const vector3& pixel)
+{
+    vector4& modifiedPixel = m_floatCanvas[To1DArrIndex(x, y)];
+    modifiedPixel = pixel;
+    ClampChannels(modifiedPixel);
 }
 
 void Image::SetAlpha(const Types::U32 x, const Types::U32 y, const Types::F32 & alpha)
 {
     m_canvas[To1DArrIndex(x, y)].m_a = static_cast<Types::U8>(alpha * 255);
+    vector4& modifedPixel = m_floatCanvas[To1DArrIndex(x, y)];
+    modifedPixel.m_w = MathTool::clamp(alpha, 0.0f, 1.0f);
 }
 
-RGBA Image::GetPixel(const Types::U32 x, const Types::U32 y) const
+CommonClass::vector4 Image::GetPixel(const Types::U32 x, const Types::U32 y) const
 {
-    const Pixel& returnedPixel = m_canvas[To1DArrIndex(x, y)];
-
-    return CastPixel(returnedPixel);
-}
-
-const Pixel & Image::GetRawPixel(const Types::U32 x, const Types::U32 y) const
-{
-    return m_canvas[To1DArrIndex(x, y)];
+    return m_floatCanvas[To1DArrIndex(x, y)];
 }
 
 unsigned char * Image::GetRawData()

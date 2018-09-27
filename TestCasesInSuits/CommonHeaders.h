@@ -22,7 +22,7 @@
 #include "../CommonClasses/ColorTemplate.h"
 #include "../CommonClasses/Light.h"
 #include "../CommonClasses/Material.h"
-#include "../CommonClasses/RasterizeImage.h"
+//#include "../CommonClasses/RasterizeImage.h"
 #include "../CommonClasses/Pipline.h"
 #include "../CommonClasses/CoordinateFrame.h"
 #include "../CommonClasses/DebugConfigs.h"

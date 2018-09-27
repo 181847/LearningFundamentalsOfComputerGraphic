@@ -41,7 +41,7 @@ public:
     /*!
         \brief sample by uv
     */
-    RGBA Sample(const Types::F32 u, const Types::F32 v, const SampleState& sampleState = SampleState());
+    vector4 Sample(const Types::F32 u, const Types::F32 v, const SampleState& sampleState = SampleState());
 
     /*!
         \brief perlin noise sampled by three dimension, you can also use this as 1D or 2D noise generator.

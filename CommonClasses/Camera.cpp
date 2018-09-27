@@ -15,7 +15,7 @@ Camera::~Camera()
 {
 }
 
-void Camera::IncomeLight(const Types::U32 & x, const Types::U32 & y, const RGBA & color)
+void Camera::IncomeLight(const Types::U32 & x, const Types::U32 & y, const vector4 & color)
 {
     if (m_film.get() == nullptr)
     {
@@ -25,7 +25,7 @@ void Camera::IncomeLight(const Types::U32 & x, const Types::U32 & y, const RGBA 
     m_film->SetPixel(x, y, color);
 }
 
-void Camera::IncomeLight(const Types::U32 & x, const Types::U32 & y, const RGB & color)
+void Camera::IncomeLight(const Types::U32 & x, const Types::U32 & y, const vector3 & color)
 {
     if (m_film.get() == nullptr)
     {

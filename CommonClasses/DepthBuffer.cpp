@@ -61,7 +61,7 @@ Image ToImage(const DepthBuffer & buffer, Types::F32 maxValue)
         for (Types::U32 x = 0; x < WIDTH; ++x)
         {
             Types::F32 value = buffer.ValueAt(x, y) / maxValue;
-            retImg.SetPixel(x, y, RGBA(value, value, value));
+            retImg.SetPixel(x, y, vector3(value, value, value));
         }
     }
     return retImg;

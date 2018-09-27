@@ -5,17 +5,16 @@ void CASE_NAME_IN_COMMON_CLASSES(BasicImage)::Run()
     const Types::U32 WIDTH(graphicToolSet.COMMON_PIXEL_WIDTH), HEIGHT(graphicToolSet.COMMON_PIXEL_HEIGHT);
     CommonClass::Image testImage(WIDTH, HEIGHT);
 
-    RGBA pixelSetterT;
-
-    pixelSetterT.SetChannel<RGBA::B>(0.5f);
+    vector4 pixelSetterT;
+    pixelSetterT.m_z = 0.5f;
 
     for (Types::U32 x = 0; x < WIDTH; ++x)
     {
         for (Types::U32 y = 0; y < HEIGHT; ++y)
         {
-            pixelSetterT.SetChannel<RGBA::R>(x / 512.0f);
-            pixelSetterT.SetChannel<RGBA::G>(y / 512.0f);
-            pixelSetterT.SetChannel<RGBA::A>((x + y) / 1024.0f);
+            pixelSetterT.m_x = (x / 512.0f);
+            pixelSetterT.m_y = (y / 512.0f);
+            pixelSetterT.m_w = ((x + y) / 1024.0f);
 
             testImage.SetPixel(x, y, pixelSetterT);
         }
@@ -32,20 +31,18 @@ void CASE_NAME_IN_COMMON_CLASSES(RGBAlphaSetting)::Run()
     const Types::U32 WIDTH(512), HEIGHT(512);
     CommonClass::Image testImage(WIDTH, HEIGHT);
 
-    RGBA pixelSetterT;
-    RGB pixelSetterRGB;
+    vector3 pixelSetterRGB;
     Types::F32 alphaSetter = 1.0f;
 
-    pixelSetterT.SetChannel<RGBA::B>(0.5f);
-    pixelSetterRGB.SetChannel<RGB::B>(0.5f);
+    pixelSetterRGB.m_z = 0.5f;
 
     for (int x = 0; x < WIDTH; ++x)
     {
         for (int y = 0; y < HEIGHT; ++y)
         {
 
-            pixelSetterRGB.SetChannel<RGBA::R>(x / 512.0f);
-            pixelSetterRGB.SetChannel<RGBA::G>(y / 512.0f);
+            pixelSetterRGB.m_x = x / 512.0f;
+            pixelSetterRGB.m_y = y / 512.0f;
             alphaSetter = ((x + y) / 1024.0f);
 
             testImage.SetPixel(x, y, pixelSetterRGB);
@@ -64,16 +61,16 @@ void CASE_NAME_IN_COMMON_CLASSES(FilmCaptureLight)::Run()
 
     Film tfilm(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f);
 
-    RGBA pixelSetterT;
-    pixelSetterT.SetChannel<RGBA::B>(0.5f);
+    vector4 pixelSetterT;
+    pixelSetterT.m_z = 0.5f;
 
     for (int x = 0; x < WIDTH; ++x)
     {
         for (int y = 0; y < HEIGHT; ++y)
         {
-            pixelSetterT.SetChannel<RGBA::R>(x / 512.0f);
-            pixelSetterT.SetChannel<RGBA::G>(y / 512.0f);
-            pixelSetterT.SetChannel<RGBA::A>((x + y) / 1024.0f);
+            pixelSetterT.m_x = (x / 512.0f);
+            pixelSetterT.m_y = (y / 512.0f);
+            pixelSetterT.m_w = ((x + y) / 1024.0f);
 
             tfilm.SetPixel(x, y, pixelSetterT);
         }
@@ -168,10 +165,10 @@ void CASE_NAME_IN_COMMON_CLASSES(CameraCaptureLight)::Run()
     OrthographicCamera orthoCamera(origin, target, dummyLookUp);
     orthoCamera.SetFilm(std::make_unique<Film>(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f));
 
-    RGBA pixelSetterT;
-    pixelSetterT.SetChannel<RGBA::B>(0.5f);
-    RGB pixelSetterRGB;
-    pixelSetterRGB.SetChannel<RGBA::B>(0.5f);
+    vector4 pixelSetterT;
+    pixelSetterT.m_z = 0.5f;
+    vector3 pixelSetterRGB;
+    pixelSetterRGB.m_z = 0.5f;
     Types::F32 alphaSetter = 1.0f;
 
     for (int x = 0; x < WIDTH; ++x)
@@ -180,15 +177,15 @@ void CASE_NAME_IN_COMMON_CLASSES(CameraCaptureLight)::Run()
         {
             if (x < WIDTH / 2)
             {
-                pixelSetterT.SetChannel<RGBA::R>(x / 512.0f);
-                pixelSetterT.SetChannel<RGBA::G>(y / 512.0f);
-                pixelSetterT.SetChannel<RGBA::A>((x + y) / 1024.0f);
+                pixelSetterT.m_x = (x / 512.0f);
+                pixelSetterT.m_y = (y / 512.0f);
+                pixelSetterT.m_w = ((x + y) / 1024.0f);
                 orthoCamera.IncomeLight(x, y, pixelSetterT);
             }
             else
             {
-                pixelSetterRGB.SetChannel<RGBA::R>(x / 512.0f);
-                pixelSetterRGB.SetChannel<RGBA::G>(y / 512.0f);
+                pixelSetterRGB.m_x = x / 512.0f;
+                pixelSetterRGB.m_y = y / 512.0f;
                 alphaSetter = ((x + y) / 1024.0f);
 
                 orthoCamera.IncomeLight(x, y, pixelSetterRGB);
@@ -252,11 +249,11 @@ void CASE_NAME_IN_COMMON_CLASSES(CameraPixelLoc)::Run()
     OrthographicCamera orthoCamera(origin, target, dummyLookUp);
     orthoCamera.SetFilm(std::make_unique<Film>(WIDTH, HEIGHT, -1.0f, 1.0f, -1.0f, 1.0f));
 
-    RGBA blackT(0.0f, 0.0f, 0.0f);
-    RGBA whiteT(1.0f, 1.0f, 1.0f);
-    RGBA redT(1.0f, 0.0f, 0.0f);
-    RGBA greenT(0.0f, 1.0f, 0.0f);
-    RGBA blueT(0.0f, 0.0f, 1.0f);
+    vector4 blackT = vector4::BLACK;
+    vector4 whiteT = vector4::WHITE;
+    vector4 redT   = vector4::RED;
+    vector4 greenT = vector4::GREEN;
+    vector4 blueT  = vector4::BLUE;
 
 
     // background as black
@@ -301,9 +298,9 @@ void CASE_NAME_IN_COMMON_CLASSES(OrthoCameraAndSphere)::Run()
 {
     Sphere tsph(vector3(-1.0f, 2.0f, 2.0f), 0.9f);
 
-    RGB hitPixel(1.0f, 1.0f, 1.0f);
-    RGB missSphPixel(0.0f, 0.0f, 0.0f);
-    RGB missAABBPixel(0.0f, 0.5f, 0.0f);
+    vector3 hitPixel(1.0f, 1.0f, 1.0f);
+    vector3 missSphPixel(0.0f, 0.0f, 0.0f);
+    vector3 missAABBPixel(0.0f, 0.5f, 0.0f);
 
     vector3 camPosition = vector3(2.0f, 1.0f, 3.0f);
     vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -335,9 +332,9 @@ void CASE_NAME_IN_COMMON_CLASSES(OrthoCameraAndSphere)::Run()
                 // try sphere
                 if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
                 {
-                    hitPixel.SetChannel<RGB::R>((hitRec.m_hitT / 3.8f));
-                    hitPixel.SetChannel<RGB::G>((hitRec.m_hitT / 3.8f));
-                    hitPixel.SetChannel<RGB::B>((hitRec.m_hitT / 3.8f));
+                    hitPixel.m_x = ((hitRec.m_hitT / 3.8f));
+                    hitPixel.m_y = ((hitRec.m_hitT / 3.8f));
+                    hitPixel.m_z = ((hitRec.m_hitT / 3.8f));
 
                     orthoCamera.IncomeLight(i, j, hitPixel);
                 }
@@ -365,31 +362,31 @@ void CASE_NAME_IN_COMMON_CLASSES(ConstColors)::Run()
     const U32 WIDTH(512), HEIGHT(512);
     Image img(WIDTH, HEIGHT);
 
-    std::array<RGBA, 8> colorsT = {
-        RGBA::RED,
-        RGBA::GREEN,
-        RGBA::BLUE,
-        RGBA::YELLOW,
-        RGBA::CYAN,
-        RGBA::MAGENTA,
-        RGBA::WHITE,
-        RGBA::BLACK,
+    std::array<vector4, 8> colorsT = {
+        vector4::RED,
+        vector4::GREEN,
+        vector4::BLUE,
+        vector4::YELLOW,
+        vector4::CYAN,
+        vector4::MAGENTA,
+        vector4::WHITE,
+        vector4::BLACK,
     };
 
-    std::array<RGB, 8> colorsRGB = {
-        RGB::RED,
-        RGB::GREEN,
-        RGB::BLUE,
-        RGB::YELLOW,
-        RGB::CYAN,
-        RGB::MAGENTA,
-        RGB::WHITE,
-        RGB::BLACK,
+    std::array<vector3, 8> colorsRGB = {
+        vector3::RED,
+        vector3::GREEN,
+        vector3::BLUE,
+        vector3::YELLOW,
+        vector3::CYAN,
+        vector3::MAGENTA,
+        vector3::WHITE,
+        vector3::BLACK,
     };
 
     int i = 0;
     int colorIndex = 0;
-    for (RGBA& oneColor : colorsT)
+    for (vector4& oneColor : colorsT)
     {
         for (int count = 0; count < 64; ++count)
         {
@@ -419,9 +416,9 @@ void CASE_NAME_IN_COMMON_CLASSES(PerspectiveCameraAndSphere)::Run()
 {
     Sphere tsph(vector3(0.0f, 0.0f, 0.0f), 1.0f);
 
-    RGB hitPixel(1.0f, 1.0f, 1.0f);
-    RGB missSphPixel(0.0f, 0.0f, 0.0f);
-    RGB missAABBPixel(0.0f, 0.5f, 0.0f);
+    vector3 hitPixel(1.0f, 1.0f, 1.0f);
+    vector3 missSphPixel(0.0f, 0.0f, 0.0f);
+    vector3 missAABBPixel(0.0f, 0.5f, 0.0f);
 
     vector3 camPosition = vector3(1.8f, 1.8f, 1.8f);
     vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -452,9 +449,9 @@ void CASE_NAME_IN_COMMON_CLASSES(PerspectiveCameraAndSphere)::Run()
                 // try sphere
                 if (tsph.Hit(ray, 0.0f, 1000.0f, &hitRec))
                 {
-                    hitPixel.SetChannel<RGB::R>((hitRec.m_hitT / 3.8f));
-                    hitPixel.SetChannel<RGB::G>((hitRec.m_hitT / 3.8f));
-                    hitPixel.SetChannel<RGB::B>((hitRec.m_hitT / 3.8f));
+                    hitPixel.m_x = ((hitRec.m_hitT / 3.8f));
+                    hitPixel.m_y = ((hitRec.m_hitT / 3.8f));
+                    hitPixel.m_z = ((hitRec.m_hitT / 3.8f));
 
                     perspectCamera.IncomeLight(i, j, hitPixel);
                 }
@@ -482,11 +479,11 @@ void CASE_NAME_IN_COMMON_CLASSES(TriangleAndRay)::Run()
         vector3(-1.0f, 0.0f, 0.0f),
         vector3(0.0f, 2.0f, 1.0f));
 
-    RGB hitPixel(1.0f, 1.0f, 1.0f);
-    RGB missSphPixel(0.0f, 0.0f, 0.0f);
-    RGB missAABBPixel(0.0f, 0.5f, 0.0f);
-    RGB positivePixel(RGB::RED);
-    RGB negativePixel(RGB::GREEN);
+    vector3 hitPixel(1.0f, 1.0f, 1.0f);
+    vector3 missSphPixel(0.0f, 0.0f, 0.0f);
+    vector3 missAABBPixel(0.0f, 0.5f, 0.0f);
+    vector3 positivePixel(vector3::RED);
+    vector3 negativePixel(vector3::GREEN);
 
     vector3 camPosition = vector3(3.0f, 3.0f, 3.0f);
     vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -572,8 +569,8 @@ void CASE_NAME_IN_COMMON_CLASSES(SceneAndRay)::Run()
     testScene.Add(std::move(tri2));
     testScene.Add(std::move(poly));
 
-    RGB backgroundColor(RGB::BLACK);
-    RGB hitColor(RGB::RED);
+    vector3 backgroundColor(RGB::BLACK);
+    vector3 hitColor(RGB::RED);
 
     vector3 camPosition = vector3(3.0f, 4.0f, 2.0f);
     vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -599,7 +596,7 @@ void CASE_NAME_IN_COMMON_CLASSES(SceneAndRay)::Run()
             // try triangle
             if (testScene.Hit(ray, 0.0f, 1000.0f, &hitRec))
             {
-                hitColor.SetChannel<RGB::R>(hitRec.m_hitT / 8.0f);
+                hitColor.m_x = (hitRec.m_hitT / 8.0f);
 
                 camera.IncomeLight(i, j, hitColor);
             }
@@ -628,10 +625,10 @@ void CASE_NAME_IN_COMMON_CLASSES(PolygoneAndRay)::Run()
     poly->AddPoint(vector3(borderLength * 0.9f, -borderLength * 3.0f, -2.0f));
     poly->AddPoint(vector3(borderLength * 0.1f, -borderLength * 4.0f, -2.0f));
 
-    RGB backgroundColor(RGB::GREEN);
+    vector3 backgroundColor(vector3::GREEN);
     backgroundColor = backgroundColor * (0.5f); // make color darker
-    RGB hitBBoxColor(RGB::BLACK);
-    RGB hitColor(RGB::RED);
+    vector3 hitBBoxColor(vector3::BLACK);
+    vector3 hitColor(vector3::RED);
 
     vector3 camPosition = vector3(-4.0f, 8.0f, 8.0f);
     vector3 camTarget = vector3(0.0f, 0.0f, 0.0f);
@@ -660,7 +657,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PolygoneAndRay)::Run()
             {
                 if (poly->Hit(ray, 0.0f, 1000.0f, &hitRec))
                 {
-                    hitColor.SetChannel<RGB::R>(hitRec.m_hitT / 4.0f);
+                    hitColor.m_x = (hitRec.m_hitT / 4.0f);
 
                     camera.IncomeLight(i, j, hitColor);
                 }
@@ -708,7 +705,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
     polyMat.SetRFresnel0(8);
 
     vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
-    RGB pointLightColor = RGB::WHITE;
+    vector3 pointLightColor = vector3::WHITE;
     Light pointLight(pointLightPosition * 5.0f, pointLightColor);
 
     /*!
@@ -786,7 +783,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
 
             if (scene.Hit(viewRay, 0.0f, 1000.0f, &hitRec))
             {
-                RGB color;
+                vector3 color;
 
                 color = hitRec.m_material.m_kDiffuse * scene.m_ambient;
 
@@ -800,7 +797,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
                     vector3 toEye = -viewRay.m_direction;
                     vector3 halfVec = Normalize(toEye + toLight);
 
-                    RGB lightStrength = pointLight.m_color * std::max(0.0f, dotProd(hitRec.m_normal, toLight));
+                    vector3 lightStrength = pointLight.m_color * std::max(0.0f, dotProd(hitRec.m_normal, toLight));
 
                     const Types::F32 m = hitRec.m_material.m_shinness;
 
@@ -809,11 +806,11 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
                     color = color + lightStrength * (hitRec.m_material.m_kDiffuse + hitRec.m_material.RFresnel(dotProd(toEye, hitRec.m_normal)) * shinnessSthrength);
                 }
 
-                camera.IncomeLight(i, j, color);
+                camera.IncomeLight(i, j, vector3(color.m_arr));
             }
             else
             {
-                camera.IncomeLight(i, j, backgroundColor);
+                camera.IncomeLight(i, j, vector3(backgroundColor.m_arr));
             }
         }
     }
@@ -849,7 +846,7 @@ void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
     polyMat.SetRFresnel0(8);
 
     vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
-    RGB pointLightColor = RGB::WHITE;
+    vector3 pointLightColor = vector3::WHITE;
     scene.Add(std::make_unique<Light>(pointLightPosition * 5.0f, pointLightColor));
 
 

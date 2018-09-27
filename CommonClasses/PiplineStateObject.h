@@ -115,7 +115,7 @@ public:
         \brief the pixel shader to compute the color.
         \paramType ScreenSpaceVertexTemplate 
     */
-    std::function< RGBA(const ScreenSpaceVertexTemplate *) > m_pixelShader = nullptr;
+    std::function< vector4(const ScreenSpaceVertexTemplate *) > m_pixelShader = nullptr;
 
     /*!
         \brief 
