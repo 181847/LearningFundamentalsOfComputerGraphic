@@ -3,6 +3,7 @@
 #include "Box.h"
 #include "HitRecord.h"
 #include "AABB.h"
+#include <memory>
 
 namespace CommonClass
 {
@@ -21,6 +22,9 @@ public:
         modify it when consider you situation.
     */
     static Types::F32 s_offsetHitT;
+
+    std::shared_ptr<Material> m_material;
+    
 public:
     virtual bool Hit(const Ray& ray, const Types::F32 t0, const Types::F32 t1, HitRecord* pHitRec) const = 0;
     virtual AABB BoundingBox() const = 0 ;

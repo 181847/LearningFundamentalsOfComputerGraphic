@@ -16,6 +16,9 @@ protected:\
 
 DECLARE_CASE_IN_RAY_RENDER_FOR(InsideBoxesAndSphere, "render inside boxes and sphere");
 
+DECLARE_CASE_IN_RAY_RENDER_FOR(TrasparentMat, "transparent material");
+
 using SuitForRayRender = SuitForPipline<
-    CASE_NAME_IN_RAY_RENDER(InsideBoxesAndSphere)
+    //CASE_NAME_IN_RAY_RENDER(InsideBoxesAndSphere),
+    CASE_NAME_IN_RAY_RENDER(TrasparentMat)
 >;

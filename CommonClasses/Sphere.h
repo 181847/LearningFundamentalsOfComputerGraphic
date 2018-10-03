@@ -3,6 +3,7 @@
 #include "HitRecord.h"
 #include "ColorTemplate.h"
 #include "Material.h"
+#include <memory>
 
 namespace CommonClass
 {
@@ -20,11 +21,6 @@ public:
         \brief the radius of the sphere
     */
     Types::F32    m_radius;
-
-    /*!
-        \brief material of this sphere.
-    */
-    Material    m_material;
 
 public:
     Sphere(const vector3& center, const Types::F32 radius);

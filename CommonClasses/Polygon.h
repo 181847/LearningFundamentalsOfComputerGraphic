@@ -2,6 +2,7 @@
 #include "Surface.h"
 #include "ColorTemplate.h"
 #include <vector>
+#include <memory>
 
 namespace CommonClass
 {
@@ -18,11 +19,6 @@ public:
         \brief all my vertices of the Polygon, at least three points.
     */
     std::vector<vector3> m_points;
-
-    /*!
-        \brief the material of this polygon
-    */
-    Material            m_material;
 
     /*!
         \brief the normal of the plane, define by the first three vertices in the m_points.

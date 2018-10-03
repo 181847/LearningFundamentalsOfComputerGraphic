@@ -2,6 +2,7 @@
 #include "vector3.h"
 #include "ColorTemplate.h"
 #include "Material.h"
+#include <memory>
 
 namespace CommonClass
 {
@@ -32,7 +33,7 @@ public:
     /*!
         \brief the material of hit point.
     */
-    Material    m_material;
+    std::shared_ptr<Material> m_material;
 
 public:
 };

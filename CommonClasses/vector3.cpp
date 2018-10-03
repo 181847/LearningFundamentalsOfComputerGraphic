@@ -149,6 +149,24 @@ vector3 Reflect(const vector3 & incomeVec, const vector3 & unitNormal)
     return incomeVec - (2.0f * (dotProd(incomeVec, unitNormal)) * unitNormal);
 }
 
+bool Refract(const vector3& incomeVec, const vector3& unitNormal, const Types::F32& reflectIndex, vector3 * outRefract)
+{
+    using namespace Types;
+    F32 dirDotNormal = dotProd(incomeVec, unitNormal);
+    F32 recipIndex = 1.0f / reflectIndex;
+
+    F32 sigma = 1 - (1 - dirDotNormal * dirDotNormal) * recipIndex * recipIndex;
+    if (sigma < 0)
+    {
+        return false;
+    }
+    else
+    {
+        *outRefract = recipIndex * (incomeVec - unitNormal * dirDotNormal) - unitNormal * std::sqrt(sigma);
+        return true;
+    }
+}
+
 bool AlmostEqual(const vector3 & a, const vector3 & b, int ulp)
 {
     return MathTool::almost_equal(a.m_x, b.m_x, ulp)

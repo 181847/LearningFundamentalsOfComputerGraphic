@@ -1,6 +1,7 @@
 #include "Sphere.h"
 #include <assert.h>
 #include <cmath>
+#include "DebugConfigs.h"
 
 namespace CommonClass
 {

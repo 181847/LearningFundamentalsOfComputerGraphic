@@ -123,6 +123,16 @@ Types::F32 Length(const vector3 & a);
 vector3 Reflect(const vector3& incomeVec, const vector3& unitNormal);
 
 /*!
+    \brief refract light, assume always from air into another medium
+    \param incomeVec the vector to be reflected
+    \param unitNormal the normal of the reflect plane.
+    \param refelctIndex reflect index of the medium(refract into)
+    \param outRefract return refract vector
+    \return false for total internal reflection, where there is no refraction.
+*/
+bool Refract(const vector3& incomeVec, const vector3& unitNormal, const Types::F32& reflectIndex, vector3 * outRefract);
+
+/*!
     \brief two vector are almost equal
     \param a compared vector
     \param b compared vector

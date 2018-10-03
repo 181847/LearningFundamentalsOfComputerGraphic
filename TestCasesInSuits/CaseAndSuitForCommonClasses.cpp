@@ -690,19 +690,19 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
     /*!
         \brief make up materials.
     */
-    Material sphereMat;
-    Material triMat;
-    Material polyMat;
+    auto sphereMat = std::make_shared<Material>();
+    auto triMat    = std::make_shared<Material>();
+    auto polyMat   = std::make_shared<Material>();
 
-    sphereMat.m_kDiffuse        = RGB::RED;
-    sphereMat.m_shinness        = 12.0f;
-    sphereMat.SetRFresnel0(8);
-    triMat.m_kDiffuse           = RGB::GREEN;
-    triMat.m_shinness           = 1.0f;
-    triMat.SetRFresnel0(8);
-    polyMat.m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
-    polyMat.m_shinness          = 4.0f;
-    polyMat.SetRFresnel0(8);
+    sphereMat->m_kDiffuse        = RGB::RED;
+    sphereMat->m_shinness        = 12.0f;
+    sphereMat->SetRFresnel0(8);
+    triMat->m_kDiffuse           = RGB::GREEN;
+    triMat->m_shinness           = 1.0f;
+    triMat->SetRFresnel0(8);
+    polyMat->m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
+    polyMat->m_shinness          = 4.0f;
+    polyMat->SetRFresnel0(8);
 
     vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
     vector3 pointLightColor = vector3::WHITE;
@@ -785,7 +785,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
             {
                 vector3 color;
 
-                color = hitRec.m_material.m_kDiffuse * scene.m_ambient;
+                color = hitRec.m_material->m_kDiffuse * scene.m_ambient;
 
                 Types::F32 toLightDist = 0.0f;
                 vector3 toLight = pointLight.ToMeFrom(hitRec.m_hitPoint, &toLightDist);
@@ -799,11 +799,11 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
 
                     vector3 lightStrength = pointLight.m_color * std::max(0.0f, dotProd(hitRec.m_normal, toLight));
 
-                    const Types::F32 m = hitRec.m_material.m_shinness;
+                    const Types::F32 m = hitRec.m_material->m_shinness;
 
                     Types::F32 shinnessSthrength = (m + 8) / 8 * std::powf(dotProd(halfVec, hitRec.m_normal), m);
 
-                    color = color + lightStrength * (hitRec.m_material.m_kDiffuse + hitRec.m_material.RFresnel(dotProd(toEye, hitRec.m_normal)) * shinnessSthrength);
+                    color = color + lightStrength * (hitRec.m_material->m_kDiffuse + hitRec.m_material->RFresnel(dotProd(toEye, hitRec.m_normal)) * shinnessSthrength);
                 }
 
                 camera.IncomeLight(i, j, vector3(color.m_arr));
@@ -831,19 +831,19 @@ void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
     /*!
         \brief make up materials.
     */
-    Material sphereMat;
-    Material triMat;
-    Material polyMat;
+    auto sphereMat = std::make_shared<Material>();
+    auto triMat    = std::make_shared<Material>();
+    auto polyMat   = std::make_shared<Material>();
 
-    sphereMat.m_kDiffuse        = RGB::RED;
-    sphereMat.m_shinness        = 12.0f;
-    sphereMat.SetRFresnel0(8);
-    triMat.m_kDiffuse           = RGB::YELLOW;
-    triMat.m_shinness           = 1.0f;
-    triMat.SetRFresnel0(8);
-    polyMat.m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
-    polyMat.m_shinness          = 0.5f;
-    polyMat.SetRFresnel0(8);
+    sphereMat->m_kDiffuse        = RGB::RED;
+    sphereMat->m_shinness        = 12.0f;
+    sphereMat->SetRFresnel0(8);
+    triMat->m_kDiffuse           = RGB::YELLOW;
+    triMat->m_shinness           = 1.0f;
+    triMat->SetRFresnel0(8);
+    polyMat->m_kDiffuse          = RGB(0.3f, 0.5f, 0.9f);
+    polyMat->m_shinness          = 0.5f;
+    polyMat->SetRFresnel0(8);
 
     vector3 pointLightPosition(-3.0f, 4.0f, 3.0f);
     vector3 pointLightColor = vector3::WHITE;

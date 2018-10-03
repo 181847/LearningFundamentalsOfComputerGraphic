@@ -63,3 +63,17 @@ public:
         ENABLE_CLIENT = 1
     };
 };
+
+
+class DEBUG_RAY_RENDER
+{
+public:
+    static bool Active;
+
+    static int StackCounter;
+
+    enum
+    {
+        ENABLE_CLIENT = 1
+    };
+};

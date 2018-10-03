@@ -18,7 +18,7 @@ public:
     /*!
         \brief ambient color.
     */
-    vector3     m_ambient = vector3::WHITE * 0.3f;
+    vector3     m_ambient = vector3::WHITE * 0.003f;
 
     /*!
         \brief background color for rendering.
@@ -70,6 +70,8 @@ public:
                                 only if reflectLayerIndex greater than 0, then generate another ray to compute specular color with RayColor(..., reflectLayerIndex - 1).
     */
     vector3 RayColor(const Ray& ray, const Types::F32 t0, const Types::F32 t1, unsigned int reflectLayerIndex = 3) const;
+
+    vector3 RefractColor(const Ray &ray, const HitRecord &hitRec, const Types::F32 t0, const Types::F32 t1, const Types::U32 reflectIndex) const;
 
     /*!
         \brief evaluate the light of this point.

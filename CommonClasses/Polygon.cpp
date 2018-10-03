@@ -1,4 +1,5 @@
 #include "Polygon.h"
+#include "DebugConfigs.h"
 
 namespace CommonClass
 {
@@ -108,6 +109,7 @@ bool Polygon::Hit(const Ray & ray, const Types::F32 t0, const Types::F32 t1, Hit
         pHitRec->m_hitT = t;
         pHitRec->m_normal = Normalize(crossProd(e2, e1));
         pHitRec->m_material = m_material;
+
         return true;
     }
     else
