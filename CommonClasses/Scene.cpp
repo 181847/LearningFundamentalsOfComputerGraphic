@@ -166,7 +166,7 @@ CommonClass::vector3 Scene::LightColor(const Ray& viewRay, const HitRecord& hitR
                 lightStrength
                 * (hitRec.m_material->m_kDiffuse
                     + fresnelCoefficient * shinnessSthrength);
-        }// end if
+        }
     }// end for
 
     return lightColor;
