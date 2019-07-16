@@ -43,10 +43,12 @@ void GraphicToolSet::CommonRenderingBuffer::Init()
     objInstances[2].m_material.m_fresnelR0 = FresnelR0_byReflectionIndex(6);
     objInstances[2].m_material.m_shiness = 64.0f;
 
-    LightBuffer pointLight;
     cameraBuffer.m_numLights = 2;
     cameraBuffer.m_ambientColor = RGB::WHITE * RGB(0.05f, 0.05f, 0.05f);
-    cameraBuffer.m_lights[0] = { vector3(0.0f, 5.0f, 0.0f), RGB::WHITE };
+    LightBuffer pointLight;
+	pointLight.m_position = vector3(0.0f, 5.0f, 0.0f);
+	pointLight.m_color = RGB::WHITE;
+	cameraBuffer.m_lights[0] = pointLight;
     LightBuffer spotLight;
     spotLight.m_color = RGB::RED;
     spotLight.m_direction = Normalize(vector3(-1.0f, 1.0f, -1.0f));

@@ -17,6 +17,10 @@ struct MeshData
         vector3 m_pos       = vector3();
         vector3 m_normal    = vector3::AXIS_Y;
         vector2 m_uv        = vector2();
+
+		Vertex(const vector3& pos=vector3(), const vector3& normal=vector3::AXIS_Y, const vector2& uv=vector2())
+			:m_pos(pos), m_normal(normal), m_uv(uv)
+		{}
     };
 
     std::vector<Vertex> m_vertices;

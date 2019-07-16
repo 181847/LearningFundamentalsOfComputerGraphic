@@ -522,7 +522,7 @@ CommonClass::MeshData GeometryBuilder::BuildGeoSphere(const Types::F32& radius, 
     retData.m_vertices.resize(pos.size());
     for (unsigned int i = 0; i < pos.size(); ++i)
     {
-        retData.m_vertices[i] = { pos[i], pos[i]/* as normal */ };
+        retData.m_vertices[i] = MeshData::Vertex(pos[i], pos[i]/* as normal */);
     }
     retData.m_indices.assign(indicesOfPos.begin(), indicesOfPos.end());
 
