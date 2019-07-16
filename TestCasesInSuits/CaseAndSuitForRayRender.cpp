@@ -235,7 +235,7 @@ void CASE_NAME_IN_RAY_RENDER(InsideBoxesAndSphere)::Run()
 
             //BREAK_POINT_IF(i == 90 && j == 511 - 298);
 
-            viewRay = camera.GetRay(i, j);
+            viewRay = camera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             //BREAK_POINT_IF(i == 93 && j == 511 - 76);
             camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
@@ -269,7 +269,7 @@ void CASE_NAME_IN_RAY_RENDER(TrasparentMat)::Run()
     auto box_1_Mat      = std::make_shared<Material>(vector3::WHITE * 1.0f,     2,  0.5f);
     auto box_2_Mat      = std::make_shared<Material>(vector3::WHITE * 0.8f,     8,  2.0f);
 
-    std::wstring pictureIndex = L"11";
+    std::wstring pictureIndex = L"13";
     sphereMat->SetDielectric(true, vector3(0.3f, 0, 0));
     sphereMat->SetRFresnel0(2);
 
@@ -280,9 +280,9 @@ void CASE_NAME_IN_RAY_RENDER(TrasparentMat)::Run()
     vector3 pointLightPosition(0.0f, 5.0f, 0.0f);
     vector3 pointLightColor = vector3::WHITE;
     auto pointLight1 = std::make_unique<Light>(pointLightPosition, pointLightColor * 0.25f);
-    auto pointLight2 = std::make_unique<Light>(vector3(2.2f, 2.7f, 0.0f), pointLightColor * 0.25f);
+    auto pointLight2 = std::make_unique<Light>(vector3(-2.0f, 2.7f, 0.0f), pointLightColor * 0.25f);
     auto pointLight3 = std::make_unique<Light>(vector3(0.0f, 2.7f, 0.0f), pointLightColor * 0.25f);
-    auto pointLight4 = std::make_unique<Light>(vector3(2.2f, 2.7f, 0.0f), pointLightColor * 0.25f);
+    auto pointLight4 = std::make_unique<Light>(vector3(+2.0f, 2.7f, 0.0f), pointLightColor * 0.25f);
 
     scene.Add(std::move(pointLight1));
     scene.Add(std::move(pointLight2));
@@ -468,6 +468,10 @@ void CASE_NAME_IN_RAY_RENDER(TrasparentMat)::Run()
     const unsigned int PIXEL_HEIGHT = camera.m_film->GetHeight();
     const unsigned int NUM_ALL_PIXEL = PIXEL_WIDTH * PIXEL_HEIGHT;
 
+    const int sampleSquareLen = 4;
+    const float recipoSSL = 1.0f / sampleSquareLen;
+    const float sqRecipoSSL = recipoSSL * recipoSSL;
+
     HitRecord hitRec, shadowHitRec;
     Ray viewRay;
     DebugGuard<DEBUG_RAY_RENDER> guard;
@@ -477,23 +481,38 @@ void CASE_NAME_IN_RAY_RENDER(TrasparentMat)::Run()
         {
             // print the progress
             const unsigned int CURR_COUNT_PIXE = j + i * PIXEL_HEIGHT + 1;
-            if (CURR_COUNT_PIXE % 2500 == 0)
+            if (CURR_COUNT_PIXE % 16 == 0)
             {
                 ShowProgress(CURR_COUNT_PIXE * 1.0f / NUM_ALL_PIXEL);
             }
 
             //BREAK_POINT_IF(i == 90 && j == 511 - 298);
 
-            viewRay = camera.GetRay(i, j);
+            vector3 color = vector3::ZERO;
+
+            // multi sampling.
+            for (int p = 0; p < sampleSquareLen; ++p)
+            {
+                for (int q = 0; q < sampleSquareLen; ++q)
+                {
+                    float randX = mtr.Random();
+                    float randY = mtr.Random();
+
+                    viewRay = camera.GetRay(i + (p + randX) * recipoSSL, j + (q + randY) * recipoSSL);
+
+                    color = color + scene.RayColor(viewRay, 0.0f, 1000.0f, 5);
+                }
+            }
+
+            color = color * sqRecipoSSL;
 
             //DEBUG_CLIENT(DEBUG_RAY_RENDER, i == 168 && j == 148);
 
-            //BREAK_POINT_IF(i == 93 && j == 511 - 76);
-            camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f, 5));
+            camera.IncomeLight(i, j, color);
         }
     }
 
-    std::wstring pictureName = L"transparentRayTrace_" + pictureIndex;
+    std::wstring pictureName = L"multisample_" + pictureIndex;
     camera.m_film->SaveTo(GetSafeStoragePath() + pictureName + L".png");
 
     ImageWindow imgWnd(camera.m_film.get(), pictureName);

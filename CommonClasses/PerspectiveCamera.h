@@ -28,7 +28,7 @@ public:
         \param x horizontal index from left to right
         \param y vertical index from bottom to top
     */
-    virtual Ray GetRay(const Types::U32 x, const Types::U32 y) override;
+    virtual Ray GetRay(const Types::F32 x, const Types::F32 y) override;
 };
 
 } // namespace CommonClass

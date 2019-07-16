@@ -230,7 +230,7 @@ void CASE_NAME_IN_COMMON_CLASSES(RayFromOrthoCamera)::Run()
 
         for (unsigned int j = 0; j < orthoCamera.m_film->GetHeight(); ++j)
         {
-            Ray ray = orthoCamera.GetRay(i, j);
+            Ray ray = orthoCamera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             TEST_ASSERT(AlmostPerpendicular(ray.m_origin - orthoCamera.m_origin, ray.m_direction, +1e-4f));
             TEST_ASSERT(AlmostEqual(ray.m_direction, -orthoCamera.m_w));
@@ -321,7 +321,7 @@ void CASE_NAME_IN_COMMON_CLASSES(OrthoCameraAndSphere)::Run()
     {
         for (unsigned int j = 0; j < orthoCamera.m_film->GetHeight(); ++j)
         {
-            Ray ray = orthoCamera.GetRay(i, j);
+            Ray ray = orthoCamera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             //BREAK_POINT_IF(i == 400 && j == 256);
 
@@ -438,7 +438,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PerspectiveCameraAndSphere)::Run()
     {
         for (unsigned int j = 0; j < perspectCamera.m_film->GetHeight(); ++j)
         {
-            Ray ray = perspectCamera.GetRay(i, j);
+            Ray ray = perspectCamera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             //BREAK_POINT_IF(i == 256 && j == 256);
 
@@ -502,7 +502,7 @@ void CASE_NAME_IN_COMMON_CLASSES(TriangleAndRay)::Run()
     {
         for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
-            Ray ray = camera.GetRay(i, j);
+            Ray ray = camera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             //BREAK_POINT_IF(i == 256 && j == 256);
 
@@ -589,7 +589,7 @@ void CASE_NAME_IN_COMMON_CLASSES(SceneAndRay)::Run()
     {
         for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
-            Ray ray = camera.GetRay(i, j);
+            Ray ray = camera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             //BREAK_POINT_IF(i == 256 && j == 256);
 
@@ -647,7 +647,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PolygoneAndRay)::Run()
     {
         for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
-            Ray ray = camera.GetRay(i, j);
+            Ray ray = camera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             //BREAK_POINT_IF(i == 278 && j == 192);
             //BREAK_POINT_IF(i == 185 && j == 195);
@@ -772,7 +772,7 @@ void CASE_NAME_IN_COMMON_CLASSES(PointLight)::Run()
     {
         for (unsigned int j = 0; j < camera.m_film->GetHeight(); ++j)
         {
-            viewRay = camera.GetRay(i, j);
+            viewRay = camera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             if ((i % 10) == 0 && (j % 10) == 0)
             {
@@ -919,7 +919,7 @@ void CASE_NAME_IN_COMMON_CLASSES(RayColorFunction)::Run()
     {
         for (Types::U32 j = 0; j < HEIGHT; ++j)
         {
-            viewRay = camera.GetRay(i, j);
+            viewRay = camera.GetRay(static_cast<Types::F32>(i), static_cast<Types::F32>(j));
 
             camera.IncomeLight(i, j, scene.RayColor(viewRay, 0.0f, 1000.0f));
 

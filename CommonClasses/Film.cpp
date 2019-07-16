@@ -12,7 +12,7 @@ Film::~Film()
 {
 }
 
-void Film::GetPixelUV(const Types::U32 x, const Types::U32 y, Types::F32 & outU, Types::F32 & outV)
+void Film::GetPixelUV(const Types::F32 x, const Types::F32 y, Types::F32& outU, Types::F32& outV)
 {
     outU = m_left + (m_right - m_left) * (1.0f * x / m_width);
     outV = m_bottom + (m_top - m_bottom) * (1.0f * y / m_height);

@@ -12,7 +12,7 @@ PerspectiveCamera::~PerspectiveCamera()
 {
 }
 
-Ray PerspectiveCamera::GetRay(const Types::U32 x, const Types::U32 y)
+CommonClass::Ray PerspectiveCamera::GetRay(const Types::F32 x, const Types::F32 y)
 {
     Types::F32 outU, outV;
     m_film->GetPixelUV(x, y, outU, outV);

@@ -36,7 +36,7 @@ public:
         \param outU return value response to x
         \param outV return value response to y
     */
-    void GetPixelUV(const Types::U32 x, const Types::U32 y, Types::F32& outU, Types::F32& outV);
+    void GetPixelUV(const Types::F32 x, const Types::F32 y, Types::F32& outU, Types::F32& outV);
     
 };
 

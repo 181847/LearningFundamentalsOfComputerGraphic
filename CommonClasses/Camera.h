@@ -55,7 +55,7 @@ public:
         \param x horizontal index from left to right
         \param y vertical index from bottom to top
     */
-    virtual Ray GetRay(const Types::U32 x, const Types::U32 y) = 0;
+    virtual Ray GetRay(const Types::F32 x, const Types::F32 y) = 0;
     
     /*!
         \brief set color of the film
