@@ -5,7 +5,7 @@
     \brief define some useful marcos for Debug
 */
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include <intrin.h>
 
