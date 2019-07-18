@@ -5,32 +5,39 @@ set(TEST_GUI_SOURCE_FILES
 	BaseFrame.h
 	App.h
 	ImguiWrapImageDX11.h
-	MinimalLuaInterpreter.h
+	# MinimalLuaInterpreter.h
 	BaseFrame.cpp
 	App.cpp
 	ImguiWrapImageDX11.cpp
-	MinimalLuaInterpreter.cpp
-	${MY_LIBRARY_PATH}/imgui/imgui.cpp
-	${MY_LIBRARY_PATH}/imgui/imgui_demo.cpp
-	${MY_LIBRARY_PATH}/imgui/imgui_draw.cpp
-	${MY_LIBRARY_PATH}/imgui/examples/imgui_impl_dx11.cpp
-	${MY_LIBRARY_PATH}/imgui/examples/imgui_impl_win32.cpp
+	# MinimalLuaInterpreter.cpp
+	# ${MY_LIBRARY_PATH}/imgui/imgui.cpp
+	# ${MY_LIBRARY_PATH}/imgui/imgui_demo.cpp
+	# ${MY_LIBRARY_PATH}/imgui/imgui_draw.cpp
+	# ${MY_LIBRARY_PATH}/imgui/examples/imgui_impl_dx11.cpp
+	# ${MY_LIBRARY_PATH}/imgui/examples/imgui_impl_win32.cpp
+	imgui/imgui.cpp
+	imgui/imgui_demo.cpp
+	imgui/imgui_draw.cpp
+	imgui/examples/imgui_impl_dx11.cpp
+	imgui/examples/imgui_impl_win32.cpp
 	../TestCasesInSuits/BaseToolForCaseAndSuit.h)
 	
 add_executable(TestGui ${TEST_GUI_SOURCE_FILES})
 
 # this application will have a build-in lua interpretor.
-find_library(LUA_LIB
-	NAMES lua
-	PATHS "${MY_LIBRARY_PATH}/Lua/Lua-5.3.4/dll/Debug")
+# find_library(LUA_LIB
+	# NAMES lua
+	# PATHS "${MY_LIBRARY_PATH}/Lua/Lua-5.3.4/dll/Debug")
 	
 # link lua library
-target_link_libraries(TestGui ${LUA_LIB})
+# target_link_libraries(TestGui ${LUA_LIB})
 target_link_libraries(TestGui CommonClass)
-target_link_libraries(TestGui ${MY_TOOLS_STATIC_LIB})
+# target_link_libraries(TestGui ${MY_TOOLS_STATIC_LIB})
 
 # include fundamental headers for "imgui"
-target_include_directories(TestGui PRIVATE ${MY_LIBRARY_PATH}/imgui)
+# target_include_directories(TestGui PRIVATE ${MY_LIBRARY_PATH}/imgui)
+target_include_directories(TestGui PRIVATE imgui)
+message(STATUS "In order to build imgui, folder 'imgui' has been added to include directories")
 
 # initialization script for lua.
 get_target_property(

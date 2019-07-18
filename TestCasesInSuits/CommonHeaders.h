@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include <MyTools/TestTool/Suit.h>
-#include <MyTools/RandomToolNeedLib/MTRandom.h>
+#include "../CommonClasses/Utils/TestTool/Suit.h"
+#include "../CommonClasses/Utils/MTRandom.h"
 
 // tools about debugging
 #include "../CommonClasses/DebugHelpers.h"

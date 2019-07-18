@@ -21,4 +21,3 @@ set (TEST_CODE_SOURCE_FILES
 
 add_executable(TestCasesInSuits ${TEST_CODE_SOURCE_FILES})
 target_link_libraries(TestCasesInSuits CommonClass)
-target_link_libraries(TestCasesInSuits ${MY_TOOLS_STATIC_LIB})

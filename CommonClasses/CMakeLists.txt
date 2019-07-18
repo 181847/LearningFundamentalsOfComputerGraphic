@@ -83,7 +83,17 @@ set (COMMON_CLASS_SOURCE_FILES
 	vector3.cpp
 	vector4.cpp
 	Texture.cpp
-	GraphicToolSet.cpp)
+	GraphicToolSet.cpp
+	# Utils
+	Utils/MTRandom.h
+	Utils/MTRandom.cpp
+	Utils/MathTool.h
+	Utils/stb_image.h
+	Utils/svpng.inc
+	#TestTool
+	Utils/TestTool/Case.h
+	Utils/TestTool/Miscellaneous.h
+	Utils/TestTool/Suit.h)
 
 # set the CommonClass directory
 add_library(CommonClass ${COMMON_CLASS_SOURCE_FILES})

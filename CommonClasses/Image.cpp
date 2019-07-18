@@ -1,6 +1,6 @@
 #include "Image.h"
 #include <assert.h>
-#include <svpng\svpng.inc>
+#include "Utils/svpng.inc"
 
 namespace CommonClass
 {

@@ -1,14 +1,14 @@
 
 #include <array>
-#include <MyTools/MathTool.h>
-#include <MyTools/RandomToolNeedLib/MTRandom.h>
+#include "Utils/MathTool.h"
+#include "Utils/MTRandom.h"
 #include "Texture.h"
 #include "vector3.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 extern "C"
 {
-#include <stb/stb_image.h>
+#include "Utils/stb_image.h"
 }
 
 namespace CommonClass

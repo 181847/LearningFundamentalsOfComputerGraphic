@@ -1,4 +1,4 @@
-#include <MyTools/TestTool/Suit.h>  // include test framework
+#include "../CommonClasses/Utils/TestTool/Suit.h"
 #include "CommonHeaders.h"
 // include required suits here
 #include "TestBasicTypesSuit.h"

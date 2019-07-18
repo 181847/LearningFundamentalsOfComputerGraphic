@@ -2,10 +2,13 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
-#include <MyTools/MyTools.h>
+//#include <MyTools/MyTools.h>
 #include "ImguiWrapImageDX11.h"
 #include "../TestCasesInSuits/BaseToolForCaseAndSuit.h"
+
+#ifdef EMBED_LUA
 #include "MinimalLuaInterpreter.h"
+#endif
 
 namespace App
 {
@@ -22,7 +25,9 @@ ID3D11DeviceContext* pd3dDeviceContex = nullptr;
 
 char            StatusText[255];
 
+#ifdef EMBED_LUA
 MinimalLuaInpterpreter MainLuaInterpreter;
+#endif
 
 // type aliases
 using SimplePoint               = GraphicToolSet::SimplePoint;
@@ -63,8 +68,8 @@ void Init(HWND consoleHwnd, HWND nativeHwnd, ID3D11Device* pDevice, ID3D11Device
     PSO = MainPipline->GetPSO();
 
     // load textures
-    texture1->LoadFile("d:\\GitHub\\C_C++\\LearningFundamentalsOfComputerGraphic\\build\\OutputTestImage\\StbImg\\noiseVector3_03.png");
-    texture2->LoadFile("d:\\GitHub\\C_C++\\LearningFundamentalsOfComputerGraphic\\build\\OutputTestImage\\StbImg\\noiseVector3_06.png");
+    //texture1->LoadFile("d:\\GitHub\\C_C++\\LearningFundamentalsOfComputerGraphic\\build\\OutputTestImage\\StbImg\\noiseVector3_03.png");
+    //texture2->LoadFile("d:\\GitHub\\C_C++\\LearningFundamentalsOfComputerGraphic\\build\\OutputTestImage\\StbImg\\noiseVector3_06.png");
     texture3->LoadFile("d:\\picture\\Maria\\sideShowToy\\bloodborne-lady-maria-of-the-astral-clocktower-statue-prime1-studio-902974-04.jpg");
     textureAgent = texture3;
 
@@ -289,7 +294,11 @@ int Main()
 
     // status bar
     ImGui::Text("app status: %s", StatusText);
+
+#ifdef EMBED_LUA
     ImGui::Text("lua status: %s", MainLuaInterpreter.StatusText);
+#endif
+
     ImGui::End();
     return 0;
 }
