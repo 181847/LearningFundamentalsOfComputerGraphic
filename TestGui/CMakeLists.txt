@@ -8,6 +8,10 @@ set(TEST_GUI_SOURCE_FILES
 	BaseFrame.cpp
 	App.cpp
 	ImguiWrapImageDX11.cpp
+	AbstractGui.h
+	AbstractGui.cpp
+	RasterizeGui.h
+	RasterizeGui.cpp
 	imgui/imgui.cpp
 	imgui/imgui_demo.cpp
 	imgui/imgui_draw.cpp
