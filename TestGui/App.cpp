@@ -9,6 +9,16 @@
 #include "MinimalLuaInterpreter.h"
 #endif
 
+App::App()
+{
+}
+
+App * App::GetInstance()
+{
+    static App app;
+    return &app;
+}
+
 void App::Init(
     HWND                    consoleHwnd, 
     HWND                    nativeHwnd, 

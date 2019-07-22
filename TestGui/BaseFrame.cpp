@@ -23,7 +23,6 @@ static ID3D11Device*            g_pd3dDevice = NULL;
 static ID3D11DeviceContext*     g_pd3dDeviceContext = NULL;
 static IDXGISwapChain*          g_pSwapChain = NULL;
 static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
-static std::unique_ptr<App> gApp;
 
 void CreateRenderTarget()
 {
@@ -88,8 +87,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         if (g_pd3dDevice != NULL && wParam != SIZE_MINIMIZED)
         {
-            gApp->MainWindowWidth = (UINT)LOWORD(lParam);
-            gApp->MainWindowHeight = (UINT)HIWORD(lParam);
+            App::GetInstance()->MainWindowWidth = (UINT)LOWORD(lParam);
+            App::GetInstance()->MainWindowHeight = (UINT)HIWORD(lParam);
             ImGui_ImplDX11_InvalidateDeviceObjects();
             CleanupRenderTarget();
             g_pSwapChain->ResizeBuffers(0, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
@@ -115,7 +114,7 @@ static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 int main(int, char**)
 {
-    gApp = std::make_unique<App>();
+    auto* app = App::GetInstance();
     printf("current working director is %s\n", ExePath().c_str());
     // Create application window
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
@@ -126,8 +125,8 @@ int main(int, char**)
         WS_OVERLAPPEDWINDOW, 
         200, 
         100, 
-        gApp->MainWindowWidth,
-        gApp->MainWindowHeight,
+        app->MainWindowWidth,
+        app->MainWindowHeight,
         NULL, 
         NULL, 
         wc.hInstance, 
@@ -159,7 +158,7 @@ int main(int, char**)
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
-    gApp->Init(GetConsoleWindow(), hwnd, g_pd3dDevice, g_pd3dDeviceContext);
+    app->Init(GetConsoleWindow(), hwnd, g_pd3dDevice, g_pd3dDeviceContext);
 
     // Setup style
     ImGui::StyleColorsDark();
@@ -201,7 +200,7 @@ int main(int, char**)
         }
 
         if (msg.message == WM_HOTKEY)
-            gApp->ShowNativeWindow();
+            app->ShowNativeWindow();
 
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
@@ -209,7 +208,7 @@ int main(int, char**)
         ImGui::NewFrame();
 
         // application main gui arrangement.
-        gApp->Main();
+        app->Main();
 
         // Rendering
         ImGui::Render();
@@ -220,6 +219,8 @@ int main(int, char**)
         g_pSwapChain->Present(1, 0); // Present with vsync
                                      //g_pSwapChain->Present(0, 0); // Present without vsync
     }
+
+    app->CleanUp();
 
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();

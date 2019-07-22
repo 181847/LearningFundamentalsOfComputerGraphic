@@ -7,6 +7,10 @@
 #include "../TestCasesInSuits/BaseToolForCaseAndSuit.h"
 #include "AbstractGui.h"
 
+/*!
+    \brief the wrap all the imgui rendering codes and execute them in batch.
+    there should always be only one instance.
+*/
 class App
 {
 public:
@@ -21,7 +25,12 @@ public:
 
     std::vector<std::shared_ptr<AbstractGui>> guiGears;
 
+private:
+    App();
+
 public:
+    static App* GetInstance();
+
     /*!
         \brief initialize the applications.
     */
