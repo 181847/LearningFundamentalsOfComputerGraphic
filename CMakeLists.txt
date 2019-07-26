@@ -14,3 +14,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_subdirectory(CommonClasses)
 add_subdirectory(TestCasesInSuits)
 add_subdirectory(TestGui)
+
+add_subdirectory(CommonClasses/Utils/glog)
+INCLUDE_DIRECTORIES(
+	CommonClasses/Utils/glog
+	CommonClasses/Utils/glog/src
+)

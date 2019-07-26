@@ -93,9 +93,13 @@ set (COMMON_CLASS_SOURCE_FILES
 	#TestTool
 	Utils/TestTool/Case.h
 	Utils/TestTool/Miscellaneous.h
-	Utils/TestTool/Suit.h)
+	Utils/TestTool/Suit.h
+	Geometry.h
+	Geometry.cpp)
 
 # set the CommonClass directory
 add_library(CommonClass ${COMMON_CLASS_SOURCE_FILES})
+
+target_link_libraries(CommonClass glog)
 
 message(STATUS "CommonClass source files = " "${COMMON_CLASS_SOURCE_FILES}")
